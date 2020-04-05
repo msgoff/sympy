@@ -52,12 +52,16 @@ class Subset(Basic):
         2
         """
         if len(subset) > len(superset):
-            raise ValueError('Invalid arguments have been provided. The '
-                             'superset must be larger than the subset.')
+            raise ValueError(
+                "Invalid arguments have been provided. The "
+                "superset must be larger than the subset."
+            )
         for elem in subset:
             if elem not in superset:
-                raise ValueError('The superset provided is invalid as it does '
-                                 'not contain the element {}'.format(elem))
+                raise ValueError(
+                    "The superset provided is invalid as it does "
+                    "not contain the element {}".format(elem)
+                )
         obj = Basic.__new__(cls)
         obj._subset = subset
         obj._superset = superset
@@ -86,8 +90,8 @@ class Subset(Basic):
         next_binary, prev_binary
         """
         bin_list = Subset.bitlist_from_subset(self.subset, self.superset)
-        n = (int(''.join(bin_list), 2) + k) % 2**self.superset_size
-        bits = bin(n)[2:].rjust(self.superset_size, '0')
+        n = (int("".join(bin_list), 2) + k) % 2 ** self.superset_size
+        bits = bin(n)[2:].rjust(self.superset_size, "0")
         return Subset.subset_from_bitlist(self.superset, bits)
 
     def next_binary(self):
@@ -167,7 +171,7 @@ class Subset(Basic):
                     i = i - 1
                 if i >= 0:
                     indices.remove(i)
-                    indices.append(i+1)
+                    indices.append(i + 1)
         else:
             while i not in indices and i >= 0:
                 i = i - 1
@@ -239,10 +243,10 @@ class Subset(Basic):
 
         next_gray, prev_gray
         """
-        unranked_code = GrayCode.unrank(self.superset_size,
-                                       (self.rank_gray + k) % self.cardinality)
-        return Subset.subset_from_bitlist(self.superset,
-                                          unranked_code)
+        unranked_code = GrayCode.unrank(
+            self.superset_size, (self.rank_gray + k) % self.cardinality
+        )
+        return Subset.subset_from_bitlist(self.superset, unranked_code)
 
     def next_gray(self):
         """
@@ -304,9 +308,9 @@ class Subset(Basic):
         iterate_binary, unrank_binary
         """
         if self._rank_binary is None:
-            self._rank_binary = int("".join(
-                Subset.bitlist_from_subset(self.subset,
-                                           self.superset)), 2)
+            self._rank_binary = int(
+                "".join(Subset.bitlist_from_subset(self.subset, self.superset)), 2
+            )
         return self._rank_binary
 
     @property
@@ -326,13 +330,15 @@ class Subset(Basic):
         43
         """
         if self._rank_lex is None:
+
             def _ranklex(self, subset_index, i, n):
                 if subset_index == [] or i > n:
                     return 0
                 if i in subset_index:
                     subset_index.remove(i)
                     return 1 + _ranklex(self, subset_index, i + 1, n)
-                return 2**(n - i - 1) + _ranklex(self, subset_index, i + 1, n)
+                return 2 ** (n - i - 1) + _ranklex(self, subset_index, i + 1, n)
+
             indices = Subset.subset_indices(self.subset, self.superset)
             self._rank_lex = _ranklex(self, indices, 0, self.superset_size)
         return self._rank_lex
@@ -461,7 +467,7 @@ class Subset(Basic):
 
         subset, superset, size, superset_size
         """
-        return 2**(self.superset_size)
+        return 2 ** (self.superset_size)
 
     @classmethod
     def subset_from_bitlist(self, super_set, bitlist):
@@ -484,7 +490,7 @@ class Subset(Basic):
             raise ValueError("The sizes of the lists are not equal")
         ret_set = []
         for i in range(len(bitlist)):
-            if bitlist[i] == '1':
+            if bitlist[i] == "1":
                 ret_set.append(super_set[i])
         return Subset(ret_set, super_set)
 
@@ -505,12 +511,12 @@ class Subset(Basic):
 
         subset_from_bitlist
         """
-        bitlist = ['0'] * len(superset)
+        bitlist = ["0"] * len(superset)
         if type(subset) is Subset:
             subset = subset.subset
         for i in Subset.subset_indices(subset, superset):
-            bitlist[i] = '1'
-        return ''.join(bitlist)
+            bitlist[i] = "1"
+        return "".join(bitlist)
 
     @classmethod
     def unrank_binary(self, rank, superset):
@@ -529,7 +535,7 @@ class Subset(Basic):
 
         iterate_binary, rank_binary
         """
-        bits = bin(rank)[2:].rjust(len(superset), '0')
+        bits = bin(rank)[2:].rjust(len(superset), "0")
         return Subset.subset_from_bitlist(superset, bits)
 
     @classmethod

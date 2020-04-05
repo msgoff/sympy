@@ -13,6 +13,7 @@ from sympy.polys.polyerrors import UnificationFailed, CoercionFailed, DomainErro
 from sympy.polys.polyutils import _unify_gens, _not_a_coeff
 from sympy.utilities import default_sort_key, public
 
+
 @public
 class Domain(object):
     """Represents an abstract domain. """
@@ -100,12 +101,15 @@ class Domain(object):
             if result is not None:
                 return result
 
-        raise CoercionFailed("can't convert %s of type %s from %s to %s" % (element, type(element), base, self))
+        raise CoercionFailed(
+            "can't convert %s of type %s from %s to %s"
+            % (element, type(element), base, self)
+        )
 
     def convert(self, element, base=None):
         """Convert ``element`` to ``self.dtype``. """
         if _not_a_coeff(element):
-            raise CoercionFailed('%s is not in any domain' % element)
+            raise CoercionFailed("%s is not in any domain" % element)
 
         if base is not None:
             return self.convert_from(element, base)
@@ -113,7 +117,13 @@ class Domain(object):
         if self.of_type(element):
             return element
 
-        from sympy.polys.domains import PythonIntegerRing, GMPYIntegerRing, GMPYRationalField, RealField, ComplexField
+        from sympy.polys.domains import (
+            PythonIntegerRing,
+            GMPYIntegerRing,
+            GMPYRationalField,
+            RealField,
+            ComplexField,
+        )
 
         if isinstance(element, int):
             return self.convert_from(element, PythonIntegerRing())
@@ -139,7 +149,7 @@ class Domain(object):
             return self.convert_from(element, element.parent())
 
         # TODO: implement this in from_ methods
-        if self.is_Numerical and getattr(element, 'is_ground', False):
+        if self.is_Numerical and getattr(element, "is_ground", False):
             return self.convert(element.LC())
 
         if isinstance(element, Basic):
@@ -147,7 +157,7 @@ class Domain(object):
                 return self.from_sympy(element)
             except (TypeError, ValueError):
                 pass
-        else: # TODO: remove this branch
+        else:  # TODO: remove this branch
             if not is_sequence(element):
                 try:
                     element = sympify(element)
@@ -157,11 +167,13 @@ class Domain(object):
                 except (TypeError, ValueError):
                     pass
 
-        raise CoercionFailed("can't convert %s of type %s to %s" % (element, type(element), self))
+        raise CoercionFailed(
+            "can't convert %s of type %s to %s" % (element, type(element), self)
+        )
 
     def of_type(self, element):
         """Check if ``a`` is of type ``dtype``. """
-        return isinstance(element, self.tp) # XXX: this isn't correct, e.g. PolyElement
+        return isinstance(element, self.tp)  # XXX: this isn't correct, e.g. PolyElement
 
     def __contains__(self, a):
         """Check if ``a`` belongs to this domain. """
@@ -240,8 +252,12 @@ class Domain(object):
         return K1.from_FractionField(a, K0)
 
     def unify_with_symbols(K0, K1, symbols):
-        if (K0.is_Composite and (set(K0.symbols) & set(symbols))) or (K1.is_Composite and (set(K1.symbols) & set(symbols))):
-            raise UnificationFailed("can't unify %s with %s, given %s generators" % (K0, K1, tuple(symbols)))
+        if (K0.is_Composite and (set(K0.symbols) & set(symbols))) or (
+            K1.is_Composite and (set(K1.symbols) & set(symbols))
+        ):
+            raise UnificationFailed(
+                "can't unify %s with %s, given %s generators" % (K0, K1, tuple(symbols))
+            )
 
         return K0.unify(K1)
 
@@ -284,17 +300,27 @@ class Domain(object):
             symbols = _unify_gens(K0_symbols, K1_symbols)
             order = K0.order if K0.is_Composite else K1.order
 
-            if ((K0.is_FractionField and K1.is_PolynomialRing or
-                 K1.is_FractionField and K0.is_PolynomialRing) and
-                 (not K0_ground.is_Field or not K1_ground.is_Field) and domain.is_Field):
+            if (
+                (
+                    K0.is_FractionField
+                    and K1.is_PolynomialRing
+                    or K1.is_FractionField
+                    and K0.is_PolynomialRing
+                )
+                and (not K0_ground.is_Field or not K1_ground.is_Field)
+                and domain.is_Field
+            ):
                 domain = domain.get_ring()
 
-            if K0.is_Composite and (not K1.is_Composite or K0.is_FractionField or K1.is_PolynomialRing):
+            if K0.is_Composite and (
+                not K1.is_Composite or K0.is_FractionField or K1.is_PolynomialRing
+            ):
                 cls = K0.__class__
             else:
                 cls = K1.__class__
 
             from sympy.polys.domains.old_polynomialring import GlobalPolynomialRing
+
             if cls == GlobalPolynomialRing:
                 return cls(domain, symbols)
 
@@ -319,7 +345,9 @@ class Domain(object):
             return K1
 
         if K0.is_AlgebraicField and K1.is_AlgebraicField:
-            return K0.__class__(K0.dom.unify(K1.dom), *_unify_gens(K0.orig_ext, K1.orig_ext))
+            return K0.__class__(
+                K0.dom.unify(K1.dom), *_unify_gens(K0.orig_ext, K1.orig_ext)
+            )
         elif K0.is_AlgebraicField:
             return K0
         elif K1.is_AlgebraicField:
@@ -339,6 +367,7 @@ class Domain(object):
             return K0.__class__(max(K0.mod, K1.mod, key=default_sort_key))
 
         from sympy.polys.domains import EX
+
         return EX
 
     def __eq__(self, other):
@@ -363,11 +392,11 @@ class Domain(object):
 
     def get_ring(self):
         """Returns a ring associated with ``self``. """
-        raise DomainError('there is no ring associated with %s' % self)
+        raise DomainError("there is no ring associated with %s" % self)
 
     def get_field(self):
         """Returns a field associated with ``self``. """
-        raise DomainError('there is no field associated with %s' % self)
+        raise DomainError("there is no field associated with %s" % self)
 
     def get_exact(self):
         """Returns an exact domain associated with ``self``. """
@@ -375,7 +404,7 @@ class Domain(object):
 
     def __getitem__(self, symbols):
         """The mathematical way to make a polynomial ring. """
-        if hasattr(symbols, '__iter__'):
+        if hasattr(symbols, "__iter__"):
             return self.poly_ring(*symbols)
         else:
             return self.poly_ring(symbols)
@@ -383,21 +412,25 @@ class Domain(object):
     def poly_ring(self, *symbols, **kwargs):
         """Returns a polynomial ring, i.e. `K[X]`. """
         from sympy.polys.domains.polynomialring import PolynomialRing
+
         return PolynomialRing(self, symbols, kwargs.get("order", lex))
 
     def frac_field(self, *symbols, **kwargs):
         """Returns a fraction field, i.e. `K(X)`. """
         from sympy.polys.domains.fractionfield import FractionField
+
         return FractionField(self, symbols, kwargs.get("order", lex))
 
     def old_poly_ring(self, *symbols, **kwargs):
         """Returns a polynomial ring, i.e. `K[X]`. """
         from sympy.polys.domains.old_polynomialring import PolynomialRing
+
         return PolynomialRing(self, *symbols, **kwargs)
 
     def old_frac_field(self, *symbols, **kwargs):
         """Returns a fraction field, i.e. `K(X)`. """
         from sympy.polys.domains.old_fractionfield import FractionField
+
         return FractionField(self, *symbols, **kwargs)
 
     def algebraic_field(self, *extension):
@@ -542,7 +575,7 @@ class Domain(object):
 
     def characteristic(self):
         """Return the characteristic of this domain. """
-        raise NotImplementedError('characteristic()')
+        raise NotImplementedError("characteristic()")
 
 
-__all__ = ['Domain']
+__all__ = ["Domain"]

@@ -3,9 +3,9 @@ from sympy import IndexedBase, Idx, symbols, sin, cos
 
 
 def test_indexed_integrals():
-    A = IndexedBase('A')
-    i, j = symbols('i j', integer=True)
-    a1, a2 = symbols('a1:3', cls=Idx)
+    A = IndexedBase("A")
+    i, j = symbols("i j", integer=True)
+    a1, a2 = symbols("a1:3", cls=Idx)
     assert isinstance(a1, Idx)
 
     assert IndexedIntegral(1, A[i]).doit() == A[i]

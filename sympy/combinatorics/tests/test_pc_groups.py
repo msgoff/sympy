@@ -3,8 +3,13 @@ from sympy.combinatorics.named_groups import SymmetricGroup
 
 
 def test_pc_presentation():
-    Groups = [SymmetricGroup(3), SymmetricGroup(4), SymmetricGroup(9).sylow_subgroup(3),
-         SymmetricGroup(9).sylow_subgroup(2), SymmetricGroup(8).sylow_subgroup(2)]
+    Groups = [
+        SymmetricGroup(3),
+        SymmetricGroup(4),
+        SymmetricGroup(9).sylow_subgroup(3),
+        SymmetricGroup(9).sylow_subgroup(2),
+        SymmetricGroup(8).sylow_subgroup(2),
+    ]
 
     S = SymmetricGroup(125).sylow_subgroup(5)
     G = S.derived_series()[2]
@@ -13,7 +18,7 @@ def test_pc_presentation():
     G = SymmetricGroup(25).sylow_subgroup(5)
     Groups.append(G)
 
-    S = SymmetricGroup(11**2).sylow_subgroup(11)
+    S = SymmetricGroup(11 ** 2).sylow_subgroup(11)
     G = S.derived_series()[2]
     Groups.append(G)
 
@@ -37,7 +42,7 @@ def test_pc_presentation():
             for gen in k_array:
                 s = gen[0]
                 e = gen[1]
-                lhs = lhs*free_to_perm[s]**e
+                lhs = lhs * free_to_perm[s] ** e
 
             if v == ():
                 assert lhs.is_identity
@@ -47,15 +52,20 @@ def test_pc_presentation():
             for gen in v_array:
                 s = gen[0]
                 e = gen[1]
-                rhs = rhs*free_to_perm[s]**e
+                rhs = rhs * free_to_perm[s] ** e
 
             assert lhs == rhs
 
 
 def test_exponent_vector():
 
-    Groups = [SymmetricGroup(3), SymmetricGroup(4), SymmetricGroup(9).sylow_subgroup(3),
-         SymmetricGroup(9).sylow_subgroup(2), SymmetricGroup(8).sylow_subgroup(2)]
+    Groups = [
+        SymmetricGroup(3),
+        SymmetricGroup(4),
+        SymmetricGroup(9).sylow_subgroup(3),
+        SymmetricGroup(9).sylow_subgroup(2),
+        SymmetricGroup(8).sylow_subgroup(2),
+    ]
 
     for G in Groups:
         PcGroup = G.polycyclic_group()
@@ -68,7 +78,7 @@ def test_exponent_vector():
             exp = collector.exponent_vector(gen)
             g = Permutation()
             for i in range(len(exp)):
-                g = g*pcgs[i]**exp[i] if exp[i] else g
+                g = g * pcgs[i] ** exp[i] if exp[i] else g
             assert g == gen
 
 
@@ -87,4 +97,4 @@ def test_induced_pcgs():
     gens = [G[0], G[1], G[2], G[3]]
     ipcgs = collector.induced_pcgs(gens)
     order = [gen.order() for gen in ipcgs]
-    assert order ==[2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    assert order == [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]

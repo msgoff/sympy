@@ -5,9 +5,9 @@ def test_equal():
     b = Symbol("b")
     a = Symbol("a")
     e1 = a + b
-    e2 = 2*a*b
-    e3 = a**3*b**2
-    e4 = a*b + b*a
+    e2 = 2 * a * b
+    e3 = a ** 3 * b ** 2
+    e4 = a * b + b * a
     assert not e1 == e2
     assert not e1 == e2
     assert e1 != e2
@@ -16,17 +16,17 @@ def test_equal():
     assert not e2 == e3
 
     x = Symbol("x")
-    e1 = exp(x + 1/x)
+    e1 = exp(x + 1 / x)
     y = Symbol("x")
-    e2 = exp(y + 1/y)
+    e2 = exp(y + 1 / y)
     assert e1 == e2
     assert not e1 != e2
     y = Symbol("y")
-    e2 = exp(y + 1/y)
+    e2 = exp(y + 1 / y)
     assert not e1 == e2
     assert e1 != e2
 
-    e5 = Rational(3) + 2*x - x - x
+    e5 = Rational(3) + 2 * x - x - x
     assert e5 == 3
     assert 3 == e5
     assert e5 != 4
@@ -37,7 +37,7 @@ def test_equal():
 
 def test_expevalbug():
     x = Symbol("x")
-    e1 = exp(1*x)
+    e1 = exp(1 * x)
     e3 = exp(x)
     assert e1 == e3
 
@@ -50,7 +50,7 @@ def test_cmp_bug1():
     x = Symbol("x")
 
     assert not (x == t)
-    assert (x != t)
+    assert x != t
 
 
 def test_cmp_bug2():
@@ -60,7 +60,7 @@ def test_cmp_bug2():
     t = T()
 
     assert not (Symbol == t)
-    assert (Symbol != t)
+    assert Symbol != t
 
 
 def test_cmp_issue_4357():
@@ -69,19 +69,19 @@ def test_cmp_issue_4357():
     https://github.com/sympy/sympy/issues/4357
     """
     assert not (Symbol == 1)
-    assert (Symbol != 1)
-    assert not (Symbol == 'x')
-    assert (Symbol != 'x')
+    assert Symbol != 1
+    assert not (Symbol == "x")
+    assert Symbol != "x"
 
 
 def test_dummy_eq():
-    x = Symbol('x')
-    y = Symbol('y')
+    x = Symbol("x")
+    y = Symbol("y")
 
-    u = Dummy('u')
+    u = Dummy("u")
 
-    assert (u**2 + 1).dummy_eq(x**2 + 1) is True
-    assert ((u**2 + 1) == (x**2 + 1)) is False
+    assert (u ** 2 + 1).dummy_eq(x ** 2 + 1) is True
+    assert ((u ** 2 + 1) == (x ** 2 + 1)) is False
 
-    assert (u**2 + y).dummy_eq(x**2 + y, x) is True
-    assert (u**2 + y).dummy_eq(x**2 + y, y) is False
+    assert (u ** 2 + y).dummy_eq(x ** 2 + y, x) is True
+    assert (u ** 2 + y).dummy_eq(x ** 2 + y, y) is False

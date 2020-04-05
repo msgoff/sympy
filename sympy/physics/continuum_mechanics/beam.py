@@ -19,7 +19,8 @@ from sympy import lambdify, Add
 from sympy.core.compatibility import iterable
 from sympy.utilities.decorator import doctest_depends_on
 
-numpy = import_module('numpy', import_kwargs={'fromlist':['arange']})
+numpy = import_module("numpy", import_kwargs={"fromlist": ["arange"]})
+
 
 class Beam(object):
     """
@@ -72,7 +73,14 @@ class Beam(object):
          + Piecewise(((x - 2)**4, x - 2 > 0), (0, True))/4)/(E*I)
     """
 
-    def __init__(self, length, elastic_modulus, second_moment, variable=Symbol('x'), base_char='C'):
+    def __init__(
+        self,
+        length,
+        elastic_modulus,
+        second_moment,
+        variable=Symbol("x"),
+        base_char="C",
+    ):
         """Initializes the class.
 
         Parameters
@@ -117,7 +125,7 @@ class Beam(object):
             self.second_moment = second_moment
         self.variable = variable
         self._base_char = base_char
-        self._boundary_conditions = {'deflection': [], 'slope': []}
+        self._boundary_conditions = {"deflection": [], "slope": []}
         self._load = 0
         self._applied_supports = []
         self._support_as_loads = []
@@ -127,8 +135,12 @@ class Beam(object):
         self._hinge_position = None
 
     def __str__(self):
-        shape_description = self._cross_section if self._cross_section else self._second_moment
-        str_sol = 'Beam({}, {}, {})'.format(sstr(self._length), sstr(self._elastic_modulus), sstr(shape_description))
+        shape_description = (
+            self._cross_section if self._cross_section else self._second_moment
+        )
+        str_sol = "Beam({}, {}, {})".format(
+            sstr(self._length), sstr(self._elastic_modulus), sstr(shape_description)
+        )
         return str_sol
 
     @property
@@ -197,7 +209,9 @@ class Beam(object):
     def second_moment(self, i):
         self._cross_section = None
         if isinstance(i, GeometryEntity):
-            raise ValueError("To update cross-section geometry use `cross_section` attribute")
+            raise ValueError(
+                "To update cross-section geometry use `cross_section` attribute"
+            )
         else:
             self._second_moment = sympify(i)
 
@@ -243,19 +257,19 @@ class Beam(object):
 
     @property
     def bc_slope(self):
-        return self._boundary_conditions['slope']
+        return self._boundary_conditions["slope"]
 
     @bc_slope.setter
     def bc_slope(self, s_bcs):
-        self._boundary_conditions['slope'] = s_bcs
+        self._boundary_conditions["slope"] = s_bcs
 
     @property
     def bc_deflection(self):
-        return self._boundary_conditions['deflection']
+        return self._boundary_conditions["deflection"]
 
     @bc_deflection.setter
     def bc_deflection(self, d_bcs):
-        self._boundary_conditions['deflection'] = d_bcs
+        self._boundary_conditions["deflection"] = d_bcs
 
     def join(self, beam, via="fixed"):
         """
@@ -304,8 +318,10 @@ class Beam(object):
         E = self.elastic_modulus
         new_length = self.length + beam.length
         if self.second_moment != beam.second_moment:
-            new_second_moment = Piecewise((self.second_moment, x<=self.length),
-                                    (beam.second_moment, x<=new_length))
+            new_second_moment = Piecewise(
+                (self.second_moment, x <= self.length),
+                (beam.second_moment, x <= new_length),
+            )
         else:
             new_second_moment = self.second_moment
 
@@ -367,12 +383,12 @@ class Beam(object):
         loc = sympify(loc)
         self._applied_supports.append((loc, type))
         if type == "pin" or type == "roller":
-            reaction_load = Symbol('R_'+str(loc))
+            reaction_load = Symbol("R_" + str(loc))
             self.apply_load(reaction_load, loc, -1)
             self.bc_deflection.append((loc, 0))
         else:
-            reaction_load = Symbol('R_'+str(loc))
-            reaction_moment = Symbol('M_'+str(loc))
+            reaction_load = Symbol("R_" + str(loc))
+            reaction_moment = Symbol("M_" + str(loc))
             self.apply_load(reaction_load, loc, -1)
             self.apply_load(reaction_moment, loc, -2)
             self.bc_deflection.append((loc, 0))
@@ -432,21 +448,26 @@ class Beam(object):
         order = sympify(order)
 
         self._applied_loads.append((value, start, order, end))
-        self._load += value*SingularityFunction(x, start, order)
+        self._load += value * SingularityFunction(x, start, order)
 
         if end:
             if order.is_negative:
-                msg = ("If 'end' is provided the 'order' of the load cannot "
-                       "be negative, i.e. 'end' is only valid for distributed "
-                       "loads.")
+                msg = (
+                    "If 'end' is provided the 'order' of the load cannot "
+                    "be negative, i.e. 'end' is only valid for distributed "
+                    "loads."
+                )
                 raise ValueError(msg)
             # NOTE : A Taylor series can be used to define the summation of
             # singularity functions that subtract from the load past the end
             # point such that it evaluates to zero past 'end'.
-            f = value*x**order
+            f = value * x ** order
             for i in range(0, order + 1):
-                self._load -= (f.diff(x, i).subs(x, end - start) *
-                               SingularityFunction(x, end, i)/factorial(i))
+                self._load -= (
+                    f.diff(x, i).subs(x, end - start)
+                    * SingularityFunction(x, end, i)
+                    / factorial(i)
+                )
 
     def remove_load(self, value, start, order, end=None):
         """
@@ -501,7 +522,7 @@ class Beam(object):
         order = sympify(order)
 
         if (value, start, order, end) in self._applied_loads:
-            self._load -= value*SingularityFunction(x, start, order)
+            self._load -= value * SingularityFunction(x, start, order)
             self._applied_loads.remove((value, start, order, end))
         else:
             msg = "No such load distribution exists on the beam object."
@@ -512,17 +533,22 @@ class Beam(object):
             # would be better to move it to one location and both methods use
             # it.
             if order.is_negative:
-                msg = ("If 'end' is provided the 'order' of the load cannot "
-                       "be negative, i.e. 'end' is only valid for distributed "
-                       "loads.")
+                msg = (
+                    "If 'end' is provided the 'order' of the load cannot "
+                    "be negative, i.e. 'end' is only valid for distributed "
+                    "loads."
+                )
                 raise ValueError(msg)
             # NOTE : A Taylor series can be used to define the summation of
             # singularity functions that subtract from the load past the end
             # point such that it evaluates to zero past 'end'.
-            f = value*x**order
+            f = value * x ** order
             for i in range(0, order + 1):
-                self._load += (f.diff(x, i).subs(x, end - start) *
-                               SingularityFunction(x, end, i)/factorial(i))
+                self._load += (
+                    f.diff(x, i).subs(x, end - start)
+                    * SingularityFunction(x, end, i)
+                    / factorial(i)
+                )
 
     @property
     def load(self):
@@ -636,30 +662,34 @@ class Beam(object):
         else:
             I1 = I2 = I
 
-        load_1 = 0       # Load equation on first segment of composite beam
-        load_2 = 0       # Load equation on second segment of composite beam
+        load_1 = 0  # Load equation on first segment of composite beam
+        load_2 = 0  # Load equation on second segment of composite beam
 
         # Distributing load on both segments
         for load in self.applied_loads:
             if load[1] < l:
-                load_1 += load[0]*SingularityFunction(x, load[1], load[2])
+                load_1 += load[0] * SingularityFunction(x, load[1], load[2])
                 if load[2] == 0:
-                    load_1 -= load[0]*SingularityFunction(x, load[3], load[2])
+                    load_1 -= load[0] * SingularityFunction(x, load[3], load[2])
                 elif load[2] > 0:
-                    load_1 -= load[0]*SingularityFunction(x, load[3], load[2]) + load[0]*SingularityFunction(x, load[3], 0)
+                    load_1 -= load[0] * SingularityFunction(x, load[3], load[2]) + load[
+                        0
+                    ] * SingularityFunction(x, load[3], 0)
             elif load[1] == l:
-                load_1 += load[0]*SingularityFunction(x, load[1], load[2])
-                load_2 += load[0]*SingularityFunction(x, load[1] - l, load[2])
+                load_1 += load[0] * SingularityFunction(x, load[1], load[2])
+                load_2 += load[0] * SingularityFunction(x, load[1] - l, load[2])
             elif load[1] > l:
-                load_2 += load[0]*SingularityFunction(x, load[1] - l, load[2])
+                load_2 += load[0] * SingularityFunction(x, load[1] - l, load[2])
                 if load[2] == 0:
-                    load_2 -= load[0]*SingularityFunction(x, load[3] - l, load[2])
+                    load_2 -= load[0] * SingularityFunction(x, load[3] - l, load[2])
                 elif load[2] > 0:
-                    load_2 -= load[0]*SingularityFunction(x, load[3] - l, load[2]) + load[0]*SingularityFunction(x, load[3] - l, 0)
+                    load_2 -= load[0] * SingularityFunction(
+                        x, load[3] - l, load[2]
+                    ) + load[0] * SingularityFunction(x, load[3] - l, 0)
 
-        h = Symbol('h')     # Force due to hinge
-        load_1 += h*SingularityFunction(x, l, -1)
-        load_2 -= h*SingularityFunction(x, 0, -1)
+        h = Symbol("h")  # Force due to hinge
+        load_1 += h * SingularityFunction(x, l, -1)
+        load_2 -= h * SingularityFunction(x, 0, -1)
 
         eq = []
         shear_1 = integrate(load_1, x)
@@ -676,28 +706,32 @@ class Beam(object):
         moment_curve_2 = limit(bending_2, x, self.length - l)
         eq.append(moment_curve_2)
 
-        C1 = Symbol('C1')
-        C2 = Symbol('C2')
-        C3 = Symbol('C3')
-        C4 = Symbol('C4')
-        slope_1 = S.One/(E*I1)*(integrate(bending_1, x) + C1)
-        def_1 = S.One/(E*I1)*(integrate((E*I)*slope_1, x) + C1*x + C2)
-        slope_2 = S.One/(E*I2)*(integrate(integrate(integrate(load_2, x), x), x) + C3)
-        def_2 = S.One/(E*I2)*(integrate((E*I)*slope_2, x) + C4)
+        C1 = Symbol("C1")
+        C2 = Symbol("C2")
+        C3 = Symbol("C3")
+        C4 = Symbol("C4")
+        slope_1 = S.One / (E * I1) * (integrate(bending_1, x) + C1)
+        def_1 = S.One / (E * I1) * (integrate((E * I) * slope_1, x) + C1 * x + C2)
+        slope_2 = (
+            S.One / (E * I2) * (integrate(integrate(integrate(load_2, x), x), x) + C3)
+        )
+        def_2 = S.One / (E * I2) * (integrate((E * I) * slope_2, x) + C4)
 
         for position, value in self.bc_slope:
-            if position<l:
+            if position < l:
                 eq.append(slope_1.subs(x, position) - value)
             else:
                 eq.append(slope_2.subs(x, position - l) - value)
 
         for position, value in self.bc_deflection:
-            if position<l:
+            if position < l:
                 eq.append(def_1.subs(x, position) - value)
             else:
                 eq.append(def_2.subs(x, position - l) - value)
 
-        eq.append(def_1.subs(x, l) - def_2.subs(x, 0)) # Deflection of both the segments at hinge would be equal
+        eq.append(
+            def_1.subs(x, l) - def_2.subs(x, 0)
+        )  # Deflection of both the segments at hinge would be equal
 
         constants = list(linsolve(eq, C1, C2, C3, C4, h, *reactions))
         reaction_values = list(constants[0])[5:]
@@ -706,13 +740,29 @@ class Beam(object):
         self._load = self._load.subs(self._reaction_loads)
 
         # Substituting constants and reactional load and moments with their corresponding values
-        slope_1 = slope_1.subs({C1: constants[0][0], h:constants[0][4]}).subs(self._reaction_loads)
-        def_1 = def_1.subs({C1: constants[0][0], C2: constants[0][1], h:constants[0][4]}).subs(self._reaction_loads)
-        slope_2 = slope_2.subs({x: x-l, C3: constants[0][2], h:constants[0][4]}).subs(self._reaction_loads)
-        def_2 = def_2.subs({x: x-l,C3: constants[0][2], C4: constants[0][3], h:constants[0][4]}).subs(self._reaction_loads)
+        slope_1 = slope_1.subs({C1: constants[0][0], h: constants[0][4]}).subs(
+            self._reaction_loads
+        )
+        def_1 = def_1.subs(
+            {C1: constants[0][0], C2: constants[0][1], h: constants[0][4]}
+        ).subs(self._reaction_loads)
+        slope_2 = slope_2.subs(
+            {x: x - l, C3: constants[0][2], h: constants[0][4]}
+        ).subs(self._reaction_loads)
+        def_2 = def_2.subs(
+            {x: x - l, C3: constants[0][2], C4: constants[0][3], h: constants[0][4]}
+        ).subs(self._reaction_loads)
 
-        self._hinge_beam_slope = slope_1*SingularityFunction(x, 0, 0) - slope_1*SingularityFunction(x, l, 0) + slope_2*SingularityFunction(x, l, 0)
-        self._hinge_beam_deflection = def_1*SingularityFunction(x, 0, 0) - def_1*SingularityFunction(x, l, 0) + def_2*SingularityFunction(x, l, 0)
+        self._hinge_beam_slope = (
+            slope_1 * SingularityFunction(x, 0, 0)
+            - slope_1 * SingularityFunction(x, l, 0)
+            + slope_2 * SingularityFunction(x, l, 0)
+        )
+        self._hinge_beam_deflection = (
+            def_1 * SingularityFunction(x, 0, 0)
+            - def_1 * SingularityFunction(x, l, 0)
+            + def_2 * SingularityFunction(x, l, 0)
+        )
 
     def solve_for_reaction_loads(self, *reactions):
         """
@@ -755,8 +805,8 @@ class Beam(object):
 
         x = self.variable
         l = self.length
-        C3 = Symbol('C3')
-        C4 = Symbol('C4')
+        C3 = Symbol("C3")
+        C4 = Symbol("C4")
 
         shear_curve = limit(self.shear_force(), x, l)
         moment_curve = limit(self.bending_moment(), x, l)
@@ -765,17 +815,23 @@ class Beam(object):
         deflection_eqs = []
 
         slope_curve = integrate(self.bending_moment(), x) + C3
-        for position, value in self._boundary_conditions['slope']:
+        for position, value in self._boundary_conditions["slope"]:
             eqs = slope_curve.subs(x, position) - value
             slope_eqs.append(eqs)
 
         deflection_curve = integrate(slope_curve, x) + C4
-        for position, value in self._boundary_conditions['deflection']:
+        for position, value in self._boundary_conditions["deflection"]:
             eqs = deflection_curve.subs(x, position) - value
             deflection_eqs.append(eqs)
 
-        solution = list((linsolve([shear_curve, moment_curve] + slope_eqs
-                            + deflection_eqs, (C3, C4) + reactions).args)[0])
+        solution = list(
+            (
+                linsolve(
+                    [shear_curve, moment_curve] + slope_eqs + deflection_eqs,
+                    (C3, C4) + reactions,
+                ).args
+            )[0]
+        )
         solution = solution[2:]
 
         self._reaction_loads = dict(zip(reactions, solution))
@@ -819,31 +875,41 @@ class Beam(object):
         """Returns maximum Shear force and its coordinate
         in the Beam object."""
         from sympy import solve, Mul, Interval
+
         shear_curve = self.shear_force()
         x = self.variable
 
         terms = shear_curve.args
-        singularity = []        # Points at which shear function changes
+        singularity = []  # Points at which shear function changes
         for term in terms:
             if isinstance(term, Mul):
-                term = term.args[-1]    # SingularityFunction in the term
+                term = term.args[-1]  # SingularityFunction in the term
             singularity.append(term.args[1])
         singularity.sort()
         singularity = list(set(singularity))
 
-        intervals = []    # List of Intervals with discrete value of shear force
-        shear_values = []   # List of values of shear force in each interval
+        intervals = []  # List of Intervals with discrete value of shear force
+        shear_values = []  # List of values of shear force in each interval
         for i, s in enumerate(singularity):
             if s == 0:
                 continue
             try:
-                shear_slope = Piecewise((float("nan"), x<=singularity[i-1]),(self._load.rewrite(Piecewise), x<s), (float("nan"), True))
+                shear_slope = Piecewise(
+                    (float("nan"), x <= singularity[i - 1]),
+                    (self._load.rewrite(Piecewise), x < s),
+                    (float("nan"), True),
+                )
                 points = solve(shear_slope, x)
                 val = []
                 for point in points:
                     val.append(shear_curve.subs(x, point))
-                points.extend([singularity[i-1], s])
-                val.extend([limit(shear_curve, x, singularity[i-1], '+'), limit(shear_curve, x, s, '-')])
+                points.extend([singularity[i - 1], s])
+                val.extend(
+                    [
+                        limit(shear_curve, x, singularity[i - 1], "+"),
+                        limit(shear_curve, x, s, "-"),
+                    ]
+                )
                 val = list(map(abs, val))
                 max_shear = max(val)
                 shear_values.append(max_shear)
@@ -852,15 +918,19 @@ class Beam(object):
             # slope, then above block gives NotImplementedError as
             # solve can't represent Interval solutions.
             except NotImplementedError:
-                initial_shear = limit(shear_curve, x, singularity[i-1], '+')
-                final_shear = limit(shear_curve, x, s, '-')
+                initial_shear = limit(shear_curve, x, singularity[i - 1], "+")
+                final_shear = limit(shear_curve, x, s, "-")
                 # If shear_curve has a constant slope(it is a line).
-                if shear_curve.subs(x, (singularity[i-1] + s)/2) == (initial_shear + final_shear)/2 and initial_shear != final_shear:
+                if (
+                    shear_curve.subs(x, (singularity[i - 1] + s) / 2)
+                    == (initial_shear + final_shear) / 2
+                    and initial_shear != final_shear
+                ):
                     shear_values.extend([initial_shear, final_shear])
-                    intervals.extend([singularity[i-1], s])
-                else:    # shear_curve has same value in whole Interval
+                    intervals.extend([singularity[i - 1], s])
+                else:  # shear_curve has same value in whole Interval
                     shear_values.append(final_shear)
-                    intervals.append(Interval(singularity[i-1], s))
+                    intervals.append(Interval(singularity[i - 1], s))
 
         shear_values = list(map(abs, shear_values))
         maximum_shear = max(shear_values)
@@ -905,31 +975,41 @@ class Beam(object):
         """Returns maximum Shear force and its coordinate
         in the Beam object."""
         from sympy import solve, Mul, Interval
+
         bending_curve = self.bending_moment()
         x = self.variable
 
         terms = bending_curve.args
-        singularity = []        # Points at which bending moment changes
+        singularity = []  # Points at which bending moment changes
         for term in terms:
             if isinstance(term, Mul):
-                term = term.args[-1]    # SingularityFunction in the term
+                term = term.args[-1]  # SingularityFunction in the term
             singularity.append(term.args[1])
         singularity.sort()
         singularity = list(set(singularity))
 
-        intervals = []    # List of Intervals with discrete value of bending moment
-        moment_values = []   # List of values of bending moment in each interval
+        intervals = []  # List of Intervals with discrete value of bending moment
+        moment_values = []  # List of values of bending moment in each interval
         for i, s in enumerate(singularity):
             if s == 0:
                 continue
             try:
-                moment_slope = Piecewise((float("nan"), x<=singularity[i-1]),(self.shear_force().rewrite(Piecewise), x<s), (float("nan"), True))
+                moment_slope = Piecewise(
+                    (float("nan"), x <= singularity[i - 1]),
+                    (self.shear_force().rewrite(Piecewise), x < s),
+                    (float("nan"), True),
+                )
                 points = solve(moment_slope, x)
                 val = []
                 for point in points:
                     val.append(bending_curve.subs(x, point))
-                points.extend([singularity[i-1], s])
-                val.extend([limit(bending_curve, x, singularity[i-1], '+'), limit(bending_curve, x, s, '-')])
+                points.extend([singularity[i - 1], s])
+                val.extend(
+                    [
+                        limit(bending_curve, x, singularity[i - 1], "+"),
+                        limit(bending_curve, x, s, "-"),
+                    ]
+                )
                 val = list(map(abs, val))
                 max_moment = max(val)
                 moment_values.append(max_moment)
@@ -938,15 +1018,19 @@ class Beam(object):
             # slope, then above block gives NotImplementedError as solve
             # can't represent Interval solutions.
             except NotImplementedError:
-                initial_moment = limit(bending_curve, x, singularity[i-1], '+')
-                final_moment = limit(bending_curve, x, s, '-')
+                initial_moment = limit(bending_curve, x, singularity[i - 1], "+")
+                final_moment = limit(bending_curve, x, s, "-")
                 # If bending_curve has a constant slope(it is a line).
-                if bending_curve.subs(x, (singularity[i-1] + s)/2) == (initial_moment + final_moment)/2 and initial_moment != final_moment:
+                if (
+                    bending_curve.subs(x, (singularity[i - 1] + s) / 2)
+                    == (initial_moment + final_moment) / 2
+                    and initial_moment != final_moment
+                ):
                     moment_values.extend([initial_moment, final_moment])
-                    intervals.extend([singularity[i-1], s])
-                else:    # bending_curve has same value in whole Interval
+                    intervals.extend([singularity[i - 1], s])
+                else:  # bending_curve has same value in whole Interval
                     moment_values.append(final_moment)
-                    intervals.append(Interval(singularity[i-1], s))
+                    intervals.append(Interval(singularity[i - 1], s))
 
         moment_values = list(map(abs, moment_values))
         maximum_moment = max(moment_values)
@@ -987,12 +1071,13 @@ class Beam(object):
         from sympy import solve, Piecewise
 
         # To restrict the range within length of the Beam
-        moment_curve = Piecewise((float("nan"), self.variable<=0),
-                (self.bending_moment(), self.variable<self.length),
-                (float("nan"), True))
+        moment_curve = Piecewise(
+            (float("nan"), self.variable <= 0),
+            (self.bending_moment(), self.variable < self.length),
+            (float("nan"), True),
+        )
 
-        points = solve(moment_curve.rewrite(Piecewise), self.variable,
-                        domain=S.Reals)
+        points = solve(moment_curve.rewrite(Piecewise), self.variable, domain=S.Reals)
         return points
 
     def slope(self):
@@ -1033,7 +1118,7 @@ class Beam(object):
 
         if self._composite_type == "hinge":
             return self._hinge_beam_slope
-        if not self._boundary_conditions['slope']:
+        if not self._boundary_conditions["slope"]:
             return diff(self.deflection(), x)
         if isinstance(I, Piecewise) and self._composite_type == "fixed":
             args = I.args
@@ -1042,21 +1127,30 @@ class Beam(object):
             prev_end = 0
             for i in range(len(args)):
                 if i != 0:
-                    prev_end = args[i-1][1].args[1]
-                slope_value = S.One/E*integrate(self.bending_moment()/args[i][0], (x, prev_end, x))
+                    prev_end = args[i - 1][1].args[1]
+                slope_value = (
+                    S.One
+                    / E
+                    * integrate(self.bending_moment() / args[i][0], (x, prev_end, x))
+                )
                 if i != len(args) - 1:
-                    slope += (prev_slope + slope_value)*SingularityFunction(x, prev_end, 0) - \
-                        (prev_slope + slope_value)*SingularityFunction(x, args[i][1].args[1], 0)
+                    slope += (prev_slope + slope_value) * SingularityFunction(
+                        x, prev_end, 0
+                    ) - (prev_slope + slope_value) * SingularityFunction(
+                        x, args[i][1].args[1], 0
+                    )
                 else:
-                    slope += (prev_slope + slope_value)*SingularityFunction(x, prev_end, 0)
+                    slope += (prev_slope + slope_value) * SingularityFunction(
+                        x, prev_end, 0
+                    )
                 prev_slope = slope_value.subs(x, args[i][1].args[1])
             return slope
 
-        C3 = Symbol('C3')
-        slope_curve = integrate(S.One/(E*I)*self.bending_moment(), x) + C3
+        C3 = Symbol("C3")
+        slope_curve = integrate(S.One / (E * I) * self.bending_moment(), x) + C3
 
         bc_eqs = []
-        for position, value in self._boundary_conditions['slope']:
+        for position, value in self._boundary_conditions["slope"]:
             eqs = slope_curve.subs(x, position) - value
             bc_eqs.append(eqs)
         constants = list(linsolve(bc_eqs, C3))
@@ -1100,7 +1194,10 @@ class Beam(object):
         I = self.second_moment
         if self._composite_type == "hinge":
             return self._hinge_beam_deflection
-        if not self._boundary_conditions['deflection'] and not self._boundary_conditions['slope']:
+        if (
+            not self._boundary_conditions["deflection"]
+            and not self._boundary_conditions["slope"]
+        ):
             if isinstance(I, Piecewise) and self._composite_type == "fixed":
                 args = I.args
                 prev_slope = 0
@@ -1109,26 +1206,46 @@ class Beam(object):
                 deflection = 0
                 for i in range(len(args)):
                     if i != 0:
-                        prev_end = args[i-1][1].args[1]
-                    slope_value = S.One/E*integrate(self.bending_moment()/args[i][0], (x, prev_end, x))
+                        prev_end = args[i - 1][1].args[1]
+                    slope_value = (
+                        S.One
+                        / E
+                        * integrate(
+                            self.bending_moment() / args[i][0], (x, prev_end, x)
+                        )
+                    )
                     recent_segment_slope = prev_slope + slope_value
                     deflection_value = integrate(recent_segment_slope, (x, prev_end, x))
                     if i != len(args) - 1:
-                        deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0) \
-                            - (prev_def + deflection_value)*SingularityFunction(x, args[i][1].args[1], 0)
+                        deflection += (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(x, prev_end, 0) - (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(
+                            x, args[i][1].args[1], 0
+                        )
                     else:
-                        deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0)
+                        deflection += (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(x, prev_end, 0)
                     prev_slope = slope_value.subs(x, args[i][1].args[1])
                     prev_def = deflection_value.subs(x, args[i][1].args[1])
                 return deflection
             base_char = self._base_char
-            constants = symbols(base_char + '3:5')
-            return S.One/(E*I)*integrate(integrate(self.bending_moment(), x), x) + constants[0]*x + constants[1]
-        elif not self._boundary_conditions['deflection']:
+            constants = symbols(base_char + "3:5")
+            return (
+                S.One / (E * I) * integrate(integrate(self.bending_moment(), x), x)
+                + constants[0] * x
+                + constants[1]
+            )
+        elif not self._boundary_conditions["deflection"]:
             base_char = self._base_char
-            constant = symbols(base_char + '4')
+            constant = symbols(base_char + "4")
             return integrate(self.slope(), x) + constant
-        elif not self._boundary_conditions['slope'] and self._boundary_conditions['deflection']:
+        elif (
+            not self._boundary_conditions["slope"]
+            and self._boundary_conditions["deflection"]
+        ):
             if isinstance(I, Piecewise) and self._composite_type == "fixed":
                 args = I.args
                 prev_slope = 0
@@ -1137,29 +1254,44 @@ class Beam(object):
                 deflection = 0
                 for i in range(len(args)):
                     if i != 0:
-                        prev_end = args[i-1][1].args[1]
-                    slope_value = S.One/E*integrate(self.bending_moment()/args[i][0], (x, prev_end, x))
+                        prev_end = args[i - 1][1].args[1]
+                    slope_value = (
+                        S.One
+                        / E
+                        * integrate(
+                            self.bending_moment() / args[i][0], (x, prev_end, x)
+                        )
+                    )
                     recent_segment_slope = prev_slope + slope_value
                     deflection_value = integrate(recent_segment_slope, (x, prev_end, x))
                     if i != len(args) - 1:
-                        deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0) \
-                            - (prev_def + deflection_value)*SingularityFunction(x, args[i][1].args[1], 0)
+                        deflection += (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(x, prev_end, 0) - (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(
+                            x, args[i][1].args[1], 0
+                        )
                     else:
-                        deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0)
+                        deflection += (
+                            prev_def + deflection_value
+                        ) * SingularityFunction(x, prev_end, 0)
                     prev_slope = slope_value.subs(x, args[i][1].args[1])
                     prev_def = deflection_value.subs(x, args[i][1].args[1])
                 return deflection
             base_char = self._base_char
-            C3, C4 = symbols(base_char + '3:5')    # Integration constants
+            C3, C4 = symbols(base_char + "3:5")  # Integration constants
             slope_curve = integrate(self.bending_moment(), x) + C3
             deflection_curve = integrate(slope_curve, x) + C4
             bc_eqs = []
-            for position, value in self._boundary_conditions['deflection']:
+            for position, value in self._boundary_conditions["deflection"]:
                 eqs = deflection_curve.subs(x, position) - value
                 bc_eqs.append(eqs)
             constants = list(linsolve(bc_eqs, (C3, C4)))
-            deflection_curve = deflection_curve.subs({C3: constants[0][0], C4: constants[0][1]})
-            return S.One/(E*I)*deflection_curve
+            deflection_curve = deflection_curve.subs(
+                {C3: constants[0][0], C4: constants[0][1]}
+            )
+            return S.One / (E * I) * deflection_curve
 
         if isinstance(I, Piecewise) and self._composite_type == "fixed":
             args = I.args
@@ -1169,24 +1301,33 @@ class Beam(object):
             deflection = 0
             for i in range(len(args)):
                 if i != 0:
-                    prev_end = args[i-1][1].args[1]
-                slope_value = S.One/E*integrate(self.bending_moment()/args[i][0], (x, prev_end, x))
+                    prev_end = args[i - 1][1].args[1]
+                slope_value = (
+                    S.One
+                    / E
+                    * integrate(self.bending_moment() / args[i][0], (x, prev_end, x))
+                )
                 recent_segment_slope = prev_slope + slope_value
                 deflection_value = integrate(recent_segment_slope, (x, prev_end, x))
                 if i != len(args) - 1:
-                    deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0) \
-                        - (prev_def + deflection_value)*SingularityFunction(x, args[i][1].args[1], 0)
+                    deflection += (prev_def + deflection_value) * SingularityFunction(
+                        x, prev_end, 0
+                    ) - (prev_def + deflection_value) * SingularityFunction(
+                        x, args[i][1].args[1], 0
+                    )
                 else:
-                    deflection += (prev_def + deflection_value)*SingularityFunction(x, prev_end, 0)
+                    deflection += (prev_def + deflection_value) * SingularityFunction(
+                        x, prev_end, 0
+                    )
                 prev_slope = slope_value.subs(x, args[i][1].args[1])
                 prev_def = deflection_value.subs(x, args[i][1].args[1])
             return deflection
 
-        C4 = Symbol('C4')
+        C4 = Symbol("C4")
         deflection_curve = integrate(self.slope(), x) + C4
 
         bc_eqs = []
-        for position, value in self._boundary_conditions['deflection']:
+        for position, value in self._boundary_conditions["deflection"]:
             eqs = deflection_curve.subs(x, position) - value
             bc_eqs.append(eqs)
 
@@ -1202,12 +1343,13 @@ class Beam(object):
         from sympy import solve, Piecewise
 
         # To restrict the range within length of the Beam
-        slope_curve = Piecewise((float("nan"), self.variable<=0),
-                (self.slope(), self.variable<self.length),
-                (float("nan"), True))
+        slope_curve = Piecewise(
+            (float("nan"), self.variable <= 0),
+            (self.slope(), self.variable < self.length),
+            (float("nan"), True),
+        )
 
-        points = solve(slope_curve.rewrite(Piecewise), self.variable,
-                        domain=S.Reals)
+        points = solve(slope_curve.rewrite(Piecewise), self.variable, domain=S.Reals)
         deflection_curve = self.deflection()
         deflections = [deflection_curve.subs(self.variable, x) for x in points]
         deflections = list(map(abs, deflections))
@@ -1267,13 +1409,19 @@ class Beam(object):
             if sym == self.variable:
                 continue
             if sym not in subs:
-                raise ValueError('Value of %s was not passed.' %sym)
+                raise ValueError("Value of %s was not passed." % sym)
         if self.length in subs:
             length = subs[self.length]
         else:
             length = self.length
-        return plot(shear_force.subs(subs), (self.variable, 0, length), title='Shear Force',
-                xlabel=r'$\mathrm{x}$', ylabel=r'$\mathrm{V}$', line_color='g')
+        return plot(
+            shear_force.subs(subs),
+            (self.variable, 0, length),
+            title="Shear Force",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\mathrm{V}$",
+            line_color="g",
+        )
 
     def plot_bending_moment(self, subs=None):
         """
@@ -1325,13 +1473,19 @@ class Beam(object):
             if sym == self.variable:
                 continue
             if sym not in subs:
-                raise ValueError('Value of %s was not passed.' %sym)
+                raise ValueError("Value of %s was not passed." % sym)
         if self.length in subs:
             length = subs[self.length]
         else:
             length = self.length
-        return plot(bending_moment.subs(subs), (self.variable, 0, length), title='Bending Moment',
-                xlabel=r'$\mathrm{x}$', ylabel=r'$\mathrm{M}$', line_color='b')
+        return plot(
+            bending_moment.subs(subs),
+            (self.variable, 0, length),
+            title="Bending Moment",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\mathrm{M}$",
+            line_color="b",
+        )
 
     def plot_slope(self, subs=None):
         """
@@ -1383,13 +1537,19 @@ class Beam(object):
             if sym == self.variable:
                 continue
             if sym not in subs:
-                raise ValueError('Value of %s was not passed.' %sym)
+                raise ValueError("Value of %s was not passed." % sym)
         if self.length in subs:
             length = subs[self.length]
         else:
             length = self.length
-        return plot(slope.subs(subs), (self.variable, 0, length), title='Slope',
-                xlabel=r'$\mathrm{x}$', ylabel=r'$\theta$', line_color='m')
+        return plot(
+            slope.subs(subs),
+            (self.variable, 0, length),
+            title="Slope",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\theta$",
+            line_color="m",
+        )
 
     def plot_deflection(self, subs=None):
         """
@@ -1442,15 +1602,19 @@ class Beam(object):
             if sym == self.variable:
                 continue
             if sym not in subs:
-                raise ValueError('Value of %s was not passed.' %sym)
+                raise ValueError("Value of %s was not passed." % sym)
         if self.length in subs:
             length = subs[self.length]
         else:
             length = self.length
-        return plot(deflection.subs(subs), (self.variable, 0, length),
-                    title='Deflection', xlabel=r'$\mathrm{x}$', ylabel=r'$\delta$',
-                    line_color='r')
-
+        return plot(
+            deflection.subs(subs),
+            (self.variable, 0, length),
+            title="Deflection",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\delta$",
+            line_color="r",
+        )
 
     def plot_loading_results(self, subs=None):
         """
@@ -1502,29 +1666,52 @@ class Beam(object):
             if sym == self.variable:
                 continue
             if sym not in subs:
-                raise ValueError('Value of %s was not passed.' %sym)
+                raise ValueError("Value of %s was not passed." % sym)
         if self.length in subs:
             length = subs[self.length]
         else:
             length = self.length
 
-        ax1 = plot(self.shear_force().subs(subs), (variable, 0, length),
-                   title="Shear Force", xlabel=r'$\mathrm{x}$', ylabel=r'$\mathrm{V}$',
-                   line_color='g', show=False)
-        ax2 = plot(self.bending_moment().subs(subs), (variable, 0, length),
-                   title="Bending Moment", xlabel=r'$\mathrm{x}$', ylabel=r'$\mathrm{M}$',
-                   line_color='b', show=False)
-        ax3 = plot(self.slope().subs(subs), (variable, 0, length),
-                   title="Slope", xlabel=r'$\mathrm{x}$', ylabel=r'$\theta$',
-                   line_color='m', show=False)
-        ax4 = plot(self.deflection().subs(subs), (variable, 0, length),
-                   title="Deflection", xlabel=r'$\mathrm{x}$', ylabel=r'$\delta$',
-                   line_color='r', show=False)
+        ax1 = plot(
+            self.shear_force().subs(subs),
+            (variable, 0, length),
+            title="Shear Force",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\mathrm{V}$",
+            line_color="g",
+            show=False,
+        )
+        ax2 = plot(
+            self.bending_moment().subs(subs),
+            (variable, 0, length),
+            title="Bending Moment",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\mathrm{M}$",
+            line_color="b",
+            show=False,
+        )
+        ax3 = plot(
+            self.slope().subs(subs),
+            (variable, 0, length),
+            title="Slope",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\theta$",
+            line_color="m",
+            show=False,
+        )
+        ax4 = plot(
+            self.deflection().subs(subs),
+            (variable, 0, length),
+            title="Deflection",
+            xlabel=r"$\mathrm{x}$",
+            ylabel=r"$\delta$",
+            line_color="r",
+            show=False,
+        )
 
         return PlotGrid(4, 1, ax1, ax2, ax3, ax4)
 
-
-    @doctest_depends_on(modules=('numpy',))
+    @doctest_depends_on(modules=("numpy",))
     def draw(self, pictorial=True):
         """Returns a plot object representing the beam diagram of the beam.
 
@@ -1572,34 +1759,45 @@ class Beam(object):
 
         # checking whether length is an expression in terms of any Symbol.
         from sympy import Expr
+
         if isinstance(self.length, Expr):
             l = list(self.length.atoms(Symbol))
             # assigning every Symbol a default value of 10
-            l = {i:10 for i in l}
+            l = {i: 10 for i in l}
             length = self.length.subs(l)
         else:
             l = {}
             length = self.length
-        height = length/10
+        height = length / 10
 
         rectangles = []
-        rectangles.append({'xy':(0, 0), 'width':length, 'height': height, 'facecolor':"brown"})
+        rectangles.append(
+            {"xy": (0, 0), "width": length, "height": height, "facecolor": "brown"}
+        )
         annotations, markers, load_eq, fill = self._draw_load(pictorial, length, l)
         support_markers, support_rectangles = self._draw_supports(length, l)
 
         rectangles += support_rectangles
         markers += support_markers
 
-        sing_plot = plot(height + load_eq, (x, 0, length),
-         xlim=(-height, length + height), ylim=(-length, 1.25*length), annotations=annotations,
-          markers=markers, rectangles=rectangles, fill=fill, axis=False, show=False)
+        sing_plot = plot(
+            height + load_eq,
+            (x, 0, length),
+            xlim=(-height, length + height),
+            ylim=(-length, 1.25 * length),
+            annotations=annotations,
+            markers=markers,
+            rectangles=rectangles,
+            fill=fill,
+            axis=False,
+            show=False,
+        )
 
         return sing_plot
 
-
     def _draw_load(self, pictorial, length, l):
         loads = list(set(self.applied_loads) - set(self._support_as_loads))
-        height = length/10
+        height = length / 10
         x = self.variable
 
         annotations = []
@@ -1613,22 +1811,52 @@ class Beam(object):
         for load in loads:
             # check if the position of load is in terms of the beam length.
             if l:
-                pos =  load[1].subs(l)
+                pos = load[1].subs(l)
             else:
                 pos = load[1]
 
             # point loads
             if load[2] == -1:
                 if isinstance(load[0], Symbol) or load[0].is_negative:
-                    annotations.append({'s':'', 'xy':(pos, 0), 'xytext':(pos, height - 4*height), 'arrowprops':dict(width= 1.5, headlength=5, headwidth=5, facecolor='black')})
+                    annotations.append(
+                        {
+                            "s": "",
+                            "xy": (pos, 0),
+                            "xytext": (pos, height - 4 * height),
+                            "arrowprops": dict(
+                                width=1.5, headlength=5, headwidth=5, facecolor="black"
+                            ),
+                        }
+                    )
                 else:
-                    annotations.append({'s':'', 'xy':(pos, height),  'xytext':(pos, height*4), 'arrowprops':dict(width= 1.5, headlength=4, headwidth=4, facecolor='black')})
+                    annotations.append(
+                        {
+                            "s": "",
+                            "xy": (pos, height),
+                            "xytext": (pos, height * 4),
+                            "arrowprops": dict(
+                                width=1.5, headlength=4, headwidth=4, facecolor="black"
+                            ),
+                        }
+                    )
             # moment loads
             elif load[2] == -2:
                 if load[0].is_negative:
-                    markers.append({'args':[[pos], [height/2]], 'marker': r'$\circlearrowleft$', 'markersize':15})
+                    markers.append(
+                        {
+                            "args": [[pos], [height / 2]],
+                            "marker": r"$\circlearrowleft$",
+                            "markersize": 15,
+                        }
+                    )
                 else:
-                    markers.append({'args':[[pos], [height/2]], 'marker': r'$\circlearrowright$', 'markersize':15})
+                    markers.append(
+                        {
+                            "args": [[pos], [height / 2]],
+                            "marker": r"$\circlearrowright$",
+                            "markersize": 15,
+                        }
+                    )
             # higher order loads
             elif load[2] >= 0:
                 higher_order = True
@@ -1636,14 +1864,21 @@ class Beam(object):
                 # some constant magnitude values.
                 if pictorial:
                     value, start, order, end = load
-                    value = 10**(1-order) if order > 0 else length/2
+                    value = 10 ** (1 - order) if order > 0 else length / 2
 
-                    scaled_load += value*SingularityFunction(x, start, order)
+                    scaled_load += value * SingularityFunction(x, start, order)
                     if end:
-                        f2 = 10**(1-order)*x**order if order > 0 else length/2*x**order
+                        f2 = (
+                            10 ** (1 - order) * x ** order
+                            if order > 0
+                            else length / 2 * x ** order
+                        )
                         for i in range(0, order + 1):
-                            scaled_load -= (f2.diff(x, i).subs(x, end - start)*
-                                           SingularityFunction(x, end, i)/factorial(i))
+                            scaled_load -= (
+                                f2.diff(x, i).subs(x, end - start)
+                                * SingularityFunction(x, end, i)
+                                / factorial(i)
+                            )
 
         # `fill` will be assigned only when higher order loads are present
         if higher_order:
@@ -1659,42 +1894,75 @@ class Beam(object):
                     load_args = self.load.args
                 else:
                     load_args = (self.load,)
-                load_eq = [i.subs(l) for i in load_args if list(i.atoms(SingularityFunction))[0].args[2] >= 0]
+                load_eq = [
+                    i.subs(l)
+                    for i in load_args
+                    if list(i.atoms(SingularityFunction))[0].args[2] >= 0
+                ]
 
             load_eq = Add(*load_eq)
 
             # filling higher order loads with colour
             y = numpy.arange(0, float(length), 0.001)
             expr = height + load_eq.rewrite(Piecewise)
-            y1 = lambdify(x, expr, 'numpy')
+            y1 = lambdify(x, expr, "numpy")
             y2 = float(height)
-            fill = {'x': y, 'y1': y1(y), 'y2': y2, 'color':'darkkhaki'}
+            fill = {"x": y, "y1": y1(y), "y2": y2, "color": "darkkhaki"}
 
         return annotations, markers, load_eq, fill
 
-
     def _draw_supports(self, length, l):
-        height = float(length/10)
+        height = float(length / 10)
 
         support_markers = []
         support_rectangles = []
         for support in self._applied_supports:
             if l:
-                pos =  support[0].subs(l)
+                pos = support[0].subs(l)
             else:
                 pos = support[0]
 
             if support[1] == "pin":
-                support_markers.append({'args':[pos, [0]], 'marker':6, 'markersize':13, 'color':"black"})
+                support_markers.append(
+                    {
+                        "args": [pos, [0]],
+                        "marker": 6,
+                        "markersize": 13,
+                        "color": "black",
+                    }
+                )
 
             elif support[1] == "roller":
-                support_markers.append({'args':[pos, [-height/2.5]], 'marker':'o', 'markersize':11, 'color':"black"})
+                support_markers.append(
+                    {
+                        "args": [pos, [-height / 2.5]],
+                        "marker": "o",
+                        "markersize": 11,
+                        "color": "black",
+                    }
+                )
 
             elif support[1] == "fixed":
                 if pos == 0:
-                    support_rectangles.append({'xy':(0, -3*height), 'width':-length/20, 'height':6*height + height, 'fill':False, 'hatch':'/////'})
+                    support_rectangles.append(
+                        {
+                            "xy": (0, -3 * height),
+                            "width": -length / 20,
+                            "height": 6 * height + height,
+                            "fill": False,
+                            "hatch": "/////",
+                        }
+                    )
                 else:
-                    support_rectangles.append({'xy':(length, -3*height), 'width':length/20, 'height': 6*height + height, 'fill':False, 'hatch':'/////'})
+                    support_rectangles.append(
+                        {
+                            "xy": (length, -3 * height),
+                            "width": length / 20,
+                            "height": 6 * height + height,
+                            "fill": False,
+                            "hatch": "/////",
+                        }
+                    )
 
         return support_markers, support_rectangles
 
@@ -1754,7 +2022,15 @@ class Beam3D(Beam):
 
     """
 
-    def __init__(self, length, elastic_modulus, shear_modulus , second_moment, area, variable=Symbol('x')):
+    def __init__(
+        self,
+        length,
+        elastic_modulus,
+        shear_modulus,
+        second_moment,
+        area,
+        variable=Symbol("x"),
+    ):
         """Initializes the class.
 
         Parameters
@@ -1885,7 +2161,7 @@ class Beam3D(Beam):
         24
         """
         if not iterable(self.second_moment):
-            return 2*self.second_moment
+            return 2 * self.second_moment
         return sum(self.second_moment)
 
     def apply_load(self, value, start, order, dir="y"):
@@ -1914,17 +2190,17 @@ class Beam3D(Beam):
         if dir == "x":
             if not order == -1:
                 self._load_vector[0] += value
-            self._load_Singularity[0] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[0] += value * SingularityFunction(x, start, order)
 
         elif dir == "y":
             if not order == -1:
                 self._load_vector[1] += value
-            self._load_Singularity[1] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[1] += value * SingularityFunction(x, start, order)
 
         else:
             if not order == -1:
                 self._load_vector[2] += value
-            self._load_Singularity[2] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[2] += value * SingularityFunction(x, start, order)
 
     def apply_moment_load(self, value, start, order, dir="y"):
         """
@@ -1952,24 +2228,24 @@ class Beam3D(Beam):
         if dir == "x":
             if not order == -2:
                 self._moment_load_vector[0] += value
-            self._load_Singularity[0] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[0] += value * SingularityFunction(x, start, order)
         elif dir == "y":
             if not order == -2:
                 self._moment_load_vector[1] += value
-            self._load_Singularity[0] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[0] += value * SingularityFunction(x, start, order)
         else:
             if not order == -2:
                 self._moment_load_vector[2] += value
-            self._load_Singularity[0] += value*SingularityFunction(x, start, order)
+            self._load_Singularity[0] += value * SingularityFunction(x, start, order)
 
     def apply_support(self, loc, type="fixed"):
         if type == "pin" or type == "roller":
-            reaction_load = Symbol('R_'+str(loc))
+            reaction_load = Symbol("R_" + str(loc))
             self._reaction_loads[reaction_load] = reaction_load
             self.bc_deflection.append((loc, [0, 0, 0]))
         else:
-            reaction_load = Symbol('R_'+str(loc))
-            reaction_moment = Symbol('M_'+str(loc))
+            reaction_load = Symbol("R_" + str(loc))
+            reaction_moment = Symbol("M_" + str(loc))
             self._reaction_loads[reaction_load] = [reaction_load, reaction_moment]
             self.bc_deflection.append((loc, [0, 0, 0]))
             self.bc_slope.append((loc, [0, 0, 0]))
@@ -2007,7 +2283,11 @@ class Beam3D(Beam):
         shear_curves = [integrate(load, x) for load in q]
         moment_curves = [integrate(shear, x) for shear in shear_curves]
         for i in range(3):
-            react = [r for r in reaction if (shear_curves[i].has(r) or moment_curves[i].has(r))]
+            react = [
+                r
+                for r in reaction
+                if (shear_curves[i].has(r) or moment_curves[i].has(r))
+            ]
             if len(react) == 0:
                 continue
             shear_curve = limit(shear_curves[i], x, l)
@@ -2019,7 +2299,9 @@ class Beam3D(Beam):
             # and if it exists then it should have same value.
             for key in sol_dict:
                 if key in reaction_loads and sol_dict[key] != reaction_loads[key]:
-                    raise ValueError("Ambiguous solution for %s in different directions." % key)
+                    raise ValueError(
+                        "Ambiguous solution for %s in different directions." % key
+                    )
             self._reaction_loads.update(sol_dict)
 
     def shear_force(self):
@@ -2046,8 +2328,11 @@ class Beam3D(Beam):
         m = self._moment_load_vector
         shear = self.shear_force()
 
-        return [integrate(-m[0], x), integrate(-m[1] + shear[2], x),
-                integrate(-m[2] - shear[1], x) ]
+        return [
+            integrate(-m[0], x),
+            integrate(-m[1] + shear[2], x),
+            integrate(-m[2] - shear[1], x),
+        ]
 
     def torsional_moment(self):
         """
@@ -2057,6 +2342,7 @@ class Beam3D(Beam):
 
     def solve_slope_deflection(self):
         from sympy import dsolve, Function, Derivative, Eq
+
         x = self.variable
         l = self.length
         E = self.elastic_modulus
@@ -2069,18 +2355,20 @@ class Beam3D(Beam):
         A = self.area
         load = self._load_vector
         moment = self._moment_load_vector
-        defl = Function('defl')
-        theta = Function('theta')
+        defl = Function("defl")
+        theta = Function("theta")
 
         # Finding deflection along x-axis(and corresponding slope value by differentiating it)
         # Equation used: Derivative(E*A*Derivative(def_x(x), x), x) + load_x = 0
-        eq = Derivative(E*A*Derivative(defl(x), x), x) + load[0]
+        eq = Derivative(E * A * Derivative(defl(x), x), x) + load[0]
         def_x = dsolve(Eq(eq, 0), defl(x)).args[1]
         # Solving constants originated from dsolve
-        C1 = Symbol('C1')
-        C2 = Symbol('C2')
-        constants = list((linsolve([def_x.subs(x, 0), def_x.subs(x, l)], C1, C2).args)[0])
-        def_x = def_x.subs({C1:constants[0], C2:constants[1]})
+        C1 = Symbol("C1")
+        C2 = Symbol("C2")
+        constants = list(
+            (linsolve([def_x.subs(x, 0), def_x.subs(x, l)], C1, C2).args)[0]
+        )
+        def_x = def_x.subs({C1: constants[0], C2: constants[1]})
         slope_x = def_x.diff(x)
         self._deflection[0] = def_x
         self._slope[0] = slope_x
@@ -2088,21 +2376,29 @@ class Beam3D(Beam):
         # Finding deflection along y-axis and slope across z-axis. System of equation involved:
         # 1: Derivative(E*I_z*Derivative(theta_z(x), x), x) + G*A*(Derivative(defl_y(x), x) - theta_z(x)) + moment_z = 0
         # 2: Derivative(G*A*(Derivative(defl_y(x), x) - theta_z(x)), x) + load_y = 0
-        C_i = Symbol('C_i')
+        C_i = Symbol("C_i")
         # Substitute value of `G*A*(Derivative(defl_y(x), x) - theta_z(x))` from (2) in (1)
-        eq1 = Derivative(E*I_z*Derivative(theta(x), x), x) + (integrate(-load[1], x) + C_i) + moment[2]
+        eq1 = (
+            Derivative(E * I_z * Derivative(theta(x), x), x)
+            + (integrate(-load[1], x) + C_i)
+            + moment[2]
+        )
         slope_z = dsolve(Eq(eq1, 0)).args[1]
 
         # Solve for constants originated from using dsolve on eq1
-        constants = list((linsolve([slope_z.subs(x, 0), slope_z.subs(x, l)], C1, C2).args)[0])
-        slope_z = slope_z.subs({C1:constants[0], C2:constants[1]})
+        constants = list(
+            (linsolve([slope_z.subs(x, 0), slope_z.subs(x, l)], C1, C2).args)[0]
+        )
+        slope_z = slope_z.subs({C1: constants[0], C2: constants[1]})
 
         # Put value of slope obtained back in (2) to solve for `C_i` and find deflection across y-axis
-        eq2 = G*A*(Derivative(defl(x), x)) + load[1]*x - C_i - G*A*slope_z
+        eq2 = G * A * (Derivative(defl(x), x)) + load[1] * x - C_i - G * A * slope_z
         def_y = dsolve(Eq(eq2, 0), defl(x)).args[1]
         # Solve for constants originated from using dsolve on eq2
-        constants = list((linsolve([def_y.subs(x, 0), def_y.subs(x, l)], C1, C_i).args)[0])
-        self._deflection[1] = def_y.subs({C1:constants[0], C_i:constants[1]})
+        constants = list(
+            (linsolve([def_y.subs(x, 0), def_y.subs(x, l)], C1, C_i).args)[0]
+        )
+        self._deflection[1] = def_y.subs({C1: constants[0], C_i: constants[1]})
         self._slope[2] = slope_z.subs(C_i, constants[1])
 
         # Finding deflection along z-axis and slope across y-axis. System of equation involved:
@@ -2110,18 +2406,26 @@ class Beam3D(Beam):
         # 2: Derivative(G*A*(Derivative(defl_z(x), x) + theta_y(x)), x) + load_z = 0
 
         # Substitute value of `G*A*(Derivative(defl_y(x), x) + theta_z(x))` from (2) in (1)
-        eq1 = Derivative(E*I_y*Derivative(theta(x), x), x) + (integrate(load[2], x) - C_i) + moment[1]
+        eq1 = (
+            Derivative(E * I_y * Derivative(theta(x), x), x)
+            + (integrate(load[2], x) - C_i)
+            + moment[1]
+        )
         slope_y = dsolve(Eq(eq1, 0)).args[1]
         # Solve for constants originated from using dsolve on eq1
-        constants = list((linsolve([slope_y.subs(x, 0), slope_y.subs(x, l)], C1, C2).args)[0])
-        slope_y = slope_y.subs({C1:constants[0], C2:constants[1]})
+        constants = list(
+            (linsolve([slope_y.subs(x, 0), slope_y.subs(x, l)], C1, C2).args)[0]
+        )
+        slope_y = slope_y.subs({C1: constants[0], C2: constants[1]})
 
         # Put value of slope obtained back in (2) to solve for `C_i` and find deflection across z-axis
-        eq2 = G*A*(Derivative(defl(x), x)) + load[2]*x - C_i + G*A*slope_y
-        def_z = dsolve(Eq(eq2,0)).args[1]
+        eq2 = G * A * (Derivative(defl(x), x)) + load[2] * x - C_i + G * A * slope_y
+        def_z = dsolve(Eq(eq2, 0)).args[1]
         # Solve for constants originated from using dsolve on eq2
-        constants = list((linsolve([def_z.subs(x, 0), def_z.subs(x, l)], C1, C_i).args)[0])
-        self._deflection[2] = def_z.subs({C1:constants[0], C_i:constants[1]})
+        constants = list(
+            (linsolve([def_z.subs(x, 0), def_z.subs(x, l)], C1, C_i).args)[0]
+        )
+        self._deflection[2] = def_z.subs({C1: constants[0], C_i: constants[1]})
         self._slope[1] = slope_y.subs(C_i, constants[1])
 
     def slope(self):

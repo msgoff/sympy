@@ -3,11 +3,11 @@ from sympy.physics.vector import Vector, ReferenceFrame, Dyadic
 from sympy.testing.pytest import raises
 
 Vector.simp = True
-A = ReferenceFrame('A')
+A = ReferenceFrame("A")
 
 
 def test_output_type():
-    A = ReferenceFrame('A')
+    A = ReferenceFrame("A")
     v = A.x + A.y
     d = v | v
     zerov = Vector(0)

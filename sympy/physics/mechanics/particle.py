@@ -5,7 +5,7 @@ from sympy.physics.vector import Point
 
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
-__all__ = ['Particle']
+__all__ = ["Particle"]
 
 
 class Particle(object):
@@ -42,7 +42,7 @@ class Particle(object):
 
     def __init__(self, name, point, mass):
         if not isinstance(name, str):
-            raise TypeError('Supply a valid name.')
+            raise TypeError("Supply a valid name.")
         self._name = name
         self.mass = mass
         self.point = point
@@ -180,8 +180,7 @@ class Particle(object):
 
         """
 
-        return (self.mass / sympify(2) * self.point.vel(frame) &
-                self.point.vel(frame))
+        return self.mass / sympify(2) * self.point.vel(frame) & self.point.vel(frame)
 
     @property
     def potential_energy(self):
@@ -229,11 +228,13 @@ class Particle(object):
 
     def set_potential_energy(self, scalar):
         SymPyDeprecationWarning(
-                feature="Method sympy.physics.mechanics." +
-                    "Particle.set_potential_energy(self, scalar)",
-                useinstead="property sympy.physics.mechanics." +
-                    "Particle.potential_energy",
-                deprecated_since_version="1.5", issue=9800).warn()
+            feature="Method sympy.physics.mechanics."
+            + "Particle.set_potential_energy(self, scalar)",
+            useinstead="property sympy.physics.mechanics."
+            + "Particle.potential_energy",
+            deprecated_since_version="1.5",
+            issue=9800,
+        ).warn()
         self.potential_energy = scalar
 
     def parallel_axis(self, point, frame):
@@ -256,5 +257,5 @@ class Particle(object):
         """
         # circular import issue
         from sympy.physics.mechanics import inertia_of_point_mass
-        return inertia_of_point_mass(self.mass, self.point.pos_from(point),
-                                     frame)
+
+        return inertia_of_point_mass(self.mass, self.point.pos_from(point), frame)

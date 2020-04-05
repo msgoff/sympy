@@ -10,10 +10,13 @@ def _is_scalar(e):
     # sympify to set proper attributes
     e = sympify(e)
     if isinstance(e, Expr):
-        if (e.is_Integer or e.is_Float or
-            e.is_Rational or e.is_Number or
-            (e.is_Symbol and e.is_commutative)
-                ):
+        if (
+            e.is_Integer
+            or e.is_Float
+            or e.is_Rational
+            or e.is_Number
+            or (e.is_Symbol and e.is_commutative)
+        ):
             return True
 
     return False
@@ -44,13 +47,12 @@ def _cycle_permute(l):
     # create sublist of items with first item as min_item and last_item
     # in each of the sublist is item just before the next occurrence of
     # minitem in the cycle formed.
-    sublist = [[le[indices[i]:indices[i + 1]]] for i in
-               range(len(indices) - 1)]
+    sublist = [[le[indices[i] : indices[i + 1]]] for i in range(len(indices) - 1)]
 
     # we do comparison of strings by comparing elements
     # in each sublist
     idx = sublist.index(min(sublist))
-    ordered_l = le[indices[idx]:indices[idx] + len(l)]
+    ordered_l = le[indices[idx] : indices[idx] + len(l)]
 
     return ordered_l
 
@@ -99,6 +101,7 @@ class Tr(Expr):
     2
 
     """
+
     def __new__(cls, *args):
         """ Construct a Trace object.
 
@@ -110,24 +113,23 @@ class Tr(Expr):
         """
 
         # expect no indices,int or a tuple/list/Tuple
-        if (len(args) == 2):
+        if len(args) == 2:
             if not isinstance(args[1], (list, Tuple, tuple)):
                 indices = Tuple(args[1])
             else:
                 indices = Tuple(*args[1])
 
             expr = args[0]
-        elif (len(args) == 1):
+        elif len(args) == 1:
             indices = Tuple()
             expr = args[0]
         else:
-            raise ValueError("Arguments to Tr should be of form "
-                             "(expr[, [indices]])")
+            raise ValueError("Arguments to Tr should be of form " "(expr[, [indices]])")
 
         if isinstance(expr, Matrix):
             return expr.trace()
-        elif hasattr(expr, 'trace') and callable(expr.trace):
-            #for any objects that have trace() defined e.g numpy
+        elif hasattr(expr, "trace") and callable(expr.trace):
+            # for any objects that have trace() defined e.g numpy
             return expr.trace()
         elif isinstance(expr, Add):
             return Add(*[Tr(arg, indices) for arg in expr.args])
@@ -136,18 +138,17 @@ class Tr(Expr):
             if len(nc_part) == 0:
                 return Mul(*c_part)
             else:
-                obj = Expr.__new__(cls, Mul(*nc_part), indices )
-                #this check is needed to prevent cached instances
-                #being returned even if len(c_part)==0
-                return Mul(*c_part)*obj if len(c_part) > 0 else obj
+                obj = Expr.__new__(cls, Mul(*nc_part), indices)
+                # this check is needed to prevent cached instances
+                # being returned even if len(c_part)==0
+                return Mul(*c_part) * obj if len(c_part) > 0 else obj
         elif isinstance(expr, Pow):
-            if (_is_scalar(expr.args[0]) and
-                    _is_scalar(expr.args[1])):
+            if _is_scalar(expr.args[0]) and _is_scalar(expr.args[1]):
                 return expr
             else:
                 return Expr.__new__(cls, expr, indices)
         else:
-            if (_is_scalar(expr)):
+            if _is_scalar(expr):
                 return expr
 
             return Expr.__new__(cls, expr, indices)
@@ -165,7 +166,7 @@ class Tr(Expr):
         1
 
         """
-        if hasattr(self.args[0], '_eval_trace'):
+        if hasattr(self.args[0], "_eval_trace"):
             return self.args[0]._eval_trace(indices=self.args[1])
 
         return self
@@ -175,7 +176,7 @@ class Tr(Expr):
         # TODO : improve this implementation
         return True
 
-    #TODO: Review if the permute method is needed
+    # TODO: Review if the permute method is needed
     # and if it needs to return a new instance
     def permute(self, pos):
         """ Permute the arguments cyclically.
@@ -212,4 +213,4 @@ class Tr(Expr):
         else:
             args = [self.args[0]]
 
-        return tuple(args) + (self.args[1], )
+        return tuple(args) + (self.args[1],)

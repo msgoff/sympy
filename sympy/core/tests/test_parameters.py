@@ -3,6 +3,7 @@ from sympy.core.parameters import evaluate
 from sympy.core import Mul, Add, Pow, S
 from sympy import sqrt, oo
 
+
 def test_add():
     with evaluate(False):
         p = oo - oo
@@ -76,6 +77,7 @@ def test_add():
 
         assert S.One / x * x == Mul(S.One / x, x)
         assert x * S.One / x == Mul(x, S.One / x)
+
 
 def test_nested():
     with evaluate(False):

@@ -9,11 +9,12 @@ from sympy.utilities import public
 
 import math
 
+
 @public
 class IntegerRing(Ring, CharacteristicZero, SimpleDomain):
     """General class for integer rings. """
 
-    rep = 'ZZ'
+    rep = "ZZ"
 
     is_IntegerRing = is_ZZ = True
     is_Numerical = True
@@ -25,6 +26,7 @@ class IntegerRing(Ring, CharacteristicZero, SimpleDomain):
     def get_field(self):
         """Returns a field associated with ``self``. """
         from sympy.polys.domains import QQ
+
         return QQ
 
     def algebraic_field(self, *extension):

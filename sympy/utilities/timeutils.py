@@ -7,7 +7,7 @@ import math
 
 
 _scales = [1e0, 1e3, 1e6, 1e9]
-_units = [u's', u'ms', u'\N{GREEK SMALL LETTER MU}s', u'ns']
+_units = [u"s", u"ms", u"\N{GREEK SMALL LETTER MU}s", u"ns"]
 
 
 def timed(func, setup="pass", limit=None):
@@ -30,23 +30,26 @@ def timed(func, setup="pass", limit=None):
     else:
         order = 3
 
-    return (number, time, time*_scales[order], _units[order])
+    return (number, time, time * _scales[order], _units[order])
 
 
 # Code for doing inline timings of recursive algorithms.
 
+
 def __do_timings():
     import os
-    res = os.getenv('SYMPY_TIMINGS', '')
-    res = [x.strip() for x in res.split(',')]
+
+    res = os.getenv("SYMPY_TIMINGS", "")
+    res = [x.strip() for x in res.split(",")]
     return set(res)
+
 
 _do_timings = __do_timings()
 _timestack = None
 
 
 def _print_timestack(stack, level=1):
-    print('-'*level, '%.2f %s%s' % (stack[2], stack[0], stack[3]))
+    print("-" * level, "%.2f %s%s" % (stack[2], stack[0], stack[3]))
     for s in stack[1]:
         _print_timestack(s, level + 1)
 
@@ -59,6 +62,7 @@ def timethis(name):
 
         def wrapper(*args, **kwargs):
             from time import time
+
             global _timestack
             oldtimestack = _timestack
             _timestack = [func.func_name, [], 0, args]
@@ -73,5 +77,7 @@ def timethis(name):
                 _print_timestack(_timestack)
                 _timestack = None
             return r
+
         return wrapper
+
     return decorator

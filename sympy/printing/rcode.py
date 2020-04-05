@@ -20,7 +20,7 @@ from sympy.sets.fancysets import Range
 # dictionary mapping sympy function to (argument_conditions, C_function).
 # Used in RCodePrinter._print_Function(self)
 known_functions = {
-    #"Abs": [(lambda x: not x.is_integer, "fabs")],
+    # "Abs": [(lambda x: not x.is_integer, "fabs")],
     "Abs": "abs",
     "sin": "sin",
     "cos": "cos",
@@ -53,63 +53,65 @@ known_functions = {
 # These are the core reserved words in the R language. Taken from:
 # https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Reserved-words
 
-reserved_words = ['if',
-                  'else',
-                  'repeat',
-                  'while',
-                  'function',
-                  'for',
-                  'in',
-                  'next',
-                  'break',
-                  'TRUE',
-                  'FALSE',
-                  'NULL',
-                  'Inf',
-                  'NaN',
-                  'NA',
-                  'NA_integer_',
-                  'NA_real_',
-                  'NA_complex_',
-                  'NA_character_',
-                  'volatile']
+reserved_words = [
+    "if",
+    "else",
+    "repeat",
+    "while",
+    "function",
+    "for",
+    "in",
+    "next",
+    "break",
+    "TRUE",
+    "FALSE",
+    "NULL",
+    "Inf",
+    "NaN",
+    "NA",
+    "NA_integer_",
+    "NA_real_",
+    "NA_complex_",
+    "NA_character_",
+    "volatile",
+]
 
 
 class RCodePrinter(CodePrinter):
     """A printer to convert python expressions to strings of R code"""
+
     printmethod = "_rcode"
     language = "R"
 
     _default_settings = {
-        'order': None,
-        'full_prec': 'auto',
-        'precision': 15,
-        'user_functions': {},
-        'human': True,
-        'contract': True,
-        'dereference': set(),
-        'error_on_reserved': False,
-        'reserved_word_suffix': '_',
+        "order": None,
+        "full_prec": "auto",
+        "precision": 15,
+        "user_functions": {},
+        "human": True,
+        "contract": True,
+        "dereference": set(),
+        "error_on_reserved": False,
+        "reserved_word_suffix": "_",
     }  # type: Dict[str, Any]
     _operators = {
-       'and': '&',
-        'or': '|',
-       'not': '!',
+        "and": "&",
+        "or": "|",
+        "not": "!",
     }
 
-    _relationals = {
-    }  # type: Dict[str, str]
+    _relationals = {}  # type: Dict[str, str]
 
     def __init__(self, settings={}):
         CodePrinter.__init__(self, settings)
         self.known_functions = dict(known_functions)
-        userfuncs = settings.get('user_functions', {})
+        userfuncs = settings.get("user_functions", {})
         self.known_functions.update(userfuncs)
-        self._dereference = set(settings.get('dereference', []))
+        self._dereference = set(settings.get("dereference", []))
         self.reserved_words = set(reserved_words)
 
     def _rate_index_position(self, p):
-        return p*5
+        return p * 5
 
     def _get_statement(self, codestring):
         return "%s;" % codestring
@@ -135,10 +137,14 @@ class RCodePrinter(CodePrinter):
         loopstart = "for (%(var)s in %(start)s:%(end)s){"
         for i in indices:
             # R arrays start at 1 and end at dimension
-            open_lines.append(loopstart % {
-                'var': self._print(i.label),
-                'start': self._print(i.lower+1),
-                'end': self._print(i.upper + 1)})
+            open_lines.append(
+                loopstart
+                % {
+                    "var": self._print(i.label),
+                    "start": self._print(i.lower + 1),
+                    "end": self._print(i.upper + 1),
+                }
+            )
             close_lines.append("}")
         return open_lines, close_lines
 
@@ -147,20 +153,21 @@ class RCodePrinter(CodePrinter):
             return self._print_Function(expr)
         PREC = precedence(expr)
         if expr.exp == -1:
-            return '1.0/%s' % (self.parenthesize(expr.base, PREC))
+            return "1.0/%s" % (self.parenthesize(expr.base, PREC))
         elif expr.exp == 0.5:
-            return 'sqrt(%s)' % self._print(expr.base)
+            return "sqrt(%s)" % self._print(expr.base)
         else:
-            return '%s^%s' % (self.parenthesize(expr.base, PREC),
-                                 self.parenthesize(expr.exp, PREC))
-
+            return "%s^%s" % (
+                self.parenthesize(expr.base, PREC),
+                self.parenthesize(expr.exp, PREC),
+            )
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)
-        return '%d.0/%d.0' % (p, q)
+        return "%d.0/%d.0" % (p, q)
 
     def _print_Indexed(self, expr):
-        inds = [ self._print(i) for i in expr.indices ]
+        inds = [self._print(i) for i in expr.indices]
         return "%s[%s]" % (self._print(expr.base.label), ", ".join(inds))
 
     def _print_Idx(self, expr):
@@ -170,21 +177,22 @@ class RCodePrinter(CodePrinter):
         return "exp(1)"
 
     def _print_Pi(self, expr):
-        return 'pi'
+        return "pi"
 
     def _print_Infinity(self, expr):
-        return 'Inf'
+        return "Inf"
 
     def _print_NegativeInfinity(self, expr):
-        return '-Inf'
+        return "-Inf"
 
     def _print_Assignment(self, expr):
         from sympy.matrices.expressions.matexpr import MatrixSymbol
         from sympy.tensor.indexed import IndexedBase
+
         lhs = expr.lhs
         rhs = expr.rhs
         # We special case assignments that take multiple lines
-        #if isinstance(expr.rhs, Piecewise):
+        # if isinstance(expr.rhs, Piecewise):
         #    from sympy.functions.elementary.piecewise import Piecewise
         #    # Here we modify Piecewise so each expression is now
         #    # an Assignment, and then continue on the print.
@@ -195,7 +203,7 @@ class RCodePrinter(CodePrinter):
         #        conditions.append(c)
         #    temp = Piecewise(*zip(expressions, conditions))
         #    return self._print(temp)
-        #elif isinstance(lhs, MatrixSymbol):
+        # elif isinstance(lhs, MatrixSymbol):
         if isinstance(lhs, MatrixSymbol):
             # Here we form an Assignment for each element in the array,
             # printing each one.
@@ -205,8 +213,9 @@ class RCodePrinter(CodePrinter):
                 code0 = self._print(temp)
                 lines.append(code0)
             return "\n".join(lines)
-        elif self._settings["contract"] and (lhs.has(IndexedBase) or
-                rhs.has(IndexedBase)):
+        elif self._settings["contract"] and (
+            lhs.has(IndexedBase) or rhs.has(IndexedBase)
+        ):
             # Here we check if there is looping to be done, and if so
             # print the required loops.
             return self._doprint_loops(rhs, lhs)
@@ -221,25 +230,31 @@ class RCodePrinter(CodePrinter):
         if expr.args[-1].cond == True:
             last_line = "%s" % self._print(expr.args[-1].expr)
         else:
-            last_line = "ifelse(%s,%s,NA)" % (self._print(expr.args[-1].cond), self._print(expr.args[-1].expr))
-        code=last_line
+            last_line = "ifelse(%s,%s,NA)" % (
+                self._print(expr.args[-1].cond),
+                self._print(expr.args[-1].expr),
+            )
+        code = last_line
         for e, c in reversed(expr.args[:-1]):
-            code= "ifelse(%s,%s," % (self._print(c), self._print(e))+code+")"
-        return(code)
+            code = "ifelse(%s,%s," % (self._print(c), self._print(e)) + code + ")"
+        return code
 
     def _print_ITE(self, expr):
         from sympy.functions import Piecewise
+
         _piecewise = Piecewise((expr.args[1], expr.args[0]), (expr.args[2], True))
         return self._print(_piecewise)
 
     def _print_MatrixElement(self, expr):
-        return "{0}[{1}]".format(self.parenthesize(expr.parent, PRECEDENCE["Atom"],
-            strict=True), expr.j + expr.i*expr.parent.shape[1])
+        return "{0}[{1}]".format(
+            self.parenthesize(expr.parent, PRECEDENCE["Atom"], strict=True),
+            expr.j + expr.i * expr.parent.shape[1],
+        )
 
     def _print_Symbol(self, expr):
         name = super(RCodePrinter, self)._print_Symbol(expr)
         if expr in self._dereference:
-            return '(*{0})'.format(name)
+            return "(*{0})".format(name)
         else:
             return name
 
@@ -253,8 +268,10 @@ class RCodePrinter(CodePrinter):
         from sympy.functions.elementary.trigonometric import sin
         from sympy.core.relational import Ne
         from sympy.functions import Piecewise
+
         _piecewise = Piecewise(
-            (sin(expr.args[0]) / expr.args[0], Ne(expr.args[0], 0)), (1, True))
+            (sin(expr.args[0]) / expr.args[0], Ne(expr.args[0], 0)), (1, True)
+        )
         return self._print(_piecewise)
 
     def _print_AugmentedAssignment(self, expr):
@@ -270,36 +287,35 @@ class RCodePrinter(CodePrinter):
         else:
             raise NotImplementedError("Only iterable currently supported is Range")
         body = self._print(expr.body)
-        return ('for ({target} = {start}; {target} < {stop}; {target} += '
-                '{step}) {{\n{body}\n}}').format(target=target, start=start,
-                stop=stop, step=step, body=body)
-
+        return (
+            "for ({target} = {start}; {target} < {stop}; {target} += "
+            "{step}) {{\n{body}\n}}"
+        ).format(target=target, start=start, stop=stop, step=step, body=body)
 
     def indent_code(self, code):
         """Accepts a string of code or a list of code lines"""
 
         if isinstance(code, str):
             code_lines = self.indent_code(code.splitlines(True))
-            return ''.join(code_lines)
+            return "".join(code_lines)
 
         tab = "   "
-        inc_token = ('{', '(', '{\n', '(\n')
-        dec_token = ('}', ')')
+        inc_token = ("{", "(", "{\n", "(\n")
+        dec_token = ("}", ")")
 
-        code = [ line.lstrip(' \t') for line in code ]
+        code = [line.lstrip(" \t") for line in code]
 
-        increase = [ int(any(map(line.endswith, inc_token))) for line in code ]
-        decrease = [ int(any(map(line.startswith, dec_token)))
-                     for line in code ]
+        increase = [int(any(map(line.endswith, inc_token))) for line in code]
+        decrease = [int(any(map(line.startswith, dec_token))) for line in code]
 
         pretty = []
         level = 0
         for n, line in enumerate(code):
-            if line == '' or line == '\n':
+            if line == "" or line == "\n":
                 pretty.append(line)
                 continue
             level -= decrease[n]
-            pretty.append("%s%s" % (tab*level, line))
+            pretty.append("%s%s" % (tab * level, line))
             level += increase[n]
         return pretty
 

@@ -7,7 +7,7 @@ from sympy.core.sympify import _sympify
 from sympy.stats import variance, covariance
 from sympy.stats.rv import RandomSymbol, probability, expectation
 
-__all__ = ['Probability', 'Expectation', 'Variance', 'Covariance']
+__all__ = ["Probability", "Expectation", "Variance", "Covariance"]
 
 
 class Probability(Expr):
@@ -34,6 +34,7 @@ class Probability(Expr):
     >>> prob.evaluate_integral()
     sqrt(2)*(-sqrt(2)*sqrt(pi)*erf(sqrt(2)/2) + sqrt(2)*sqrt(pi))/(4*sqrt(pi))
     """
+
     def __new__(cls, prob, condition=None, **kwargs):
         prob = _sympify(prob)
         if condition is None:
@@ -128,7 +129,7 @@ class Expectation(Expr):
                     rv.append(a)
                 else:
                     nonrv.append(a)
-            return Mul(*nonrv)*Expectation(Mul(*rv), condition=condition)
+            return Mul(*nonrv) * Expectation(Mul(*rv), condition=condition)
 
         return self
 
@@ -146,16 +147,22 @@ class Expectation(Expr):
         symbol = rv.symbol
         if symbol.name[0].isupper():
             symbol = Symbol(symbol.name.lower())
-        else :
+        else:
             symbol = Symbol(symbol.name + "_1")
 
         if rv.pspace.is_Continuous:
-            return Integral(arg.replace(rv, symbol)*Probability(Eq(rv, symbol), condition), (symbol, rv.pspace.domain.set.inf, rv.pspace.domain.set.sup))
+            return Integral(
+                arg.replace(rv, symbol) * Probability(Eq(rv, symbol), condition),
+                (symbol, rv.pspace.domain.set.inf, rv.pspace.domain.set.sup),
+            )
         else:
             if rv.pspace.is_Finite:
                 raise NotImplementedError
             else:
-                return Sum(arg.replace(rv, symbol)*Probability(Eq(rv, symbol), condition), (symbol, rv.pspace.domain.set.inf, rv.pspace.set.sup))
+                return Sum(
+                    arg.replace(rv, symbol) * Probability(Eq(rv, symbol), condition),
+                    (symbol, rv.pspace.domain.set.inf, rv.pspace.set.sup),
+                )
 
     def _eval_rewrite_as_Integral(self, arg, condition=None, **kwargs):
         return expectation(arg, condition=condition, evaluate=False)
@@ -215,6 +222,7 @@ class Variance(Expr):
     2*Covariance(X, Y) + Variance(X) + Variance(Y)
 
     """
+
     def __new__(cls, arg, condition=None, **kwargs):
         arg = _sympify(arg)
         if condition is None:
@@ -240,7 +248,7 @@ class Variance(Expr):
                 if a.has(RandomSymbol):
                     rv.append(a)
             variances = Add(*map(lambda xv: Variance(xv, condition).doit(), rv))
-            map_to_covar = lambda x: 2*Covariance(*x, condition=condition).doit()
+            map_to_covar = lambda x: 2 * Covariance(*x, condition=condition).doit()
             covariances = Add(*map(map_to_covar, itertools.combinations(rv, 2)))
             return variances + covariances
         elif isinstance(arg, Mul):
@@ -250,18 +258,18 @@ class Variance(Expr):
                 if a.has(RandomSymbol):
                     rv.append(a)
                 else:
-                    nonrv.append(a**2)
+                    nonrv.append(a ** 2)
             if len(rv) == 0:
                 return S.Zero
-            return Mul(*nonrv)*Variance(Mul(*rv), condition)
+            return Mul(*nonrv) * Variance(Mul(*rv), condition)
 
         # this expression contains a RandomSymbol somehow:
         return self
 
     def _eval_rewrite_as_Expectation(self, arg, condition=None, **kwargs):
-            e1 = Expectation(arg**2, condition)
-            e2 = Expectation(arg, condition)**2
-            return e1 - e2
+        e1 = Expectation(arg ** 2, condition)
+        e2 = Expectation(arg, condition) ** 2
+        return e1 - e2
 
     def _eval_rewrite_as_Probability(self, arg, condition=None, **kwargs):
         return self.rewrite(Expectation).rewrite(Probability)
@@ -324,7 +332,7 @@ class Covariance(Expr):
         arg1 = _sympify(arg1)
         arg2 = _sympify(arg2)
 
-        if kwargs.pop('evaluate', global_parameters.evaluate):
+        if kwargs.pop("evaluate", global_parameters.evaluate):
             arg1, arg2 = sorted([arg1, arg2], key=default_sort_key)
 
         if condition is None:
@@ -356,8 +364,13 @@ class Covariance(Expr):
         coeff_rv_list1 = self._expand_single_argument(arg1.expand())
         coeff_rv_list2 = self._expand_single_argument(arg2.expand())
 
-        addends = [a*b*Covariance(*sorted([r1, r2], key=default_sort_key), condition=condition)
-                   for (a, r1) in coeff_rv_list1 for (b, r2) in coeff_rv_list2]
+        addends = [
+            a
+            * b
+            * Covariance(*sorted([r1, r2], key=default_sort_key), condition=condition)
+            for (a, r1) in coeff_rv_list1
+            for (b, r2) in coeff_rv_list2
+        ]
         return Add(*addends)
 
     @classmethod
@@ -391,8 +404,8 @@ class Covariance(Expr):
         return (Mul(*nonrv), Mul(*rv))
 
     def _eval_rewrite_as_Expectation(self, arg1, arg2, condition=None, **kwargs):
-        e1 = Expectation(arg1*arg2, condition)
-        e2 = Expectation(arg1, condition)*Expectation(arg2, condition)
+        e1 = Expectation(arg1 * arg2, condition)
+        e2 = Expectation(arg1, condition) * Expectation(arg2, condition)
         return e1 - e2
 
     def _eval_rewrite_as_Probability(self, arg1, arg2, condition=None, **kwargs):

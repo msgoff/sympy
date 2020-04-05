@@ -3,33 +3,48 @@
 from __future__ import print_function, division
 
 from sympy.polys.densearith import (
-    dup_neg, dmp_neg,
-    dup_sub, dmp_sub,
+    dup_neg,
+    dmp_neg,
+    dup_sub,
+    dmp_sub,
     dup_mul,
-    dup_quo, dmp_quo,
-    dup_mul_ground, dmp_mul_ground)
+    dup_quo,
+    dmp_quo,
+    dup_mul_ground,
+    dmp_mul_ground,
+)
 from sympy.polys.densebasic import (
     dup_strip,
-    dup_LC, dmp_ground_LC,
+    dup_LC,
+    dmp_ground_LC,
     dmp_zero_p,
     dmp_ground,
-    dup_degree, dmp_degree,
-    dmp_raise, dmp_inject,
-    dup_convert)
+    dup_degree,
+    dmp_degree,
+    dmp_raise,
+    dmp_inject,
+    dup_convert,
+)
 from sympy.polys.densetools import (
-    dup_diff, dmp_diff,
-    dup_shift, dmp_compose,
-    dup_monic, dmp_ground_monic,
-    dup_primitive, dmp_ground_primitive)
+    dup_diff,
+    dmp_diff,
+    dup_shift,
+    dmp_compose,
+    dup_monic,
+    dmp_ground_monic,
+    dup_primitive,
+    dmp_ground_primitive,
+)
 from sympy.polys.euclidtools import (
-    dup_inner_gcd, dmp_inner_gcd,
-    dup_gcd, dmp_gcd,
-    dmp_resultant)
-from sympy.polys.galoistools import (
-    gf_sqf_list, gf_sqf_part)
-from sympy.polys.polyerrors import (
-    MultivariatePolynomialError,
-    DomainError)
+    dup_inner_gcd,
+    dmp_inner_gcd,
+    dup_gcd,
+    dmp_gcd,
+    dmp_resultant,
+)
+from sympy.polys.galoistools import gf_sqf_list, gf_sqf_part
+from sympy.polys.polyerrors import MultivariatePolynomialError, DomainError
+
 
 def dup_sqf_p(f, K):
     """
@@ -191,7 +206,7 @@ def dup_gf_sqf_part(f, K):
 
 def dmp_gf_sqf_part(f, u, K):
     """Compute square-free part of ``f`` in ``GF(p)[X]``. """
-    raise NotImplementedError('multivariate polynomials over finite fields')
+    raise NotImplementedError("multivariate polynomials over finite fields")
 
 
 def dup_sqf_part(f, K):
@@ -275,7 +290,7 @@ def dup_gf_sqf_list(f, K, all=False):
 
 def dmp_gf_sqf_list(f, u, K, all=False):
     """Compute square-free decomposition of ``f`` in ``GF(p)[X]``. """
-    raise NotImplementedError('multivariate polynomials over finite fields')
+    raise NotImplementedError("multivariate polynomials over finite fields")
 
 
 def dup_sqf_list(f, K, all=False):
@@ -469,7 +484,9 @@ def dup_gff_list(f, K):
 
     """
     if not f:
-        raise ValueError("greatest factorial factorization doesn't exist for a zero polynomial")
+        raise ValueError(
+            "greatest factorial factorization doesn't exist for a zero polynomial"
+        )
 
     f = dup_monic(f, K)
 

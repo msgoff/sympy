@@ -15,7 +15,6 @@ from .expr import Expr
 from .parameters import global_parameters
 
 
-
 # internal marker to indicate:
 #   "there are still non-commutative objects -- don't forget to process them"
 class NC_Marker:
@@ -29,6 +28,8 @@ class NC_Marker:
 
 # Key for sorting commutative args in canonical order
 _args_sortkey = cmp_to_key(Basic.compare)
+
+
 def _mulsort(args):
     # in-place sorting of args
     args.sort(key=_args_sortkey)
@@ -189,6 +190,7 @@ class Mul(Expr, AssocOp):
 
         from sympy.calculus.util import AccumBounds
         from sympy.matrices.expressions import MatrixExpr
+
         rv = None
         if len(seq) == 2:
             a, b = seq
@@ -201,12 +203,12 @@ class Mul(Expr, AssocOp):
                 if b.is_Add:
                     if r is not S.One:  # 2-arg hack
                         # leave the Mul as a Mul
-                        rv = [cls(a*r, b, evaluate=False)], [], None
+                        rv = [cls(a * r, b, evaluate=False)], [], None
                     elif global_parameters.distribute and b.is_commutative:
                         r, b = b.as_coeff_Add()
                         bargs = [_keep_coeff(a, bi) for bi in Add.make_args(b)]
                         _addsort(bargs)
-                        ar = a*r
+                        ar = a * r
                         if ar:
                             bargs.insert(0, ar)
                         bargs = [Add._from_args(bargs)]
@@ -215,24 +217,24 @@ class Mul(Expr, AssocOp):
                 return rv
 
         # apply associativity, separate commutative part of seq
-        c_part = []         # out: commutative factors
-        nc_part = []        # out: non-commutative factors
+        c_part = []  # out: commutative factors
+        nc_part = []  # out: non-commutative factors
 
         nc_seq = []
 
-        coeff = S.One       # standalone term
-                            # e.g. 3 * ...
+        coeff = S.One  # standalone term
+        # e.g. 3 * ...
 
-        c_powers = []       # (base,exp)      n
-                            # e.g. (x,n) for x
+        c_powers = []  # (base,exp)      n
+        # e.g. (x,n) for x
 
-        num_exp = []        # (num-base, exp)           y
-                            # e.g.  (3, y)  for  ... * 3  * ...
+        num_exp = []  # (num-base, exp)           y
+        # e.g.  (3, y)  for  ... * 3  * ...
 
-        neg1e = S.Zero      # exponent on -1 extracted from Number-based Pow and I
+        neg1e = S.Zero  # exponent on -1 extracted from Number-based Pow and I
 
-        pnum_rat = {}       # (num-base, Rat-exp)          1/2
-                            # e.g.  (3, 1/2)  for  ... * 3     * ...
+        pnum_rat = {}  # (num-base, Rat-exp)          1/2
+        # e.g.  (3, 1/2)  for  ... * 3     * ...
 
         order_symbols = None
 
@@ -255,7 +257,7 @@ class Mul(Expr, AssocOp):
             # Mul([...])
             if o.is_Mul:
                 if o.is_commutative:
-                    seq.extend(o.args)    # XXX zerocopy?
+                    seq.extend(o.args)  # XXX zerocopy?
 
                 else:
                     # NCMul can have commutative parts as well
@@ -276,7 +278,9 @@ class Mul(Expr, AssocOp):
                 if o is S.NaN or coeff is S.ComplexInfinity and o.is_zero:
                     # we know for sure the result will be nan
                     return [S.NaN], [], None
-                elif coeff.is_Number or isinstance(coeff, AccumBounds):  # it could be zoo
+                elif coeff.is_Number or isinstance(
+                    coeff, AccumBounds
+                ):  # it could be zoo
                     coeff *= o
                     if coeff is S.NaN:
                         # we know for sure the result will be nan
@@ -315,7 +319,7 @@ class Mul(Expr, AssocOp):
                             if e.is_Integer:
                                 coeff *= Pow(b, e)  # it is an unevaluated power
                                 continue
-                            elif e.is_negative:    # also a sign of an unevaluated power
+                            elif e.is_negative:  # also a sign of an unevaluated power
                                 seq.append(Pow(b, e))
                                 continue
                             elif b.is_negative:
@@ -384,14 +388,13 @@ class Mul(Expr, AssocOp):
             common_b = {}  # b:e
             for b, e in c_powers:
                 co = e.as_coeff_Mul()
-                common_b.setdefault(b, {}).setdefault(
-                    co[1], []).append(co[0])
+                common_b.setdefault(b, {}).setdefault(co[1], []).append(co[0])
             for b, d in common_b.items():
                 for di, li in d.items():
                     d[di] = Add(*li)
             new_c_powers = []
             for b, e in common_b.items():
-                new_c_powers.extend([(b, c*t) for t, c in e.items()])
+                new_c_powers.extend([(b, c * t) for t, c in e.items()])
             return new_c_powers
 
         # in c_powers
@@ -428,9 +431,10 @@ class Mul(Expr, AssocOp):
             for b, e in c_powers:
                 if e.is_zero:
                     # canceling out infinities yields NaN
-                    if (b.is_Add or b.is_Mul) and any(infty in b.args
-                        for infty in (S.ComplexInfinity, S.Infinity,
-                                      S.NegativeInfinity)):
+                    if (b.is_Add or b.is_Mul) and any(
+                        infty in b.args
+                        for infty in (S.ComplexInfinity, S.Infinity, S.NegativeInfinity)
+                    ):
                         return [S.NaN], [], None
                     continue
                 if e is S.One:
@@ -452,8 +456,7 @@ class Mul(Expr, AssocOp):
                 new_c_powers.append((b, e))
             # there might have been a change, but unless the base
             # matches some other base, there is nothing to do
-            if changed and len(set(
-                    b for b, e in new_c_powers)) != len(new_c_powers):
+            if changed and len(set(b for b, e in new_c_powers)) != len(new_c_powers):
                 # start over again
                 c_part = []
                 c_powers = _gather(new_c_powers)
@@ -462,8 +465,8 @@ class Mul(Expr, AssocOp):
 
         #  x    x     x
         # 2  * 3  -> 6
-        inv_exp_dict = {}   # exp:Mul(num-bases)     x    x
-                            # e.g.  x:6  for  ... * 2  * 3  * ...
+        inv_exp_dict = {}  # exp:Mul(num-bases)     x    x
+        # e.g.  x:6  for  ... * 2  * 3  * ...
         for b, e in num_exp:
             inv_exp_dict.setdefault(e, []).append(b)
         for e, b in inv_exp_dict.items():
@@ -515,9 +518,9 @@ class Mul(Expr, AssocOp):
                             e = Rational(ep, e.q)
                         grow.append((g, e))
                     # update the jth item
-                    num_rat[j] = (bj/g, ej)
+                    num_rat[j] = (bj / g, ej)
                     # update bi that we are checking with
-                    bi = bi/g
+                    bi = bi / g
                     if bi is S.One:
                         break
             if bi is not S.One:
@@ -544,7 +547,7 @@ class Mul(Expr, AssocOp):
         # handle -1 and I
         if neg1e:
             # treat I as (-1)**(1/2) and compute -1's total exponent
-            p, q =  neg1e.as_numer_denom()
+            p, q = neg1e.as_numer_denom()
             # if the integer part is odd, extract -1
             n, p = divmod(p, q)
             if n % 2:
@@ -570,6 +573,7 @@ class Mul(Expr, AssocOp):
 
         # oo, -oo
         if (coeff is S.Infinity) or (coeff is S.NegativeInfinity):
+
             def _handle_for_oo(c_part, coeff_sign):
                 new_c_part = []
                 for t in c_part:
@@ -580,6 +584,7 @@ class Mul(Expr, AssocOp):
                         continue
                     new_c_part.append(t)
                 return new_c_part, coeff_sign
+
             c_part, coeff_sign = _handle_for_oo(c_part, 1)
             nc_part, coeff_sign = _handle_for_oo(nc_part, coeff_sign)
             coeff *= coeff_sign
@@ -591,10 +596,16 @@ class Mul(Expr, AssocOp):
             #   bounded_real + infinite_im
             #   infinite_real + infinite_im
             # and non-zero real or imaginary will not change that status.
-            c_part = [c for c in c_part if not (fuzzy_not(c.is_zero) and
-                                                c.is_extended_real is not None)]
-            nc_part = [c for c in nc_part if not (fuzzy_not(c.is_zero) and
-                                                  c.is_extended_real is not None)]
+            c_part = [
+                c
+                for c in c_part
+                if not (fuzzy_not(c.is_zero) and c.is_extended_real is not None)
+            ]
+            nc_part = [
+                c
+                for c in nc_part
+                if not (fuzzy_not(c.is_zero) and c.is_extended_real is not None)
+            ]
 
         # 0
         elif coeff.is_zero:
@@ -623,11 +634,17 @@ class Mul(Expr, AssocOp):
             c_part.insert(0, coeff)
 
         # we are done
-        if (global_parameters.distribute and not nc_part and len(c_part) == 2 and
-                c_part[0].is_Number and c_part[0].is_finite and c_part[1].is_Add):
+        if (
+            global_parameters.distribute
+            and not nc_part
+            and len(c_part) == 2
+            and c_part[0].is_Number
+            and c_part[0].is_finite
+            and c_part[1].is_Add
+        ):
             # 2*(1+a) -> 2 + 2 * a
             coeff = c_part[0]
-            c_part = [Add(*[coeff*f for f in c_part[1].args])]
+            c_part = [Add(*[coeff * f for f in c_part[1].args])]
 
         return c_part, nc_part, order_symbols
 
@@ -637,21 +654,25 @@ class Mul(Expr, AssocOp):
         cargs, nc = b.args_cnc(split_1=False)
 
         if e.is_Integer:
-            return Mul(*[Pow(b, e, evaluate=False) for b in cargs]) * \
-                Pow(Mul._from_args(nc), e, evaluate=False)
+            return Mul(*[Pow(b, e, evaluate=False) for b in cargs]) * Pow(
+                Mul._from_args(nc), e, evaluate=False
+            )
         if e.is_Rational and e.q == 2:
             from sympy.core.power import integer_nthroot
             from sympy.functions.elementary.complexes import sign
+
             if b.is_imaginary:
                 a = b.as_real_imag()[1]
                 if a.is_Rational:
-                    n, d = abs(a/2).as_numer_denom()
+                    n, d = abs(a / 2).as_numer_denom()
                     n, t = integer_nthroot(n, 2)
                     if t:
                         d, t = integer_nthroot(d, 2)
                         if t:
-                            r = sympify(n)/d
-                            return _unevaluated_Mul(r**e.p, (1 + sign(a)*S.ImaginaryUnit)**e.p)
+                            r = sympify(n) / d
+                            return _unevaluated_Mul(
+                                r ** e.p, (1 + sign(a) * S.ImaginaryUnit) ** e.p
+                            )
 
         p = Pow(b, e, evaluate=False)
 
@@ -686,12 +707,15 @@ class Mul(Expr, AssocOp):
         Convert self to an mpmath mpc if possible
         """
         from sympy.core.numbers import I, Float
+
         im_part, imag_unit = self.as_coeff_Mul()
         if not imag_unit == I:
             # ValueError may seem more reasonable but since it's a @property,
             # we need to use AttributeError to keep from confusing things like
             # hasattr.
-            raise AttributeError("Cannot convert Mul to mpc. Must be of the form Number*I")
+            raise AttributeError(
+                "Cannot convert Mul to mpc. Must be of the form Number*I"
+            )
 
         return (Float(0)._mpf_, Float(im_part)._mpf_)
 
@@ -754,9 +778,10 @@ class Mul(Expr, AssocOp):
     def as_coeff_mul(self, *deps, **kwargs):
         if deps:
             from sympy.utilities.iterables import sift
+
             l1, l2 = sift(self.args, lambda x: x.has(*deps), binary=True)
             return self._new_rawargs(*l2), tuple(l1)
-        rational = kwargs.pop('rational', True)
+        rational = kwargs.pop("rational", True)
         args = self.args
         if args[0].is_Number:
             if not rational or args[0].is_Rational:
@@ -783,6 +808,7 @@ class Mul(Expr, AssocOp):
 
     def as_real_imag(self, deep=True, **hints):
         from sympy import Abs, expand_mul, im, re
+
         other = []
         coeffr = []
         coeffi = []
@@ -792,12 +818,12 @@ class Mul(Expr, AssocOp):
             if i.is_zero:
                 coeffr.append(r)
             elif r.is_zero:
-                coeffi.append(i*S.ImaginaryUnit)
+                coeffi.append(i * S.ImaginaryUnit)
             elif a.is_commutative:
                 # search for complex conjugate pairs:
                 for i, x in enumerate(other):
                     if x == a.conjugate():
-                        coeffr.append(Abs(x)**2)
+                        coeffr.append(Abs(x) ** 2)
                         del other[i]
                         break
                 else:
@@ -808,7 +834,7 @@ class Mul(Expr, AssocOp):
             else:
                 other.append(a)
         m = self.func(*other)
-        if hints.get('ignore') == m:
+        if hints.get("ignore") == m:
             return
         if len(coeffi) % 2:
             imco = im(coeffi.pop(0))
@@ -817,22 +843,22 @@ class Mul(Expr, AssocOp):
         else:
             imco = S.Zero
         reco = self.func(*(coeffr + coeffi))
-        r, i = (reco*re(m), reco*im(m))
+        r, i = (reco * re(m), reco * im(m))
         if addterms == 1:
             if m == 1:
                 if imco.is_zero:
                     return (reco, S.Zero)
                 else:
-                    return (S.Zero, reco*imco)
+                    return (S.Zero, reco * imco)
             if imco is S.Zero:
                 return (r, i)
-            return (-imco*i, imco*r)
+            return (-imco * i, imco * r)
         addre, addim = expand_mul(addterms, deep=False).as_real_imag()
         if imco is S.Zero:
-            return (r*addre - i*addim, i*addre + r*addim)
+            return (r * addre - i * addim, i * addre + r * addim)
         else:
-            r, i = -imco*i, imco*r
-            return (r*addre - i*addim, r*addim + i*addre)
+            r, i = -imco * i, imco * r
+            return (r * addre - i * addim, r * addim + i * addre)
 
     @staticmethod
     def _expandsums(sums):
@@ -846,8 +872,8 @@ class Mul(Expr, AssocOp):
         if L == 1:
             return sums[0].args
         terms = []
-        left = Mul._expandsums(sums[:L//2])
-        right = Mul._expandsums(sums[L//2:])
+        left = Mul._expandsums(sums[: L // 2])
+        right = Mul._expandsums(sums[L // 2 :])
 
         terms = [Mul(a, b) for a in left for b in right]
         added = Add(*terms)
@@ -861,9 +887,8 @@ class Mul(Expr, AssocOp):
         expr = self
         n, d = fraction(expr)
         if d.is_Mul:
-            n, d = [i._eval_expand_mul(**hints) if i.is_Mul else i
-                for i in (n, d)]
-            expr = n/d
+            n, d = [i._eval_expand_mul(**hints) if i.is_Mul else i for i in (n, d)]
+            expr = n / d
             if not expr.is_Mul:
                 return expr
 
@@ -904,7 +929,9 @@ class Mul(Expr, AssocOp):
             if d:
                 # Note: reduce is used in step of Mul as Mul is unable to
                 # handle subtypes and operation priority:
-                terms.append(reduce(lambda x, y: x*y, (args[:i] + [d] + args[i + 1:]), S.One))
+                terms.append(
+                    reduce(lambda x, y: x * y, (args[:i] + [d] + args[i + 1 :]), S.One)
+                )
         return Add.fromiter(terms)
 
     @cacheit
@@ -913,6 +940,7 @@ class Mul(Expr, AssocOp):
         from sympy.ntheory.multinomial import multinomial_coefficients_iterator
         from .function import AppliedUndef
         from .symbol import Symbol, symbols, Dummy
+
         if not isinstance(s, AppliedUndef) and not isinstance(s, Symbol):
             # other types of s may not be well behaved, e.g.
             # (cos(x)*sin(y)).diff([[x, y, z]])
@@ -929,19 +957,22 @@ class Mul(Expr, AssocOp):
         kvals = symbols("k1:%i" % m, cls=Dummy)
         klast = n - sum(kvals)
         nfact = factorial(n)
-        e, l = (# better to use the multinomial?
-            nfact/prod(map(factorial, kvals))/factorial(klast)*\
-            prod([args[t].diff((s, kvals[t])) for t in range(m-1)])*\
-            args[-1].diff((s, Max(0, klast))),
-            [(k, 0, n) for k in kvals])
+        e, l = (  # better to use the multinomial?
+            nfact
+            / prod(map(factorial, kvals))
+            / factorial(klast)
+            * prod([args[t].diff((s, kvals[t])) for t in range(m - 1)])
+            * args[-1].diff((s, Max(0, klast))),
+            [(k, 0, n) for k in kvals],
+        )
         return Sum(e, *l)
 
     def _eval_difference_delta(self, n, step):
         from sympy.series.limitseq import difference_delta as dd
+
         arg0 = self.args[0]
         rest = Mul(*self.args[1:])
-        return (arg0.subs(n, n + step) * dd(rest, n, step) + dd(arg0, n, step) *
-                rest)
+        return arg0.subs(n, n + step) * dd(rest, n, step) + dd(arg0, n, step) * rest
 
     def _matches_simple(self, expr, repl_dict):
         # handle (w*3).matches('x*5') -> {w: x*5/3}
@@ -1017,8 +1048,9 @@ class Mul(Expr, AssocOp):
             if node.is_Wild:
                 Mul._matches_add_wildcard(wildcard_dict, state)
 
-            states_matches = Mul._matches_new_states(wildcard_dict, state,
-                                                     nodes, targets)
+            states_matches = Mul._matches_new_states(
+                wildcard_dict, state, nodes, targets
+            )
             if states_matches:
                 new_states, new_matches = states_matches
                 agenda.extend(new_states)
@@ -1053,20 +1085,22 @@ class Mul(Expr, AssocOp):
             return None
 
         if node.is_Wild:
-            match_attempt = Mul._matches_match_wilds(dictionary, node_ind,
-                                                     nodes, targets)
+            match_attempt = Mul._matches_match_wilds(
+                dictionary, node_ind, nodes, targets
+            )
             if match_attempt:
                 # If the same node has been matched before, don't return
                 # anything if the current match is diverging from the previous
                 # match
-                other_node_inds = Mul._matches_get_other_nodes(dictionary,
-                                                               nodes, node_ind)
+                other_node_inds = Mul._matches_get_other_nodes(
+                    dictionary, nodes, node_ind
+                )
                 for ind in other_node_inds:
                     other_begin, other_end = dictionary[ind]
                     curr_begin, curr_end = dictionary[node_ind]
 
-                    other_targets = targets[other_begin:other_end + 1]
-                    current_targets = targets[curr_begin:curr_end + 1]
+                    other_targets = targets[other_begin : other_end + 1]
+                    current_targets = targets[curr_begin : curr_end + 1]
 
                     for curr, other in zip(current_targets, other_targets):
                         if curr != other:
@@ -1100,7 +1134,7 @@ class Mul(Expr, AssocOp):
         """Determine matches of a wildcard with sub-expression in `target`."""
         wildcard = nodes[wildcard_ind]
         begin, end = dictionary[wildcard_ind]
-        terms = targets[begin:end + 1]
+        terms = targets[begin : end + 1]
         # TODO: Should this be self.func?
         mul = Mul(*terms) if len(terms) > 1 else terms[0]
         return wildcard.matches(mul)
@@ -1122,6 +1156,7 @@ class Mul(Expr, AssocOp):
         a symbol instead of sqrt(-1).
         """
         from .symbol import Dummy
+
         if lhs == rhs:
             return S.One
 
@@ -1132,12 +1167,13 @@ class Mul(Expr, AssocOp):
                 # the 0 to pass, we use __add__ directly.
                 return l.__add__(0) == r.evalf().__add__(0)
             return False
+
         if check(lhs, rhs) or check(rhs, lhs):
             return S.One
         if any(i.is_Pow or i.is_Mul for i in (lhs, rhs)):
             # gruntz and limit wants a literal I to not combine
             # with a power of -1
-            d = Dummy('I')
+            d = Dummy("I")
             _i = {S.ImaginaryUnit: d}
             i_ = {d: S.ImaginaryUnit}
             a = lhs.xreplace(_i).as_powers_dict()
@@ -1149,9 +1185,9 @@ class Mul(Expr, AssocOp):
                     if not a[bi]:
                         a.pop(bi)
             if len(b) != blen:
-                lhs = Mul(*[k**v for k, v in a.items()]).xreplace(i_)
-                rhs = Mul(*[k**v for k, v in b.items()]).xreplace(i_)
-        return lhs/rhs
+                lhs = Mul(*[k ** v for k, v in a.items()]).xreplace(i_)
+                rhs = Mul(*[k ** v for k, v in b.items()]).xreplace(i_)
+        return lhs / rhs
 
     def as_powers_dict(self):
         d = defaultdict(int)
@@ -1192,7 +1228,8 @@ class Mul(Expr, AssocOp):
         return all(term._eval_is_algebraic_expr(syms) for term in self.args)
 
     _eval_is_commutative = lambda self: _fuzzy_group(
-        a.is_commutative for a in self.args)
+        a.is_commutative for a in self.args
+    )
 
     def _eval_is_complex(self):
         comp = _fuzzy_group((a.is_complex for a in self.args))
@@ -1263,8 +1300,7 @@ class Mul(Expr, AssocOp):
 
     def _eval_is_polar(self):
         has_polar = any(arg.is_polar for arg in self.args)
-        return has_polar and \
-            all(arg.is_polar or arg.is_positive for arg in self.args)
+        return has_polar and all(arg.is_polar or arg.is_positive for arg in self.args)
 
     def _eval_is_extended_real(self):
         return self._eval_real_imag(True)
@@ -1369,7 +1405,9 @@ class Mul(Expr, AssocOp):
             if a:
                 others = list(self.args)
                 others.remove(t)
-                if all((x.is_rational and fuzzy_not(x.is_zero)) is True for x in others):
+                if all(
+                    (x.is_rational and fuzzy_not(x.is_zero)) is True for x in others
+                ):
                     return True
                 return
             if a is None:
@@ -1470,11 +1508,11 @@ class Mul(Expr, AssocOp):
         If there are more than one of such a symbol then the result is composite.
         Else, the result cannot be determined.
         """
-        number_of_args = 0 # count of symbols with minimum value greater than one
+        number_of_args = 0  # count of symbols with minimum value greater than one
         for arg in self.args:
             if not (arg.is_integer and arg.is_positive):
                 return None
-            if (arg-1).is_positive:
+            if (arg - 1).is_positive:
                 number_of_args += 1
 
         if number_of_args > 1:
@@ -1501,6 +1539,7 @@ class Mul(Expr, AssocOp):
             # a -1 base (see issue 6421); all we want here are the
             # true Pow or exp separated into base and exponent
             from sympy import exp
+
             if a.is_Pow or isinstance(a, exp):
                 return a.as_base_exp()
             return a, S.One
@@ -1518,7 +1557,7 @@ class Mul(Expr, AssocOp):
                 (b, e) = base_exp(a)
                 if e is not S.One:
                     (co, _) = e.as_coeff_mul()
-                    b = Pow(b, e/co)
+                    b = Pow(b, e / co)
                     e = co
                 if a.is_commutative:
                     c[b] += e
@@ -1534,7 +1573,7 @@ class Mul(Expr, AssocOp):
             """
 
             (b, e) = base_exp(b)
-            return Pow(b, e*co)
+            return Pow(b, e * co)
 
         def ndiv(a, b):
             """if b divides a in an extractive way (like 1/4 divides 1/2
@@ -1542,7 +1581,7 @@ class Mul(Expr, AssocOp):
             the integer number of times it divides, else return 0.
             """
             if not b.q % a.q or not a.q % b.q:
-                return int(a/b)
+                return int(a / b)
             return 0
 
         # give Muls in the denominator a chance to be changed (see issue 5651)
@@ -1551,7 +1590,7 @@ class Mul(Expr, AssocOp):
         n, d = fraction(self)
         self2 = self
         if d is not S.One:
-            self2 = n._subs(old, new)/d._subs(old, new)
+            self2 = n._subs(old, new) / d._subs(old, new)
             if not self2.is_Mul:
                 return self2._subs(old, new)
             if self2 != self:
@@ -1591,7 +1630,7 @@ class Mul(Expr, AssocOp):
                 c[co_old] += mult
             else:
                 c[co_old] = mult
-            co_residual = co_self/co_old**mult
+            co_residual = co_self / co_old ** mult
         else:
             co_residual = 1
 
@@ -1663,15 +1702,15 @@ class Mul(Expr, AssocOp):
                         if take == 1:
                             if cdid:
                                 ndo = min(cdid, ndo)
-                            nc[i] = Pow(new, ndo)*rejoin(nc[i][0],
-                                    nc[i][1] - ndo*old_nc[0][1])
+                            nc[i] = Pow(new, ndo) * rejoin(
+                                nc[i][0], nc[i][1] - ndo * old_nc[0][1]
+                            )
                         else:
                             ndo = 1
 
                             # the left residual
 
-                            l = rejoin(nc[i][0], nc[i][1] - ndo*
-                                    old_nc[0][1])
+                            l = rejoin(nc[i][0], nc[i][1] - ndo * old_nc[0][1])
 
                             # eliminate all middle terms
 
@@ -1680,19 +1719,18 @@ class Mul(Expr, AssocOp):
                             # the right residual (which may be the same as the middle if take == 2)
 
                             ir = i + take - 1
-                            r = (nc[ir][0], nc[ir][1] - ndo*
-                                 old_nc[-1][1])
+                            r = (nc[ir][0], nc[ir][1] - ndo * old_nc[-1][1])
                             if r[1]:
                                 if i + take < len(nc):
-                                    nc[i:i + take] = [l*mid, r]
+                                    nc[i : i + take] = [l * mid, r]
                                 else:
                                     r = rejoin(*r)
-                                    nc[i:i + take] = [l*mid*r]
+                                    nc[i : i + take] = [l * mid * r]
                             else:
 
                                 # there was nothing left on the right
 
-                                nc[i:i + take] = [l*mid]
+                                nc[i : i + take] = [l * mid]
 
                         limit -= ndo
                         ncdid += ndo
@@ -1731,7 +1769,7 @@ class Mul(Expr, AssocOp):
 
                 # calculate the new exponent
 
-                e = c[b] - old_c[b]*do
+                e = c[b] - old_c[b] * do
                 margs.append(rejoin(b, e))
             else:
                 margs.append(rejoin(b.subs(old, new), c[b]))
@@ -1742,14 +1780,15 @@ class Mul(Expr, AssocOp):
             # rest of this routine
 
             margs = [Pow(new, cdid)] + margs
-        return co_residual*self2.func(*margs)*self2.func(*nc)
+        return co_residual * self2.func(*margs) * self2.func(*nc)
 
     def _eval_nseries(self, x, n, logx):
         from sympy import Order, powsimp
+
         terms = [t.nseries(x, n=n, logx=logx) for t in self.args]
-        res = powsimp(self.func(*terms).expand(), combine='exp', deep=True)
+        res = powsimp(self.func(*terms).expand(), combine="exp", deep=True)
         if res.has(Order):
-            res += Order(x**n, x)
+            res += Order(x ** n, x)
         return res
 
     def _eval_as_leading_term(self, x):
@@ -1876,7 +1915,7 @@ def _keep_coeff(coeff, factors, clear=True, sign=False):
         if factors.is_Number:
             factors, coeff = coeff, factors
         else:
-            return coeff*factors
+            return coeff * factors
     if coeff is S.One:
         return factors
     elif coeff is S.NegativeOne and not sign:
@@ -1886,9 +1925,9 @@ def _keep_coeff(coeff, factors, clear=True, sign=False):
             q = S(coeff.q)
             for i in factors.args:
                 c, t = i.as_coeff_Mul()
-                r = c/q
+                r = c / q
                 if r == int(r):
-                    return coeff*factors
+                    return coeff * factors
         return Mul(coeff, factors, evaluate=False)
     elif factors.is_Mul:
         margs = list(factors.args)
@@ -1900,17 +1939,19 @@ def _keep_coeff(coeff, factors, clear=True, sign=False):
             margs.insert(0, coeff)
         return Mul._from_args(margs)
     else:
-        return coeff*factors
+        return coeff * factors
 
 
 def expand_2arg(e):
     from sympy.simplify.simplify import bottom_up
+
     def do(e):
         if e.is_Mul:
             c, r = e.as_coeff_Mul()
             if c.is_Number and r.is_Add:
-                return _unevaluated_Add(*[c*ri for ri in r.args])
+                return _unevaluated_Add(*[c * ri for ri in r.args])
         return e
+
     return bottom_up(e, do)
 
 

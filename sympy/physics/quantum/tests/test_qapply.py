@@ -21,7 +21,7 @@ z = JzKet(1, 0)
 po = JzKet(1, 1)
 mo = JzKet(1, -1)
 
-A = Operator('A')
+A = Operator("A")
 
 
 class Foo(Operator):
@@ -30,32 +30,37 @@ class Foo(Operator):
 
 
 def test_basic():
-    assert qapply(Jz*po) == hbar*po
-    assert qapply(Jx*z) == hbar*po/sqrt(2) + hbar*mo/sqrt(2)
-    assert qapply((Jplus + Jminus)*z/sqrt(2)) == hbar*po + hbar*mo
-    assert qapply(Jz*(po + mo)) == hbar*po - hbar*mo
-    assert qapply(Jz*po + Jz*mo) == hbar*po - hbar*mo
-    assert qapply(Jminus*Jminus*po) == 2*hbar**2*mo
-    assert qapply(Jplus**2*mo) == 2*hbar**2*po
-    assert qapply(Jplus**2*Jminus**2*po) == 4*hbar**4*po
+    assert qapply(Jz * po) == hbar * po
+    assert qapply(Jx * z) == hbar * po / sqrt(2) + hbar * mo / sqrt(2)
+    assert qapply((Jplus + Jminus) * z / sqrt(2)) == hbar * po + hbar * mo
+    assert qapply(Jz * (po + mo)) == hbar * po - hbar * mo
+    assert qapply(Jz * po + Jz * mo) == hbar * po - hbar * mo
+    assert qapply(Jminus * Jminus * po) == 2 * hbar ** 2 * mo
+    assert qapply(Jplus ** 2 * mo) == 2 * hbar ** 2 * po
+    assert qapply(Jplus ** 2 * Jminus ** 2 * po) == 4 * hbar ** 4 * po
 
 
 def test_extra():
-    extra = z.dual*A*z
-    assert qapply(Jz*po*extra) == hbar*po*extra
-    assert qapply(Jx*z*extra) == (hbar*po/sqrt(2) + hbar*mo/sqrt(2))*extra
-    assert qapply(
-        (Jplus + Jminus)*z/sqrt(2)*extra) == hbar*po*extra + hbar*mo*extra
-    assert qapply(Jz*(po + mo)*extra) == hbar*po*extra - hbar*mo*extra
-    assert qapply(Jz*po*extra + Jz*mo*extra) == hbar*po*extra - hbar*mo*extra
-    assert qapply(Jminus*Jminus*po*extra) == 2*hbar**2*mo*extra
-    assert qapply(Jplus**2*mo*extra) == 2*hbar**2*po*extra
-    assert qapply(Jplus**2*Jminus**2*po*extra) == 4*hbar**4*po*extra
+    extra = z.dual * A * z
+    assert qapply(Jz * po * extra) == hbar * po * extra
+    assert qapply(Jx * z * extra) == (hbar * po / sqrt(2) + hbar * mo / sqrt(2)) * extra
+    assert (
+        qapply((Jplus + Jminus) * z / sqrt(2) * extra)
+        == hbar * po * extra + hbar * mo * extra
+    )
+    assert qapply(Jz * (po + mo) * extra) == hbar * po * extra - hbar * mo * extra
+    assert (
+        qapply(Jz * po * extra + Jz * mo * extra)
+        == hbar * po * extra - hbar * mo * extra
+    )
+    assert qapply(Jminus * Jminus * po * extra) == 2 * hbar ** 2 * mo * extra
+    assert qapply(Jplus ** 2 * mo * extra) == 2 * hbar ** 2 * po * extra
+    assert qapply(Jplus ** 2 * Jminus ** 2 * po * extra) == 4 * hbar ** 4 * po * extra
 
 
 def test_innerproduct():
-    assert qapply(po.dual*Jz*po, ip_doit=False) == hbar*(po.dual*po)
-    assert qapply(po.dual*Jz*po) == hbar
+    assert qapply(po.dual * Jz * po, ip_doit=False) == hbar * (po.dual * po)
+    assert qapply(po.dual * Jz * po) == hbar
 
 
 def test_zero():
@@ -64,22 +69,22 @@ def test_zero():
 
 
 def test_commutator():
-    assert qapply(Commutator(Jx, Jy)*Jz*po) == I*hbar**3*po
-    assert qapply(Commutator(J2, Jz)*Jz*po) == 0
-    assert qapply(Commutator(Jz, Foo('F'))*po) == 0
-    assert qapply(Commutator(Foo('F'), Jz)*po) == 0
+    assert qapply(Commutator(Jx, Jy) * Jz * po) == I * hbar ** 3 * po
+    assert qapply(Commutator(J2, Jz) * Jz * po) == 0
+    assert qapply(Commutator(Jz, Foo("F")) * po) == 0
+    assert qapply(Commutator(Foo("F"), Jz) * po) == 0
 
 
 def test_anticommutator():
-    assert qapply(AntiCommutator(Jz, Foo('F'))*po) == 2*hbar*po
-    assert qapply(AntiCommutator(Foo('F'), Jz)*po) == 2*hbar*po
+    assert qapply(AntiCommutator(Jz, Foo("F")) * po) == 2 * hbar * po
+    assert qapply(AntiCommutator(Foo("F"), Jz) * po) == 2 * hbar * po
 
 
 def test_outerproduct():
-    e = Jz*(mo*po.dual)*Jz*po
-    assert qapply(e) == -hbar**2*mo
-    assert qapply(e, ip_doit=False) == -hbar**2*(po.dual*po)*mo
-    assert qapply(e).doit() == -hbar**2*mo
+    e = Jz * (mo * po.dual) * Jz * po
+    assert qapply(e) == -(hbar ** 2) * mo
+    assert qapply(e, ip_doit=False) == -(hbar ** 2) * (po.dual * po) * mo
+    assert qapply(e).doit() == -(hbar ** 2) * mo
 
 
 def test_tensorproduct():
@@ -92,35 +97,37 @@ def test_tensorproduct():
     bra2 = TensorProduct(BosonFockBra(1), BosonFockBra(2))
     assert qapply(TensorProduct(a, b ** 2) * ket1) == sqrt(2) * ket2
     assert qapply(TensorProduct(a, Dagger(b) * b) * ket1) == 2 * ket3
-    assert qapply(bra1 * TensorProduct(a, b * b),
-                  dagger=True) == sqrt(2) * bra2
+    assert qapply(bra1 * TensorProduct(a, b * b), dagger=True) == sqrt(2) * bra2
     assert qapply(bra2 * ket1).doit() == TensorProduct(1, 1)
     assert qapply(TensorProduct(a, b * b) * ket1) == sqrt(2) * ket2
-    assert qapply(Dagger(TensorProduct(a, b * b) * ket1),
-                  dagger=True) == sqrt(2) * Dagger(ket2)
+    assert qapply(Dagger(TensorProduct(a, b * b) * ket1), dagger=True) == sqrt(
+        2
+    ) * Dagger(ket2)
 
 
 def test_dagger():
-    lhs = Dagger(Qubit(0))*Dagger(H(0))
-    rhs = Dagger(Qubit(1))/sqrt(2) + Dagger(Qubit(0))/sqrt(2)
+    lhs = Dagger(Qubit(0)) * Dagger(H(0))
+    rhs = Dagger(Qubit(1)) / sqrt(2) + Dagger(Qubit(0)) / sqrt(2)
     assert qapply(lhs, dagger=True) == rhs
 
 
 def test_issue_6073():
-    x, y = symbols('x y', commutative=False)
+    x, y = symbols("x y", commutative=False)
     A = Ket(x, y)
-    B = Operator('B')
+    B = Operator("B")
     assert qapply(A) == A
-    assert qapply(A.dual*B) == A.dual*B
+    assert qapply(A.dual * B) == A.dual * B
 
 
 def test_density():
-    d = Density([Jz*mo, 0.5], [Jz*po, 0.5])
-    assert qapply(d) == Density([-hbar*mo, 0.5], [hbar*po, 0.5])
+    d = Density([Jz * mo, 0.5], [Jz * po, 0.5])
+    assert qapply(d) == Density([-hbar * mo, 0.5], [hbar * po, 0.5])
 
 
 def test_issue3044():
-    expr1 = TensorProduct(Jz*JzKet(S(2),S.NegativeOne)/sqrt(2), Jz*JzKet(S.Half,S.Half))
-    result = Mul(S.NegativeOne, Rational(1, 4), 2**S.Half, hbar**2)
-    result *= TensorProduct(JzKet(2,-1), JzKet(S.Half,S.Half))
+    expr1 = TensorProduct(
+        Jz * JzKet(S(2), S.NegativeOne) / sqrt(2), Jz * JzKet(S.Half, S.Half)
+    )
+    result = Mul(S.NegativeOne, Rational(1, 4), 2 ** S.Half, hbar ** 2)
+    result *= TensorProduct(JzKet(2, -1), JzKet(S.Half, S.Half))
     assert qapply(expr1) == result

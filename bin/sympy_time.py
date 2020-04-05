@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import time
 from get_sympy import path_hack
+
 path_hack()
 
 seen = set()
@@ -29,6 +30,7 @@ def new_import(name, globals={}, locals={}, fromlist=[]):
     elapsed_times[name] = t2 - t1
     return module
 
+
 old_import = __builtins__.__import__
 
 __builtins__.__import__ = new_import
@@ -42,8 +44,7 @@ for name, level, parent in import_order:
 
 print("== Tree ==")
 for name, level, parent in import_order:
-    print("%s%s: %.3f (%s)" % (" "*level, name, elapsed_times.get(name, 0),
-            parent))
+    print("%s%s: %.3f (%s)" % (" " * level, name, elapsed_times.get(name, 0), parent))
 
 print("\n")
 print("== Slowest (including children) ==")

@@ -7,43 +7,48 @@ from sympy.matrices import eye, zeros
 from sympy.external import import_module
 
 __all__ = [
-    'numpy_ndarray',
-    'scipy_sparse_matrix',
-    'sympy_to_numpy',
-    'sympy_to_scipy_sparse',
-    'numpy_to_sympy',
-    'scipy_sparse_to_sympy',
-    'flatten_scalar',
-    'matrix_dagger',
-    'to_sympy',
-    'to_numpy',
-    'to_scipy_sparse',
-    'matrix_tensor_product',
-    'matrix_zeros'
+    "numpy_ndarray",
+    "scipy_sparse_matrix",
+    "sympy_to_numpy",
+    "sympy_to_scipy_sparse",
+    "numpy_to_sympy",
+    "scipy_sparse_to_sympy",
+    "flatten_scalar",
+    "matrix_dagger",
+    "to_sympy",
+    "to_numpy",
+    "to_scipy_sparse",
+    "matrix_tensor_product",
+    "matrix_zeros",
 ]
 
 # Conditionally define the base classes for numpy and scipy.sparse arrays
 # for use in isinstance tests.
 
-np = import_module('numpy')
+np = import_module("numpy")
 if not np:
+
     class numpy_ndarray(object):
         pass
+
+
 else:
     numpy_ndarray = np.ndarray  # type: ignore
 
-scipy = import_module('scipy', import_kwargs={'fromlist': ['sparse']})
+scipy = import_module("scipy", import_kwargs={"fromlist": ["sparse"]})
 if not scipy:
+
     class scipy_sparse_matrix(object):
         pass
+
     sparse = None
 else:
     sparse = scipy.sparse
     # Try to find spmatrix.
-    if hasattr(sparse, 'base'):
+    if hasattr(sparse, "base"):
         # Newer versions have it under scipy.sparse.base.
         scipy_sparse_matrix = sparse.base.spmatrix  # type: ignore
-    elif hasattr(sparse, 'sparse'):
+    elif hasattr(sparse, "sparse"):
         # Older versions have it under scipy.sparse.sparse.
         scipy_sparse_matrix = sparse.sparse.spmatrix  # type: ignore
 
@@ -52,26 +57,26 @@ def sympy_to_numpy(m, **options):
     """Convert a sympy Matrix/complex number to a numpy matrix or scalar."""
     if not np:
         raise ImportError
-    dtype = options.get('dtype', 'complex')
+    dtype = options.get("dtype", "complex")
     if isinstance(m, MatrixBase):
         return np.matrix(m.tolist(), dtype=dtype)
     elif isinstance(m, Expr):
         if m.is_Number or m.is_NumberSymbol or m == I:
             return complex(m)
-    raise TypeError('Expected MatrixBase or complex scalar, got: %r' % m)
+    raise TypeError("Expected MatrixBase or complex scalar, got: %r" % m)
 
 
 def sympy_to_scipy_sparse(m, **options):
     """Convert a sympy Matrix/complex number to a numpy matrix or scalar."""
     if not np or not sparse:
         raise ImportError
-    dtype = options.get('dtype', 'complex')
+    dtype = options.get("dtype", "complex")
     if isinstance(m, MatrixBase):
         return sparse.csr_matrix(np.matrix(m.tolist(), dtype=dtype))
     elif isinstance(m, Expr):
         if m.is_Number or m.is_NumberSymbol or m == I:
             return complex(m)
-    raise TypeError('Expected MatrixBase or complex scalar, got: %r' % m)
+    raise TypeError("Expected MatrixBase or complex scalar, got: %r" % m)
 
 
 def scipy_sparse_to_sympy(m, **options):
@@ -94,24 +99,24 @@ def to_sympy(m, **options):
         return scipy_sparse_to_sympy(m)
     elif isinstance(m, Expr):
         return m
-    raise TypeError('Expected sympy/numpy/scipy.sparse matrix, got: %r' % m)
+    raise TypeError("Expected sympy/numpy/scipy.sparse matrix, got: %r" % m)
 
 
 def to_numpy(m, **options):
     """Convert a sympy/scipy.sparse matrix to a numpy matrix."""
-    dtype = options.get('dtype', 'complex')
+    dtype = options.get("dtype", "complex")
     if isinstance(m, (MatrixBase, Expr)):
         return sympy_to_numpy(m, dtype=dtype)
     elif isinstance(m, numpy_ndarray):
         return m
     elif isinstance(m, scipy_sparse_matrix):
         return m.todense()
-    raise TypeError('Expected sympy/numpy/scipy.sparse matrix, got: %r' % m)
+    raise TypeError("Expected sympy/numpy/scipy.sparse matrix, got: %r" % m)
 
 
 def to_scipy_sparse(m, **options):
     """Convert a sympy/numpy matrix to a scipy.sparse matrix."""
-    dtype = options.get('dtype', 'complex')
+    dtype = options.get("dtype", "complex")
     if isinstance(m, (MatrixBase, Expr)):
         return sympy_to_scipy_sparse(m, dtype=dtype)
     elif isinstance(m, numpy_ndarray):
@@ -120,7 +125,7 @@ def to_scipy_sparse(m, **options):
         return sparse.csr_matrix(m)
     elif isinstance(m, scipy_sparse_matrix):
         return m
-    raise TypeError('Expected sympy/numpy/scipy.sparse matrix, got: %r' % m)
+    raise TypeError("Expected sympy/numpy/scipy.sparse matrix, got: %r" % m)
 
 
 def flatten_scalar(e):
@@ -140,7 +145,7 @@ def matrix_dagger(e):
         return e.H
     elif isinstance(e, (numpy_ndarray, scipy_sparse_matrix)):
         return e.conjugate().transpose()
-    raise TypeError('Expected sympy/numpy/scipy.sparse matrix, got: %r' % e)
+    raise TypeError("Expected sympy/numpy/scipy.sparse matrix, got: %r" % e)
 
 
 # TODO: Move this into sympy.matricies.
@@ -188,31 +193,31 @@ def _numpy_eye(n):
     """numpy version of complex eye."""
     if not np:
         raise ImportError
-    return np.matrix(np.eye(n, dtype='complex'))
+    return np.matrix(np.eye(n, dtype="complex"))
 
 
 def _scipy_sparse_eye(n):
     """scipy.sparse version of complex eye."""
     if not sparse:
         raise ImportError
-    return sparse.eye(n, n, dtype='complex')
+    return sparse.eye(n, n, dtype="complex")
 
 
 def matrix_eye(n, **options):
     """Get the version of eye and tensor_product for a given format."""
-    format = options.get('format', 'sympy')
-    if format == 'sympy':
+    format = options.get("format", "sympy")
+    if format == "sympy":
         return eye(n)
-    elif format == 'numpy':
+    elif format == "numpy":
         return _numpy_eye(n)
-    elif format == 'scipy.sparse':
+    elif format == "scipy.sparse":
         return _scipy_sparse_eye(n)
-    raise NotImplementedError('Invalid format: %r' % format)
+    raise NotImplementedError("Invalid format: %r" % format)
 
 
 def _numpy_zeros(m, n, **options):
     """numpy version of zeros."""
-    dtype = options.get('dtype', 'float64')
+    dtype = options.get("dtype", "float64")
     if not np:
         raise ImportError
     return np.zeros((m, n), dtype=dtype)
@@ -220,26 +225,26 @@ def _numpy_zeros(m, n, **options):
 
 def _scipy_sparse_zeros(m, n, **options):
     """scipy.sparse version of zeros."""
-    spmatrix = options.get('spmatrix', 'csr')
-    dtype = options.get('dtype', 'float64')
+    spmatrix = options.get("spmatrix", "csr")
+    dtype = options.get("dtype", "float64")
     if not sparse:
         raise ImportError
-    if spmatrix == 'lil':
+    if spmatrix == "lil":
         return sparse.lil_matrix((m, n), dtype=dtype)
-    elif spmatrix == 'csr':
+    elif spmatrix == "csr":
         return sparse.csr_matrix((m, n), dtype=dtype)
 
 
 def matrix_zeros(m, n, **options):
     """"Get a zeros matrix for a given format."""
-    format = options.get('format', 'sympy')
-    if format == 'sympy':
+    format = options.get("format", "sympy")
+    if format == "sympy":
         return zeros(m, n)
-    elif format == 'numpy':
+    elif format == "numpy":
         return _numpy_zeros(m, n, **options)
-    elif format == 'scipy.sparse':
+    elif format == "scipy.sparse":
         return _scipy_sparse_zeros(m, n, **options)
-    raise NotImplementedError('Invaild format: %r' % format)
+    raise NotImplementedError("Invaild format: %r" % format)
 
 
 def _numpy_matrix_to_zero(e):

@@ -12,7 +12,11 @@ from sympy.core import Rational
 from sympy.core.function import Function, ArgumentIndexError
 from sympy.core.singleton import S
 from sympy.core.symbol import Dummy
-from sympy.functions.combinatorial.factorials import binomial, factorial, RisingFactorial
+from sympy.functions.combinatorial.factorials import (
+    binomial,
+    factorial,
+    RisingFactorial,
+)
 from sympy.functions.elementary.complexes import re
 from sympy.functions.elementary.exponential import exp
 from sympy.functions.elementary.integers import floor
@@ -28,10 +32,10 @@ from sympy.polys.orthopolys import (
     chebyshevu_poly,
     laguerre_poly,
     hermite_poly,
-    legendre_poly
+    legendre_poly,
 )
 
-_x = Dummy('x')
+_x = Dummy("x")
 
 
 class OrthogonalPolynomial(Function):
@@ -46,7 +50,8 @@ class OrthogonalPolynomial(Function):
     def _eval_conjugate(self):
         return self.func(self.args[0], self.args[1].conjugate())
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # Jacobi polynomials
 #
 
@@ -142,28 +147,44 @@ class jacobi(OrthogonalPolynomial):
             elif a.is_zero:
                 return legendre(n, x)
             elif a == S.Half:
-                return RisingFactorial(3*S.Half, n) / factorial(n + 1) * chebyshevu(n, x)
+                return (
+                    RisingFactorial(3 * S.Half, n) / factorial(n + 1) * chebyshevu(n, x)
+                )
             else:
-                return RisingFactorial(a + 1, n) / RisingFactorial(2*a + 1, n) * gegenbauer(n, a + S.Half, x)
+                return (
+                    RisingFactorial(a + 1, n)
+                    / RisingFactorial(2 * a + 1, n)
+                    * gegenbauer(n, a + S.Half, x)
+                )
         elif b == -a:
             # P^{a, -a}_n(x)
-            return gamma(n + a + 1) / gamma(n + 1) * (1 + x)**(a/2) / (1 - x)**(a/2) * assoc_legendre(n, -a, x)
+            return (
+                gamma(n + a + 1)
+                / gamma(n + 1)
+                * (1 + x) ** (a / 2)
+                / (1 - x) ** (a / 2)
+                * assoc_legendre(n, -a, x)
+            )
 
         if not n.is_Number:
             # Symbolic result P^{a,b}_n(x)
             # P^{a,b}_n(-x)  --->  (-1)**n * P^{b,a}_n(-x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * jacobi(n, b, a, -x)
+                return S.NegativeOne ** n * jacobi(n, b, a, -x)
             # We can evaluate for some special values of x
             if x.is_zero:
-                return (2**(-n) * gamma(a + n + 1) / (gamma(a + 1) * factorial(n)) *
-                        hyper([-b - n, -n], [a + 1], -1))
+                return (
+                    2 ** (-n)
+                    * gamma(a + n + 1)
+                    / (gamma(a + 1) * factorial(n))
+                    * hyper([-b - n, -n], [a + 1], -1)
+                )
             if x == S.One:
                 return RisingFactorial(a + 1, n) / factorial(n)
             elif x is S.Infinity:
                 if n.is_positive:
                     # Make sure a+b+2*n \notin Z
-                    if (a + b + 2*n).is_integer:
+                    if (a + b + 2 * n).is_integer:
                         raise ValueError("Error. a + b + 2*n should not be an integer.")
                     return RisingFactorial(a + b + n + 1, n) * S.Infinity
         else:
@@ -172,6 +193,7 @@ class jacobi(OrthogonalPolynomial):
 
     def fdiff(self, argindex=4):
         from sympy import Sum
+
         if argindex == 1:
             # Diff wrt n
             raise ArgumentIndexError(self, argindex)
@@ -180,17 +202,27 @@ class jacobi(OrthogonalPolynomial):
             n, a, b, x = self.args
             k = Dummy("k")
             f1 = 1 / (a + b + n + k + 1)
-            f2 = ((a + b + 2*k + 1) * RisingFactorial(b + k + 1, n - k) /
-                  ((n - k) * RisingFactorial(a + b + k + 1, n - k)))
-            return Sum(f1 * (jacobi(n, a, b, x) + f2*jacobi(k, a, b, x)), (k, 0, n - 1))
+            f2 = (
+                (a + b + 2 * k + 1)
+                * RisingFactorial(b + k + 1, n - k)
+                / ((n - k) * RisingFactorial(a + b + k + 1, n - k))
+            )
+            return Sum(
+                f1 * (jacobi(n, a, b, x) + f2 * jacobi(k, a, b, x)), (k, 0, n - 1)
+            )
         elif argindex == 3:
             # Diff wrt b
             n, a, b, x = self.args
             k = Dummy("k")
             f1 = 1 / (a + b + n + k + 1)
-            f2 = (-1)**(n - k) * ((a + b + 2*k + 1) * RisingFactorial(a + k + 1, n - k) /
-                  ((n - k) * RisingFactorial(a + b + k + 1, n - k)))
-            return Sum(f1 * (jacobi(n, a, b, x) + f2*jacobi(k, a, b, x)), (k, 0, n - 1))
+            f2 = (-1) ** (n - k) * (
+                (a + b + 2 * k + 1)
+                * RisingFactorial(a + k + 1, n - k)
+                / ((n - k) * RisingFactorial(a + b + k + 1, n - k))
+            )
+            return Sum(
+                f1 * (jacobi(n, a, b, x) + f2 * jacobi(k, a, b, x)), (k, 0, n - 1)
+            )
         elif argindex == 4:
             # Diff wrt x
             n, a, b, x = self.args
@@ -200,12 +232,18 @@ class jacobi(OrthogonalPolynomial):
 
     def _eval_rewrite_as_polynomial(self, n, a, b, x, **kwargs):
         from sympy import Sum
+
         # Make sure n \in N
         if n.is_negative or n.is_integer is False:
             raise ValueError("Error: n should be a non-negative integer.")
         k = Dummy("k")
-        kern = (RisingFactorial(-n, k) * RisingFactorial(a + b + n + 1, k) * RisingFactorial(a + k + 1, n - k) /
-                factorial(k) * ((1 - x)/2)**k)
+        kern = (
+            RisingFactorial(-n, k)
+            * RisingFactorial(a + b + n + 1, k)
+            * RisingFactorial(a + k + 1, n - k)
+            / factorial(k)
+            * ((1 - x) / 2) ** k
+        )
         return 1 / factorial(n) * Sum(kern, (k, 0, n))
 
     def _eval_conjugate(self):
@@ -269,13 +307,17 @@ def jacobi_normalized(n, a, b, x):
     .. [3] http://functions.wolfram.com/Polynomials/JacobiP/
 
     """
-    nfactor = (S(2)**(a + b + 1) * (gamma(n + a + 1) * gamma(n + b + 1))
-               / (2*n + a + b + 1) / (factorial(n) * gamma(n + a + b + 1)))
+    nfactor = (
+        S(2) ** (a + b + 1)
+        * (gamma(n + a + 1) * gamma(n + b + 1))
+        / (2 * n + a + b + 1)
+        / (factorial(n) * gamma(n + a + b + 1))
+    )
 
     return jacobi(n, a, b, x) / sqrt(nfactor)
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Gegenbauer polynomials
 #
 
@@ -369,19 +411,27 @@ class gegenbauer(OrthogonalPolynomial):
                 if (re(a) > S.Half) == True:
                     return S.ComplexInfinity
                 else:
-                    return (cos(S.Pi*(a+n)) * sec(S.Pi*a) * gamma(2*a+n) /
-                                (gamma(2*a) * gamma(n+1)))
+                    return (
+                        cos(S.Pi * (a + n))
+                        * sec(S.Pi * a)
+                        * gamma(2 * a + n)
+                        / (gamma(2 * a) * gamma(n + 1))
+                    )
 
             # Symbolic result C^a_n(x)
             # C^a_n(-x)  --->  (-1)**n * C^a_n(x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * gegenbauer(n, a, -x)
+                return S.NegativeOne ** n * gegenbauer(n, a, -x)
             # We can evaluate for some special values of x
             if x.is_zero:
-                return (2**n * sqrt(S.Pi) * gamma(a + S.Half*n) /
-                        (gamma((1 - n)/2) * gamma(n + 1) * gamma(a)) )
+                return (
+                    2 ** n
+                    * sqrt(S.Pi)
+                    * gamma(a + S.Half * n)
+                    / (gamma((1 - n) / 2) * gamma(n + 1) * gamma(a))
+                )
             if x == S.One:
-                return gamma(2*a + n) / (gamma(2*a) * gamma(n + 1))
+                return gamma(2 * a + n) / (gamma(2 * a) * gamma(n + 1))
             elif x is S.Infinity:
                 if n.is_positive:
                     return RisingFactorial(a, n) * S.Infinity
@@ -391,6 +441,7 @@ class gegenbauer(OrthogonalPolynomial):
 
     def fdiff(self, argindex=3):
         from sympy import Sum
+
         if argindex == 1:
             # Diff wrt n
             raise ArgumentIndexError(self, argindex)
@@ -398,31 +449,37 @@ class gegenbauer(OrthogonalPolynomial):
             # Diff wrt a
             n, a, x = self.args
             k = Dummy("k")
-            factor1 = 2 * (1 + (-1)**(n - k)) * (k + a) / ((k +
-                           n + 2*a) * (n - k))
-            factor2 = 2*(k + 1) / ((k + 2*a) * (2*k + 2*a + 1)) + \
-                2 / (k + n + 2*a)
-            kern = factor1*gegenbauer(k, a, x) + factor2*gegenbauer(n, a, x)
+            factor1 = 2 * (1 + (-1) ** (n - k)) * (k + a) / ((k + n + 2 * a) * (n - k))
+            factor2 = 2 * (k + 1) / ((k + 2 * a) * (2 * k + 2 * a + 1)) + 2 / (
+                k + n + 2 * a
+            )
+            kern = factor1 * gegenbauer(k, a, x) + factor2 * gegenbauer(n, a, x)
             return Sum(kern, (k, 0, n - 1))
         elif argindex == 3:
             # Diff wrt x
             n, a, x = self.args
-            return 2*a*gegenbauer(n - 1, a + 1, x)
+            return 2 * a * gegenbauer(n - 1, a + 1, x)
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_polynomial(self, n, a, x, **kwargs):
         from sympy import Sum
+
         k = Dummy("k")
-        kern = ((-1)**k * RisingFactorial(a, n - k) * (2*x)**(n - 2*k) /
-                (factorial(k) * factorial(n - 2*k)))
-        return Sum(kern, (k, 0, floor(n/2)))
+        kern = (
+            (-1) ** k
+            * RisingFactorial(a, n - k)
+            * (2 * x) ** (n - 2 * k)
+            / (factorial(k) * factorial(n - 2 * k))
+        )
+        return Sum(kern, (k, 0, floor(n / 2)))
 
     def _eval_conjugate(self):
         n, a, x = self.args
         return self.func(n, a.conjugate(), x.conjugate())
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # Chebyshev polynomials of first and second kind
 #
 
@@ -502,7 +559,7 @@ class chebyshevt(OrthogonalPolynomial):
             # Symbolic result T_n(x)
             # T_n(-x)  --->  (-1)**n * T_n(x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * chebyshevt(n, -x)
+                return S.NegativeOne ** n * chebyshevt(n, -x)
             # T_{-n}(x)  --->  T_n(x)
             if n.could_extract_minus_sign():
                 return chebyshevt(-n, x)
@@ -534,9 +591,10 @@ class chebyshevt(OrthogonalPolynomial):
 
     def _eval_rewrite_as_polynomial(self, n, x, **kwargs):
         from sympy import Sum
+
         k = Dummy("k")
-        kern = binomial(n, 2*k) * (x**2 - 1)**k * x**(n - 2*k)
-        return Sum(kern, (k, 0, floor(n/2)))
+        kern = binomial(n, 2 * k) * (x ** 2 - 1) ** k * x ** (n - 2 * k)
+        return Sum(kern, (k, 0, floor(n / 2)))
 
 
 class chebyshevu(OrthogonalPolynomial):
@@ -614,7 +672,7 @@ class chebyshevu(OrthogonalPolynomial):
             # Symbolic result U_n(x)
             # U_n(-x)  --->  (-1)**n * U_n(x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * chebyshevu(n, -x)
+                return S.NegativeOne ** n * chebyshevu(n, -x)
             # U_{-n}(x)  --->  -U_{n-2}(x)
             if n.could_extract_minus_sign():
                 if n == S.NegativeOne:
@@ -647,16 +705,23 @@ class chebyshevu(OrthogonalPolynomial):
         elif argindex == 2:
             # Diff wrt x
             n, x = self.args
-            return ((n + 1) * chebyshevt(n + 1, x) - x * chebyshevu(n, x)) / (x**2 - 1)
+            return ((n + 1) * chebyshevt(n + 1, x) - x * chebyshevu(n, x)) / (
+                x ** 2 - 1
+            )
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_polynomial(self, n, x, **kwargs):
         from sympy import Sum
+
         k = Dummy("k")
-        kern = S.NegativeOne**k * factorial(
-            n - k) * (2*x)**(n - 2*k) / (factorial(k) * factorial(n - 2*k))
-        return Sum(kern, (k, 0, floor(n/2)))
+        kern = (
+            S.NegativeOne ** k
+            * factorial(n - k)
+            * (2 * x) ** (n - 2 * k)
+            / (factorial(k) * factorial(n - 2 * k))
+        )
+        return Sum(kern, (k, 0, floor(n / 2)))
 
 
 class chebyshevt_root(Function):
@@ -694,9 +759,8 @@ class chebyshevt_root(Function):
     @classmethod
     def eval(cls, n, k):
         if not ((0 <= k) and (k < n)):
-            raise ValueError("must have 0 <= k < n, "
-                "got k = %s and n = %s" % (k, n))
-        return cos(S.Pi*(2*k + 1)/(2*n))
+            raise ValueError("must have 0 <= k < n, " "got k = %s and n = %s" % (k, n))
+        return cos(S.Pi * (2 * k + 1) / (2 * n))
 
 
 class chebyshevu_root(Function):
@@ -730,15 +794,14 @@ class chebyshevu_root(Function):
     sympy.polys.orthopolys.laguerre_poly
     """
 
-
     @classmethod
     def eval(cls, n, k):
         if not ((0 <= k) and (k < n)):
-            raise ValueError("must have 0 <= k < n, "
-                "got k = %s and n = %s" % (k, n))
-        return cos(S.Pi*(k + 1)/(n + 1))
+            raise ValueError("must have 0 <= k < n, " "got k = %s and n = %s" % (k, n))
+        return cos(S.Pi * (k + 1) / (n + 1))
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # Legendre polynomials and Associated Legendre polynomials
 #
 
@@ -804,13 +867,13 @@ class legendre(OrthogonalPolynomial):
             # Symbolic result L_n(x)
             # L_n(-x)  --->  (-1)**n * L_n(x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * legendre(n, -x)
+                return S.NegativeOne ** n * legendre(n, -x)
             # L_{-n}(x)  --->  L_{n-1}(x)
-            if n.could_extract_minus_sign() and not(-n - 1).could_extract_minus_sign():
+            if n.could_extract_minus_sign() and not (-n - 1).could_extract_minus_sign():
                 return legendre(-n - S.One, x)
             # We can evaluate for some special values of x
             if x.is_zero:
-                return sqrt(S.Pi)/(gamma(S.Half - n/2)*gamma(S.One + n/2))
+                return sqrt(S.Pi) / (gamma(S.Half - n / 2) * gamma(S.One + n / 2))
             elif x == S.One:
                 return S.One
             elif x is S.Infinity:
@@ -842,14 +905,20 @@ class legendre(OrthogonalPolynomial):
             #    (-1)**n*(n-1)*n*(n+1)*(n+2)/4 , m = 2
             #    0                             , m = 3, 4, ..., n
             n, x = self.args
-            return n/(x**2 - 1)*(x*legendre(n, x) - legendre(n - 1, x))
+            return n / (x ** 2 - 1) * (x * legendre(n, x) - legendre(n - 1, x))
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_polynomial(self, n, x, **kwargs):
         from sympy import Sum
+
         k = Dummy("k")
-        kern = (-1)**k*binomial(n, k)**2*((1 + x)/2)**(n - k)*((1 - x)/2)**k
+        kern = (
+            (-1) ** k
+            * binomial(n, k) ** 2
+            * ((1 + x) / 2) ** (n - k)
+            * ((1 - x) / 2) ** k
+        )
         return Sum(kern, (k, 0, n))
 
 
@@ -914,23 +983,34 @@ class assoc_legendre(Function):
     @classmethod
     def _eval_at_order(cls, n, m):
         P = legendre_poly(n, _x, polys=True).diff((_x, m))
-        return (-1)**m * (1 - _x**2)**Rational(m, 2) * P.as_expr()
+        return (-1) ** m * (1 - _x ** 2) ** Rational(m, 2) * P.as_expr()
 
     @classmethod
     def eval(cls, n, m, x):
         if m.could_extract_minus_sign():
             # P^{-m}_n  --->  F * P^m_n
-            return S.NegativeOne**(-m) * (factorial(m + n)/factorial(n - m)) * assoc_legendre(n, -m, x)
+            return (
+                S.NegativeOne ** (-m)
+                * (factorial(m + n) / factorial(n - m))
+                * assoc_legendre(n, -m, x)
+            )
         if m == 0:
             # P^0_n  --->  L_n
             return legendre(n, x)
         if x == 0:
-            return 2**m*sqrt(S.Pi) / (gamma((1 - m - n)/2)*gamma(1 - (m - n)/2))
+            return (
+                2 ** m * sqrt(S.Pi) / (gamma((1 - m - n) / 2) * gamma(1 - (m - n) / 2))
+            )
         if n.is_Number and m.is_Number and n.is_integer and m.is_integer:
             if n.is_negative:
-                raise ValueError("%s : 1st index must be nonnegative integer (got %r)" % (cls, n))
+                raise ValueError(
+                    "%s : 1st index must be nonnegative integer (got %r)" % (cls, n)
+                )
             if abs(m) > n:
-                raise ValueError("%s : abs('2nd index') must be <= '1st index' (got %r, %r)" % (cls, n, m))
+                raise ValueError(
+                    "%s : abs('2nd index') must be <= '1st index' (got %r, %r)"
+                    % (cls, n, m)
+                )
             return cls._eval_at_order(int(n), abs(int(m))).subs(_x, x)
 
     def fdiff(self, argindex=3):
@@ -944,22 +1024,35 @@ class assoc_legendre(Function):
             # Diff wrt x
             # Find better formula, this is unsuitable for x = 1
             n, m, x = self.args
-            return 1/(x**2 - 1)*(x*n*assoc_legendre(n, m, x) - (m + n)*assoc_legendre(n - 1, m, x))
+            return (
+                1
+                / (x ** 2 - 1)
+                * (
+                    x * n * assoc_legendre(n, m, x)
+                    - (m + n) * assoc_legendre(n - 1, m, x)
+                )
+            )
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_polynomial(self, n, m, x, **kwargs):
         from sympy import Sum
+
         k = Dummy("k")
-        kern = factorial(2*n - 2*k)/(2**n*factorial(n - k)*factorial(
-            k)*factorial(n - 2*k - m))*(-1)**k*x**(n - m - 2*k)
-        return (1 - x**2)**(m/2) * Sum(kern, (k, 0, floor((n - m)*S.Half)))
+        kern = (
+            factorial(2 * n - 2 * k)
+            / (2 ** n * factorial(n - k) * factorial(k) * factorial(n - 2 * k - m))
+            * (-1) ** k
+            * x ** (n - m - 2 * k)
+        )
+        return (1 - x ** 2) ** (m / 2) * Sum(kern, (k, 0, floor((n - m) * S.Half)))
 
     def _eval_conjugate(self):
         n, m, x = self.args
         return self.func(n, m.conjugate(), x.conjugate())
 
-#----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # Hermite polynomials
 #
 
@@ -1024,17 +1117,16 @@ class hermite(OrthogonalPolynomial):
             # Symbolic result H_n(x)
             # H_n(-x)  --->  (-1)**n * H_n(x)
             if x.could_extract_minus_sign():
-                return S.NegativeOne**n * hermite(n, -x)
+                return S.NegativeOne ** n * hermite(n, -x)
             # We can evaluate for some special values of x
             if x.is_zero:
-                return 2**n * sqrt(S.Pi) / gamma((S.One - n)/2)
+                return 2 ** n * sqrt(S.Pi) / gamma((S.One - n) / 2)
             elif x is S.Infinity:
                 return S.Infinity
         else:
             # n is a given fixed integer, evaluate into polynomial
             if n.is_negative:
-                raise ValueError(
-                    "The index n must be nonnegative integer (got %r)" % n)
+                raise ValueError("The index n must be nonnegative integer (got %r)" % n)
             else:
                 return cls._eval_at_order(n, x)
 
@@ -1045,17 +1137,21 @@ class hermite(OrthogonalPolynomial):
         elif argindex == 2:
             # Diff wrt x
             n, x = self.args
-            return 2*n*hermite(n - 1, x)
+            return 2 * n * hermite(n - 1, x)
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_polynomial(self, n, x, **kwargs):
         from sympy import Sum
-        k = Dummy("k")
-        kern = (-1)**k / (factorial(k)*factorial(n - 2*k)) * (2*x)**(n - 2*k)
-        return factorial(n)*Sum(kern, (k, 0, floor(n/2)))
 
-#----------------------------------------------------------------------------
+        k = Dummy("k")
+        kern = (
+            (-1) ** k / (factorial(k) * factorial(n - 2 * k)) * (2 * x) ** (n - 2 * k)
+        )
+        return factorial(n) * Sum(kern, (k, 0, floor(n / 2)))
+
+
+# ----------------------------------------------------------------------------
 # Laguerre polynomials
 #
 
@@ -1126,18 +1222,18 @@ class laguerre(OrthogonalPolynomial):
             # Symbolic result L_n(x)
             # L_{n}(-x)  --->  exp(-x) * L_{-n-1}(x)
             # L_{-n}(x)  --->  exp(x) * L_{n-1}(-x)
-            if n.could_extract_minus_sign() and not(-n - 1).could_extract_minus_sign():
-                return exp(x)*laguerre(-n - 1, -x)
+            if n.could_extract_minus_sign() and not (-n - 1).could_extract_minus_sign():
+                return exp(x) * laguerre(-n - 1, -x)
             # We can evaluate for some special values of x
             if x.is_zero:
                 return S.One
             elif x is S.NegativeInfinity:
                 return S.Infinity
             elif x is S.Infinity:
-                return S.NegativeOne**n * S.Infinity
+                return S.NegativeOne ** n * S.Infinity
         else:
             if n.is_negative:
-                return exp(x)*laguerre(-n - 1, -x)
+                return exp(x) * laguerre(-n - 1, -x)
             else:
                 return cls._eval_at_order(n, x)
 
@@ -1154,13 +1250,14 @@ class laguerre(OrthogonalPolynomial):
 
     def _eval_rewrite_as_polynomial(self, n, x, **kwargs):
         from sympy import Sum
+
         # Make sure n \in N_0
         if n.is_negative:
             return exp(x) * self._eval_rewrite_as_polynomial(-n - 1, -x, **kwargs)
         if n.is_integer is False:
             raise ValueError("Error: n should be an integer.")
         k = Dummy("k")
-        kern = RisingFactorial(-n, k) / factorial(k)**2 * x**k
+        kern = RisingFactorial(-n, k) / factorial(k) ** 2 * x ** k
         return Sum(kern, (k, 0, n))
 
 
@@ -1245,19 +1342,19 @@ class assoc_laguerre(OrthogonalPolynomial):
             if x.is_zero:
                 return binomial(n + alpha, alpha)
             elif x is S.Infinity and n > 0:
-                return S.NegativeOne**n * S.Infinity
+                return S.NegativeOne ** n * S.Infinity
             elif x is S.NegativeInfinity and n > 0:
                 return S.Infinity
         else:
             # n is a given fixed integer, evaluate into polynomial
             if n.is_negative:
-                raise ValueError(
-                    "The index n must be nonnegative integer (got %r)" % n)
+                raise ValueError("The index n must be nonnegative integer (got %r)" % n)
             else:
                 return laguerre_poly(n, x, alpha)
 
     def fdiff(self, argindex=3):
         from sympy import Sum
+
         if argindex == 1:
             # Diff wrt n
             raise ArgumentIndexError(self, argindex)
@@ -1275,12 +1372,12 @@ class assoc_laguerre(OrthogonalPolynomial):
 
     def _eval_rewrite_as_polynomial(self, n, alpha, x, **kwargs):
         from sympy import Sum
+
         # Make sure n \in N_0
         if n.is_negative or n.is_integer is False:
             raise ValueError("Error: n should be a non-negative integer.")
         k = Dummy("k")
-        kern = RisingFactorial(
-            -n, k) / (gamma(k + alpha + 1) * factorial(k)) * x**k
+        kern = RisingFactorial(-n, k) / (gamma(k + alpha + 1) * factorial(k)) * x ** k
         return gamma(n + alpha + 1) / factorial(n) * Sum(kern, (k, 0, n))
 
     def _eval_conjugate(self):

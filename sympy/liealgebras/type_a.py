@@ -16,7 +16,6 @@ class TypeA(Standard_Cartan):
             raise ValueError("n can not be less than 1")
         return Standard_Cartan.__new__(cls, "A", n)
 
-
     def dimension(self):
         """Dimension of the vector space V underlying the Lie algebra
 
@@ -28,8 +27,7 @@ class TypeA(Standard_Cartan):
         >>> c.dimension()
         5
         """
-        return self.n+1
-
+        return self.n + 1
 
     def basic_root(self, i, j):
         """
@@ -40,7 +38,7 @@ class TypeA(Standard_Cartan):
         """
 
         n = self.n
-        root = [0]*(n+1)
+        root = [0] * (n + 1)
         root[i] = 1
         root[j] = -1
         return root
@@ -72,7 +70,7 @@ class TypeA(Standard_Cartan):
 
         """
 
-        return self.basic_root(i-1, i)
+        return self.basic_root(i - 1, i)
 
     def positive_roots(self):
         """
@@ -95,9 +93,9 @@ class TypeA(Standard_Cartan):
         posroots = {}
         k = 0
         for i in range(0, n):
-            for j in range(i+1, n+1):
-               k += 1
-               posroots[k] = self.basic_root(i, j)
+            for j in range(i + 1, n + 1):
+                k += 1
+                posroots[k] = self.basic_root(i, j)
         return posroots
 
     def highest_root(self):
@@ -112,7 +110,7 @@ class TypeA(Standard_Cartan):
         Returns the total number of roots for A_n
         """
         n = self.n
-        return n*(n+1)
+        return n * (n + 1)
 
     def cartan_matrix(self):
         """
@@ -139,12 +137,12 @@ class TypeA(Standard_Cartan):
         n = self.n
         m = 2 * eye(n)
         i = 1
-        while i < n-1:
-            m[i, i+1] = -1
-            m[i, i-1] = -1
+        while i < n - 1:
+            m[i, i + 1] = -1
+            m[i, i - 1] = -1
             i += 1
-        m[0,1] = -1
-        m[n-1, n-2] = -1
+        m[0, 1] = -1
+        m[n - 1, n - 2] = -1
         return m
 
     def basis(self):
@@ -152,7 +150,7 @@ class TypeA(Standard_Cartan):
         Returns the number of independent generators of A_n
         """
         n = self.n
-        return n**2 - 1
+        return n ** 2 - 1
 
     def lie_algebra(self):
         """
@@ -163,6 +161,6 @@ class TypeA(Standard_Cartan):
 
     def dynkin_diagram(self):
         n = self.n
-        diag = "---".join("0" for i in range(1, n+1)) + "\n"
-        diag += "   ".join(str(i) for i in range(1, n+1))
+        diag = "---".join("0" for i in range(1, n + 1)) + "\n"
+        diag += "   ".join(str(i) for i in range(1, n + 1))
         return diag

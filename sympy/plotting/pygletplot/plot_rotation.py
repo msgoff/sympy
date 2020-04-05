@@ -10,9 +10,11 @@ from math import sqrt as _sqrt, acos as _acos
 
 
 def cross(a, b):
-    return (a[1] * b[2] - a[2] * b[1],
-            a[2] * b[0] - a[0] * b[2],
-            a[0] * b[1] - a[1] * b[0])
+    return (
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    )
 
 
 def dot(a, b):
@@ -20,7 +22,7 @@ def dot(a, b):
 
 
 def mag(a):
-    return _sqrt(a[0]**2 + a[1]**2 + a[2]**2)
+    return _sqrt(a[0] ** 2 + a[1] ** 2 + a[2] ** 2)
 
 
 def norm(a):
@@ -32,11 +34,11 @@ def get_sphere_mapping(x, y, width, height):
     x = min([max([x, 0]), width])
     y = min([max([y, 0]), height])
 
-    sr = _sqrt((width/2)**2 + (height/2)**2)
-    sx = ((x - width / 2) / sr)
-    sy = ((y - height / 2) / sr)
+    sr = _sqrt((width / 2) ** 2 + (height / 2) ** 2)
+    sx = (x - width / 2) / sr
+    sy = (y - height / 2) / sr
 
-    sz = 1.0 - sx**2 - sy**2
+    sz = 1.0 - sx ** 2 - sy ** 2
 
     if sz > 0.0:
         sz = _sqrt(sz)
@@ -44,6 +46,7 @@ def get_sphere_mapping(x, y, width, height):
     else:
         sz = 0
         return norm((sx, sy, sz))
+
 
 rad2deg = 180.0 / 3.141592
 
@@ -57,13 +60,13 @@ def get_spherical_rotatation(p1, p2, width, height, theta_multiplier):
     if abs(d - 1.0) < 0.000001:
         return None
 
-    raxis = norm( cross(v1, v2) )
+    raxis = norm(cross(v1, v2))
     rtheta = theta_multiplier * rad2deg * _acos(d)
 
     pgl.glPushMatrix()
     pgl.glLoadIdentity()
     pgl.glRotatef(rtheta, *raxis)
-    mat = (c_float*16)()
+    mat = (c_float * 16)()
     pgl.glGetFloatv(pgl.GL_MODELVIEW_MATRIX, mat)
     pgl.glPopMatrix()
 

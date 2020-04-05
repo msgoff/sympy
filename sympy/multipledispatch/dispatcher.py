@@ -28,7 +28,7 @@ def ambiguity_warn(dispatcher, ambiguities):
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
 
 
-_unresolved_dispatchers = set() # type: Set[Dispatcher]
+_unresolved_dispatchers = set()  # type: Set[Dispatcher]
 _resolve = [True]
 
 
@@ -65,7 +65,8 @@ class Dispatcher(object):
     >>> f(3.0)
     2.0
     """
-    __slots__ = '__name__', 'name', 'funcs', 'ordering', '_cache', 'doc'
+
+    __slots__ = "__name__", "name", "funcs", "ordering", "_cache", "doc"
 
     def __init__(self, name, doc=None):
         self.name = self.__name__ = name
@@ -101,9 +102,11 @@ class Dispatcher(object):
         >>> f([1, 2, 3])
         [3, 2, 1]
         """
+
         def _(func):
             self.add(types, func, **kwargs)
             return func
+
         return _
 
     @classmethod
@@ -120,14 +123,14 @@ class Dispatcher(object):
         if params:
             Parameter = inspect.Parameter
 
-            params = (param for param in params
-                      if param.kind in
-                      (Parameter.POSITIONAL_ONLY,
-                       Parameter.POSITIONAL_OR_KEYWORD))
+            params = (
+                param
+                for param in params
+                if param.kind
+                in (Parameter.POSITIONAL_ONLY, Parameter.POSITIONAL_OR_KEYWORD)
+            )
 
-            annotations = tuple(
-                param.annotation
-                for param in params)
+            annotations = tuple(param.annotation for param in params)
 
             if all(ann is not Parameter.empty for ann in annotations):
                 return annotations
@@ -165,12 +168,14 @@ class Dispatcher(object):
 
         for typ in signature:
             if not isinstance(typ, type):
-                str_sig = ', '.join(c.__name__ if isinstance(c, type)
-                                    else str(c) for c in signature)
-                raise TypeError("Tried to dispatch on non-type: %s\n"
-                                "In signature: <%s>\n"
-                                "In function: %s" %
-                                (typ, str_sig, self.name))
+                str_sig = ", ".join(
+                    c.__name__ if isinstance(c, type) else str(c) for c in signature
+                )
+                raise TypeError(
+                    "Tried to dispatch on non-type: %s\n"
+                    "In signature: <%s>\n"
+                    "In function: %s" % (typ, str_sig, self.name)
+                )
 
         self.funcs[signature] = func
         self.reorder(on_ambiguity=on_ambiguity)
@@ -193,8 +198,9 @@ class Dispatcher(object):
             func = self.dispatch(*types)
             if not func:
                 raise NotImplementedError(
-                    'Could not find signature for %s: <%s>' %
-                    (self.name, str_signature(types)))
+                    "Could not find signature for %s: <%s>"
+                    % (self.name, str_signature(types))
+                )
             self._cache[types] = func
         try:
             return func(*args, **kwargs)
@@ -207,12 +213,15 @@ class Dispatcher(object):
                     return func(*args, **kwargs)
                 except MDNotImplementedError:
                     pass
-            raise NotImplementedError("Matching functions for "
-                                      "%s: <%s> found, but none completed successfully"
-                                      % (self.name, str_signature(types)))
+            raise NotImplementedError(
+                "Matching functions for "
+                "%s: <%s> found, but none completed successfully"
+                % (self.name, str_signature(types))
+            )
 
     def __str__(self):
         return "<dispatched %s>" % self.name
+
     __repr__ = __str__
 
     def dispatch(self, *types):
@@ -258,18 +267,16 @@ class Dispatcher(object):
         .. deprecated:: 0.4.4
             Use ``dispatch(*types)`` instead
         """
-        warn("resolve() is deprecated, use dispatch(*types)",
-             DeprecationWarning)
+        warn("resolve() is deprecated, use dispatch(*types)", DeprecationWarning)
 
         return self.dispatch(*types)
 
     def __getstate__(self):
-        return {'name': self.name,
-                'funcs': self.funcs}
+        return {"name": self.name, "funcs": self.funcs}
 
     def __setstate__(self, d):
-        self.name = d['name']
-        self.funcs = d['funcs']
+        self.name = d["name"]
+        self.funcs = d["funcs"]
         self.ordering = ordering(self.funcs)
         self._cache = dict()
 
@@ -284,17 +291,17 @@ class Dispatcher(object):
         for sig in self.ordering[::-1]:
             func = self.funcs[sig]
             if func.__doc__:
-                s = 'Inputs: <%s>\n' % str_signature(sig)
-                s += '-' * len(s) + '\n'
+                s = "Inputs: <%s>\n" % str_signature(sig)
+                s += "-" * len(s) + "\n"
                 s += func.__doc__.strip()
                 docs.append(s)
             else:
                 other.append(str_signature(sig))
 
         if other:
-            docs.append('Other signatures:\n    ' + '\n    '.join(other))
+            docs.append("Other signatures:\n    " + "\n    ".join(other))
 
-        return '\n\n'.join(docs)
+        return "\n\n".join(docs)
 
     def _help(self, *args):
         return self.dispatch(*map(type, args)).__doc__
@@ -315,7 +322,7 @@ class Dispatcher(object):
 
 
 def source(func):
-    s = 'File: %s\n\n' % inspect.getsourcefile(func)
+    s = "File: %s\n\n" % inspect.getsourcefile(func)
     s = s + inspect.getsource(func)
     return s
 
@@ -342,8 +349,10 @@ class MethodDispatcher(Dispatcher):
         types = tuple([type(arg) for arg in args])
         func = self.dispatch(*types)
         if not func:
-            raise NotImplementedError('Could not find signature for %s: <%s>' %
-                                      (self.name, str_signature(types)))
+            raise NotImplementedError(
+                "Could not find signature for %s: <%s>"
+                % (self.name, str_signature(types))
+            )
         return func(self.obj, *args, **kwargs)
 
 
@@ -354,7 +363,7 @@ def str_signature(sig):
     >>> str_signature((int, float))
     'int, float'
     """
-    return ', '.join(cls.__name__ for cls in sig)
+    return ", ".join(cls.__name__ for cls in sig)
 
 
 def warning_text(name, amb):
@@ -362,9 +371,12 @@ def warning_text(name, amb):
     text = "\nAmbiguities exist in dispatched function %s\n\n" % (name)
     text += "The following signatures may result in ambiguous behavior:\n"
     for pair in amb:
-        text += "\t" + \
-            ', '.join('[' + str_signature(s) + ']' for s in pair) + "\n"
+        text += "\t" + ", ".join("[" + str_signature(s) + "]" for s in pair) + "\n"
     text += "\n\nConsider making the following additions:\n\n"
-    text += '\n\n'.join(['@dispatch(' + str_signature(super_signature(s))
-                         + ')\ndef %s(...)' % name for s in amb])
+    text += "\n\n".join(
+        [
+            "@dispatch(" + str_signature(super_signature(s)) + ")\ndef %s(...)" % name
+            for s in amb
+        ]
+    )
     return text

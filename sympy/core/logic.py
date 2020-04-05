@@ -223,6 +223,7 @@ def fuzzy_nand(args):
 
 class Logic(object):
     """Logical expression"""
+
     # {} 'op' -> LogicClass
     op_2class = {}  # type: Dict[str, Type[Logic]]
 
@@ -264,8 +265,10 @@ class Logic(object):
         return (a > b) - (a < b)
 
     def __str__(self):
-        return '%s(%s)' % (self.__class__.__name__,
-                           ', '.join(str(a) for a in self.args))
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ", ".join(str(a) for a in self.args),
+        )
 
     __repr__ = __str__
 
@@ -281,18 +284,18 @@ class Logic(object):
         schedop = None  # scheduled operation
         for term in text.split():
             # operation symbol
-            if term in '&|':
+            if term in "&|":
                 if schedop is not None:
-                    raise ValueError(
-                        'double op forbidden: "%s %s"' % (term, schedop))
+                    raise ValueError('double op forbidden: "%s %s"' % (term, schedop))
                 if lexpr is None:
                     raise ValueError(
-                        '%s cannot be in the beginning of expression' % term)
+                        "%s cannot be in the beginning of expression" % term
+                    )
                 schedop = term
                 continue
-            if '&' in term or '|' in term:
-                raise ValueError('& and | must have space around them')
-            if term[0] == '!':
+            if "&" in term or "|" in term:
+                raise ValueError("& and | must have space around them")
+            if term[0] == "!":
                 if len(term) == 1:
                     raise ValueError('do not include space after "!"')
                 term = Not(term[1:])
@@ -305,8 +308,7 @@ class Logic(object):
 
             # this should be atom
             if lexpr is not None:
-                raise ValueError(
-                    'missing op between "%s" and "%s"' % (lexpr, term))
+                raise ValueError('missing op between "%s" and "%s"' % (lexpr, term))
 
             lexpr = term
 
@@ -321,14 +323,13 @@ class Logic(object):
 
 
 class AndOr_Base(Logic):
-
     def __new__(cls, *args):
         bargs = []
         for a in args:
             if a == cls.op_x_notx:
                 return a
             elif a == (not cls.op_x_notx):
-                continue    # skip this argument
+                continue  # skip this argument
             bargs.append(a)
 
         args = sorted(set(cls.flatten(bargs)), key=hash)
@@ -379,7 +380,7 @@ class And(AndOr_Base):
         for i in range(len(self.args)):
             arg = self.args[i]
             if isinstance(arg, Or):
-                arest = self.args[:i] + self.args[i + 1:]
+                arest = self.args[:i] + self.args[i + 1 :]
 
                 orterms = [And(*(arest + (a,))) for a in arg.args]
                 for j in range(len(orterms)):
@@ -401,7 +402,6 @@ class Or(AndOr_Base):
 
 
 class Not(Logic):
-
     def __new__(cls, arg):
         if isinstance(arg, str):
             return Logic.__new__(cls, arg)
@@ -417,13 +417,13 @@ class Not(Logic):
             return arg
 
         else:
-            raise ValueError('Not: unknown argument %r' % (arg,))
+            raise ValueError("Not: unknown argument %r" % (arg,))
 
     @property
     def arg(self):
         return self.args[0]
 
 
-Logic.op_2class['&'] = And
-Logic.op_2class['|'] = Or
-Logic.op_2class['!'] = Not
+Logic.op_2class["&"] = And
+Logic.op_2class["|"] = Or
+Logic.op_2class["!"] = Not

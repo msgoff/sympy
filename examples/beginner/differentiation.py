@@ -7,10 +7,11 @@ Demonstrates some differentiation operations.
 
 from sympy import pprint, Symbol
 
+
 def main():
-    a = Symbol('a')
-    b = Symbol('b')
-    e = (a + 2*b)**5
+    a = Symbol("a")
+    b = Symbol("b")
+    e = (a + 2 * b) ** 5
 
     print("\nExpression : ")
     print()
@@ -28,6 +29,7 @@ def main():
     print()
     pprint(e.expand().diff(b).diff(a, 2))
     print()
+
 
 if __name__ == "__main__":
     main()

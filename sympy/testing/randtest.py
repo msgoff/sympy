@@ -23,9 +23,10 @@ def random_complex_number(a=2, b=-1, c=3, d=1, rational=False, tolerance=None):
     """
     A, B = uniform(a, c), uniform(b, d)
     if not rational:
-        return A + I*B
-    return (nsimplify(A, rational=True, tolerance=tolerance) +
-        I*nsimplify(B, rational=True, tolerance=tolerance))
+        return A + I * B
+    return nsimplify(A, rational=True, tolerance=tolerance) + I * nsimplify(
+        B, rational=True, tolerance=tolerance
+    )
 
 
 def verify_numerically(f, g, z=None, tol=1.0e-6, a=2, b=-1, c=3, d=1):
@@ -73,6 +74,7 @@ def test_derivative_numerically(f, z, tol=1.0e-6, a=2, b=-1, c=3, d=1):
     True
     """
     from sympy.core.function import Derivative
+
     z0 = random_complex_number(a, b, c, d)
     f1 = f.diff(z).subs(z, z0)
     f2 = Derivative(f, z).doit_numerically(z0)
@@ -114,18 +116,19 @@ def _randrange(seed=None):
             a, b = as_int(a), as_int(b)
             w = b - a
             if w < 1:
-                raise ValueError('_randrange got empty range')
+                raise ValueError("_randrange got empty range")
             try:
                 x = seq.pop()
             except IndexError:
-                raise ValueError('_randrange sequence was too short')
+                raise ValueError("_randrange sequence was too short")
             if a <= x < b:
                 return x
             else:
                 return give(a, b, seq)
+
         return give
     else:
-        raise ValueError('_randrange got an unexpected seed')
+        raise ValueError("_randrange got an unexpected seed")
 
 
 def _randint(seed=None):
@@ -161,15 +164,16 @@ def _randint(seed=None):
             a, b = as_int(a), as_int(b)
             w = b - a
             if w < 0:
-                raise ValueError('_randint got empty range')
+                raise ValueError("_randint got empty range")
             try:
                 x = seq.pop()
             except IndexError:
-                raise ValueError('_randint sequence was too short')
+                raise ValueError("_randint sequence was too short")
             if a <= x <= b:
                 return x
             else:
                 return give(a, b, seq)
+
         return give
     else:
-        raise ValueError('_randint got an unexpected seed')
+        raise ValueError("_randint got an unexpected seed")

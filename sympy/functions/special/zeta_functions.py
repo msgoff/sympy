@@ -120,17 +120,18 @@ class lerchphi(Function):
 
     def _eval_expand_func(self, **hints):
         from sympy import exp, I, floor, Add, Poly, Dummy, exp_polar, unpolarify
+
         z, s, a = self.args
         if z == 1:
             return zeta(s, a)
         if s.is_Integer and s <= 0:
-            t = Dummy('t')
-            p = Poly((t + a)**(-s), t)
-            start = 1/(1 - t)
+            t = Dummy("t")
+            p = Poly((t + a) ** (-s), t)
+            start = 1 / (1 - t)
             res = S.Zero
             for c in reversed(p.all_coeffs()):
-                res += c*start
-                start = t*start.diff(t)
+                res += c * start
+                start = t * start.diff(t)
             return res.subs(t, z)
 
         if a.is_Rational:
@@ -147,23 +148,31 @@ class lerchphi(Function):
                 if n == a:
                     n -= 1
                 a -= n
-                mul = z**(-n)
-                add = Add(*[-z**(k - n)/(a + k)**s for k in range(n)])
+                mul = z ** (-n)
+                add = Add(*[-(z ** (k - n)) / (a + k) ** s for k in range(n)])
             elif a <= 0:
                 n = floor(-a) + 1
                 a += n
-                mul = z**n
-                add = Add(*[z**(n - 1 - k)/(a - k - 1)**s for k in range(n)])
+                mul = z ** n
+                add = Add(*[z ** (n - 1 - k) / (a - k - 1) ** s for k in range(n)])
 
             m, n = S([a.p, a.q])
-            zet = exp_polar(2*pi*I/n)
-            root = z**(1/n)
-            return add + mul*n**(s - 1)*Add(
-                *[polylog(s, zet**k*root)._eval_expand_func(**hints)
-                  / (unpolarify(zet)**k*root)**m for k in range(n)])
+            zet = exp_polar(2 * pi * I / n)
+            root = z ** (1 / n)
+            return add + mul * n ** (s - 1) * Add(
+                *[
+                    polylog(s, zet ** k * root)._eval_expand_func(**hints)
+                    / (unpolarify(zet) ** k * root) ** m
+                    for k in range(n)
+                ]
+            )
 
         # TODO use minpoly instead of ad-hoc methods when issue 5888 is fixed
-        if isinstance(z, exp) and (z.args[0]/(pi*I)).is_Rational or z in [-1, I, -I]:
+        if (
+            isinstance(z, exp)
+            and (z.args[0] / (pi * I)).is_Rational
+            or z in [-1, I, -I]
+        ):
             # TODO reference?
             if z == -1:
                 p, q = S([1, 2])
@@ -172,19 +181,23 @@ class lerchphi(Function):
             elif z == -I:
                 p, q = S([-1, 4])
             else:
-                arg = z.args[0]/(2*pi*I)
+                arg = z.args[0] / (2 * pi * I)
                 p, q = S([arg.p, arg.q])
-            return Add(*[exp(2*pi*I*k*p/q)/q**s*zeta(s, (k + a)/q)
-                         for k in range(q)])
+            return Add(
+                *[
+                    exp(2 * pi * I * k * p / q) / q ** s * zeta(s, (k + a) / q)
+                    for k in range(q)
+                ]
+            )
 
         return lerchphi(z, s, a)
 
     def fdiff(self, argindex=1):
         z, s, a = self.args
         if argindex == 3:
-            return -s*lerchphi(z, s + 1, a)
+            return -s * lerchphi(z, s + 1, a)
         elif argindex == 1:
-            return (lerchphi(z, s - 1, a) - a*lerchphi(z, s, a))/z
+            return (lerchphi(z, s - 1, a) - a * lerchphi(z, s, a)) / z
         else:
             raise ArgumentIndexError
 
@@ -200,6 +213,7 @@ class lerchphi(Function):
 
     def _eval_rewrite_as_polylog(self, z, s, a, **kwargs):
         return self._eval_rewrite_helper(z, s, a, polylog)
+
 
 ###############################################################################
 ###################### POLYLOGARITHM ##########################################
@@ -287,17 +301,17 @@ class polylog(Function):
             return S.Zero
         elif s == 2:
             if z == S.Half:
-                return pi**2/12 - log(2)**2/2
+                return pi ** 2 / 12 - log(2) ** 2 / 2
             elif z == 2:
-                return pi**2/4 - I*pi*log(2)
-            elif z == -(sqrt(5) - 1)/2:
-                return -pi**2/15 + log((sqrt(5)-1)/2)**2/2
-            elif z == -(sqrt(5) + 1)/2:
-                return -pi**2/10 - log((sqrt(5)+1)/2)**2
-            elif z == (3 - sqrt(5))/2:
-                return pi**2/15 - log((sqrt(5)-1)/2)**2
-            elif z == (sqrt(5) - 1)/2:
-                return pi**2/10 - log((sqrt(5)-1)/2)**2
+                return pi ** 2 / 4 - I * pi * log(2)
+            elif z == -(sqrt(5) - 1) / 2:
+                return -(pi ** 2) / 15 + log((sqrt(5) - 1) / 2) ** 2 / 2
+            elif z == -(sqrt(5) + 1) / 2:
+                return -(pi ** 2) / 10 - log((sqrt(5) + 1) / 2) ** 2
+            elif z == (3 - sqrt(5)) / 2:
+                return pi ** 2 / 15 - log((sqrt(5) - 1) / 2) ** 2
+            elif z == (sqrt(5) - 1) / 2:
+                return pi ** 2 / 10 - log((sqrt(5) - 1) / 2) ** 2
 
         if z.is_zero:
             return S.Zero
@@ -314,37 +328,38 @@ class polylog(Function):
             # undesirable for summation methods based on hypergeometric
             # functions
             if s is S.Zero:
-                return z/(1 - z)
+                return z / (1 - z)
             elif s is S.NegativeOne:
-                return z/(1 - z)**2
+                return z / (1 - z) ** 2
             if s.is_zero:
-                return z/(1 - z)
+                return z / (1 - z)
 
         # polylog is branched, but not over the unit disk
-        from sympy.functions.elementary.complexes import (Abs, unpolarify,
-                                                          polar_lift)
+        from sympy.functions.elementary.complexes import Abs, unpolarify, polar_lift
+
         if z.has(exp_polar, polar_lift) and (zone or (Abs(z) <= S.One) == True):
             return cls(s, unpolarify(z))
 
     def fdiff(self, argindex=1):
         s, z = self.args
         if argindex == 2:
-            return polylog(s - 1, z)/z
+            return polylog(s - 1, z) / z
         raise ArgumentIndexError
 
     def _eval_rewrite_as_lerchphi(self, s, z, **kwargs):
-        return z*lerchphi(z, s, 1)
+        return z * lerchphi(z, s, 1)
 
     def _eval_expand_func(self, **hints):
         from sympy import log, expand_mul, Dummy
+
         s, z = self.args
         if s == 1:
             return -log(1 - z)
         if s.is_Integer and s <= 0:
-            u = Dummy('u')
-            start = u/(1 - u)
+            u = Dummy("u")
+            start = u / (1 - u)
             for _ in range(-s):
-                start = u*start.diff(u)
+                start = u * start.diff(u)
             return expand_mul(start).subs(u, z)
         return polylog(s, z)
 
@@ -352,6 +367,7 @@ class polylog(Function):
         z = self.args[1]
         if z.is_zero:
             return True
+
 
 ###############################################################################
 ###################### HURWITZ GENERALIZED ZETA FUNCTION ######################
@@ -495,10 +511,10 @@ class zeta(Function):
         if z.is_integer:
             if a.is_Integer:
                 if z.is_negative:
-                    zeta = (-1)**z * bernoulli(-z + 1)/(-z + 1)
+                    zeta = (-1) ** z * bernoulli(-z + 1) / (-z + 1)
                 elif z.is_even and z.is_positive:
                     B, F = bernoulli(z), factorial(z)
-                    zeta = ((-1)**(z/2+1) * 2**(z - 1) * B * pi**z) / F
+                    zeta = ((-1) ** (z / 2 + 1) * 2 ** (z - 1) * B * pi ** z) / F
                 else:
                     return
 
@@ -513,7 +529,7 @@ class zeta(Function):
         if a != 1:
             return self
         s = self.args[0]
-        return dirichlet_eta(s)/(1 - 2**(1 - s))
+        return dirichlet_eta(s) / (1 - 2 ** (1 - s))
 
     def _eval_rewrite_as_lerchphi(self, s, a=1, **kwargs):
         return lerchphi(1, s, a)
@@ -529,7 +545,7 @@ class zeta(Function):
         else:
             s, a = self.args + (1,)
         if argindex == 2:
-            return -s*zeta(s + 1, a)
+            return -s * zeta(s + 1, a)
         else:
             raise ArgumentIndexError
 
@@ -576,10 +592,10 @@ class dirichlet_eta(Function):
             return log(2)
         z = zeta(s)
         if not z.has(zeta):
-            return (1 - 2**(1 - s))*z
+            return (1 - 2 ** (1 - s)) * z
 
     def _eval_rewrite_as_zeta(self, s, **kwargs):
-        return (1 - 2**(1 - s)) * zeta(s)
+        return (1 - 2 ** (1 - s)) * zeta(s)
 
 
 class stieltjes(Function):

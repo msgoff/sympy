@@ -21,10 +21,10 @@ import sys
 
 from sympy.external import import_module
 
-np = import_module('numpy')
+np = import_module("numpy")
 if not np:
     sys.exit("Cannot import numpy. Exiting.")
-plt = import_module('matplotlib.pyplot')
+plt = import_module("matplotlib.pyplot")
 if not plt:
     sys.exit("Cannot import matplotlib.pyplot. Exiting.")
 
@@ -37,7 +37,7 @@ def main():
 
     print(__doc__)
 
-    x = symbols('x')
+    x = symbols("x")
 
     # a numpy array we can apply the ufuncs to
     grid = np.linspace(-1, 1, 1000)
@@ -75,9 +75,9 @@ def main():
         # function and plot values as they are calculated by the binary function
         plot1 = plt.pyplot.plot(grid, polyvector, hold=True)
 
-
     print("Here's a plot with values calculated by the wrapped binary functions")
     plt.pyplot.show()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

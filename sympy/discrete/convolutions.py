@@ -8,8 +8,15 @@ from sympy.core import S, sympify
 from sympy.core.compatibility import as_int, iterable
 from sympy.core.function import expand_mul
 from sympy.discrete.transforms import (
-    fft, ifft, ntt, intt, fwht, ifwht,
-    mobius_transform, inverse_mobius_transform)
+    fft,
+    ifft,
+    ntt,
+    intt,
+    fwht,
+    ifwht,
+    mobius_transform,
+    inverse_mobius_transform,
+)
 
 
 def convolution(a, b, cycle=0, dps=None, prime=None, dyadic=None, subset=None):
@@ -72,8 +79,7 @@ def convolution(a, b, cycle=0, dps=None, prime=None, dyadic=None, subset=None):
 
     c = as_int(cycle)
     if c < 0:
-        raise ValueError("The length for cyclic convolution "
-                        "must be non-negative")
+        raise ValueError("The length for cyclic convolution " "must be non-negative")
 
     dyadic = True if dyadic else None
     subset = True if subset else None
@@ -94,11 +100,12 @@ def convolution(a, b, cycle=0, dps=None, prime=None, dyadic=None, subset=None):
     return ls if not c else [sum(ls[i::c]) for i in range(c)]
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                       Convolution for Complex domain                       #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def convolution_fft(a, b, dps=None):
     """
@@ -134,27 +141,28 @@ def convolution_fft(a, b, dps=None):
     """
 
     a, b = a[:], b[:]
-    n = m = len(a) + len(b) - 1 # convolution size
+    n = m = len(a) + len(b) - 1  # convolution size
 
-    if n > 0 and n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n > 0 and n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [S.Zero]*(n - len(a))
-    b += [S.Zero]*(n - len(b))
+    a += [S.Zero] * (n - len(a))
+    b += [S.Zero] * (n - len(b))
 
     a, b = fft(a, dps), fft(b, dps)
-    a = [expand_mul(x*y) for x, y in zip(a, b)]
+    a = [expand_mul(x * y) for x, y in zip(a, b)]
     a = ifft(a, dps)[:m]
 
     return a
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Convolution for GF(p)                            #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def convolution_ntt(a, b, prime):
     """
@@ -189,27 +197,28 @@ def convolution_ntt(a, b, prime):
     """
 
     a, b, p = a[:], b[:], as_int(prime)
-    n = m = len(a) + len(b) - 1 # convolution size
+    n = m = len(a) + len(b) - 1  # convolution size
 
-    if n > 0 and n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n > 0 and n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [0]*(n - len(a))
-    b += [0]*(n - len(b))
+    a += [0] * (n - len(a))
+    b += [0] * (n - len(b))
 
     a, b = ntt(a, p), ntt(b, p)
-    a = [x*y % p for x, y in zip(a, b)]
+    a = [x * y % p for x, y in zip(a, b)]
     a = intt(a, p)[:m]
 
     return a
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                         Convolution for 2**n-group                         #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def convolution_fwht(a, b):
     """
@@ -257,25 +266,26 @@ def convolution_fwht(a, b):
     a, b = a[:], b[:]
     n = max(len(a), len(b))
 
-    if n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [S.Zero]*(n - len(a))
-    b += [S.Zero]*(n - len(b))
+    a += [S.Zero] * (n - len(a))
+    b += [S.Zero] * (n - len(b))
 
     a, b = fwht(a), fwht(b)
-    a = [expand_mul(x*y) for x, y in zip(a, b)]
+    a = [expand_mul(x * y) for x, y in zip(a, b)]
     a = ifwht(a)
 
     return a
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            Subset Convolution                              #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def convolution_subset(a, b):
     """
@@ -328,31 +338,32 @@ def convolution_subset(a, b):
     b = [sympify(arg) for arg in b]
     n = max(len(a), len(b))
 
-    if n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [S.Zero]*(n - len(a))
-    b += [S.Zero]*(n - len(b))
+    a += [S.Zero] * (n - len(a))
+    b += [S.Zero] * (n - len(b))
 
-    c = [S.Zero]*n
+    c = [S.Zero] * n
 
     for mask in range(n):
         smask = mask
         while smask > 0:
-            c[mask] += expand_mul(a[smask] * b[mask^smask])
-            smask = (smask - 1)&mask
+            c[mask] += expand_mul(a[smask] * b[mask ^ smask])
+            smask = (smask - 1) & mask
 
-        c[mask] += expand_mul(a[smask] * b[mask^smask])
+        c[mask] += expand_mul(a[smask] * b[mask ^ smask])
 
     return c
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                              Covering Product                              #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def covering_product(a, b):
     """
@@ -404,25 +415,26 @@ def covering_product(a, b):
     a, b = a[:], b[:]
     n = max(len(a), len(b))
 
-    if n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [S.Zero]*(n - len(a))
-    b += [S.Zero]*(n - len(b))
+    a += [S.Zero] * (n - len(a))
+    b += [S.Zero] * (n - len(b))
 
     a, b = mobius_transform(a), mobius_transform(b)
-    a = [expand_mul(x*y) for x, y in zip(a, b)]
+    a = [expand_mul(x * y) for x, y in zip(a, b)]
     a = inverse_mobius_transform(a)
 
     return a
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            Intersecting Product                            #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def intersecting_product(a, b):
     """
@@ -474,15 +486,15 @@ def intersecting_product(a, b):
     a, b = a[:], b[:]
     n = max(len(a), len(b))
 
-    if n&(n - 1): # not a power of 2
-        n = 2**n.bit_length()
+    if n & (n - 1):  # not a power of 2
+        n = 2 ** n.bit_length()
 
     # padding with zeros
-    a += [S.Zero]*(n - len(a))
-    b += [S.Zero]*(n - len(b))
+    a += [S.Zero] * (n - len(a))
+    b += [S.Zero] * (n - len(b))
 
     a, b = mobius_transform(a, subset=False), mobius_transform(b, subset=False)
-    a = [expand_mul(x*y) for x, y in zip(a, b)]
+    a = [expand_mul(x * y) for x, y in zip(a, b)]
     a = inverse_mobius_transform(a, subset=False)
 
     return a

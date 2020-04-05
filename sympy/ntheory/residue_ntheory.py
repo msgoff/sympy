@@ -11,7 +11,6 @@ from .factor_ import factorint, trailing, totient, multiplicity
 from random import randint, Random
 
 
-
 def n_order(a, n):
     """Returns the order of ``a`` modulo ``n``.
 
@@ -28,6 +27,7 @@ def n_order(a, n):
     3
     """
     from collections import defaultdict
+
     a, n = as_int(a), as_int(n)
     if igcd(a, n) != 1:
         raise ValueError("The two numbers should be relatively prime")
@@ -41,7 +41,7 @@ def n_order(a, n):
             factors[py] += ky
     group_order = 1
     for px, kx in factors.items():
-        group_order *= px**kx
+        group_order *= px ** kx
     order = 1
     if a > n:
         a = a % n
@@ -110,7 +110,7 @@ def primitive_root(p):
     """
     p = as_int(p)
     if p < 1:
-        raise ValueError('p is required to be positive')
+        raise ValueError("p is required to be positive")
     if p <= 2:
         return 1
     f = factorint(p)
@@ -141,7 +141,7 @@ def primitive_root(p):
         if n > 1:
             # see Ref [2], page 81
             g = primitive_root(p1)
-            if is_primitive_root(g, p1**2):
+            if is_primitive_root(g, p1 ** 2):
                 return g
             else:
                 for i in range(2, g + p1 + 1):
@@ -200,17 +200,17 @@ def _sqrt_mod_tonelli_shanks(a, p):
         r = legendre_symbol(d, p)
         if r == -1:
             break
-    #assert legendre_symbol(d, p) == -1
+    # assert legendre_symbol(d, p) == -1
     A = pow(a, t, p)
     D = pow(d, t, p)
     m = 0
     for i in range(s):
-        adm = A*pow(D, m, p) % p
-        adm = pow(adm, 2**(s - 1 - i), p)
+        adm = A * pow(D, m, p) % p
+        adm = pow(adm, 2 ** (s - 1 - i), p)
         if adm % p == p - 1:
-            m += 2**i
-    #assert A*pow(D, m, p) % p == 1
-    x = pow(a, (t + 1)//2, p)*pow(D, m//2, p) % p
+            m += 2 ** i
+    # assert A*pow(D, m, p) % p == 1
+    x = pow(a, (t + 1) // 2, p) * pow(D, m // 2, p) % p
     return x
 
 
@@ -280,9 +280,10 @@ def _product(*iters):
     with small changes
     """
     import itertools
+
     inf_iters = tuple(itertools.cycle(enumerate(it)) for it in iters)
     num_iters = len(inf_iters)
-    cur_val = [None]*num_iters
+    cur_val = [None] * num_iters
 
     first_v = True
     while True:
@@ -320,6 +321,7 @@ def sqrt_mod_iter(a, p, domain=int):
     """
     from sympy.polys.galoistools import gf_crt1, gf_crt2
     from sympy.polys.domains import ZZ
+
     a, p = as_int(a), abs(as_int(p))
     if isprime(p):
         a = a % p
@@ -348,7 +350,7 @@ def sqrt_mod_iter(a, p, domain=int):
                 if not rx:
                     return
             v.append(rx)
-            pv.append(px**ex)
+            pv.append(px ** ex)
         mm, e, s = gf_crt1(pv, ZZ)
         if domain is ZZ:
             for vx in _product(*v):
@@ -388,7 +390,7 @@ def _sqrt_mod_prime_power(a, p, k):
     from sympy.core.numbers import igcdex
     from sympy.polys.domains import ZZ
 
-    pk = p**k
+    pk = p ** k
     a = a % pk
 
     if k == 1:
@@ -404,8 +406,8 @@ def _sqrt_mod_prime_power(a, p, k):
             if sign == 1:
                 res = pow(a, (p + 3) // 8, p)
             else:
-                b = pow(4*a, (p - 5) // 8, p)
-                x =  (2*a*b) % p
+                b = pow(4 * a, (p - 5) // 8, p)
+                x = (2 * a * b) % p
                 if pow(x, 2, p) == a:
                     res = x
         else:
@@ -421,11 +423,11 @@ def _sqrt_mod_prime_power(a, p, k):
             if a % 8 != 1:
                 return None
             if k <= 3:
-               s = set()
-               for i in range(0, pk, 4):
+                s = set()
+                for i in range(0, pk, 4):
                     s.add(1 + i)
                     s.add(-1 + i)
-               return list(s)
+                return list(s)
             # according to Ref.[2] for k > 2 there are two solutions
             # (mod 2**k-1), that is four solutions (mod 2**k), which can be
             # obtained from the roots of x**2 = 0 (mod 8)
@@ -438,24 +440,24 @@ def _sqrt_mod_prime_power(a, p, k):
             for r in rv:
                 nx = n
                 while nx < k:
-                    r1 = (r**2 - a) >> nx
+                    r1 = (r ** 2 - a) >> nx
                     if r1 % 2:
                         r = r + (1 << (nx - 1))
-                    #assert (r**2 - a)% (1 << (nx + 1)) == 0
+                    # assert (r**2 - a)% (1 << (nx + 1)) == 0
                     nx += 1
                 if r not in res:
                     res.append(r)
                 x = r + (1 << (k - 1))
-                #assert (x**2 - a) % pk == 0
+                # assert (x**2 - a) % pk == 0
                 if x < (1 << nx) and x not in res:
-                    if (x**2 - a) % pk == 0:
+                    if (x ** 2 - a) % pk == 0:
                         res.append(x)
             return res
         rv = _sqrt_mod_prime_power(a, p, 1)
         if not rv:
             return None
         r = rv[0]
-        fr = r**2 - a
+        fr = r ** 2 - a
         # hensel lifting with Newton iteration, see Ref.[3] chapter 9
         # with f(x) = x**2 - a; one has f'(a) != 0 (mod p) for p != 2
         n = 1
@@ -466,14 +468,14 @@ def _sqrt_mod_prime_power(a, p, k):
             if n1 > k:
                 break
             n = n1
-            px = px**2
-            frinv = igcdex(2*r, px)[0]
-            r = (r - fr*frinv) % px
-            fr = r**2 - a
+            px = px ** 2
+            frinv = igcdex(2 * r, px)[0]
+            r = (r - fr * frinv) % px
+            fr = r ** 2 - a
         if n < k:
-            px = p**k
-            frinv = igcdex(2*r, px)[0]
-            r = (r - fr*frinv) % px
+            px = p ** k
+            frinv = igcdex(2 * r, px)[0]
+            r = (r - fr * frinv) % px
         return [r, px - r]
 
 
@@ -483,26 +485,30 @@ def _sqrt_mod1(a, p, n):
 
     see http://www.numbertheory.org/php/squareroot.html
     """
-    pn = p**n
+    pn = p ** n
     a = a % pn
     if a == 0:
         # case gcd(a, p**k) = p**n
         m = n // 2
         if n % 2 == 1:
-            pm1 = p**(m + 1)
+            pm1 = p ** (m + 1)
+
             def _iter0a():
                 i = 0
                 while i < pn:
                     yield i
                     i += pm1
+
             return _iter0a()
         else:
-            pm = p**m
+            pm = p ** m
+
             def _iter0b():
                 i = 0
                 while i < pn:
                     yield i
                     i += pm
+
             return _iter0b()
 
     # case gcd(a, p**k) = p**r, r < n
@@ -516,6 +522,7 @@ def _sqrt_mod1(a, p, n):
         if n - r == 1:
             pnm1 = 1 << (n - m + 1)
             pm1 = 1 << (m + 1)
+
             def _iter1():
                 k = 1 << (m + 2)
                 i = 1 << m
@@ -525,12 +532,14 @@ def _sqrt_mod1(a, p, n):
                         yield j
                         j += k
                     i += pm1
+
             return _iter1()
         if n - r == 2:
             res = _sqrt_mod_prime_power(a1, p, n - r)
             if res is None:
                 return None
             pnm = 1 << (n - m)
+
             def _iter2():
                 s = set()
                 for r in res:
@@ -541,12 +550,14 @@ def _sqrt_mod1(a, p, n):
                             s.add(x)
                             yield x
                         i += pnm
+
             return _iter2()
         if n - r > 2:
             res = _sqrt_mod_prime_power(a1, p, n - r)
             if res is None:
                 return None
             pnm1 = 1 << (n - m - 1)
+
             def _iter3():
                 s = set()
                 for r in res:
@@ -557,28 +568,30 @@ def _sqrt_mod1(a, p, n):
                             s.add(x)
                             yield x
                         i += pnm1
+
             return _iter3()
     else:
         m = r // 2
-        a1 = a // p**r
+        a1 = a // p ** r
         res1 = _sqrt_mod_prime_power(a1, p, n - r)
         if res1 is None:
             return None
-        pm = p**m
-        pnr = p**(n-r)
-        pnm = p**(n-m)
+        pm = p ** m
+        pnr = p ** (n - r)
+        pnm = p ** (n - m)
 
         def _iter4():
             s = set()
-            pm = p**m
+            pm = p ** m
             for rx in res1:
                 i = 0
                 while i < pnm:
-                    x = ((rx + i) % pn)
+                    x = (rx + i) % pn
                     if x not in s:
                         s.add(x)
-                        yield x*pm
+                        yield x * pm
                     i += pnr
+
         return _iter4()
 
 
@@ -601,7 +614,7 @@ def is_quad_residue(a, p):
     """
     a, p = as_int(a), as_int(p)
     if p < 1:
-        raise ValueError('p must be > 0')
+        raise ValueError("p must be > 0")
     if a >= p or a < 0:
         a = a % p
     if a < 2 or p < 3:
@@ -631,9 +644,9 @@ def is_nthpow_residue(a, n, m):
     a = a % m
     a, n, m = as_int(a), as_int(n), as_int(m)
     if m <= 0:
-        raise ValueError('m must be > 0')
+        raise ValueError("m must be > 0")
     if n < 0:
-        raise ValueError('n must be >= 0')
+        raise ValueError("n must be >= 0")
     if n == 0:
         if m == 1:
             return False
@@ -684,14 +697,14 @@ def _is_nthpow_residue_bign_prime_power(a, n, p, k):
         if mu % n:
             return False
         pm = pow(p, mu)
-        return _is_nthpow_residue_bign_prime_power(a//pm, n, p, k - mu)
+        return _is_nthpow_residue_bign_prime_power(a // pm, n, p, k - mu)
 
 
 def _nthroot_mod2(s, q, p):
     f = factorint(q)
     v = []
     for b, e in f.items():
-        v.extend([b]*e)
+        v.extend([b] * e)
     for qx in v:
         s = _nthroot_mod1(s, qx, p, False)
     return s
@@ -720,28 +733,27 @@ def _nthroot_mod1(s, q, p, all_roots):
             f = f // q
         # find z, x, r1
         f1 = igcdex(-f, q)[0] % q
-        z = f*f1
+        z = f * f1
         x = (1 + z) // q
         r1 = pow(s, x, p)
         s1 = pow(s, f, p)
-        h = pow(g, f*q, p)
+        h = pow(g, f * q, p)
         t = discrete_log(p, s1, h)
-        g2 = pow(g, z*t, p)
+        g2 = pow(g, z * t, p)
         g3 = igcdex(g2, p)[0]
-        r = r1*g3 % p
-        #assert pow(r, q, p) == s
+        r = r1 * g3 % p
+        # assert pow(r, q, p) == s
     res = [r]
     h = pow(g, (p - 1) // q, p)
-    #assert pow(h, q, p) == 1
+    # assert pow(h, q, p) == 1
     hx = r
     for i in range(q - 1):
-        hx = (hx*h) % p
+        hx = (hx * h) % p
         res.append(hx)
     if all_roots:
         res.sort()
         return res
     return min(res)
-
 
 
 def _help(m, prime_modulo_method, diff_method, expr_val):
@@ -760,6 +772,7 @@ def _help(m, prime_modulo_method, diff_method, expr_val):
     given point
     """
     from sympy.ntheory.modular import crt
+
     f = factorint(m)
     dd = {}
     for p, e in f.items():
@@ -783,7 +796,7 @@ def _help(m, prime_modulo_method, diff_method, expr_val):
                         new_base *= p
                         new_roots = set()
                         for k in roots_in_base:
-                            if expr_val(k, new_base)!= 0:
+                            if expr_val(k, new_base) != 0:
                                 continue
                             while k not in new_roots:
                                 new_roots.add(k)
@@ -800,14 +813,17 @@ def _help(m, prime_modulo_method, diff_method, expr_val):
         a.append(list(y))
     return sorted(set(crt(m, list(i))[0] for i in cartes(*a)))
 
+
 def _nthroot_mod_composite(a, n, m):
     """
     Find the solutions to ``x**n = a mod m`` when m is not prime.
     """
-    return _help(m,
+    return _help(
+        m,
         lambda p: nthroot_mod(a, n, p, True),
         lambda root, p: (pow(root, n - 1, p) * (n % p)) % p,
-        lambda root, p: (pow(root, n, p) - a) % p)
+        lambda root, p: (pow(root, n, p) - a) % p,
+    )
 
 
 def nthroot_mod(a, n, p, all_roots=False):
@@ -834,6 +850,7 @@ def nthroot_mod(a, n, p, all_roots=False):
     23
     """
     from sympy.core.numbers import igcdex
+
     a = a % p
     a, n, p = as_int(a), as_int(n), as_int(p)
 
@@ -871,7 +888,7 @@ def nthroot_mod(a, n, p, all_roots=False):
         else:
             res = a
     elif pa == 2:
-        return sqrt_mod(a, p , all_roots)
+        return sqrt_mod(a, p, all_roots)
     else:
         res = _nthroot_mod1(a, pa, p, all_roots)
     return res
@@ -1069,6 +1086,7 @@ class mobius(Function):
     .. [2] Thomas Koshy "Elementary Number Theory with Applications"
 
     """
+
     @classmethod
     def eval(cls, n):
         if n.is_integer:
@@ -1084,7 +1102,7 @@ class mobius(Function):
             a = factorint(n)
             if any(i > 1 for i in a.values()):
                 return S.Zero
-            return S.NegativeOne**len(a)
+            return S.NegativeOne ** len(a)
 
 
 def _discrete_log_trial_mul(n, a, b, order=None):
@@ -1303,6 +1321,7 @@ def _discrete_log_pohlig_hellman(n, a, b, order=None):
         Vanstone, S. A. (1997).
     """
     from .modular import crt
+
     a %= n
     b %= n
 
@@ -1315,12 +1334,12 @@ def _discrete_log_pohlig_hellman(n, a, b, order=None):
     for i, (pi, ri) in enumerate(f.items()):
         for j in range(ri):
             gj = pow(b, l[i], n)
-            aj = pow(a * mod_inverse(gj, n), order // pi**(j + 1), n)
+            aj = pow(a * mod_inverse(gj, n), order // pi ** (j + 1), n)
             bj = pow(b, order // pi, n)
             cj = discrete_log(n, aj, bj, pi, True)
-            l[i] += cj * pi**j
+            l[i] += cj * pi ** j
 
-    d, _ = crt([pi**ri for pi, ri in f.items()], l)
+    d, _ = crt([pi ** ri for pi, ri in f.items()], l)
     return d
 
 
@@ -1372,7 +1391,6 @@ def discrete_log(n, a, b, order=None, prime_order=None):
     return _discrete_log_pohlig_hellman(n, a, b, order)
 
 
-
 def quadratic_congruence(a, b, c, p):
     """
     Find the solutions to ``a x**2 + b x + c = 0 mod p
@@ -1382,6 +1400,7 @@ def quadratic_congruence(a, b, c, p):
     p : positive integer
     """
     from sympy.polys.galoistools import linear_congruence
+
     a = as_int(a)
     b = as_int(b)
     c = as_int(c)
@@ -1411,7 +1430,7 @@ def quadratic_congruence(a, b, c, p):
         for i in y:
             res.add((i - b // 2) % p)
         return sorted(res)
-    y = sqrt_mod(b * b - 4 * a * c , 4 * a * p, all_roots=True)
+    y = sqrt_mod(b * b - 4 * a * c, 4 * a * p, all_roots=True)
     res = set()
     for i in y:
         root = linear_congruence(2 * a, i - b, 4 * a * p)
@@ -1436,7 +1455,7 @@ def _polynomial_congruence_prime(coefficients, p):
     rank = len(coefficients)
     for i in range(0, p):
         f_val = 0
-        for coeff in range(0,rank - 1):
+        for coeff in range(0, rank - 1):
             f_val = (f_val + pow(i, int(rank - coeff - 1), p) * coefficients[coeff]) % p
         f_val = f_val + coefficients[-1]
         if f_val % p == 0:
@@ -1462,8 +1481,10 @@ def _diff_poly(root, coefficients, p):
     for coeff in range(0, rank - 1):
         if not coefficients[coeff]:
             continue
-        diff = (diff + pow(root, rank - coeff - 2, p)*(rank - coeff - 1)*
-            coefficients[coeff]) % p
+        diff = (
+            diff
+            + pow(root, rank - coeff - 2, p) * (rank - coeff - 1) * coefficients[coeff]
+        ) % p
     return diff % p
 
 
@@ -1481,8 +1502,7 @@ def _val_poly(root, coefficients, p):
     rank = len(coefficients)
     f_val = 0
     for coeff in range(0, rank - 1):
-        f_val = (f_val + pow(root, rank - coeff - 1, p)*
-            coefficients[coeff]) % p
+        f_val = (f_val + pow(root, rank - coeff - 1, p) * coefficients[coeff]) % p
     f_val = f_val + coefficients[-1]
     return f_val % p
 
@@ -1495,10 +1515,11 @@ def _valid_expr(expr):
 
     from sympy import Poly
     from sympy.polys.domains import ZZ
+
     if not expr.is_polynomial():
         raise ValueError("The expression should be a polynomial")
     polynomial = Poly(expr)
-    if not  polynomial.is_univariate:
+    if not polynomial.is_univariate:
         raise ValueError("The expression should be univariate")
     if not polynomial.domain == ZZ:
         raise ValueError("The expression should should have integer coefficients")
@@ -1536,7 +1557,9 @@ def polynomial_congruence(expr, m):
         return nthroot_mod(-coefficients[-1], rank - 1, m, True)
     if isprime(m):
         return _polynomial_congruence_prime(coefficients, m)
-    return _help(m,
+    return _help(
+        m,
         lambda p: _polynomial_congruence_prime(coefficients, p),
         lambda root, p: _diff_poly(root, coefficients, p),
-        lambda root, p: _val_poly(root, coefficients, p))
+        lambda root, p: _val_poly(root, coefficients, p),
+    )

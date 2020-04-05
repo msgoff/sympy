@@ -54,16 +54,47 @@ Metaclasses:
 """
 
 __all__ = [
-    'PY3', 'long', 'int_info', 'SYMPY_INTS', 'lru_cache', 'clock',
-    'unicode', 'unichr', 'u_decode', 'Iterator', 'get_function_code',
-    'get_function_globals', 'get_function_name', 'builtins', 'reduce',
-    'StringIO', 'cStringIO', 'exec_', 'round', 'Mapping', 'Callable',
-    'MutableMapping', 'MutableSet', 'Iterable', 'Hashable', 'unwrap',
-    'accumulate', 'with_metaclass', 'NotIterable', 'iterable', 'is_sequence',
-    'as_int', 'default_sort_key', 'ordered', 'GROUND_TYPES', 'HAS_GMPY', 'gmpy',
+    "PY3",
+    "long",
+    "int_info",
+    "SYMPY_INTS",
+    "lru_cache",
+    "clock",
+    "unicode",
+    "unichr",
+    "u_decode",
+    "Iterator",
+    "get_function_code",
+    "get_function_globals",
+    "get_function_name",
+    "builtins",
+    "reduce",
+    "StringIO",
+    "cStringIO",
+    "exec_",
+    "round",
+    "Mapping",
+    "Callable",
+    "MutableMapping",
+    "MutableSet",
+    "Iterable",
+    "Hashable",
+    "unwrap",
+    "accumulate",
+    "with_metaclass",
+    "NotIterable",
+    "iterable",
+    "is_sequence",
+    "as_int",
+    "default_sort_key",
+    "ordered",
+    "GROUND_TYPES",
+    "HAS_GMPY",
+    "gmpy",
 ]
 
 import sys
+
 PY3 = sys.version_info[0] > 2
 
 if PY3:
@@ -87,14 +118,21 @@ if PY3:
     import builtins
     from functools import reduce
     from io import StringIO
+
     cStringIO = StringIO
 
     exec_ = getattr(builtins, "exec")
 
     round = round
 
-    from collections.abc import (Mapping, Callable, MutableMapping,
-        MutableSet, Iterable, Hashable)
+    from collections.abc import (
+        Mapping,
+        Callable,
+        MutableMapping,
+        MutableSet,
+        Iterable,
+        Hashable,
+    )
 
     from inspect import unwrap
     from itertools import accumulate
@@ -107,7 +145,7 @@ else:
     unichr = unichr
 
     def u_decode(x):
-        return x.decode('utf-8')
+        return x.decode("utf-8")
 
     class Iterator(object):
         def next(self):
@@ -119,6 +157,7 @@ else:
     get_function_name = operator.attrgetter("func_name")
 
     import __builtin__ as builtins
+
     reduce = reduce
     from StringIO import StringIO
     from cStringIO import StringIO as cStringIO
@@ -136,14 +175,21 @@ else:
         exec("exec _code_ in _globs_, _locs_")
 
     _round = round
+
     def round(x, *args):
         try:
             return x.__round__(*args)
         except (AttributeError, TypeError):
             return _round(x, *args)
 
-    from collections import (Mapping, Callable, MutableMapping,
-        MutableSet, Iterable, Hashable)
+    from collections import (
+        Mapping,
+        Callable,
+        MutableMapping,
+        MutableSet,
+        Iterable,
+        Hashable,
+    )
 
     def unwrap(func, stop=None):
         """Get the object wrapped by *func*.
@@ -162,18 +208,22 @@ else:
 
         """
         if stop is None:
+
             def _is_wrapper(f):
-                return hasattr(f, '__wrapped__')
+                return hasattr(f, "__wrapped__")
+
         else:
+
             def _is_wrapper(f):
-                return hasattr(f, '__wrapped__') and not stop(f)
+                return hasattr(f, "__wrapped__") and not stop(f)
+
         f = func  # remember the original func for error reporting
-        memo = {id(f)} # Memoise by id to tolerate non-hashable objects
+        memo = {id(f)}  # Memoise by id to tolerate non-hashable objects
         while _is_wrapper(func):
             func = func.__wrapped__
             id_func = id(func)
             if id_func in memo:
-                raise ValueError('wrapper loop when unwrapping {!r}'.format(f))
+                raise ValueError("wrapper loop when unwrapping {!r}".format(f))
             memo.add(id_func)
         return func
 
@@ -227,6 +277,7 @@ def with_metaclass(meta, *bases):
     class metaclass(meta):
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
+
     return type.__new__(metaclass, "NewBase", (), {})
 
 
@@ -235,6 +286,7 @@ def with_metaclass(meta, *bases):
 # particular, hasattr(str, "__iter__") is False in Python 2 and True in Python 3.
 # I think putting them here also makes it easier to use them in the core.
 
+
 class NotIterable:
     """
     Use this as mixin when creating a class which is not supposed to
@@ -242,7 +294,9 @@ class NotIterable:
     calling list() on the instance, for example, would result in
     an infinite loop.
     """
+
     pass
+
 
 def iterable(i, exclude=(str, dict, NotIterable)):
     """
@@ -291,7 +345,7 @@ def iterable(i, exclude=(str, dict, NotIterable)):
     False
 
     """
-    if hasattr(i, '_iterable'):
+    if hasattr(i, "_iterable"):
         return i._iterable
     try:
         iter(i)
@@ -336,10 +390,12 @@ def is_sequence(i, include=None):
     True
 
     """
-    return (hasattr(i, '__getitem__') and
-            iterable(i) or
-            bool(include) and
-            isinstance(i, include))
+    return (
+        hasattr(i, "__getitem__")
+        and iterable(i)
+        or bool(include)
+        and isinstance(i, include)
+    )
 
 
 def as_int(n, strict=True):
@@ -396,14 +452,14 @@ def as_int(n, strict=True):
         try:
             return operator.index(n)
         except TypeError:
-            raise ValueError('%s is not an integer' % (n,))
+            raise ValueError("%s is not an integer" % (n,))
     else:
         try:
             result = int(n)
         except TypeError:
-            raise ValueError('%s is not an integer' % (n,))
+            raise ValueError("%s is not an integer" % (n,))
         if n != result:
-            raise ValueError('%s is not an integer' % (n,))
+            raise ValueError("%s is not an integer" % (n,))
         return result
 
 
@@ -565,8 +621,7 @@ def default_sort_key(item, order=None):
         # e.g. str
         cls_index, args = 0, (1, (str(item),))
 
-    return (cls_index, 0, item.__class__.__name__
-            ), args, S.One.sort_key(), S.One
+    return (cls_index, 0, item.__class__.__name__), args, S.One.sort_key(), S.One
 
 
 def _nodes(e):
@@ -678,7 +733,7 @@ def ordered(seq, keys=None, default=True, warn=False):
             d[f(a)].append(a)
     else:
         if not default:
-            raise ValueError('if default=False then keys must be provided')
+            raise ValueError("if default=False then keys must be provided")
         d[None].extend(seq)
 
     for k in sorted(d.keys()):
@@ -686,17 +741,19 @@ def ordered(seq, keys=None, default=True, warn=False):
             if keys:
                 d[k] = ordered(d[k], keys, default, warn)
             elif default:
-                d[k] = ordered(d[k], (_nodes, default_sort_key,),
-                               default=False, warn=warn)
+                d[k] = ordered(
+                    d[k], (_nodes, default_sort_key,), default=False, warn=warn
+                )
             elif warn:
                 from sympy.utilities.iterables import uniq
+
                 u = list(uniq(d[k]))
                 if len(u) > 1:
-                    raise ValueError(
-                        'not enough keys to break ties: %s' % u)
+                    raise ValueError("not enough keys to break ties: %s" % u)
         for v in d[k]:
             yield v
         d.pop(k)
+
 
 # If HAS_GMPY is 0, no supported version of gmpy is available. Otherwise,
 # HAS_GMPY contains the major version number of gmpy; i.e. 1 for gmpy, and
@@ -709,50 +766,62 @@ def ordered(seq, keys=None, default=True, warn=False):
 # Minimum version of gmpy changed to 1.13 to allow a single code base to also
 # work with gmpy2.
 
+
 def _getenv(key, default=None):
     from os import getenv
+
     return getenv(key, default)
 
-GROUND_TYPES = _getenv('SYMPY_GROUND_TYPES', 'auto').lower()
+
+GROUND_TYPES = _getenv("SYMPY_GROUND_TYPES", "auto").lower()
 
 HAS_GMPY = 0
 
-if GROUND_TYPES != 'python':
+if GROUND_TYPES != "python":
 
     # Don't try to import gmpy2 if ground types is set to gmpy1. This is
     # primarily intended for testing.
 
-    if GROUND_TYPES != 'gmpy1':
-        gmpy = import_module('gmpy2', min_module_version='2.0.0',
-            module_version_attr='version', module_version_attr_call_args=())
+    if GROUND_TYPES != "gmpy1":
+        gmpy = import_module(
+            "gmpy2",
+            min_module_version="2.0.0",
+            module_version_attr="version",
+            module_version_attr_call_args=(),
+        )
         if gmpy:
             HAS_GMPY = 2
     else:
-        GROUND_TYPES = 'gmpy'
+        GROUND_TYPES = "gmpy"
 
     if not HAS_GMPY:
-        gmpy = import_module('gmpy', min_module_version='1.13',
-            module_version_attr='version', module_version_attr_call_args=())
+        gmpy = import_module(
+            "gmpy",
+            min_module_version="1.13",
+            module_version_attr="version",
+            module_version_attr_call_args=(),
+        )
         if gmpy:
             HAS_GMPY = 1
 else:
     gmpy = None
 
-if GROUND_TYPES == 'auto':
+if GROUND_TYPES == "auto":
     if HAS_GMPY:
-        GROUND_TYPES = 'gmpy'
+        GROUND_TYPES = "gmpy"
     else:
-        GROUND_TYPES = 'python'
+        GROUND_TYPES = "python"
 
-if GROUND_TYPES == 'gmpy' and not HAS_GMPY:
+if GROUND_TYPES == "gmpy" and not HAS_GMPY:
     from warnings import warn
+
     warn("gmpy library is not installed, switching to 'python' ground types")
-    GROUND_TYPES = 'python'
+    GROUND_TYPES = "python"
 
 # SYMPY_INTS is a tuple containing the base types for valid integer types.
-SYMPY_INTS = (int, )  # type: Tuple[Type, ...]
+SYMPY_INTS = (int,)  # type: Tuple[Type, ...]
 
-if GROUND_TYPES == 'gmpy':
+if GROUND_TYPES == "gmpy":
     SYMPY_INTS += (type(gmpy.mpz(0)),)
 
 
@@ -765,8 +834,9 @@ from threading import RLock
 
 _CacheInfo = namedtuple("CacheInfo", ["hits", "misses", "maxsize", "currsize"])
 
+
 class _HashedSeq(list):
-    __slots__ = ('hashvalue',)
+    __slots__ = ("hashvalue",)
 
     def __init__(self, tup, hash=hash):
         self[:] = tup
@@ -775,11 +845,19 @@ class _HashedSeq(list):
     def __hash__(self):
         return self.hashvalue
 
-def _make_key(args, kwds, typed,
-             kwd_mark = (object(),),
-             fasttypes = set((int, str, frozenset, type(None))),
-             sorted=sorted, tuple=tuple, type=type, len=len):
-    'Make a cache key from optionally typed positional and keyword arguments'
+
+def _make_key(
+    args,
+    kwds,
+    typed,
+    kwd_mark=(object(),),
+    fasttypes=set((int, str, frozenset, type(None))),
+    sorted=sorted,
+    tuple=tuple,
+    type=type,
+    len=len,
+):
+    "Make a cache key from optionally typed positional and keyword arguments"
     key = args
     if kwds:
         sorted_items = sorted(kwds.items())
@@ -794,10 +872,12 @@ def _make_key(args, kwds, typed,
         return key[0]
     return _HashedSeq(key)
 
+
 if sys.version_info[:2] >= (3, 3):
     # 3.2 has an lru_cache with an incompatible API
     from functools import lru_cache
 else:
+
     def lru_cache(maxsize=100, typed=False):
         """Least-recently-used cache decorator.
 
@@ -826,16 +906,16 @@ else:
         def decorating_function(user_function):
 
             cache = dict()
-            stats = [0, 0]                  # make statistics updateable non-locally
-            HITS, MISSES = 0, 1             # names for the stats fields
+            stats = [0, 0]  # make statistics updateable non-locally
+            HITS, MISSES = 0, 1  # names for the stats fields
             make_key = _make_key
-            cache_get = cache.get           # bound method to lookup key or return None
-            _len = len                      # localize the global len() function
-            lock = RLock()                  # because linkedlist updates aren't threadsafe
-            root = []                       # root of the circular doubly linked list
-            root[:] = [root, root, None, None]      # initialize by pointing to self
-            nonlocal_root = [root]                  # make updateable non-locally
-            PREV, NEXT, KEY, RESULT = 0, 1, 2, 3    # names for the link fields
+            cache_get = cache.get  # bound method to lookup key or return None
+            _len = len  # localize the global len() function
+            lock = RLock()  # because linkedlist updates aren't threadsafe
+            root = []  # root of the circular doubly linked list
+            root[:] = [root, root, None, None]  # initialize by pointing to self
+            nonlocal_root = [root]  # make updateable non-locally
+            PREV, NEXT, KEY, RESULT = 0, 1, 2, 3  # names for the link fields
 
             if maxsize == 0:
 
@@ -850,7 +930,9 @@ else:
                 def wrapper(*args, **kwds):
                     # simple caching without ordering or size limit
                     key = make_key(args, kwds, typed)
-                    result = cache_get(key, root)   # root used here as a unique not-found sentinel
+                    result = cache_get(
+                        key, root
+                    )  # root used here as a unique not-found sentinel
                     if result is not root:
                         stats[HITS] += 1
                         return result
@@ -872,7 +954,7 @@ else:
                         link = cache_get(key)
                         if link is not None:
                             # record recent use of the key by moving it to the front of the list
-                            root, = nonlocal_root
+                            (root,) = nonlocal_root
                             link_prev, link_next, key, result = link
                             link_prev[NEXT] = link_next
                             link_next[PREV] = link_prev
@@ -884,7 +966,7 @@ else:
                             return result
                     result = user_function(*args, **kwds)
                     with lock:
-                        root, = nonlocal_root
+                        (root,) = nonlocal_root
                         if key in cache:
                             # getting here means that this same key was added to the
                             # cache while the lock was released.  since the link
@@ -930,6 +1012,7 @@ else:
             return update_wrapper(wrapper, user_function)
 
         return decorating_function
+
     ### End of backported lru_cache
 
 from time import perf_counter as clock

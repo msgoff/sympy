@@ -7,6 +7,7 @@ from sympy.logic.boolalg import Boolean
 
 from sympy.assumptions import Q, ask  # type: ignore
 
+
 def refine(expr, assumptions=True):
     """
     Simplify an expression using assumptions.
@@ -32,7 +33,7 @@ def refine(expr, assumptions=True):
         args = [refine(arg, assumptions) for arg in expr.args]
         # TODO: this will probably not work with Integral or Polynomial
         expr = expr.func(*args)
-    if hasattr(expr, '_eval_refine'):
+    if hasattr(expr, "_eval_refine"):
         ref_expr = expr._eval_refine(assumptions)
         if ref_expr is not None:
             return ref_expr
@@ -67,9 +68,9 @@ def refine_abs(expr, assumptions):
     """
     from sympy.core.logic import fuzzy_not
     from sympy import Abs
+
     arg = expr.args[0]
-    if ask(Q.real(arg), assumptions) and \
-            fuzzy_not(ask(Q.negative(arg), assumptions)):
+    if ask(Q.real(arg), assumptions) and fuzzy_not(ask(Q.negative(arg), assumptions)):
         # if it's nonnegative
         return arg
     if ask(Q.negative(arg), assumptions):
@@ -115,9 +116,11 @@ def refine_Pow(expr, assumptions):
     from sympy.core import Pow, Rational
     from sympy.functions.elementary.complexes import Abs
     from sympy.functions import sign
+
     if isinstance(expr.base, Abs):
-        if ask(Q.real(expr.base.args[0]), assumptions) and \
-                ask(Q.even(expr.exp), assumptions):
+        if ask(Q.real(expr.base.args[0]), assumptions) and ask(
+            Q.even(expr.exp), assumptions
+        ):
             return expr.base.args[0] ** expr.exp
     if ask(Q.real(expr.base), assumptions):
         if expr.base.is_number:
@@ -162,10 +165,10 @@ def refine_Pow(expr, assumptions):
 
                 if new_coeff != coeff or len(terms) < initial_number_of_terms:
                     terms.add(new_coeff)
-                    expr = expr.base**(Add(*terms))
+                    expr = expr.base ** (Add(*terms))
 
                 # Handle (-1)**((-1)**n/2 + m/2)
-                e2 = 2*expr.exp
+                e2 = 2 * expr.exp
                 if ask(Q.even(e2), assumptions):
                     if e2.could_extract_minus_sign():
                         e2 *= expr.base
@@ -173,13 +176,13 @@ def refine_Pow(expr, assumptions):
                     i, p = e2.as_two_terms()
                     if p.is_Pow and p.base is S.NegativeOne:
                         if ask(Q.integer(p.exp), assumptions):
-                            i = (i + 1)/2
+                            i = (i + 1) / 2
                             if ask(Q.even(i), assumptions):
-                                return expr.base**p.exp
+                                return expr.base ** p.exp
                             elif ask(Q.odd(i), assumptions):
-                                return expr.base**(p.exp + 1)
+                                return expr.base ** (p.exp + 1)
                             else:
-                                return expr.base**(p.exp + i)
+                                return expr.base ** (p.exp + i)
 
                 if old != expr:
                     return expr
@@ -212,6 +215,7 @@ def refine_atan2(expr, assumptions):
     """
     from sympy.functions.elementary.trigonometric import atan
     from sympy.core import S
+
     y, x = expr.args
     if ask(Q.real(y) & Q.positive(x), assumptions):
         return atan(y / x)
@@ -222,9 +226,9 @@ def refine_atan2(expr, assumptions):
     elif ask(Q.zero(y) & Q.negative(x), assumptions):
         return S.Pi
     elif ask(Q.positive(y) & Q.zero(x), assumptions):
-        return S.Pi/2
+        return S.Pi / 2
     elif ask(Q.negative(y) & Q.zero(x), assumptions):
-        return -S.Pi/2
+        return -S.Pi / 2
     elif ask(Q.zero(y) & Q.zero(x), assumptions):
         return S.NaN
     else:
@@ -280,13 +284,13 @@ def refine_im(expr, assumptions):
     if ask(Q.real(arg), assumptions):
         return S.Zero
     if ask(Q.imaginary(arg), assumptions):
-        return - S.ImaginaryUnit * arg
+        return -S.ImaginaryUnit * arg
     return _refine_reim(expr, assumptions)
 
 
 def _refine_reim(expr, assumptions):
     # Helper function for refine_re & refine_im
-    expanded = expr.expand(complex = True)
+    expanded = expr.expand(complex=True)
     if expanded != expr:
         refined = refine(expanded, assumptions)
         if refined != expanded:
@@ -337,16 +341,16 @@ def refine_sign(expr, assumptions):
 
 
 handlers_dict = {
-    'Abs': refine_abs,
-    'Pow': refine_Pow,
-    'atan2': refine_atan2,
-    'Equality': refine_Relational,
-    'Unequality': refine_Relational,
-    'GreaterThan': refine_Relational,
-    'LessThan': refine_Relational,
-    'StrictGreaterThan': refine_Relational,
-    'StrictLessThan': refine_Relational,
-    're': refine_re,
-    'im': refine_im,
-    'sign': refine_sign
+    "Abs": refine_abs,
+    "Pow": refine_Pow,
+    "atan2": refine_atan2,
+    "Equality": refine_Relational,
+    "Unequality": refine_Relational,
+    "GreaterThan": refine_Relational,
+    "LessThan": refine_Relational,
+    "StrictGreaterThan": refine_Relational,
+    "StrictLessThan": refine_Relational,
+    "re": refine_re,
+    "im": refine_im,
+    "sign": refine_sign,
 }  # type: Dict[str, Callable[[Expr, Boolean], Expr]]

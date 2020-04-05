@@ -53,8 +53,8 @@ def dispatch(*types, **kwargs):
     ...     def __init__(self, datum):
     ...         self.data = [datum]
     """
-    namespace = kwargs.get('namespace', global_namespace)
-    on_ambiguity = kwargs.get('on_ambiguity', ambiguity_warn)
+    namespace = kwargs.get("namespace", global_namespace)
+    on_ambiguity = kwargs.get("on_ambiguity", ambiguity_warn)
 
     types = tuple(types)
 
@@ -63,8 +63,8 @@ def dispatch(*types, **kwargs):
 
         if ismethod(func):
             dispatcher = inspect.currentframe().f_back.f_locals.get(
-                name,
-                MethodDispatcher(name))
+                name, MethodDispatcher(name)
+            )
         else:
             if name not in namespace:
                 namespace[name] = Dispatcher(name)
@@ -72,6 +72,7 @@ def dispatch(*types, **kwargs):
 
         dispatcher.add(types, func, on_ambiguity=on_ambiguity)
         return dispatcher
+
     return _
 
 
@@ -83,7 +84,7 @@ def ismethod(func):
     """
     if hasattr(inspect, "signature"):
         signature = inspect.signature(func)
-        return signature.parameters.get('self', None) is not None
+        return signature.parameters.get("self", None) is not None
     else:
         spec = inspect.getargspec(func)
-        return spec and spec.args and spec.args[0] == 'self'
+        return spec and spec.args and spec.args[0] == "self"

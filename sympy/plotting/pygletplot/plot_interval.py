@@ -7,6 +7,7 @@ from sympy.core.numbers import Integer
 class PlotInterval(object):
     """
     """
+
     _v, _v_min, _v_max, _v_steps = None, None, None, None
 
     def require_all_args(f):
@@ -15,6 +16,7 @@ class PlotInterval(object):
                 if g is None:
                     raise ValueError("PlotInterval is incomplete.")
             return f(self, *args, **kwargs)
+
         return check
 
     def __init__(self, *args):
@@ -133,8 +135,9 @@ class PlotInterval(object):
             return None
 
     def _str_base(self):
-        return ",".join([str(self.v), str(self.v_min),
-                         str(self.v_max), str(self.v_steps)])
+        return ",".join(
+            [str(self.v), str(self.v_min), str(self.v_max), str(self.v_steps)]
+        )
 
     def __repr__(self):
         """

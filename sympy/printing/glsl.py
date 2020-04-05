@@ -8,24 +8,25 @@ from sympy.printing.precedence import precedence
 from functools import reduce
 
 known_functions = {
-    'Abs': 'abs',
-    'sin': 'sin',
-    'cos': 'cos',
-    'tan': 'tan',
-    'acos': 'acos',
-    'asin': 'asin',
-    'atan': 'atan',
-    'atan2': 'atan',
-    'ceiling': 'ceil',
-    'floor': 'floor',
-    'sign': 'sign',
-    'exp': 'exp',
-    'log': 'log',
-    'add': 'add',
-    'sub': 'sub',
-    'mul': 'mul',
-    'pow': 'pow'
+    "Abs": "abs",
+    "sin": "sin",
+    "cos": "cos",
+    "tan": "tan",
+    "acos": "acos",
+    "asin": "asin",
+    "atan": "atan",
+    "atan2": "atan",
+    "ceiling": "ceil",
+    "floor": "floor",
+    "sign": "sign",
+    "exp": "exp",
+    "log": "log",
+    "add": "add",
+    "sub": "sub",
+    "mul": "mul",
+    "pow": "pow",
 }
+
 
 class GLSLPrinter(CodePrinter):
     """
@@ -34,36 +35,36 @@ class GLSLPrinter(CodePrinter):
     Additional settings:
     'use_operators': Boolean (should the printer use operators for +,-,*, or functions?)
     """
+
     _not_supported = set()  # type: Set[Basic]
     printmethod = "_glsl"
     language = "GLSL"
 
     _default_settings = {
-        'use_operators': True,
-        'mat_nested': False,
-        'mat_separator': ',\n',
-        'mat_transpose': False,
-        'glsl_types': True,
-
-        'order': None,
-        'full_prec': 'auto',
-        'precision': 9,
-        'user_functions': {},
-        'human': True,
-        'allow_unknown_functions': False,
-        'contract': True,
-        'error_on_reserved': False,
-        'reserved_word_suffix': '_',
+        "use_operators": True,
+        "mat_nested": False,
+        "mat_separator": ",\n",
+        "mat_transpose": False,
+        "glsl_types": True,
+        "order": None,
+        "full_prec": "auto",
+        "precision": 9,
+        "user_functions": {},
+        "human": True,
+        "allow_unknown_functions": False,
+        "contract": True,
+        "error_on_reserved": False,
+        "reserved_word_suffix": "_",
     }
 
     def __init__(self, settings={}):
         CodePrinter.__init__(self, settings)
         self.known_functions = dict(known_functions)
-        userfuncs = settings.get('user_functions', {})
+        userfuncs = settings.get("user_functions", {})
         self.known_functions.update(userfuncs)
 
     def _rate_index_position(self, p):
-        return p*5
+        return p * 5
 
     def _get_statement(self, codestring):
         return "%s;" % codestring
@@ -82,13 +83,13 @@ class GLSLPrinter(CodePrinter):
 
         if isinstance(code, str):
             code_lines = self.indent_code(code.splitlines(True))
-            return ''.join(code_lines)
+            return "".join(code_lines)
 
         tab = "   "
-        inc_token = ('{', '(', '{\n', '(\n')
-        dec_token = ('}', ')')
+        inc_token = ("{", "(", "{\n", "(\n")
+        dec_token = ("}", ")")
 
-        code = [line.lstrip(' \t') for line in code]
+        code = [line.lstrip(" \t") for line in code]
 
         increase = [int(any(map(line.endswith, inc_token))) for line in code]
         decrease = [int(any(map(line.startswith, dec_token))) for line in code]
@@ -96,83 +97,96 @@ class GLSLPrinter(CodePrinter):
         pretty = []
         level = 0
         for n, line in enumerate(code):
-            if line == '' or line == '\n':
+            if line == "" or line == "\n":
                 pretty.append(line)
                 continue
             level -= decrease[n]
-            pretty.append("%s%s" % (tab*level, line))
+            pretty.append("%s%s" % (tab * level, line))
             level += increase[n]
         return pretty
 
     def _print_MatrixBase(self, mat):
-        mat_separator = self._settings['mat_separator']
-        mat_transpose = self._settings['mat_transpose']
-        glsl_types = self._settings['glsl_types']
+        mat_separator = self._settings["mat_separator"]
+        mat_transpose = self._settings["mat_transpose"]
+        glsl_types = self._settings["glsl_types"]
         column_vector = (mat.rows == 1) if mat_transpose else (mat.cols == 1)
         A = mat.transpose() if mat_transpose != column_vector else mat
 
         if A.cols == 1:
-            return self._print(A[0]);
+            return self._print(A[0])
         if A.rows <= 4 and A.cols <= 4 and glsl_types:
             if A.rows == 1:
-                return 'vec%s%s' % (A.cols, A.table(self,rowstart='(',rowend=')'))
+                return "vec%s%s" % (A.cols, A.table(self, rowstart="(", rowend=")"))
             elif A.rows == A.cols:
-                return 'mat%s(%s)' %   (A.rows, A.table(self,rowsep=', ',
-                                        rowstart='',rowend=''))
+                return "mat%s(%s)" % (
+                    A.rows,
+                    A.table(self, rowsep=", ", rowstart="", rowend=""),
+                )
             else:
-                return 'mat%sx%s(%s)' % (A.cols, A.rows,
-                                        A.table(self,rowsep=', ',
-                                        rowstart='',rowend=''))
+                return "mat%sx%s(%s)" % (
+                    A.cols,
+                    A.rows,
+                    A.table(self, rowsep=", ", rowstart="", rowend=""),
+                )
         elif A.cols == 1 or A.rows == 1:
-            return 'float[%s](%s)' % (A.cols*A.rows, A.table(self,rowsep=mat_separator,rowstart='',rowend=''))
-        elif not self._settings['mat_nested']:
-            return 'float[%s](\n%s\n) /* a %sx%s matrix */' % (A.cols*A.rows,
-                            A.table(self,rowsep=mat_separator,rowstart='',rowend=''),
-                            A.rows,A.cols)
-        elif self._settings['mat_nested']:
-            return 'float[%s][%s](\n%s\n)' % (A.rows,A.cols,A.table(self,rowsep=mat_separator,rowstart='float[](',rowend=')'))
+            return "float[%s](%s)" % (
+                A.cols * A.rows,
+                A.table(self, rowsep=mat_separator, rowstart="", rowend=""),
+            )
+        elif not self._settings["mat_nested"]:
+            return "float[%s](\n%s\n) /* a %sx%s matrix */" % (
+                A.cols * A.rows,
+                A.table(self, rowsep=mat_separator, rowstart="", rowend=""),
+                A.rows,
+                A.cols,
+            )
+        elif self._settings["mat_nested"]:
+            return "float[%s][%s](\n%s\n)" % (
+                A.rows,
+                A.cols,
+                A.table(self, rowsep=mat_separator, rowstart="float[](", rowend=")"),
+            )
 
-    _print_Matrix = \
-        _print_DenseMatrix = \
-        _print_MutableDenseMatrix = \
-        _print_ImmutableMatrix = \
-        _print_ImmutableDenseMatrix = \
-        _print_MatrixBase
+    _print_Matrix = (
+        _print_DenseMatrix
+    ) = (
+        _print_MutableDenseMatrix
+    ) = _print_ImmutableMatrix = _print_ImmutableDenseMatrix = _print_MatrixBase
 
     def _traverse_matrix_indices(self, mat):
-        mat_transpose = self._settings['mat_transpose']
+        mat_transpose = self._settings["mat_transpose"]
         if mat_transpose:
-            rows,cols = mat.shape
+            rows, cols = mat.shape
         else:
-            cols,rows = mat.shape
+            cols, rows = mat.shape
         return ((i, j) for i in range(cols) for j in range(rows))
 
     def _print_MatrixElement(self, expr):
         # print('begin _print_MatrixElement')
-        nest = self._settings['mat_nested'];
-        glsl_types = self._settings['glsl_types'];
-        mat_transpose = self._settings['mat_transpose'];
+        nest = self._settings["mat_nested"]
+        glsl_types = self._settings["glsl_types"]
+        mat_transpose = self._settings["mat_transpose"]
         if mat_transpose:
-            cols,rows = expr.parent.shape
-            i,j = expr.j,expr.i
+            cols, rows = expr.parent.shape
+            i, j = expr.j, expr.i
         else:
-            rows,cols = expr.parent.shape
-            i,j = expr.i,expr.j
+            rows, cols = expr.parent.shape
+            i, j = expr.i, expr.j
         pnt = self._print(expr.parent)
-        if glsl_types and ((rows <= 4 and cols <=4) or nest):
+        if glsl_types and ((rows <= 4 and cols <= 4) or nest):
             # print('end _print_MatrixElement case A',nest,glsl_types)
             return "%s[%s][%s]" % (pnt, i, j)
         else:
             # print('end _print_MatrixElement case B',nest,glsl_types)
-            return "{0}[{1}]".format(pnt, i + j*rows)
+            return "{0}[{1}]".format(pnt, i + j * rows)
 
     def _print_list(self, expr):
-        l = ', '.join(self._print(item) for item in expr)
-        glsl_types = self._settings['glsl_types']
+        l = ", ".join(self._print(item) for item in expr)
+        glsl_types = self._settings["glsl_types"]
         if len(expr) <= 4 and glsl_types:
-            return 'vec%s(%s)' % (len(expr),l)
+            return "vec%s(%s)" % (len(expr), l)
         else:
-            return 'float[%s](%s)' % (len(expr),l)
+            return "float[%s](%s)" % (len(expr), l)
 
     _print_tuple = _print_list
     _print_Tuple = _print_list
@@ -183,10 +197,14 @@ class GLSLPrinter(CodePrinter):
         loopstart = "for (int %(varble)s=%(start)s; %(varble)s<%(end)s; %(varble)s++){"
         for i in indices:
             # GLSL arrays start at 0 and end at dimension-1
-            open_lines.append(loopstart % {
-                'varble': self._print(i.label),
-                'start': self._print(i.lower),
-                'end': self._print(i.upper + 1)})
+            open_lines.append(
+                loopstart
+                % {
+                    "varble": self._print(i.label),
+                    "start": self._print(i.lower),
+                    "end": self._print(i.upper + 1),
+                }
+            )
             close_lines.append("}")
         return open_lines, close_lines
 
@@ -215,11 +233,13 @@ class GLSLPrinter(CodePrinter):
         if expr.args[-1].cond != True:
             # We need the last conditional to be a True, otherwise the resulting
             # function may not return a result.
-            raise ValueError("All Piecewise expressions must contain an "
-                             "(expr, True) statement to be used as a default "
-                             "condition. Without one, the generated "
-                             "expression may not evaluate to anything under "
-                             "some condition.")
+            raise ValueError(
+                "All Piecewise expressions must contain an "
+                "(expr, True) statement to be used as a default "
+                "condition. Without one, the generated "
+                "expression may not evaluate to anything under "
+                "some condition."
+            )
         lines = []
         if expr.has(Assignment):
             for i, (e, c) in enumerate(expr.args):
@@ -238,11 +258,12 @@ class GLSLPrinter(CodePrinter):
             # operators. This has the downside that inline operators will
             # not work for statements that span multiple lines (Matrix or
             # Indexed expressions).
-            ecpairs = ["((%s) ? (\n%s\n)\n" % (self._print(c),
-                                               self._print(e))
-                    for e, c in expr.args[:-1]]
+            ecpairs = [
+                "((%s) ? (\n%s\n)\n" % (self._print(c), self._print(e))
+                for e, c in expr.args[:-1]
+            ]
             last_line = ": (\n%s\n)" % self._print(expr.args[-1].expr)
-            return ": ".join(ecpairs) + last_line + " ".join([")"*len(ecpairs)])
+            return ": ".join(ecpairs) + last_line + " ".join([")" * len(ecpairs)])
 
     def _print_Idx(self, expr):
         return self._print(expr.label)
@@ -253,27 +274,23 @@ class GLSLPrinter(CodePrinter):
         elem = S.Zero
         offset = S.One
         for i in reversed(range(expr.rank)):
-            elem += expr.indices[i]*offset
+            elem += expr.indices[i] * offset
             offset *= dims[i]
-        return "%s[%s]" % (self._print(expr.base.label),
-                           self._print(elem))
+        return "%s[%s]" % (self._print(expr.base.label), self._print(elem))
 
     def _print_Pow(self, expr):
         PREC = precedence(expr)
         if expr.exp == -1:
-            return '1.0/%s' % (self.parenthesize(expr.base, PREC))
+            return "1.0/%s" % (self.parenthesize(expr.base, PREC))
         elif expr.exp == 0.5:
-            return 'sqrt(%s)' % self._print(expr.base)
+            return "sqrt(%s)" % self._print(expr.base)
         else:
             try:
                 e = self._print(float(expr.exp))
             except TypeError:
                 e = self._print(expr.exp)
             # return self.known_functions['pow']+'(%s, %s)' % (self._print(expr.base),e)
-            return self._print_Function_with_args('pow', (
-                self._print(expr.base),
-                e
-            ))
+            return self._print_Function_with_args("pow", (self._print(expr.base), e))
 
     def _print_int(self, expr):
         return str(float(expr))
@@ -288,38 +305,46 @@ class GLSLPrinter(CodePrinter):
         return "{0} {1} {2}".format(lhs_code, op, rhs_code)
 
     def _print_Add(self, expr, order=None):
-        if self._settings['use_operators']:
+        if self._settings["use_operators"]:
             return CodePrinter._print_Add(self, expr, order=order)
 
         terms = expr.as_ordered_terms()
 
-        def partition(p,l):
-            return reduce(lambda x, y: (x[0]+[y], x[1]) if p(y) else (x[0], x[1]+[y]), l,  ([], []))
-        def add(a,b):
-            return self._print_Function_with_args('add', (a, b))
+        def partition(p, l):
+            return reduce(
+                lambda x, y: (x[0] + [y], x[1]) if p(y) else (x[0], x[1] + [y]),
+                l,
+                ([], []),
+            )
+
+        def add(a, b):
+            return self._print_Function_with_args("add", (a, b))
             # return self.known_functions['add']+'(%s, %s)' % (a,b)
+
         neg, pos = partition(lambda arg: _coeff_isneg(arg), terms)
-        s = pos = reduce(lambda a,b: add(a,b), map(lambda t: self._print(t),pos))
+        s = pos = reduce(lambda a, b: add(a, b), map(lambda t: self._print(t), pos))
         if neg:
             # sum the absolute values of the negative terms
-            neg = reduce(lambda a,b: add(a,b), map(lambda n: self._print(-n),neg))
+            neg = reduce(lambda a, b: add(a, b), map(lambda n: self._print(-n), neg))
             # then subtract them from the positive terms
-            s = self._print_Function_with_args('sub', (pos,neg))
+            s = self._print_Function_with_args("sub", (pos, neg))
             # s = self.known_functions['sub']+'(%s, %s)' % (pos,neg)
         return s
 
     def _print_Mul(self, expr, **kwargs):
-        if self._settings['use_operators']:
+        if self._settings["use_operators"]:
             return CodePrinter._print_Mul(self, expr, **kwargs)
         terms = expr.as_ordered_factors()
-        def mul(a,b):
-            # return self.known_functions['mul']+'(%s, %s)' % (a,b)
-            return self._print_Function_with_args('mul', (a,b))
 
-        s = reduce(lambda a,b: mul(a,b), map(lambda t: self._print(t), terms))
+        def mul(a, b):
+            # return self.known_functions['mul']+'(%s, %s)' % (a,b)
+            return self._print_Function_with_args("mul", (a, b))
+
+        s = reduce(lambda a, b: mul(a, b), map(lambda t: self._print(t), terms))
         return s
 
-def glsl_code(expr,assign_to=None,**settings):
+
+def glsl_code(expr, assign_to=None, **settings):
     """Converts an expr to a string of GLSL code
 
     Parameters
@@ -490,7 +515,8 @@ def glsl_code(expr,assign_to=None,**settings):
     }
     A[2][0] = sin(x);
     """
-    return GLSLPrinter(settings).doprint(expr,assign_to)
+    return GLSLPrinter(settings).doprint(expr, assign_to)
+
 
 def print_glsl(expr, **settings):
     """Prints the GLSL representation of the given expression.

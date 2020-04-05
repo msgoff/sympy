@@ -17,21 +17,39 @@ from __future__ import print_function, division
 
 import random
 
-from sympy import (factorial, exp, S, sympify, I, zeta, polylog, log, beta,
-                   hyper, binomial, Piecewise, floor, besseli, sqrt, Sum, Dummy)
+from sympy import (
+    factorial,
+    exp,
+    S,
+    sympify,
+    I,
+    zeta,
+    polylog,
+    log,
+    beta,
+    hyper,
+    binomial,
+    Piecewise,
+    floor,
+    besseli,
+    sqrt,
+    Sum,
+    Dummy,
+)
 from sympy.stats import density
 from sympy.stats.drv import SingleDiscreteDistribution, SingleDiscretePSpace
 from sympy.stats.joint_rv import JointPSpace, CompoundDistribution
 from sympy.stats.rv import _value_check, RandomSymbol
 
-__all__ = ['Geometric',
-'Hermite',
-'Logarithmic',
-'NegativeBinomial',
-'Poisson',
-'Skellam',
-'YuleSimon',
-'Zeta'
+__all__ = [
+    "Geometric",
+    "Hermite",
+    "Logarithmic",
+    "NegativeBinomial",
+    "Poisson",
+    "Skellam",
+    "YuleSimon",
+    "Zeta",
 ]
 
 
@@ -45,11 +63,12 @@ def rv(symbol, cls, *args):
     return pspace.value
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Geometric distribution ------------------------------------------------------------
 
+
 class GeometricDistribution(SingleDiscreteDistribution):
-    _argnames = ('p',)
+    _argnames = ("p",)
     set = S.Naturals
 
     @staticmethod
@@ -57,15 +76,16 @@ class GeometricDistribution(SingleDiscreteDistribution):
         _value_check((0 < p, p <= 1), "p must be between 0 and 1")
 
     def pdf(self, k):
-        return (1 - self.p)**(k - 1) * self.p
+        return (1 - self.p) ** (k - 1) * self.p
 
     def _characteristic_function(self, t):
         p = self.p
-        return p * exp(I*t) / (1 - (1 - p)*exp(I*t))
+        return p * exp(I * t) / (1 - (1 - p) * exp(I * t))
 
     def _moment_generating_function(self, t):
         p = self.p
         return p * exp(t) / (1 - (1 - p) * exp(t))
+
 
 def Geometric(name, p):
     r"""
@@ -116,38 +136,39 @@ def Geometric(name, p):
     return rv(name, GeometricDistribution, p)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Hermite distribution ---------------------------------------------------------
 
 
 class HermiteDistribution(SingleDiscreteDistribution):
-    _argnames = ('a1', 'a2')
+    _argnames = ("a1", "a2")
     set = S.Naturals0
 
     @staticmethod
     def check(a1, a2):
-        _value_check(a1.is_nonnegative, 'Parameter a1 must be >= 0.')
-        _value_check(a2.is_nonnegative, 'Parameter a2 must be >= 0.')
+        _value_check(a1.is_nonnegative, "Parameter a1 must be >= 0.")
+        _value_check(a2.is_nonnegative, "Parameter a2 must be >= 0.")
 
     def pdf(self, k):
         a1, a2 = self.a1, self.a2
         term1 = exp(-(a1 + a2))
         j = Dummy("j", integer=True)
-        num = a1**(k - 2*j) * a2**j
-        den = factorial(k - 2*j) * factorial(j)
-        return term1 * Sum(num/den, (j, 0, k//2)).doit()
+        num = a1 ** (k - 2 * j) * a2 ** j
+        den = factorial(k - 2 * j) * factorial(j)
+        return term1 * Sum(num / den, (j, 0, k // 2)).doit()
 
     def _moment_generating_function(self, t):
         a1, a2 = self.a1, self.a2
         term1 = a1 * (exp(t) - 1)
-        term2 = a2 * (exp(2*t) - 1)
+        term2 = a2 * (exp(2 * t) - 1)
         return exp(term1 + term2)
 
     def _characteristic_function(self, t):
         a1, a2 = self.a1, self.a2
-        term1 = a1 * (exp(I*t) - 1)
-        term2 = a2 * (exp(2*I*t) - 1)
+        term1 = a1 * (exp(I * t) - 1)
+        term2 = a2 * (exp(2 * I * t) - 1)
         return exp(term1 + term2)
+
 
 def Hermite(name, a1, a2):
     r"""
@@ -201,11 +222,12 @@ def Hermite(name, a1, a2):
     return rv(name, HermiteDistribution, a1, a2)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Logarithmic distribution ------------------------------------------------------------
 
+
 class LogarithmicDistribution(SingleDiscreteDistribution):
-    _argnames = ('p',)
+    _argnames = ("p",)
 
     set = S.Naturals
 
@@ -215,11 +237,11 @@ class LogarithmicDistribution(SingleDiscreteDistribution):
 
     def pdf(self, k):
         p = self.p
-        return (-1) * p**k / (k * log(1 - p))
+        return (-1) * p ** k / (k * log(1 - p))
 
     def _characteristic_function(self, t):
         p = self.p
-        return log(1 - p * exp(I*t)) / log(1 - p)
+        return log(1 - p * exp(I * t)) / log(1 - p)
 
     def _moment_generating_function(self, t):
         p = self.p
@@ -279,35 +301,36 @@ def Logarithmic(name, p):
     return rv(name, LogarithmicDistribution, p)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Negative binomial distribution ------------------------------------------------------------
 
+
 class NegativeBinomialDistribution(SingleDiscreteDistribution):
-    _argnames = ('r', 'p')
+    _argnames = ("r", "p")
     set = S.Naturals0
 
     @staticmethod
     def check(r, p):
-        _value_check(r > 0, 'r should be positive')
-        _value_check((p > 0, p < 1), 'p should be between 0 and 1')
+        _value_check(r > 0, "r should be positive")
+        _value_check((p > 0, p < 1), "p should be between 0 and 1")
 
     def pdf(self, k):
         r = self.r
         p = self.p
 
-        return binomial(k + r - 1, k) * (1 - p)**r * p**k
+        return binomial(k + r - 1, k) * (1 - p) ** r * p ** k
 
     def _characteristic_function(self, t):
         r = self.r
         p = self.p
 
-        return ((1 - p) / (1 - p * exp(I*t)))**r
+        return ((1 - p) / (1 - p * exp(I * t))) ** r
 
     def _moment_generating_function(self, t):
         r = self.r
         p = self.p
 
-        return ((1 - p) / (1 - p * exp(t)))**r
+        return ((1 - p) / (1 - p * exp(t))) ** r
 
     def sample(self):
         ### TODO
@@ -365,11 +388,12 @@ def NegativeBinomial(name, r, p):
     return rv(name, NegativeBinomialDistribution, r, p)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Poisson distribution ------------------------------------------------------------
 
+
 class PoissonDistribution(SingleDiscreteDistribution):
-    _argnames = ('lamda',)
+    _argnames = ("lamda",)
 
     set = S.Naturals0
 
@@ -378,12 +402,12 @@ class PoissonDistribution(SingleDiscreteDistribution):
         _value_check(lamda > 0, "Lambda must be positive")
 
     def pdf(self, k):
-        return self.lamda**k / factorial(k) * exp(-self.lamda)
+        return self.lamda ** k / factorial(k) * exp(-self.lamda)
 
     def sample(self):
         def search(x, y, u):
             while x < y:
-                mid = (x + y)//2
+                mid = (x + y) // 2
                 if u <= self.cdf(mid):
                     y = mid
                 else:
@@ -395,13 +419,13 @@ class PoissonDistribution(SingleDiscreteDistribution):
             return S.Zero
         n = S.One
         while True:
-            if u > self.cdf(2*n):
+            if u > self.cdf(2 * n):
                 n *= 2
             else:
-                return search(n, 2*n, u)
+                return search(n, 2 * n, u)
 
     def _characteristic_function(self, t):
-        return exp(self.lamda * (exp(I*t) - 1))
+        return exp(self.lamda * (exp(I * t) - 1))
 
     def _moment_generating_function(self, t):
         return exp(self.lamda * (exp(t) - 1))
@@ -461,13 +485,13 @@ def Poisson(name, lamda):
 
 
 class SkellamDistribution(SingleDiscreteDistribution):
-    _argnames = ('mu1', 'mu2')
+    _argnames = ("mu1", "mu2")
     set = S.Integers
 
     @staticmethod
     def check(mu1, mu2):
-        _value_check(mu1 >= 0, 'Parameter mu1 must be >= 0')
-        _value_check(mu2 >= 0, 'Parameter mu2 must be >= 0')
+        _value_check(mu1 >= 0, "Parameter mu1 must be >= 0")
+        _value_check(mu2 >= 0, "Parameter mu2 must be >= 0")
 
     def pdf(self, k):
         (mu1, mu2) = (self.mu1, self.mu2)
@@ -476,8 +500,7 @@ class SkellamDistribution(SingleDiscreteDistribution):
         return term1 * term2
 
     def _cdf(self, x):
-        raise NotImplementedError(
-            "Skellam doesn't have closed form for the CDF.")
+        raise NotImplementedError("Skellam doesn't have closed form for the CDF.")
 
     def _characteristic_function(self, t):
         (mu1, mu2) = (self.mu1, self.mu2)
@@ -544,27 +567,30 @@ def Skellam(name, mu1, mu2):
     return rv(name, SkellamDistribution, mu1, mu2)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Yule-Simon distribution ------------------------------------------------------------
 
+
 class YuleSimonDistribution(SingleDiscreteDistribution):
-    _argnames = ('rho',)
+    _argnames = ("rho",)
     set = S.Naturals
 
     @staticmethod
     def check(rho):
-        _value_check(rho > 0, 'rho should be positive')
+        _value_check(rho > 0, "rho should be positive")
 
     def pdf(self, k):
         rho = self.rho
         return rho * beta(k, rho + 1)
 
     def _cdf(self, x):
-        return Piecewise((1 - floor(x) * beta(floor(x), self.rho + 1), x >= 1), (0, True))
+        return Piecewise(
+            (1 - floor(x) * beta(floor(x), self.rho + 1), x >= 1), (0, True)
+        )
 
     def _characteristic_function(self, t):
         rho = self.rho
-        return rho * hyper((1, 1), (rho + 2,), exp(I*t)) * exp(I*t) / (rho + 1)
+        return rho * hyper((1, 1), (rho + 2,), exp(I * t)) * exp(I * t) / (rho + 1)
 
     def _moment_generating_function(self, t):
         rho = self.rho
@@ -623,23 +649,24 @@ def YuleSimon(name, rho):
     return rv(name, YuleSimonDistribution, rho)
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Zeta distribution ------------------------------------------------------------
 
+
 class ZetaDistribution(SingleDiscreteDistribution):
-    _argnames = ('s',)
+    _argnames = ("s",)
     set = S.Naturals
 
     @staticmethod
     def check(s):
-        _value_check(s > 1, 's should be greater than 1')
+        _value_check(s > 1, "s should be greater than 1")
 
     def pdf(self, k):
         s = self.s
-        return 1 / (k**s * zeta(s))
+        return 1 / (k ** s * zeta(s))
 
     def _characteristic_function(self, t):
-        return polylog(self.s, exp(I*t)) / zeta(self.s)
+        return polylog(self.s, exp(I * t)) / zeta(self.s)
 
     def _moment_generating_function(self, t):
         return polylog(self.s, exp(t)) / zeta(self.s)

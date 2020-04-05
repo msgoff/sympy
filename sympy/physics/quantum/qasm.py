@@ -17,23 +17,27 @@ CNOT(1,0)*CNOT(0,1)*CNOT(1,0)
 """
 
 __all__ = [
-    'Qasm',
-    ]
+    "Qasm",
+]
 
-from sympy.physics.quantum.gate import H, CNOT, X, Z, CGate, CGateS, SWAP, S, T,CPHASE
+from sympy.physics.quantum.gate import H, CNOT, X, Z, CGate, CGateS, SWAP, S, T, CPHASE
 from sympy.physics.quantum.circuitplot import Mz
+
 
 def read_qasm(lines):
     return Qasm(*lines.splitlines())
 
+
 def read_qasm_file(filename):
     return Qasm(*open(filename).readlines())
+
 
 def prod(c):
     p = 1
     for ci in c:
         p *= ci
     return p
+
 
 def flip_index(i, n):
     """Reorder qubit indices from largest to smallest.
@@ -44,7 +48,8 @@ def flip_index(i, n):
     >>> flip_index(1, 2)
     0
     """
-    return n-i-1
+    return n - i - 1
+
 
 def trim(line):
     """Remove everything following comment # characters in line.
@@ -55,9 +60,10 @@ def trim(line):
     >>> trim('something #happens here')
     'something '
     """
-    if not '#' in line:
+    if not "#" in line:
         return line
-    return line.split('#')[0]
+    return line.split("#")[0]
+
 
 def get_index(target, labels):
     """Get qubit labels from the rest of the line,and return indices
@@ -71,8 +77,10 @@ def get_index(target, labels):
     nq = len(labels)
     return flip_index(labels.index(target), nq)
 
+
 def get_indices(targets, labels):
     return [get_index(t, labels) for t in targets]
+
 
 def nonblank(args):
     for line in args:
@@ -82,10 +90,12 @@ def nonblank(args):
         yield line
     return
 
+
 def fullsplit(line):
     words = line.split()
-    rest = ' '.join(words[1:])
-    return fixcommand(words[0]), [s.strip() for s in rest.split(',')]
+    rest = " ".join(words[1:])
+    return fixcommand(words[0]), [s.strip() for s in rest.split(",")]
+
 
 def fixcommand(c):
     """Fix Qasm command names.
@@ -93,13 +103,14 @@ def fixcommand(c):
     Remove all of forbidden characters from command c, and
     replace 'def' with 'qdef'.
     """
-    forbidden_characters = ['-']
+    forbidden_characters = ["-"]
     c = c.lower()
     for char in forbidden_characters:
-        c = c.replace(char, '')
-    if c == 'def':
-        return 'qdef'
+        c = c.replace(char, "")
+    if c == "def":
+        return "qdef"
     return c
+
 
 def stripquotes(s):
     """Replace explicit quotes in a string.
@@ -112,9 +123,10 @@ def stripquotes(s):
     >>> stripquotes('S') == 'S'
     True
     """
-    s = s.replace('"', '') # Remove second set of quotes?
-    s = s.replace("'", '')
+    s = s.replace('"', "")  # Remove second set of quotes?
+    s = s.replace("'", "")
     return s
+
 
 class Qasm(object):
     """Class to form objects from Qasm lines
@@ -127,6 +139,7 @@ class Qasm(object):
     >>> q.get_circuit()
     CNOT(1,0)*CNOT(0,1)*CNOT(1,0)
     """
+
     def __init__(self, *args, **kwargs):
         self.defs = {}
         self.circuit = []
@@ -138,7 +151,9 @@ class Qasm(object):
     def add(self, *lines):
         for line in nonblank(lines):
             command, rest = fullsplit(line)
-            if self.defs.get(command): #defs come first, since you can override built-in
+            if self.defs.get(
+                command
+            ):  # defs come first, since you can override built-in
                 function = self.defs.get(command)
                 indices = self.indices(rest)
                 if len(indices) == 1:
@@ -159,12 +174,14 @@ class Qasm(object):
 
     def plot(self):
         from sympy.physics.quantum.circuitplot import CircuitPlot
+
         circuit, labels = self.get_circuit(), self.get_labels()
         CircuitPlot(circuit, len(labels), labels=labels, inits=self.inits)
 
     def qubit(self, arg, init=None):
         self.labels.append(arg)
-        if init: self.inits[arg] = init
+        if init:
+            self.inits[arg] = init
 
     def indices(self, args):
         return get_indices(args, self.labels)
@@ -219,6 +236,7 @@ class Qasm(object):
 
     def qdef(self, name, ncontrols, symbol):
         from sympy.physics.quantum.circuitplot import CreateOneQubitGate, CreateCGate
+
         ncontrols = int(ncontrols)
         command = fixcommand(name)
         symbol = stripquotes(symbol)

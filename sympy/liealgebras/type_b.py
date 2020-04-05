@@ -3,8 +3,8 @@ from __future__ import print_function, division
 from .cartan_type import Standard_Cartan
 from sympy.core.backend import eye
 
-class TypeB(Standard_Cartan):
 
+class TypeB(Standard_Cartan):
     def __new__(cls, n):
         if n < 2:
             raise ValueError("n can not be less than 2")
@@ -31,7 +31,7 @@ class TypeB(Standard_Cartan):
         in the jth position.
 
         """
-        root = [0]*self.n
+        root = [0] * self.n
         root[i] = 1
         root[j] = -1
         return root
@@ -66,10 +66,10 @@ class TypeB(Standard_Cartan):
         """
         n = self.n
         if i < n:
-            return self.basic_root(i-1, i)
+            return self.basic_root(i - 1, i)
         else:
-            root = [0]*self.n
-            root[n-1] = 1
+            root = [0] * self.n
+            root[n - 1] = 1
             return root
 
     def positive_roots(self):
@@ -92,18 +92,18 @@ class TypeB(Standard_Cartan):
         n = self.n
         posroots = {}
         k = 0
-        for i in range(0, n-1):
-            for j in range(i+1, n):
-               k += 1
-               posroots[k] = self.basic_root(i, j)
-               k += 1
-               root = self.basic_root(i, j)
-               root[j] = 1
-               posroots[k] = root
+        for i in range(0, n - 1):
+            for j in range(i + 1, n):
+                k += 1
+                posroots[k] = self.basic_root(i, j)
+                k += 1
+                root = self.basic_root(i, j)
+                root[j] = 1
+                posroots[k] = root
 
         for i in range(0, n):
             k += 1
-            root = [0]*n
+            root = [0] * n
             root[i] = 1
             posroots[k] = root
 
@@ -115,7 +115,7 @@ class TypeB(Standard_Cartan):
         """
 
         n = self.n
-        return 2*(n**2)
+        return 2 * (n ** 2)
 
     def cartan_matrix(self):
         """
@@ -140,15 +140,15 @@ class TypeB(Standard_Cartan):
         """
 
         n = self.n
-        m = 2* eye(n)
+        m = 2 * eye(n)
         i = 1
-        while i < n-1:
-            m[i, i+1] = -1
-            m[i, i-1] = -1
+        while i < n - 1:
+            m[i, i + 1] = -1
+            m[i, i - 1] = -1
             i += 1
         m[0, 1] = -1
-        m[n-2, n-1] = -2
-        m[n-1, n-2] = -1
+        m[n - 2, n - 1] = -2
+        m[n - 1, n - 2] = -1
         return m
 
     def basis(self):
@@ -157,7 +157,7 @@ class TypeB(Standard_Cartan):
         """
 
         n = self.n
-        return (n**2 - n)/2
+        return (n ** 2 - n) / 2
 
     def lie_algebra(self):
         """
@@ -165,10 +165,10 @@ class TypeB(Standard_Cartan):
         """
 
         n = self.n
-        return "so(" + str(2*n) + ")"
+        return "so(" + str(2 * n) + ")"
 
     def dynkin_diagram(self):
         n = self.n
         diag = "---".join("0" for i in range(1, n)) + "=>=0\n"
-        diag += "   ".join(str(i) for i in range(1, n+1))
+        diag += "   ".join(str(i) for i in range(1, n + 1))
         return diag

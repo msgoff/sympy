@@ -88,10 +88,11 @@ def is_square(n, prep=True):
         if n in [0, 1]:
             return True
     m = n & 127
-    if not ((m*0x8bc40d7d) & (m*0xa1e2f5d1) & 0x14020a):
+    if not ((m * 0x8BC40D7D) & (m * 0xA1E2F5D1) & 0x14020A):
         m = n % 63
-        if not ((m*0x3d491df7) & (m*0xc824a9f9) & 0x10f14008):
+        if not ((m * 0x3D491DF7) & (m * 0xC824A9F9) & 0x10F14008):
             from sympy.core.power import integer_nthroot
+
             return integer_nthroot(n, 2)[1]
     return False
 
@@ -180,7 +181,7 @@ def _lucas_sequence(n, P, Q, k):
     (0, 2, 1)
 
     """
-    D = P*P - 4*Q
+    D = P * P - 4 * Q
     if n < 2:
         raise ValueError("n must be >= 2")
     if k < 0:
@@ -197,11 +198,11 @@ def _lucas_sequence(n, P, Q, k):
     if Q == 1:
         # Optimization for extra strong tests.
         while b > 1:
-            U = (U*V) % n
-            V = (V*V - 2) % n
+            U = (U * V) % n
+            V = (V * V - 2) % n
             b -= 1
             if (k >> (b - 1)) & 1:
-                U, V = U*P + V, V*P + U*D
+                U, V = U * P + V, V * P + U * D
                 if U & 1:
                     U += n
                 if V & 1:
@@ -210,15 +211,15 @@ def _lucas_sequence(n, P, Q, k):
     elif P == 1 and Q == -1:
         # Small optimization for 50% of Selfridge parameters.
         while b > 1:
-            U = (U*V) % n
+            U = (U * V) % n
             if Qk == 1:
-                V = (V*V - 2) % n
+                V = (V * V - 2) % n
             else:
-                V = (V*V + 2) % n
+                V = (V * V + 2) % n
                 Qk = 1
             b -= 1
-            if (k >> (b-1)) & 1:
-                U, V = U + V, V + U*D
+            if (k >> (b - 1)) & 1:
+                U, V = U + V, V + U * D
                 if U & 1:
                     U += n
                 if V & 1:
@@ -228,12 +229,12 @@ def _lucas_sequence(n, P, Q, k):
     else:
         # The general case with any P and Q.
         while b > 1:
-            U = (U*V) % n
-            V = (V*V - 2*Qk) % n
+            U = (U * V) % n
+            V = (V * V - 2 * Qk) % n
             Qk *= Qk
             b -= 1
             if (k >> (b - 1)) & 1:
-                U, V = U*P + V, V*P + U*D
+                U, V = U * P + V, V * P + U * D
                 if U & 1:
                     U += n
                 if V & 1:
@@ -255,6 +256,7 @@ def _lucas_selfridge_params(n):
     """
     from sympy.core import igcd
     from sympy.ntheory.residue_ntheory import jacobi_symbol
+
     D = 5
     while True:
         g = igcd(abs(D), n)
@@ -263,10 +265,10 @@ def _lucas_selfridge_params(n):
         if jacobi_symbol(D, n) == -1:
             break
         if D > 0:
-          D = -D - 2
+            D = -D - 2
         else:
-          D = -D + 2
-    return _int_tuple(D, 1, (1 - D)/4)
+            D = -D + 2
+    return _int_tuple(D, 1, (1 - D) / 4)
 
 
 def _lucas_extrastrong_params(n):
@@ -280,6 +282,7 @@ def _lucas_extrastrong_params(n):
     """
     from sympy.core import igcd
     from sympy.ntheory.residue_ntheory import jacobi_symbol
+
     P, Q, D = 3, 1, 5
     while True:
         g = igcd(D, n)
@@ -288,7 +291,7 @@ def _lucas_extrastrong_params(n):
         if jacobi_symbol(D, n) == -1:
             break
         P += 1
-        D = P*P - 4
+        D = P * P - 4
     return _int_tuple(D, P, Q)
 
 
@@ -335,7 +338,7 @@ def is_lucas_prp(n):
     D, P, Q = _lucas_selfridge_params(n)
     if D == 0:
         return False
-    U, V, Qk = _lucas_sequence(n, P, Q, n+1)
+    U, V, Qk = _lucas_sequence(n, P, Q, n + 1)
     return U == 0
 
 
@@ -370,6 +373,7 @@ def is_strong_lucas_prp(n):
     18971
     """
     from sympy.ntheory.factor_ import trailing
+
     n = as_int(n)
     if n == 2:
         return True
@@ -384,14 +388,14 @@ def is_strong_lucas_prp(n):
 
     # remove powers of 2 from n+1 (= k * 2**s)
     s = trailing(n + 1)
-    k = (n+1) >> s
+    k = (n + 1) >> s
 
     U, V, Qk = _lucas_sequence(n, P, Q, k)
 
     if U == 0 or V == 0:
         return True
     for r in range(1, s):
-        V = (V*V - 2*Qk) % n
+        V = (V * V - 2 * Qk) % n
         if V == 0:
             return True
         Qk = pow(Qk, 2, n)
@@ -444,6 +448,7 @@ def is_extra_strong_lucas_prp(n):
     #      sequence must have Q=1.  See Grantham theorem 2.3, any of the
     #      references on the MathWorld page, or run it and see Q=-1 is wrong.
     from sympy.ntheory.factor_ import trailing
+
     n = as_int(n)
     if n == 2:
         return True
@@ -458,7 +463,7 @@ def is_extra_strong_lucas_prp(n):
 
     # remove powers of 2 from n+1 (= k * 2**s)
     s = trailing(n + 1)
-    k = (n+1) >> s
+    k = (n + 1) >> s
 
     U, V, Qk = _lucas_sequence(n, P, Q, k)
 
@@ -467,7 +472,7 @@ def is_extra_strong_lucas_prp(n):
     if V == 0:
         return True
     for r in range(1, s):
-        V = (V*V - 2) % n
+        V = (V * V - 2) % n
         if V == 0:
             return True
     return False
@@ -557,9 +562,20 @@ def isprime(n):
         return False
     if n < 49:
         return True
-    if (n %  7) == 0 or (n % 11) == 0 or (n % 13) == 0 or (n % 17) == 0 or \
-       (n % 19) == 0 or (n % 23) == 0 or (n % 29) == 0 or (n % 31) == 0 or \
-       (n % 37) == 0 or (n % 41) == 0 or (n % 43) == 0 or (n % 47) == 0:
+    if (
+        (n % 7) == 0
+        or (n % 11) == 0
+        or (n % 13) == 0
+        or (n % 17) == 0
+        or (n % 19) == 0
+        or (n % 23) == 0
+        or (n % 29) == 0
+        or (n % 31) == 0
+        or (n % 37) == 0
+        or (n % 41) == 0
+        or (n % 43) == 0
+        or (n % 47) == 0
+    ):
         return False
     if n < 2809:
         return True
@@ -568,6 +584,7 @@ def isprime(n):
 
     # bisection search on the sieve if the sieve is large enough
     from sympy.ntheory.generate import sieve as s
+
     if n <= s._list[-1]:
         l, u = s.search(n)
         return l == u
@@ -576,10 +593,11 @@ def isprime(n):
     # This should be a bit faster than our step 2, and for large values will
     # be a lot faster than our step 3 (C+GMP vs. Python).
     from sympy.core.compatibility import HAS_GMPY
+
     if HAS_GMPY == 2:
         from gmpy2 import is_strong_prp, is_strong_selfridge_prp
-        return is_strong_prp(n, 2) and is_strong_selfridge_prp(n)
 
+        return is_strong_prp(n, 2) and is_strong_selfridge_prp(n)
 
     # Step 2: deterministic Miller-Rabin testing for numbers < 2^64.  See:
     #    https://miller-rabin.appspot.com/
@@ -594,35 +612,54 @@ def isprime(n):
     if n < 55245642489451:
         return mr(n, [2, 141889084524735, 1199124725622454117, 11096072698276303650])
     if n < 7999252175582851:
-        return mr(n, [2, 4130806001517, 149795463772692060, 186635894390467037, 3967304179347715805])
+        return mr(
+            n,
+            [
+                2,
+                4130806001517,
+                149795463772692060,
+                186635894390467037,
+                3967304179347715805,
+            ],
+        )
     if n < 585226005592931977:
-        return mr(n, [2, 123635709730000, 9233062284813009, 43835965440333360, 761179012939631437, 1263739024124850375])
+        return mr(
+            n,
+            [
+                2,
+                123635709730000,
+                9233062284813009,
+                43835965440333360,
+                761179012939631437,
+                1263739024124850375,
+            ],
+        )
     if n < 18446744073709551616:
         return mr(n, [2, 325, 9375, 28178, 450775, 9780504, 1795265022])
 
     # We could do this instead at any point:
-    #if n < 18446744073709551616:
+    # if n < 18446744073709551616:
     #   return mr(n, [2]) and is_extra_strong_lucas_prp(n)
 
     # Here are tests that are safe for MR routines that don't understand
     # large bases.
-    #if n < 9080191:
+    # if n < 9080191:
     #    return mr(n, [31, 73])
-    #if n < 19471033:
+    # if n < 19471033:
     #    return mr(n, [2, 299417])
-    #if n < 38010307:
+    # if n < 38010307:
     #    return mr(n, [2, 9332593])
-    #if n < 316349281:
+    # if n < 316349281:
     #    return mr(n, [11000544, 31481107])
-    #if n < 4759123141:
+    # if n < 4759123141:
     #    return mr(n, [2, 7, 61])
-    #if n < 105936894253:
+    # if n < 105936894253:
     #    return mr(n, [2, 1005905886, 1340600841])
-    #if n < 31858317218647:
+    # if n < 31858317218647:
     #    return mr(n, [2, 642735, 553174392, 3046413974])
-    #if n < 3071837692357849:
+    # if n < 3071837692357849:
     #    return mr(n, [2, 75088, 642735, 203659041, 3613982119])
-    #if n < 18446744073709551616:
+    # if n < 18446744073709551616:
     #    return mr(n, [2, 325, 9375, 28178, 450775, 9780504, 1795265022])
 
     # Step 3: BPSW.
@@ -638,8 +675,8 @@ def isprime(n):
     return mr(n, [2]) and is_strong_lucas_prp(n)
 
     # Using extra strong test, which is somewhat faster
-    #return mr(n, [2]) and is_extra_strong_lucas_prp(n)
+    # return mr(n, [2]) and is_extra_strong_lucas_prp(n)
 
     # Add a random M-R base
-    #import random
-    #return mr(n, [2, random.randint(3, n-1)]) and is_strong_lucas_prp(n)
+    # import random
+    # return mr(n, [2, random.randint(3, n-1)]) and is_strong_lucas_prp(n)

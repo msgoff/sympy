@@ -22,6 +22,7 @@ class StochasticPSpace(ProductPSpace):
     def __new__(cls, sym, process, distribution=None):
         sym = _symbol_converter(sym)
         from sympy.stats.stochastic_process_types import StochasticProcess
+
         if not isinstance(process, StochasticProcess):
             raise TypeError("`process` must be an instance of StochasticProcess.")
         return Basic.__new__(cls, sym, process, distribution)
@@ -35,8 +36,7 @@ class StochasticPSpace(ProductPSpace):
 
     @property
     def domain(self):
-        return ProductDomain(self.process.index_set,
-                             self.process.state_space)
+        return ProductDomain(self.process.index_set, self.process.state_space)
 
     @property
     def symbol(self):

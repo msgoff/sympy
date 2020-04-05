@@ -11,16 +11,20 @@ from sympy import Derivative as D
 
 def main():
     r, phi, theta = symbols("r,phi,theta")
-    Xi = Function('Xi')
-    R, Phi, Theta, u = map(Function, ['R', 'Phi', 'Theta', 'u'])
-    C1, C2 = symbols('C1,C2')
+    Xi = Function("Xi")
+    R, Phi, Theta, u = map(Function, ["R", "Phi", "Theta", "u"])
+    C1, C2 = symbols("C1,C2")
 
     pprint("Separation of variables in Laplace equation in spherical coordinates")
     pprint("Laplace equation in spherical coordinates:")
-    eq = Eq(D(Xi(r, phi, theta), r, 2) + 2/r * D(Xi(r, phi, theta), r) +
-            1/(r**2 * sin(phi)**2) * D(Xi(r, phi, theta), theta, 2) +
-            cos(phi)/(r**2 * sin(phi)) * D(Xi(r, phi, theta), phi) +
-            1/r**2 * D(Xi(r, phi, theta), phi, 2), 0)
+    eq = Eq(
+        D(Xi(r, phi, theta), r, 2)
+        + 2 / r * D(Xi(r, phi, theta), r)
+        + 1 / (r ** 2 * sin(phi) ** 2) * D(Xi(r, phi, theta), theta, 2)
+        + cos(phi) / (r ** 2 * sin(phi)) * D(Xi(r, phi, theta), phi)
+        + 1 / r ** 2 * D(Xi(r, phi, theta), phi, 2),
+        0,
+    )
     pprint(eq)
 
     pprint("We can either separate this equation in regards with variable r:")

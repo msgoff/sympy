@@ -18,30 +18,49 @@ from __future__ import print_function, division
 
 import random
 
-from sympy import (S, sympify, Rational, binomial, cacheit, Integer,
-                   Dummy, Eq, Intersection, Interval,
-                   Symbol, Lambda, Piecewise, Or, Gt, Lt, Ge, Le, Contains)
+from sympy import (
+    S,
+    sympify,
+    Rational,
+    binomial,
+    cacheit,
+    Integer,
+    Dummy,
+    Eq,
+    Intersection,
+    Interval,
+    Symbol,
+    Lambda,
+    Piecewise,
+    Or,
+    Gt,
+    Lt,
+    Ge,
+    Le,
+    Contains,
+)
 from sympy import beta as beta_fn
 from sympy.external import import_module
 from sympy.tensor.array import ArrayComprehensionMap
-from sympy.stats.frv import (SingleFiniteDistribution,
-                             SingleFinitePSpace)
+from sympy.stats.frv import SingleFiniteDistribution, SingleFinitePSpace
 from sympy.stats.rv import _value_check, Density, RandomSymbol
 
-numpy = import_module('numpy')
-scipy = import_module('scipy')
-pymc3 = import_module('pymc3')
+numpy = import_module("numpy")
+scipy = import_module("scipy")
+pymc3 = import_module("pymc3")
 
-__all__ = ['FiniteRV',
-'DiscreteUniform',
-'Die',
-'Bernoulli',
-'Coin',
-'Binomial',
-'BetaBinomial',
-'Hypergeometric',
-'Rademacher'
+__all__ = [
+    "FiniteRV",
+    "DiscreteUniform",
+    "Die",
+    "Bernoulli",
+    "Coin",
+    "Binomial",
+    "BetaBinomial",
+    "Hypergeometric",
+    "Rademacher",
 ]
+
 
 def rv(name, cls, *args):
     args = list(map(sympify, args))
@@ -49,16 +68,20 @@ def rv(name, cls, *args):
     dist.check(*args)
     return SingleFinitePSpace(name, dist).value
 
-class FiniteDistributionHandmade(SingleFiniteDistribution):
 
+class FiniteDistributionHandmade(SingleFiniteDistribution):
     @property
     def dict(self):
         return self.args[0]
 
     def pmf(self, x):
-        x = Symbol('x')
-        return Lambda(x, Piecewise(*(
-            [(v, Eq(k, x)) for k, v in self.dict.items()] + [(S.Zero, True)])))
+        x = Symbol("x")
+        return Lambda(
+            x,
+            Piecewise(
+                *([(v, Eq(k, x)) for k, v in self.dict.items()] + [(S.Zero, True)])
+            ),
+        )
 
     @property
     def set(self):
@@ -67,9 +90,11 @@ class FiniteDistributionHandmade(SingleFiniteDistribution):
     @staticmethod
     def check(density):
         for p in density.values():
-            _value_check((p >= 0, p <= 1),
-                        "Probability at a point must be between 0 and 1.")
+            _value_check(
+                (p >= 0, p <= 1), "Probability at a point must be between 0 and 1."
+            )
         _value_check(Eq(sum(density.values()), 1), "Total Probability must be 1.")
+
 
 def FiniteRV(name, density):
     """
@@ -88,6 +113,7 @@ def FiniteRV(name, density):
     0.700000000000000
     """
     return rv(name, FiniteDistributionHandmade, density)
+
 
 class DiscreteUniformDistribution(SingleFiniteDistribution):
     @property
@@ -110,9 +136,10 @@ class DiscreteUniformDistribution(SingleFiniteDistribution):
             return S.Zero
 
     def _sample_random(self, size):
-        x = Symbol('x')
-        return ArrayComprehensionMap(lambda: self.args[random.randint(0, len(self.args)-1)], (x, 0, size)).doit()
-
+        x = Symbol("x")
+        return ArrayComprehensionMap(
+            lambda: self.args[random.randint(0, len(self.args) - 1)], (x, 0, size)
+        ).doit()
 
 
 def DiscreteUniform(name, items):
@@ -147,12 +174,14 @@ def DiscreteUniform(name, items):
 
 
 class DieDistribution(SingleFiniteDistribution):
-    _argnames = ('sides',)
+    _argnames = ("sides",)
 
     @staticmethod
     def check(sides):
-        _value_check((sides.is_positive, sides.is_integer),
-                    "number of sides must be a positive integer.")
+        _value_check(
+            (sides.is_positive, sides.is_integer),
+            "number of sides must be a positive integer.",
+        )
 
     @property
     def is_symbolic(self):
@@ -175,10 +204,13 @@ class DieDistribution(SingleFiniteDistribution):
     def pmf(self, x):
         x = sympify(x)
         if not (x.is_number or x.is_Symbol or isinstance(x, RandomSymbol)):
-            raise ValueError("'x' expected as an argument of type 'number' or 'Symbol' or , "
-                        "'RandomSymbol' not %s" % (type(x)))
+            raise ValueError(
+                "'x' expected as an argument of type 'number' or 'Symbol' or , "
+                "'RandomSymbol' not %s" % (type(x))
+            )
         cond = Ge(x, 1) & Le(x, self.sides) & Contains(x, S.Integers)
-        return Piecewise((S.One/self.sides, cond), (S.Zero, True))
+        return Piecewise((S.One / self.sides, cond), (S.Zero, True))
+
 
 def Die(name, sides=6):
     """
@@ -212,21 +244,20 @@ def Die(name, sides=6):
 
 
 class BernoulliDistribution(SingleFiniteDistribution):
-    _argnames = ('p', 'succ', 'fail')
+    _argnames = ("p", "succ", "fail")
 
     @staticmethod
     def check(p, succ, fail):
-        _value_check((p >= 0, p <= 1),
-                    "p should be in range [0, 1].")
+        _value_check((p >= 0, p <= 1), "p should be in range [0, 1].")
 
     @property
     def set(self):
         return set([self.succ, self.fail])
 
     def pmf(self, x):
-        return Piecewise((self.p, x == self.succ),
-                         (1 - self.p, x == self.fail),
-                         (S.Zero, True))
+        return Piecewise(
+            (self.p, x == self.succ), (1 - self.p, x == self.fail), (S.Zero, True)
+        )
 
 
 def Bernoulli(name, p, succ=1, fail=0):
@@ -293,18 +324,18 @@ def Coin(name, p=S.Half):
     .. [1] https://en.wikipedia.org/wiki/Coin_flipping
 
     """
-    return rv(name, BernoulliDistribution, p, 'H', 'T')
+    return rv(name, BernoulliDistribution, p, "H", "T")
 
 
 class BinomialDistribution(SingleFiniteDistribution):
-    _argnames = ('n', 'p', 'succ', 'fail')
+    _argnames = ("n", "p", "succ", "fail")
 
     @staticmethod
     def check(n, p, succ, fail):
-        _value_check((n.is_integer, n.is_nonnegative),
-                    "'n' must be nonnegative integer.")
-        _value_check((p <= 1, p >= 0),
-                    "p should be in range [0, 1].")
+        _value_check(
+            (n.is_integer, n.is_nonnegative), "'n' must be nonnegative integer."
+        )
+        _value_check((p <= 1, p >= 0), "p should be in range [0, 1].")
 
     @property
     def high(self):
@@ -328,18 +359,25 @@ class BinomialDistribution(SingleFiniteDistribution):
         n, p = self.n, self.p
         x = sympify(x)
         if not (x.is_number or x.is_Symbol or isinstance(x, RandomSymbol)):
-            raise ValueError("'x' expected as an argument of type 'number' or 'Symbol' or , "
-                        "'RandomSymbol' not %s" % (type(x)))
+            raise ValueError(
+                "'x' expected as an argument of type 'number' or 'Symbol' or , "
+                "'RandomSymbol' not %s" % (type(x))
+            )
         cond = Ge(x, 0) & Le(x, n) & Contains(x, S.Integers)
-        return Piecewise((binomial(n, x) * p**x * (1 - p)**(n - x), cond), (S.Zero, True))
+        return Piecewise(
+            (binomial(n, x) * p ** x * (1 - p) ** (n - x), cond), (S.Zero, True)
+        )
 
     @property  # type: ignore
     @cacheit
     def dict(self):
         if self.is_symbolic:
             return Density(self)
-        return dict((k*self.succ + (self.n-k)*self.fail, self.pmf(k))
-                    for k in range(0, self.n + 1))
+        return dict(
+            (k * self.succ + (self.n - k) * self.fail, self.pmf(k))
+            for k in range(0, self.n + 1)
+        )
+
 
 def Binomial(name, n, p, succ=1, fail=0):
     """
@@ -375,20 +413,24 @@ def Binomial(name, n, p, succ=1, fail=0):
 
     return rv(name, BinomialDistribution, n, p, succ, fail)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Beta-binomial distribution ----------------------------------------------------------
 
+
 class BetaBinomialDistribution(SingleFiniteDistribution):
-    _argnames = ('n', 'alpha', 'beta')
+    _argnames = ("n", "alpha", "beta")
 
     @staticmethod
     def check(n, alpha, beta):
-        _value_check((n.is_integer, n.is_nonnegative),
-        "'n' must be nonnegative integer. n = %s." % str(n))
-        _value_check((alpha > 0),
-        "'alpha' must be: alpha > 0 . alpha = %s" % str(alpha))
-        _value_check((beta > 0),
-        "'beta' must be: beta > 0 . beta = %s" % str(beta))
+        _value_check(
+            (n.is_integer, n.is_nonnegative),
+            "'n' must be nonnegative integer. n = %s." % str(n),
+        )
+        _value_check(
+            (alpha > 0), "'alpha' must be: alpha > 0 . alpha = %s" % str(alpha)
+        )
+        _value_check((beta > 0), "'beta' must be: beta > 0 . beta = %s" % str(beta))
 
     @property
     def high(self):
@@ -415,8 +457,9 @@ class BetaBinomialDistribution(SingleFiniteDistribution):
     def _sample_pymc3(self, size):
         n, a, b = int(self.n), float(self.alpha), float(self.beta)
         with pymc3.Model():
-            pymc3.BetaBinomial('X', alpha=a, beta=b, n=n)
-            return pymc3.sample(size, chains=1, progressbar=False)[:]['X']
+            pymc3.BetaBinomial("X", alpha=a, beta=b, n=n)
+            return pymc3.sample(size, chains=1, progressbar=False)[:]["X"]
+
 
 def BetaBinomial(name, n, alpha, beta):
     """
@@ -446,16 +489,22 @@ def BetaBinomial(name, n, alpha, beta):
 
 
 class HypergeometricDistribution(SingleFiniteDistribution):
-    _argnames = ('N', 'm', 'n')
+    _argnames = ("N", "m", "n")
 
     @staticmethod
     def check(n, N, m):
-        _value_check((N.is_integer, N.is_nonnegative),
-                     "'N' must be nonnegative integer. N = %s." % str(n))
-        _value_check((n.is_integer, n.is_nonnegative),
-                     "'n' must be nonnegative integer. n = %s." % str(n))
-        _value_check((m.is_integer, m.is_nonnegative),
-                     "'m' must be nonnegative integer. m = %s." % str(n))
+        _value_check(
+            (N.is_integer, N.is_nonnegative),
+            "'N' must be nonnegative integer. N = %s." % str(n),
+        )
+        _value_check(
+            (n.is_integer, n.is_nonnegative),
+            "'n' must be nonnegative integer. n = %s." % str(n),
+        )
+        _value_check(
+            (m.is_integer, m.is_nonnegative),
+            "'m' must be nonnegative integer. m = %s." % str(n),
+        )
 
     @property
     def is_symbolic(self):
@@ -467,7 +516,10 @@ class HypergeometricDistribution(SingleFiniteDistribution):
 
     @property
     def low(self):
-        return Piecewise((0, Gt(0, self.n + self.m - self.N) != False), (self.n + self.m - self.N, True))
+        return Piecewise(
+            (0, Gt(0, self.n + self.m - self.N) != False),
+            (self.n + self.m - self.N, True),
+        )
 
     @property
     def set(self):
@@ -478,12 +530,14 @@ class HypergeometricDistribution(SingleFiniteDistribution):
 
     def pmf(self, k):
         N, m, n = self.N, self.m, self.n
-        return S(binomial(m, k) * binomial(N - m, n - k))/binomial(N, n)
+        return S(binomial(m, k) * binomial(N - m, n - k)) / binomial(N, n)
 
     def _sample_scipy(self, size):
-        import scipy.stats # Make sure that stats is imported
+        import scipy.stats  # Make sure that stats is imported
+
         N, m, n = int(self.N), int(self.m), int(self.n)
         return scipy.stats.hypergeom.rvs(M=m, n=n, N=N, size=size)
+
 
 def Hypergeometric(name, N, m, n):
     """
@@ -512,15 +566,15 @@ def Hypergeometric(name, N, m, n):
 
 
 class RademacherDistribution(SingleFiniteDistribution):
-
     @property
     def set(self):
         return set([-1, 1])
 
     @property
     def pmf(self):
-        k = Dummy('k')
+        k = Dummy("k")
         return Lambda(k, Piecewise((S.Half, Or(Eq(k, -1), Eq(k, 1))), (S.Zero, True)))
+
 
 def Rademacher(name):
     """

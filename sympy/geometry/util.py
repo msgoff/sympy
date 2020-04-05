@@ -13,8 +13,7 @@ are_similar
 from __future__ import division, print_function
 
 from sympy import Function, Symbol, solve, sqrt
-from sympy.core.compatibility import (
-    is_sequence, ordered)
+from sympy.core.compatibility import is_sequence, ordered
 from sympy.core.containers import OrderedSet
 from .point import Point, Point2D
 
@@ -29,9 +28,9 @@ def find(x, equation):
     free = equation.free_symbols
     xs = [i for i in free if (i.name if isinstance(x, str) else i) == x]
     if not xs:
-        raise ValueError('could not find %s' % x)
+        raise ValueError("could not find %s" % x)
     if len(xs) != 1:
-        raise ValueError('ambiguous %s' % x)
+        raise ValueError("ambiguous %s" % x)
     return xs[0]
 
 
@@ -69,6 +68,7 @@ def are_coplanar(*e):
     from sympy.geometry.entity import GeometryEntity
     from sympy.geometry.point import Point3D
     from sympy.geometry.plane import Plane
+
     # XXX update tests for coverage
 
     e = set(e)
@@ -104,7 +104,9 @@ def are_coplanar(*e):
                 pt3d.append(i)
             elif isinstance(i, LinearEntity3D):
                 pt3d.extend(i.args)
-            elif isinstance(i, GeometryEntity):  # XXX we should have a GeometryEntity3D class so we can tell the difference between 2D and 3D -- here we just want to deal with 2D objects; if new 3D objects are encountered that we didn't handle above, an error should be raised
+            elif isinstance(
+                i, GeometryEntity
+            ):  # XXX we should have a GeometryEntity3D class so we can tell the difference between 2D and 3D -- here we just want to deal with 2D objects; if new 3D objects are encountered that we didn't handle above, an error should be raised
                 # all 2D objects have some Point that defines them; so convert those points to 3D pts by making z=0
                 for p in i.args:
                     if isinstance(p, Point):
@@ -162,16 +164,15 @@ def are_similar(e1, e2):
 
     if e1 == e2:
         return True
-    is_similar1 = getattr(e1, 'is_similar', None)
+    is_similar1 = getattr(e1, "is_similar", None)
     if is_similar1:
         return is_similar1(e2)
-    is_similar2 = getattr(e2, 'is_similar', None)
+    is_similar2 = getattr(e2, "is_similar", None)
     if is_similar2:
         return is_similar2(e1)
     n1 = e1.__class__.__name__
     n2 = e2.__class__.__name__
-    raise GeometryError(
-        "Cannot test similarity between %s and %s" % (n1, n2))
+    raise GeometryError("Cannot test similarity between %s and %s" % (n1, n2))
 
 
 def centroid(*args):
@@ -224,6 +225,7 @@ def centroid(*args):
     """
 
     from sympy.geometry import Polygon, Segment, Point
+
     if args:
         if all(isinstance(g, Point) for g in args):
             c = Point(0, 0)
@@ -235,7 +237,7 @@ def centroid(*args):
             L = 0
             for g in args:
                 l = g.length
-                c += g.midpoint*l
+                c += g.midpoint * l
                 L += l
             den = L
         elif all(isinstance(g, Polygon) for g in args):
@@ -243,7 +245,7 @@ def centroid(*args):
             A = 0
             for g in args:
                 a = g.area
-                c += g.centroid*a
+                c += g.centroid * a
                 A += a
             den = A
         c /= den
@@ -290,7 +292,7 @@ def closest_points(*args):
 
     p = [Point2D(i) for i in set(args)]
     if len(p) < 2:
-        raise ValueError('At least 2 distinct points must be given.')
+        raise ValueError("At least 2 distinct points must be given.")
 
     try:
         p.sort(key=lambda x: x.args)
@@ -298,11 +300,13 @@ def closest_points(*args):
         raise ValueError("The points could not be sorted.")
 
     if any(not i.is_Rational for j in p for i in j.args):
+
         def hypot(x, y):
-            arg = x*x + y*y
+            arg = x * x + y * y
             if arg.is_Rational:
                 return _sqrt(arg)
             return sqrt(arg)
+
     else:
         from math import hypot
 
@@ -382,14 +386,16 @@ def convex_hull(*args, **kwargs):
     from .line import Segment
     from .polygon import Polygon
 
-    polygon = kwargs.get('polygon', True)
+    polygon = kwargs.get("polygon", True)
     p = OrderedSet()
     for e in args:
         if not isinstance(e, GeometryEntity):
             try:
                 e = Point(e)
             except NotImplementedError:
-                raise ValueError('%s is not a GeometryEntity and cannot be made into Point' % str(e))
+                raise ValueError(
+                    "%s is not a GeometryEntity and cannot be made into Point" % str(e)
+                )
         if isinstance(e, Point):
             p.add(e)
         elif isinstance(e, Segment):
@@ -397,12 +403,11 @@ def convex_hull(*args, **kwargs):
         elif isinstance(e, Polygon):
             p.update(e.vertices)
         else:
-            raise NotImplementedError(
-                'Convex hull for %s not implemented.' % type(e))
+            raise NotImplementedError("Convex hull for %s not implemented." % type(e))
 
     # make sure all our points are of the same dimension
     if any(len(x) != 2 for x in p):
-        raise ValueError('Can only compute the convex hull in two dimensions')
+        raise ValueError("Can only compute the convex hull in two dimensions")
 
     p = list(p)
     if len(p) == 1:
@@ -412,9 +417,9 @@ def convex_hull(*args, **kwargs):
         return s if polygon else (s, None)
 
     def _orientation(p, q, r):
-        '''Return positive if p-q-r are clockwise, neg if ccw, zero if
-        collinear.'''
-        return (q.y - p.y)*(r.x - p.x) - (q.x - p.x)*(r.y - p.y)
+        """Return positive if p-q-r are clockwise, neg if ccw, zero if
+        collinear."""
+        return (q.y - p.y) * (r.x - p.x) - (q.x - p.x) * (r.y - p.y)
 
     # scan to find upper and lower convex hulls of a set of 2d points.
     U = []
@@ -441,6 +446,7 @@ def convex_hull(*args, **kwargs):
     else:
         U.reverse()
         return (U, L)
+
 
 def farthest_points(*args):
     """Return the subset of points from a set of points that were
@@ -483,7 +489,7 @@ def farthest_points(*args):
 
         if L is None:
             if isinstance(U, Point):
-                raise ValueError('At least two distinct points must be given.')
+                raise ValueError("At least two distinct points must be given.")
             yield U.args
         else:
             i = 0
@@ -497,8 +503,9 @@ def farthest_points(*args):
                     i += 1
                 # still points left on both lists, compare slopes of next hull edges
                 # being careful to avoid divide-by-zero in slope calculation
-                elif (U[i+1].y - U[i].y) * (L[j].x - L[j-1].x) > \
-                        (L[j].y - L[j-1].y) * (U[i+1].x - U[i].x):
+                elif (U[i + 1].y - U[i].y) * (L[j].x - L[j - 1].x) > (
+                    L[j].y - L[j - 1].y
+                ) * (U[i + 1].x - U[i].x):
                     i += 1
                 else:
                     j -= 1
@@ -506,11 +513,13 @@ def farthest_points(*args):
     p = [Point2D(i) for i in set(args)]
 
     if any(not i.is_Rational for j in p for i in j.args):
+
         def hypot(x, y):
-            arg = x*x + y*y
+            arg = x * x + y * y
             if arg.is_Rational:
                 return _sqrt(arg)
             return sqrt(arg)
+
     else:
         from math import hypot
 
@@ -578,10 +587,11 @@ def idiff(eq, y, x, n=1):
     elif isinstance(y, Function):
         pass
     else:
-        raise ValueError("expecting x-dependent symbol(s) or function(s) but got: %s" % y)
+        raise ValueError(
+            "expecting x-dependent symbol(s) or function(s) but got: %s" % y
+        )
 
-    f = {s: Function(s.name)(x) for s in eq.free_symbols
-        if s != x and s in dep}
+    f = {s: Function(s.name)(x) for s in eq.free_symbols if s != x and s in dep}
 
     if isinstance(y, Symbol):
         dydx = Function(y.name)(x).diff(x)
@@ -663,7 +673,7 @@ def intersection(*entities, **kwargs):
     from .entity import GeometryEntity
     from .point import Point
 
-    pairwise = kwargs.pop('pairwise', False)
+    pairwise = kwargs.pop("pairwise", False)
 
     if len(entities) <= 1:
         return []

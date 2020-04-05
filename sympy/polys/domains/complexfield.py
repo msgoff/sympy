@@ -10,11 +10,12 @@ from sympy.polys.domains.simpledomain import SimpleDomain
 from sympy.polys.polyerrors import DomainError, CoercionFailed
 from sympy.utilities import public
 
+
 @public
 class ComplexField(Field, CharacteristicZero, SimpleDomain):
     """Complex numbers up to the given precision. """
 
-    rep = 'CC'
+    rep = "CC"
 
     is_ComplexField = is_CC = True
 
@@ -52,16 +53,20 @@ class ComplexField(Field, CharacteristicZero, SimpleDomain):
         self.one = self.dtype(1)
 
     def __eq__(self, other):
-        return (isinstance(other, ComplexField)
-           and self.precision == other.precision
-           and self.tolerance == other.tolerance)
+        return (
+            isinstance(other, ComplexField)
+            and self.precision == other.precision
+            and self.tolerance == other.tolerance
+        )
 
     def __hash__(self):
-        return hash((self.__class__.__name__, self.dtype, self.precision, self.tolerance))
+        return hash(
+            (self.__class__.__name__, self.dtype, self.precision, self.tolerance)
+        )
 
     def to_sympy(self, element):
         """Convert ``element`` to SymPy number. """
-        return Float(element.real, self.dps) + I*Float(element.imag, self.dps)
+        return Float(element.real, self.dps) + I * Float(element.imag, self.dps)
 
     def from_sympy(self, expr):
         """Convert SymPy's number to ``dtype``. """
@@ -108,7 +113,7 @@ class ComplexField(Field, CharacteristicZero, SimpleDomain):
 
     def lcm(self, a, b):
         """Returns LCM of ``a`` and ``b``. """
-        return a*b
+        return a * b
 
     def almosteq(self, a, b, tolerance=None):
         """Check if ``a`` and ``b`` are almost equal. """

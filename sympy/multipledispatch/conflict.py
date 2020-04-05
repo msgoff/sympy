@@ -1,5 +1,6 @@
 from .utils import _toposort, groupby
 
+
 class AmbiguityWarning(Warning):
     pass
 
@@ -11,9 +12,9 @@ def supercedes(a, b):
 
 def consistent(a, b):
     """ It is possible for an argument list to satisfy both A and B """
-    return (len(a) == len(b) and
-            all(issubclass(aa, bb) or issubclass(bb, aa)
-                           for aa, bb in zip(a, b)))
+    return len(a) == len(b) and all(
+        issubclass(aa, bb) or issubclass(bb, aa) for aa, bb in zip(a, b)
+    )
 
 
 def ambiguous(a, b):
@@ -24,11 +25,16 @@ def ambiguous(a, b):
 def ambiguities(signatures):
     """ All signature pairs such that A is ambiguous with B """
     signatures = list(map(tuple, signatures))
-    return set([(a, b) for a in signatures for b in signatures
-                       if hash(a) < hash(b)
-                       and ambiguous(a, b)
-                       and not any(supercedes(c, a) and supercedes(c, b)
-                                    for c in signatures)])
+    return set(
+        [
+            (a, b)
+            for a in signatures
+            for b in signatures
+            if hash(a) < hash(b)
+            and ambiguous(a, b)
+            and not any(supercedes(c, a) and supercedes(c, b) for c in signatures)
+        ]
+    )
 
 
 def super_signature(signatures):
@@ -36,8 +42,7 @@ def super_signature(signatures):
     n = len(signatures[0])
     assert all(len(s) == n for s in signatures)
 
-    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0]
-               for i in range(n)]
+    return [max([type.mro(sig[i]) for sig in signatures], key=len)[0] for i in range(n)]
 
 
 def edge(a, b, tie_breaker=hash):

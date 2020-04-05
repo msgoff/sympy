@@ -5,7 +5,7 @@ from sympy.testing.pytest import raises
 
 
 def test_parabola_geom():
-    a, b = symbols('a b')
+    a, b = symbols("a b")
     p1 = Point(0, 0)
     p2 = Point(3, 7)
     p3 = Point(0, 4)
@@ -32,12 +32,12 @@ def test_parabola_geom():
     pa10 = Parabola(p5, d5)
     pa11 = Parabola(p5, d6)
 
-    raises(ValueError, lambda:
-           Parabola(Point(7, 8, 9), Line(Point(6, 7), Point(7, 7))))
-    raises(NotImplementedError, lambda:
-           Parabola(Point(7, 8), Line(Point(3, 7), Point(2, 9))))
-    raises(ValueError, lambda:
-           Parabola(Point(0, 2), Line(Point(7, 2), Point(6, 2))))
+    raises(ValueError, lambda: Parabola(Point(7, 8, 9), Line(Point(6, 7), Point(7, 7))))
+    raises(
+        NotImplementedError,
+        lambda: Parabola(Point(7, 8), Line(Point(3, 7), Point(2, 9))),
+    )
+    raises(ValueError, lambda: Parabola(Point(0, 2), Line(Point(7, 2), Point(6, 2))))
     raises(ValueError, lambda: Parabola(Point(7, 8), Point(3, 8)))
 
     # Basic Stuff
@@ -53,10 +53,10 @@ def test_parabola_geom():
     assert pa7.focus == Point2D(3, 7)
     assert pa7.focal_length == half
     assert pa7.p_parameter == -half
-    assert pa7.vertex == Point2D(7*half, 7)
+    assert pa7.vertex == Point2D(7 * half, 7)
     assert pa4.focal_length == half
     assert pa4.p_parameter == half
-    assert pa4.vertex == Point2D(3, 13*half)
+    assert pa4.vertex == Point2D(3, 13 * half)
     assert pa8.focal_length == 1
     assert pa8.p_parameter == 1
     assert pa8.vertex == Point2D(5, 0)
@@ -68,17 +68,22 @@ def test_parabola_geom():
     assert pa8.p_parameter == pa9.p_parameter
     assert pa8.vertex == pa9.vertex
     assert pa8.equation() == pa9.equation()
-    assert pa10.focal_length == pa11.focal_length == sqrt((a - b) ** 2) / 2 # if a, b real == abs(a - b)/2
-    assert pa11.vertex == Point(*pa10.vertex[::-1]) == Point(a,
-                            a - sqrt((a - b)**2)*sign(a - b)/2) # change axis x->y, y->x on pa10
+    assert (
+        pa10.focal_length == pa11.focal_length == sqrt((a - b) ** 2) / 2
+    )  # if a, b real == abs(a - b)/2
+    assert (
+        pa11.vertex
+        == Point(*pa10.vertex[::-1])
+        == Point(a, a - sqrt((a - b) ** 2) * sign(a - b) / 2)
+    )  # change axis x->y, y->x on pa10
 
 
 def test_parabola_intersection():
-    l1 = Line(Point(1, -2), Point(-1,-2))
-    l2 = Line(Point(1, 2), Point(-1,2))
-    l3 = Line(Point(1, 0), Point(-1,0))
+    l1 = Line(Point(1, -2), Point(-1, -2))
+    l2 = Line(Point(1, 2), Point(-1, 2))
+    l3 = Line(Point(1, 0), Point(-1, 0))
 
-    p1 = Point(0,0)
+    p1 = Point(0, 0)
     p2 = Point(0, -2)
     p3 = Point(120, -12)
     parabola1 = Parabola(p1, l1)
@@ -88,28 +93,46 @@ def test_parabola_intersection():
     assert parabola1.intersection(Parabola(p1, l2)) == [Point2D(-2, 0), Point2D(2, 0)]
     assert parabola1.intersection(Parabola(p2, l3)) == [Point2D(0, -1)]
     assert parabola1.intersection(Parabola(Point(16, 0), l1)) == [Point2D(8, 15)]
-    assert parabola1.intersection(Parabola(Point(0, 16), l1)) == [Point2D(-6, 8), Point2D(6, 8)]
+    assert parabola1.intersection(Parabola(Point(0, 16), l1)) == [
+        Point2D(-6, 8),
+        Point2D(6, 8),
+    ]
     assert parabola1.intersection(Parabola(p3, l3)) == []
     # parabola with point
     assert parabola1.intersection(p1) == []
     assert parabola1.intersection(Point2D(0, -1)) == [Point2D(0, -1)]
     assert parabola1.intersection(Point2D(4, 3)) == [Point2D(4, 3)]
     # parabola with line
-    assert parabola1.intersection(Line(Point2D(-7, 3), Point(12, 3))) == [Point2D(-4, 3), Point2D(4, 3)]
+    assert parabola1.intersection(Line(Point2D(-7, 3), Point(12, 3))) == [
+        Point2D(-4, 3),
+        Point2D(4, 3),
+    ]
     assert parabola1.intersection(Line(Point(-4, -1), Point(4, -1))) == [Point(0, -1)]
     assert parabola1.intersection(Line(Point(2, 0), Point(0, -2))) == [Point2D(2, 0)]
     # parabola with segment
-    assert parabola1.intersection(Segment2D((-4, -5), (4, 3))) == [Point2D(0, -1), Point2D(4, 3)]
+    assert parabola1.intersection(Segment2D((-4, -5), (4, 3))) == [
+        Point2D(0, -1),
+        Point2D(4, 3),
+    ]
     assert parabola1.intersection(Segment2D((0, -5), (0, 6))) == [Point2D(0, -1)]
     assert parabola1.intersection(Segment2D((-12, -65), (14, -68))) == []
     # parabola with ray
-    assert parabola1.intersection(Ray2D((-4, -5), (4, 3))) == [Point2D(0, -1), Point2D(4, 3)]
-    assert parabola1.intersection(Ray2D((0, 7), (1, 14))) == [Point2D(14 + 2*sqrt(57), 105 + 14*sqrt(57))]
+    assert parabola1.intersection(Ray2D((-4, -5), (4, 3))) == [
+        Point2D(0, -1),
+        Point2D(4, 3),
+    ]
+    assert parabola1.intersection(Ray2D((0, 7), (1, 14))) == [
+        Point2D(14 + 2 * sqrt(57), 105 + 14 * sqrt(57))
+    ]
     assert parabola1.intersection(Ray2D((0, 7), (0, 14))) == []
     # parabola with ellipse/circle
     assert parabola1.intersection(Circle(p1, 2)) == [Point2D(-2, 0), Point2D(2, 0)]
     assert parabola1.intersection(Circle(p2, 1)) == [Point2D(0, -1), Point2D(0, -1)]
     assert parabola1.intersection(Ellipse(p2, 2, 1)) == [Point2D(0, -1), Point2D(0, -1)]
     assert parabola1.intersection(Ellipse(Point(0, 19), 5, 7)) == []
-    assert parabola1.intersection(Ellipse((0, 3), 12, 4)) == \
-           [Point2D(0, -1), Point2D(0, -1), Point2D(-4*sqrt(17)/3, Rational(59, 9)), Point2D(4*sqrt(17)/3, Rational(59, 9))]
+    assert parabola1.intersection(Ellipse((0, 3), 12, 4)) == [
+        Point2D(0, -1),
+        Point2D(0, -1),
+        Point2D(-4 * sqrt(17) / 3, Rational(59, 9)),
+        Point2D(4 * sqrt(17) / 3, Rational(59, 9)),
+    ]

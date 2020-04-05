@@ -38,16 +38,15 @@ def _product(a, b):
     return p
 
 
-
 # Dummy symbol used for computing polynomial sequences
-_sym = Symbol('x')
+_sym = Symbol("x")
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Carmichael numbers                               #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class carmichael(Function):
@@ -138,18 +137,22 @@ class carmichael(Function):
             return True
 
         else:
-            raise ValueError('The provided number must be greater than or equal to 0')
+            raise ValueError("The provided number must be greater than or equal to 0")
 
     @staticmethod
     def find_carmichael_numbers_in_range(x, y):
         if 0 <= x <= y:
             if x % 2 == 0:
-                return list([i for i in range(x + 1, y, 2) if carmichael.is_carmichael(i)])
+                return list(
+                    [i for i in range(x + 1, y, 2) if carmichael.is_carmichael(i)]
+                )
             else:
                 return list([i for i in range(x, y, 2) if carmichael.is_carmichael(i)])
 
         else:
-            raise ValueError('The provided range is not valid. x and y must be non-negative integers and x <= y')
+            raise ValueError(
+                "The provided range is not valid. x and y must be non-negative integers and x <= y"
+            )
 
     @staticmethod
     def find_first_n_carmichaels(n):
@@ -164,11 +167,11 @@ class carmichael(Function):
         return carmichaels
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Fibonacci numbers                                #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class fibonacci(Function):
@@ -220,7 +223,7 @@ class fibonacci(Function):
     @staticmethod
     @recurrence_memo([None, S.One, _sym])
     def _fibpoly(n, prev):
-        return (prev[-2] + _sym*prev[-1]).expand()
+        return (prev[-2] + _sym * prev[-1]).expand()
 
     @classmethod
     def eval(cls, n, sym=None):
@@ -231,27 +234,31 @@ class fibonacci(Function):
             if sym is None:
                 n = int(n)
                 if n < 0:
-                    return S.NegativeOne**(n + 1) * fibonacci(-n)
+                    return S.NegativeOne ** (n + 1) * fibonacci(-n)
                 else:
                     return Integer(cls._fib(n))
             else:
                 if n < 1:
-                    raise ValueError("Fibonacci polynomials are defined "
-                       "only for positive integer indices.")
+                    raise ValueError(
+                        "Fibonacci polynomials are defined "
+                        "only for positive integer indices."
+                    )
                 return cls._fibpoly(n).subs(_sym, sym)
 
     def _eval_rewrite_as_sqrt(self, n, **kwargs):
-        return 2**(-n)*sqrt(5)*((1 + sqrt(5))**n - (-sqrt(5) + 1)**n) / 5
+        return 2 ** (-n) * sqrt(5) * ((1 + sqrt(5)) ** n - (-sqrt(5) + 1) ** n) / 5
 
-    def _eval_rewrite_as_GoldenRatio(self,n, **kwargs):
-        return (S.GoldenRatio**n - 1/(-S.GoldenRatio)**n)/(2*S.GoldenRatio-1)
+    def _eval_rewrite_as_GoldenRatio(self, n, **kwargs):
+        return (S.GoldenRatio ** n - 1 / (-S.GoldenRatio) ** n) / (
+            2 * S.GoldenRatio - 1
+        )
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                               Lucas numbers                                #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class lucas(Function):
@@ -295,14 +302,14 @@ class lucas(Function):
             return fibonacci(n + 1) + fibonacci(n - 1)
 
     def _eval_rewrite_as_sqrt(self, n, **kwargs):
-        return 2**(-n)*((1 + sqrt(5))**n + (-sqrt(5) + 1)**n)
+        return 2 ** (-n) * ((1 + sqrt(5)) ** n + (-sqrt(5) + 1) ** n)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                             Tribonacci numbers                             #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class tribonacci(Function):
@@ -347,12 +354,12 @@ class tribonacci(Function):
     @staticmethod
     @recurrence_memo([S.Zero, S.One, S.One])
     def _trib(n, prev):
-        return (prev[-3] + prev[-2] + prev[-1])
+        return prev[-3] + prev[-2] + prev[-1]
 
     @staticmethod
-    @recurrence_memo([S.Zero, S.One, _sym**2])
+    @recurrence_memo([S.Zero, S.One, _sym ** 2])
     def _tribpoly(n, prev):
-        return (prev[-3] + _sym*prev[-2] + _sym**2*prev[-1]).expand()
+        return (prev[-3] + _sym * prev[-2] + _sym ** 2 * prev[-1]).expand()
 
     @classmethod
     def eval(cls, n, sym=None):
@@ -362,8 +369,10 @@ class tribonacci(Function):
         if n.is_Integer:
             n = int(n)
             if n < 0:
-                raise ValueError("Tribonacci polynomials are defined "
-                       "only for non-negative integer indices.")
+                raise ValueError(
+                    "Tribonacci polynomials are defined "
+                    "only for non-negative integer indices."
+                )
             if sym is None:
                 return Integer(cls._trib(n))
             else:
@@ -371,25 +380,27 @@ class tribonacci(Function):
 
     def _eval_rewrite_as_sqrt(self, n, **kwargs):
         w = (-1 + S.ImaginaryUnit * sqrt(3)) / 2
-        a = (1 + cbrt(19 + 3*sqrt(33)) + cbrt(19 - 3*sqrt(33))) / 3
-        b = (1 + w*cbrt(19 + 3*sqrt(33)) + w**2*cbrt(19 - 3*sqrt(33))) / 3
-        c = (1 + w**2*cbrt(19 + 3*sqrt(33)) + w*cbrt(19 - 3*sqrt(33))) / 3
-        Tn = (a**(n + 1)/((a - b)*(a - c))
-            + b**(n + 1)/((b - a)*(b - c))
-            + c**(n + 1)/((c - a)*(c - b)))
+        a = (1 + cbrt(19 + 3 * sqrt(33)) + cbrt(19 - 3 * sqrt(33))) / 3
+        b = (1 + w * cbrt(19 + 3 * sqrt(33)) + w ** 2 * cbrt(19 - 3 * sqrt(33))) / 3
+        c = (1 + w ** 2 * cbrt(19 + 3 * sqrt(33)) + w * cbrt(19 - 3 * sqrt(33))) / 3
+        Tn = (
+            a ** (n + 1) / ((a - b) * (a - c))
+            + b ** (n + 1) / ((b - a) * (b - c))
+            + c ** (n + 1) / ((c - a) * (c - b))
+        )
         return Tn
 
     def _eval_rewrite_as_TribonacciConstant(self, n, **kwargs):
-        b = cbrt(586 + 102*sqrt(33))
-        Tn = 3 * b * S.TribonacciConstant**n / (b**2 - 2*b + 4)
+        b = cbrt(586 + 102 * sqrt(33))
+        Tn = 3 * b * S.TribonacciConstant ** n / (b ** 2 - 2 * b + 4)
         return floor(Tn + S.Half)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Bernoulli numbers                                #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class bernoulli(Function):
@@ -463,11 +474,11 @@ class bernoulli(Function):
     def _calc_bernoulli(n):
         s = 0
         a = int(binomial(n + 3, n - 6))
-        for j in range(1, n//6 + 1):
-            s += a * bernoulli(n - 6*j)
+        for j in range(1, n // 6 + 1):
+            s += a * bernoulli(n - 6 * j)
             # Avoid computing each binomial coefficient from scratch
-            a *= _product(n - 6 - 6*j + 1, n - 6*j)
-            a //= _product(6*j + 4, 6*j + 9)
+            a *= _product(n - 6 - 6 * j + 1, n - 6 * j)
+            a //= _product(6 * j + 4, 6 * j + 9)
         if n % 6 == 4:
             s = -Rational(n + 3, 6) - s
         else:
@@ -515,22 +526,24 @@ class bernoulli(Function):
                 else:
                     n, result = int(n), []
                     for k in range(n + 1):
-                        result.append(binomial(n, k)*cls(k)*sym**(n - k))
+                        result.append(binomial(n, k) * cls(k) * sym ** (n - k))
                     return Add(*result)
             else:
-                raise ValueError("Bernoulli numbers are defined only"
-                                 " for nonnegative integer indices.")
+                raise ValueError(
+                    "Bernoulli numbers are defined only"
+                    " for nonnegative integer indices."
+                )
 
         if sym is None:
             if n.is_odd and (n - 1).is_positive:
                 return S.Zero
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                                Bell numbers                                #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class bell(Function):
@@ -642,8 +655,7 @@ class bell(Function):
         s = S.Zero
         a = S.One
         for m in range(1, n - k + 2):
-            s += a * bell._bell_incomplete_poly(
-                n - m, k - 1, symbols) * symbols[m - 1]
+            s += a * bell._bell_incomplete_poly(n - m, k - 1, symbols) * symbols[m - 1]
             a = a * (n - m) / m
         return expand_mul(s)
 
@@ -669,21 +681,22 @@ class bell(Function):
 
     def _eval_rewrite_as_Sum(self, n, k_sym=None, symbols=None, **kwargs):
         from sympy import Sum
+
         if (k_sym is not None) or (symbols is not None):
             return self
 
         # Dobinski's formula
         if not n.is_nonnegative:
             return self
-        k = Dummy('k', integer=True, nonnegative=True)
-        return 1 / E * Sum(k**n / factorial(k), (k, 0, S.Infinity))
+        k = Dummy("k", integer=True, nonnegative=True)
+        return 1 / E * Sum(k ** n / factorial(k), (k, 0, S.Infinity))
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                              Harmonic numbers                              #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class harmonic(Function):
@@ -820,6 +833,7 @@ class harmonic(Function):
     @classmethod
     def eval(cls, n, m=None):
         from sympy import zeta
+
         if m is S.One:
             return cls(n)
         if m is None:
@@ -844,33 +858,44 @@ class harmonic(Function):
 
         if n.is_Integer and n.is_nonnegative and m.is_Integer:
             if not m in cls._functions:
+
                 @recurrence_memo([0])
                 def f(n, prev):
-                    return prev[-1] + S.One / n**m
+                    return prev[-1] + S.One / n ** m
+
                 cls._functions[m] = f
             return cls._functions[m](int(n))
 
     def _eval_rewrite_as_polygamma(self, n, m=1, **kwargs):
         from sympy.functions.special.gamma_functions import polygamma
-        return S.NegativeOne**m/factorial(m - 1) * (polygamma(m - 1, 1) - polygamma(m - 1, n + 1))
+
+        return (
+            S.NegativeOne ** m
+            / factorial(m - 1)
+            * (polygamma(m - 1, 1) - polygamma(m - 1, n + 1))
+        )
 
     def _eval_rewrite_as_digamma(self, n, m=1, **kwargs):
         from sympy.functions.special.gamma_functions import polygamma
+
         return self.rewrite(polygamma)
 
     def _eval_rewrite_as_trigamma(self, n, m=1, **kwargs):
         from sympy.functions.special.gamma_functions import polygamma
+
         return self.rewrite(polygamma)
 
     def _eval_rewrite_as_Sum(self, n, m=None, **kwargs):
         from sympy import Sum
+
         k = Dummy("k", integer=True)
         if m is None:
             m = S.One
-        return Sum(k**(-m), (k, 1, n))
+        return Sum(k ** (-m), (k, 1, n))
 
     def _eval_expand_func(self, **hints):
         from sympy import Sum
+
         n = self.args[0]
         m = self.args[1] if len(self.args) == 2 else 1
 
@@ -879,10 +904,14 @@ class harmonic(Function):
                 off = n.args[0]
                 nnew = n - off
                 if off.is_Integer and off.is_positive:
-                    result = [S.One/(nnew + i) for i in range(off, 0, -1)] + [harmonic(nnew)]
+                    result = [S.One / (nnew + i) for i in range(off, 0, -1)] + [
+                        harmonic(nnew)
+                    ]
                     return Add(*result)
                 elif off.is_Integer and off.is_negative:
-                    result = [-S.One/(nnew + i) for i in range(0, off, -1)] + [harmonic(nnew)]
+                    result = [-S.One / (nnew + i) for i in range(0, off, -1)] + [
+                        harmonic(nnew)
+                    ]
                     return Add(*result)
 
             if n.is_Rational:
@@ -894,9 +923,10 @@ class harmonic(Function):
                 if u.is_nonnegative and p.is_positive and q.is_positive and p < q:
                     k = Dummy("k")
                     t1 = q * Sum(1 / (q * k + p), (k, 0, u))
-                    t2 = 2 * Sum(cos((2 * pi * p * k) / S(q)) *
-                                   log(sin((pi * k) / S(q))),
-                                   (k, 1, floor((q - 1) / S(2))))
+                    t2 = 2 * Sum(
+                        cos((2 * pi * p * k) / S(q)) * log(sin((pi * k) / S(q))),
+                        (k, 1, floor((q - 1) / S(2))),
+                    )
                     t3 = (pi / 2) * cot((pi * p) / q) + log(2 * q)
                     return t1 + t2 - t3
 
@@ -904,19 +934,21 @@ class harmonic(Function):
 
     def _eval_rewrite_as_tractable(self, n, m=1, **kwargs):
         from sympy import polygamma
+
         return self.rewrite(polygamma).rewrite("tractable", deep=True)
 
     def _eval_evalf(self, prec):
         from sympy import polygamma
+
         if all(i.is_number for i in self.args):
             return self.rewrite(polygamma)._eval_evalf(prec)
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Euler numbers                                    #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class euler(Function):
@@ -1001,18 +1033,24 @@ class euler(Function):
                     if m.is_odd:
                         return S.Zero
                     from mpmath import mp
+
                     m = m._to_mpmath(mp.prec)
                     res = mp.eulernum(m, exact=True)
                     return Integer(res)
                 # Euler polynomial
                 else:
                     from sympy.core.evalf import pure_complex
+
                     reim = pure_complex(sym, or_real=True)
                     # Evaluate polynomial numerically using mpmath
-                    if reim and all(a.is_Float or a.is_Integer for a in reim) \
-                            and any(a.is_Float for a in reim):
+                    if (
+                        reim
+                        and all(a.is_Float or a.is_Integer for a in reim)
+                        and any(a.is_Float for a in reim)
+                    ):
                         from mpmath import mp
                         from sympy import Expr
+
                         m = int(m)
                         # XXX ComplexFloat (#12192) would be nice here, above
                         prec = min([a._prec for a in reim if a.is_Float])
@@ -1022,27 +1060,43 @@ class euler(Function):
                     # Construct polynomial symbolically from definition
                     m, result = int(m), []
                     for k in range(m + 1):
-                        result.append(binomial(m, k)*cls(k)/(2**k)*(sym - S.Half)**(m - k))
+                        result.append(
+                            binomial(m, k)
+                            * cls(k)
+                            / (2 ** k)
+                            * (sym - S.Half) ** (m - k)
+                        )
                     return Add(*result).expand()
             else:
-                raise ValueError("Euler numbers are defined only"
-                                 " for nonnegative integer indices.")
+                raise ValueError(
+                    "Euler numbers are defined only" " for nonnegative integer indices."
+                )
         if sym is None:
             if m.is_odd and m.is_positive:
                 return S.Zero
 
     def _eval_rewrite_as_Sum(self, n, x=None, **kwargs):
         from sympy import Sum
+
         if x is None and n.is_even:
             k = Dummy("k", integer=True)
             j = Dummy("j", integer=True)
             n = n / 2
-            Em = (S.ImaginaryUnit * Sum(Sum(binomial(k, j) * ((-1)**j * (k - 2*j)**(2*n + 1)) /
-                  (2**k*S.ImaginaryUnit**k * k), (j, 0, k)), (k, 1, 2*n + 1)))
+            Em = S.ImaginaryUnit * Sum(
+                Sum(
+                    binomial(k, j)
+                    * ((-1) ** j * (k - 2 * j) ** (2 * n + 1))
+                    / (2 ** k * S.ImaginaryUnit ** k * k),
+                    (j, 0, k),
+                ),
+                (k, 1, 2 * n + 1),
+            )
             return Em
         if x:
             k = Dummy("k", integer=True)
-            return Sum(binomial(n, k)*euler(k)/2**k*(x - S.Half)**(n - k), (k, 0, n))
+            return Sum(
+                binomial(n, k) * euler(k) / 2 ** k * (x - S.Half) ** (n - k), (k, 0, n)
+            )
 
     def _eval_evalf(self, prec):
         m, x = (self.args[0], None) if len(self.args) == 1 else self.args
@@ -1050,6 +1104,7 @@ class euler(Function):
         if x is None and m.is_Integer and m.is_nonnegative:
             from mpmath import mp
             from sympy import Expr
+
             m = m._to_mpmath(prec)
             with workprec(prec):
                 res = mp.eulernum(m)
@@ -1057,17 +1112,19 @@ class euler(Function):
         if x and x.is_number and m.is_Integer and m.is_nonnegative:
             from mpmath import mp
             from sympy import Expr
+
             m = int(m)
             x = x._to_mpmath(prec)
             with workprec(prec):
                 res = mp.eulerpoly(m, x)
             return Expr._from_mpmath(res, prec)
 
-#----------------------------------------------------------------------------#
+
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                              Catalan numbers                               #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class catalan(Function):
@@ -1153,11 +1210,11 @@ class catalan(Function):
     @classmethod
     def eval(cls, n):
         from sympy import gamma
-        if (n.is_Integer and n.is_nonnegative) or \
-           (n.is_noninteger and n.is_negative):
-            return 4**n*gamma(n + S.Half)/(gamma(S.Half)*gamma(n + 2))
 
-        if (n.is_integer and n.is_negative):
+        if (n.is_Integer and n.is_nonnegative) or (n.is_noninteger and n.is_negative):
+            return 4 ** n * gamma(n + S.Half) / (gamma(S.Half) * gamma(n + 2))
+
+        if n.is_integer and n.is_negative:
             if (n + 1).is_negative:
                 return S.Zero
             if (n + 1).is_zero:
@@ -1165,29 +1222,33 @@ class catalan(Function):
 
     def fdiff(self, argindex=1):
         from sympy import polygamma, log
+
         n = self.args[0]
-        return catalan(n)*(polygamma(0, n + S.Half) - polygamma(0, n + 2) + log(4))
+        return catalan(n) * (polygamma(0, n + S.Half) - polygamma(0, n + 2) + log(4))
 
     def _eval_rewrite_as_binomial(self, n, **kwargs):
-        return binomial(2*n, n)/(n + 1)
+        return binomial(2 * n, n) / (n + 1)
 
     def _eval_rewrite_as_factorial(self, n, **kwargs):
-        return factorial(2*n) / (factorial(n+1) * factorial(n))
+        return factorial(2 * n) / (factorial(n + 1) * factorial(n))
 
     def _eval_rewrite_as_gamma(self, n, **kwargs):
         from sympy import gamma
+
         # The gamma function allows to generalize Catalan numbers to complex n
-        return 4**n*gamma(n + S.Half)/(gamma(S.Half)*gamma(n + 2))
+        return 4 ** n * gamma(n + S.Half) / (gamma(S.Half) * gamma(n + 2))
 
     def _eval_rewrite_as_hyper(self, n, **kwargs):
         from sympy import hyper
+
         return hyper([1 - n, -n], [2], 1)
 
     def _eval_rewrite_as_Product(self, n, **kwargs):
         from sympy import Product
+
         if not (n.is_integer and n.is_nonnegative):
             return self
-        k = Dummy('k', integer=True, positive=True)
+        k = Dummy("k", integer=True, positive=True)
         return Product((n + k) / k, (k, 2, n))
 
     def _eval_is_integer(self):
@@ -1204,16 +1265,16 @@ class catalan(Function):
 
     def _eval_evalf(self, prec):
         from sympy import gamma
+
         if self.args[0].is_number:
             return self.rewrite(gamma)._eval_evalf(prec)
 
 
-
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Genocchi numbers                                 #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 class genocchi(Function):
@@ -1253,8 +1314,9 @@ class genocchi(Function):
     def eval(cls, n):
         if n.is_Number:
             if (not n.is_Integer) or n.is_nonpositive:
-                raise ValueError("Genocchi numbers are defined only for " +
-                                 "positive integers")
+                raise ValueError(
+                    "Genocchi numbers are defined only for " + "positive integers"
+                )
             return 2 * (1 - S(2) ** n) * bernoulli(n)
 
         if n.is_odd and (n - 1).is_positive:
@@ -1307,13 +1369,15 @@ class genocchi(Function):
         return (n - 8).is_zero
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                           Partition numbers                                #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 _npartition = [1, 1]
+
+
 class partition(Function):
     r"""
     Partition numbers
@@ -1358,7 +1422,7 @@ class partition(Function):
             v, p, i = 0, 0, 0
             while 1:
                 s = 0
-                p += 3*i + 1  # p = pentagonal number: 1, 5, 12, ...
+                p += 3 * i + 1  # p = pentagonal number: 1, 5, 12, ...
                 if _n >= p:
                     s += _npartition[_n - p]
                 i += 1
@@ -1368,7 +1432,7 @@ class partition(Function):
                 if s == 0:
                     break
                 else:
-                    v += s if i%2 == 1 else -s
+                    v += s if i % 2 == 1 else -s
             _npartition.append(v)
         return v
 
@@ -1376,8 +1440,7 @@ class partition(Function):
     def eval(cls, n):
         is_int = n.is_integer
         if is_int == False:
-            raise ValueError("Partition numbers are defined only for "
-                             "integers")
+            raise ValueError("Partition numbers are defined only for " "integers")
         elif is_int:
             if n.is_negative:
                 return S.Zero
@@ -1387,7 +1450,6 @@ class partition(Function):
 
             if n.is_Integer:
                 return Integer(cls._partition(n))
-
 
     def _eval_is_integer(self):
         if self.args[0].is_integer:
@@ -1437,11 +1499,11 @@ def _multiset_histogram(n):
         n = list(n)
         s = set(n)
         if len(s) == len(n):
-            n = [1]*len(n)
+            n = [1] * len(n)
             n.extend([len(n), len(n)])
             return _MultisetHistogram(n)
         m = dict(zip(s, range(len(s))))
-        d = dict(zip(range(len(s)), [0]*len(s)))
+        d = dict(zip(range(len(s)), [0] * len(s)))
         for i in n:
             d[m[i]] += 1
         return _multiset_histogram(d)
@@ -1525,7 +1587,7 @@ def _nP(n, k=None, replacement=False):
         if k is None:
             return sum(_nP(n, i, replacement) for i in range(n + 1))
         elif replacement:
-            return n**k
+            return n ** k
         elif k > n:
             return 0
         elif k == n:
@@ -1539,9 +1601,9 @@ def _nP(n, k=None, replacement=False):
         if k is None:
             return sum(_nP(n, i, replacement) for i in range(n[_N] + 1))
         elif replacement:
-            return n[_ITEMS]**k
+            return n[_ITEMS] ** k
         elif k == n[_N]:
-            return factorial(k)/prod([factorial(i) for i in n[_M] if i > 1])
+            return factorial(k) / prod([factorial(i) for i in n[_M] if i > 1])
         elif k > n[_N]:
             return 0
         elif k == 1:
@@ -1598,9 +1660,9 @@ def _AOP_product(n):
 
     n = list(n)
     ord = sum(n)
-    need = (ord + 2)//2
-    rv = [1]*(n.pop() + 1)
-    rv.extend([0]*(need - len(rv)))
+    need = (ord + 2) // 2
+    rv = [1] * (n.pop() + 1)
+    rv.extend([0] * (need - len(rv)))
     rv = rv[:need]
     while n:
         ni = n.pop()
@@ -1692,7 +1754,7 @@ def nC(n, k=None, replacement=False):
     if isinstance(n, SYMPY_INTS):
         if k is None:
             if not replacement:
-                return 2**n
+                return 2 ** n
             return sum(nC(n, i, replacement) for i in range(n + 1))
         if k < 0:
             raise ValueError("k cannot be negative")
@@ -1729,19 +1791,19 @@ def _eval_stirling1(n, k):
     elif k == n - 1:
         return binomial(n, 2)
     elif k == n - 2:
-        return (3*n - 1)*binomial(n, 3)/4
+        return (3 * n - 1) * binomial(n, 3) / 4
     elif k == n - 3:
-        return binomial(n, 2)*binomial(n, 4)
+        return binomial(n, 2) * binomial(n, 4)
 
     return _stirling1(n, k)
 
 
 @cacheit
 def _stirling1(n, k):
-    row = [0, 1]+[0]*(k-1) # for n = 1
-    for i in range(2, n+1):
-        for j in range(min(k,i), 0, -1):
-            row[j] = (i-1) * row[j] + row[j-1]
+    row = [0, 1] + [0] * (k - 1)  # for n = 1
+    for i in range(2, n + 1):
+        for j in range(min(k, i), 0, -1):
+            row[j] = (i - 1) * row[j] + row[j - 1]
     return Integer(row[k])
 
 
@@ -1759,17 +1821,17 @@ def _eval_stirling2(n, k):
     elif k == 1:
         return S.One
     elif k == 2:
-        return Integer(2**(n - 1) - 1)
+        return Integer(2 ** (n - 1) - 1)
 
     return _stirling2(n, k)
 
 
 @cacheit
 def _stirling2(n, k):
-    row = [0, 1]+[0]*(k-1) # for n = 1
-    for i in range(2, n+1):
-        for j in range(min(k,i), 0, -1):
-            row[j] = j * row[j] + row[j-1]
+    row = [0, 1] + [0] * (k - 1)  # for n = 1
+    for i in range(2, n + 1):
+        for j in range(min(k, i), 0, -1):
+            row[j] = j * row[j] + row[j - 1]
     return Integer(row[k])
 
 
@@ -1862,7 +1924,7 @@ def stirling(n, k, d=None, kind=2, signed=False):
     n = as_int(n)
     k = as_int(k)
     if n < 0:
-        raise ValueError('n must be nonnegative')
+        raise ValueError("n must be nonnegative")
     if k > n:
         return S.Zero
     if d:
@@ -1871,14 +1933,14 @@ def stirling(n, k, d=None, kind=2, signed=False):
         return _eval_stirling2(n - d + 1, k - d + 1)
     elif signed:
         # kind is ignored -- only kind=1 is supported
-        return (-1)**(n - k)*_eval_stirling1(n, k)
+        return (-1) ** (n - k) * _eval_stirling1(n, k)
 
     if kind == 1:
         return _eval_stirling1(n, k)
     elif kind == 2:
         return _eval_stirling2(n, k)
     else:
-        raise ValueError('kind must be 1 or 2, not %s' % k)
+        raise ValueError("kind must be 1 or 2, not %s" % k)
 
 
 @cacheit
@@ -1894,12 +1956,12 @@ def _nT(n, k):
         return 0
     # exits that could be done below but this is quicker
     if k == 2:
-        return n//2
+        return n // 2
     d = n - k
     if d <= 3:
         return d
     # quick exit
-    if 3*k >= n:  # or, equivalently, 2*k >= d
+    if 3 * k >= n:  # or, equivalently, 2*k >= d
         # all the information needed in this case
         # will be in the cache needed to calculate
         # partition(d), so...
@@ -1907,14 +1969,14 @@ def _nT(n, k):
         tot = partition._partition(d)
         # and correct for values not needed
         if d - k > 0:
-            tot -= sum(_npartition[:d - k])
+            tot -= sum(_npartition[: d - k])
         return tot
     # regular exit
     # nT(n, k) = Sum(nT(n - k, m), (m, 1, k));
     # calculate needed nT(i, j) values
-    p = [1]*d
+    p = [1] * d
     for i in range(2, k + 1):
-        for m  in range(i + 1, d):
+        for m in range(i + 1, d):
             p[m] += p[m - i]
         d -= 1
     # if p[0] were appended to the end of p then the last
@@ -1922,7 +1984,7 @@ def _nT(n, k):
     # order p[-1] = nT(n, 1), p[-2] = nT(n, 2), etc.... Instead of
     # putting the 1 from p[0] there, however, it is simply added to
     # the sum below which is valid for 1 < k <= n//2
-    return (1 + sum(p[1 - k:]))
+    return 1 + sum(p[1 - k :])
 
 
 def nT(n, k=None):
@@ -2028,7 +2090,7 @@ def nT(n, k=None):
         m, r = divmod(N, 2)
         rv = sum(nC(n, i) for i in range(1, m + 1))
         if not r:
-            rv -= nC(n, m)//2
+            rv -= nC(n, m) // 2
         if k is None:
             rv += 1  # for k == 1
         return rv
@@ -2043,6 +2105,6 @@ def nT(n, k=None):
     # MultisetPartitionTraverser does not have a range-limited count
     # method, so need to enumerate and count
     tot = 0
-    for discard in m.enum_range(n[_M], k-1, k):
+    for discard in m.enum_range(n[_M], k - 1, k):
         tot += 1
     return tot

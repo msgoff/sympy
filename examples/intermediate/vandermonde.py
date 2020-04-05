@@ -38,7 +38,7 @@ def comb_w_rep(n, k):
     return combs
 
 
-def vandermonde(order, dim=1, syms='a b c d'):
+def vandermonde(order, dim=1, syms="a b c d"):
     """Computes a Vandermonde matrix of given order and dimension.
 
     Define syms to give beginning strings for temporary variables.
@@ -68,7 +68,7 @@ def vandermonde(order, dim=1, syms='a b c d'):
             v_entry = 1
             for k in term:
                 v_entry *= row_syms[k]
-            V[i*rank + j] = v_entry
+            V[i * rank + j] = v_entry
     return V, all_syms, terms
 
 
@@ -84,12 +84,13 @@ def gen_poly(points, order, syms):
     if num_pts < V.shape[0]:
         raise ValueError(
             "Must provide %d points for order %d, dimension "
-            "%d polynomial, given %d points" %
-            (V.shape[0], order, dim, num_pts))
+            "%d polynomial, given %d points" % (V.shape[0], order, dim, num_pts)
+        )
     elif num_pts > V.shape[0]:
-        print("gen_poly given %d points but only requires %d, "\
-            "continuing using the first %d points" % \
-            (num_pts, V.shape[0], V.shape[0]))
+        print(
+            "gen_poly given %d points but only requires %d, "
+            "continuing using the first %d points" % (num_pts, V.shape[0], V.shape[0])
+        )
         num_pts = V.shape[0]
 
     subs_dict = {}
@@ -106,7 +107,7 @@ def gen_poly(points, order, syms):
         t = 1
         for k in term:
             t *= syms[k]
-        f += coeffs[j]*t
+        f += coeffs[j] * t
     return f
 
 
@@ -116,54 +117,63 @@ def main():
     print("Vandermonde matrix of order 2 in 1 dimension")
     pprint(V)
 
-    print('-'*79)
+    print("-" * 79)
     print("Computing the determinant and comparing to \sum_{0<i<j<=3}(a_j - a_i)")
 
     det_sum = 1
     for j in range(order + 1):
         for i in range(j):
-            det_sum *= (tmp_syms[j][0] - tmp_syms[i][0])
+            det_sum *= tmp_syms[j][0] - tmp_syms[i][0]
 
-    print("""
+    print(
+        """
     det(V) = %(det)s
     \sum   = %(sum)s
            = %(sum_expand)s
-    """ % {"det": V.det(),
-            "sum": det_sum,
-            "sum_expand": det_sum.expand(),
-          })
+    """
+        % {"det": V.det(), "sum": det_sum, "sum_expand": det_sum.expand(),}
+    )
 
-    print('-'*79)
+    print("-" * 79)
     print("Polynomial fitting with a Vandermonde Matrix:")
-    x, y, z = symbols('x,y,z')
+    x, y, z = symbols("x,y,z")
 
     points = [(0, 3), (1, 2), (2, 3)]
-    print("""
+    print(
+        """
     Quadratic function, represented by 3 points:
        points = %(pts)s
        f = %(f)s
-    """ % {"pts": points,
-            "f": gen_poly(points, 2, [x]),
-          })
+    """
+        % {"pts": points, "f": gen_poly(points, 2, [x]),}
+    )
 
-    points = [(0, 1, 1), (1, 0, 0), (1, 1, 0), (Rational(1, 2), 0, 0),
-              (0, Rational(1, 2), 0), (Rational(1, 2), Rational(1, 2), 0)]
-    print("""
+    points = [
+        (0, 1, 1),
+        (1, 0, 0),
+        (1, 1, 0),
+        (Rational(1, 2), 0, 0),
+        (0, Rational(1, 2), 0),
+        (Rational(1, 2), Rational(1, 2), 0),
+    ]
+    print(
+        """
     2D Quadratic function, represented by 6 points:
        points = %(pts)s
        f = %(f)s
-    """ % {"pts": points,
-            "f": gen_poly(points, 2, [x, y]),
-          })
+    """
+        % {"pts": points, "f": gen_poly(points, 2, [x, y]),}
+    )
 
     points = [(0, 1, 1, 1), (1, 1, 0, 0), (1, 0, 1, 0), (1, 1, 1, 1)]
-    print("""
+    print(
+        """
     3D linear function, represented by 4 points:
        points = %(pts)s
        f = %(f)s
-    """ % {"pts": points,
-            "f": gen_poly(points, 1, [x, y, z]),
-          })
+    """
+        % {"pts": points, "f": gen_poly(points, 1, [x, y, z]),}
+    )
 
 
 if __name__ == "__main__":

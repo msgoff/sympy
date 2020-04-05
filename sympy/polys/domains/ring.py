@@ -7,6 +7,7 @@ from sympy.polys.polyerrors import ExactQuotientFailed, NotInvertible, NotRevers
 
 from sympy.utilities import public
 
+
 @public
 class Ring(Domain):
     """Represents a ring domain. """
@@ -50,7 +51,7 @@ class Ring(Domain):
         if self.is_one(a):
             return a
         else:
-            raise NotReversible('only unity is reversible in a ring')
+            raise NotReversible("only unity is reversible in a ring")
 
     def is_unit(self, a):
         try:
@@ -88,8 +89,10 @@ class Ring(Domain):
         <x**2>
         """
         from sympy.polys.agca.ideals import ModuleImplementedIdeal
-        return ModuleImplementedIdeal(self, self.free_module(1).submodule(
-            *[[x] for x in gens]))
+
+        return ModuleImplementedIdeal(
+            self, self.free_module(1).submodule(*[[x] for x in gens])
+        )
 
     def quotient_ring(self, e):
         """
@@ -111,6 +114,7 @@ class Ring(Domain):
         """
         from sympy.polys.agca.ideals import Ideal
         from sympy.polys.domains.quotientring import QuotientRing
+
         if not isinstance(e, Ideal):
             e = self.ideal(*e)
         return QuotientRing(self, e)

@@ -2,8 +2,12 @@ from __future__ import print_function, division
 
 import pyglet.gl as pgl
 from sympy.plotting.pygletplot.plot_rotation import get_spherical_rotatation
-from sympy.plotting.pygletplot.util import get_model_matrix, model_to_screen, \
-                                            screen_to_model, vec_subs
+from sympy.plotting.pygletplot.util import (
+    get_model_matrix,
+    model_to_screen,
+    screen_to_model,
+    vec_subs,
+)
 
 
 class PlotCamera(object):
@@ -18,10 +22,10 @@ class PlotCamera(object):
     _default_ortho_dist = 600.0
 
     rot_presets = {
-        'xy': (0, 0, 0),
-        'xz': (-90, 0, 0),
-        'yz': (0, 90, 0),
-        'perspective': (-45, 0, -45)
+        "xy": (0, 0, 0),
+        "xz": (-90, 0, 0),
+        "yz": (0, 90, 0),
+        "perspective": (-45, 0, -45),
     }
 
     def __init__(self, window, ortho=False):
@@ -41,8 +45,7 @@ class PlotCamera(object):
         try:
             r = self.rot_presets[preset_name]
         except AttributeError:
-            raise ValueError(
-                "%s is not a valid rotation preset." % preset_name)
+            raise ValueError("%s is not a valid rotation preset." % preset_name)
         try:
             self.euler_rotate(r[0], 1, 0, 0)
             self.euler_rotate(r[1], 0, 1, 0)
@@ -73,12 +76,18 @@ class PlotCamera(object):
         if self.ortho:
             # yep, this is pseudo ortho (don't tell anyone)
             pgl.gluPerspective(
-                0.3, float(self.window.width)/float(self.window.height),
-                self.min_ortho_dist - 0.01, self.max_ortho_dist + 0.01)
+                0.3,
+                float(self.window.width) / float(self.window.height),
+                self.min_ortho_dist - 0.01,
+                self.max_ortho_dist + 0.01,
+            )
         else:
             pgl.gluPerspective(
-                30.0, float(self.window.width)/float(self.window.height),
-                self.min_dist - 0.01, self.max_dist + 0.01)
+                30.0,
+                float(self.window.width) / float(self.window.height),
+                self.min_dist - 0.01,
+                self.max_dist + 0.01,
+            )
         pgl.glMatrixMode(pgl.GL_MODELVIEW)
 
     def _get_scale(self):
@@ -92,8 +101,9 @@ class PlotCamera(object):
         pgl.glScalef(*self._get_scale())
 
     def spherical_rotate(self, p1, p2, sensitivity=1.0):
-        mat = get_spherical_rotatation(p1, p2, self.window.width,
-                                       self.window.height, sensitivity)
+        mat = get_spherical_rotatation(
+            p1, p2, self.window.width, self.window.height, sensitivity
+        )
         if mat is not None:
             self.mult_rot_matrix(mat)
 
@@ -115,7 +125,7 @@ class PlotCamera(object):
             min_dist = self.min_dist
             max_dist = self.max_dist
 
-        new_dist = (self._dist - dist_d)
+        new_dist = self._dist - dist_d
         if (clicks < 0 and new_dist < max_dist) or new_dist > min_dist:
             self._dist = new_dist
 

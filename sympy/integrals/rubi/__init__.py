@@ -1,4 +1,4 @@
-'''
+"""
 Rule Based Integration(RUBI) module in sympy uses set of transformation
 rules to integrate an expression. All the transformation rules are compiled as a
 discrimination-net which helps in matching expression with the rule efficiently.
@@ -89,4 +89,4 @@ References
 [1] http://www.apmaths.uwo.ca/~arich/
 [2] https://github.com/sympy/sympy/issues/7749
 [3] https://github.com/sympy/sympy/pull/12978
-'''
+"""

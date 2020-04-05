@@ -4,6 +4,7 @@ from .cartan_type import CartanType
 from mpmath import fac
 from sympy.core.backend import Matrix, eye, Rational, Basic, igcd
 
+
 class WeylGroup(Basic):
 
     """
@@ -37,8 +38,8 @@ class WeylGroup(Basic):
         """
         n = self.cartan_type.rank()
         generators = []
-        for i in range(1, n+1):
-            reflection = "r"+str(i)
+        for i in range(1, n + 1):
+            reflection = "r" + str(i)
             generators.append(reflection)
         return generators
 
@@ -59,13 +60,13 @@ class WeylGroup(Basic):
         """
         n = self.cartan_type.rank()
         if self.cartan_type.series == "A":
-            return fac(n+1)
+            return fac(n + 1)
 
-        if self.cartan_type.series == "B" or self.cartan_type.series ==  "C":
-            return fac(n)*(2**n)
+        if self.cartan_type.series == "B" or self.cartan_type.series == "C":
+            return fac(n) * (2 ** n)
 
         if self.cartan_type.series == "D":
-            return fac(n)*(2**(n-1))
+            return fac(n) * (2 ** (n - 1))
 
         if self.cartan_type.series == "E":
             if n == 6:
@@ -88,10 +89,16 @@ class WeylGroup(Basic):
         """
         n = self.cartan_type.rank()
         if self.cartan_type.series == "A":
-            return "S"+str(n+1) + ": the symmetric group acting on " + str(n+1) + " elements."
+            return (
+                "S"
+                + str(n + 1)
+                + ": the symmetric group acting on "
+                + str(n + 1)
+                + " elements."
+            )
 
-        if self.cartan_type.series == "B" or self.cartan_type.series ==  "C":
-            return "The hyperoctahedral group acting on " + str(2*n) + " elements."
+        if self.cartan_type.series == "B" or self.cartan_type.series == "C":
+            return "The hyperoctahedral group acting on " + str(2 * n) + " elements."
 
         if self.cartan_type.series == "D":
             return "The symmetry group of the " + str(n) + "-dimensional demihypercube."
@@ -110,7 +117,9 @@ class WeylGroup(Basic):
             return "The symmetry group of the 24-cell, or icositetrachoron."
 
         if self.cartan_type.series == "G":
-            return "D6, the dihedral group of order 12, and symmetry group of the hexagon."
+            return (
+                "D6, the dihedral group of order 12, and symmetry group of the hexagon."
+            )
 
     def element_order(self, weylelt):
         """
@@ -134,7 +143,7 @@ class WeylGroup(Basic):
         if self.cartan_type.series == "A":
             a = self.matrix_form(weylelt)
             order = 1
-            while a != eye(n+1):
+            while a != eye(n + 1):
                 a *= self.matrix_form(weylelt)
                 order += 1
             return order
@@ -173,19 +182,17 @@ class WeylGroup(Basic):
                     return 2
                 else:
                     m = len(reflections) // 2
-                    lcm = (6 * m)/ igcd(m, 6)
+                    lcm = (6 * m) / igcd(m, 6)
                 order = lcm / m
                 return order
 
-
-        if self.cartan_type.series == 'F':
+        if self.cartan_type.series == "F":
             a = self.matrix_form(weylelt)
             order = 1
             while a != eye(4):
                 a *= self.matrix_form(weylelt)
                 order += 1
             return order
-
 
         if self.cartan_type.series == "B" or self.cartan_type.series == "C":
             a = self.matrix_form(weylelt)
@@ -204,15 +211,13 @@ class WeylGroup(Basic):
         counter = 0
         copy = list(reflections)
         for elt in copy:
-            if counter < len(copy)-1:
+            if counter < len(copy) - 1:
                 if copy[counter + 1] == elt:
                     del copy[counter]
                     del copy[counter]
             counter += 1
 
-
         return copy
-
 
     def matrix_form(self, weylelt):
         """
@@ -239,38 +244,38 @@ class WeylGroup(Basic):
         elts = list(weylelt)
         reflections = elts[1::3]
         n = self.cartan_type.rank()
-        if self.cartan_type.series == 'A':
-            matrixform = eye(n+1)
+        if self.cartan_type.series == "A":
+            matrixform = eye(n + 1)
             for elt in reflections:
                 a = int(elt)
-                mat = eye(n+1)
-                mat[a-1, a-1] = 0
-                mat[a-1, a] = 1
-                mat[a, a-1] = 1
+                mat = eye(n + 1)
+                mat[a - 1, a - 1] = 0
+                mat[a - 1, a] = 1
+                mat[a, a - 1] = 1
                 mat[a, a] = 0
                 matrixform *= mat
             return matrixform
 
-        if self.cartan_type.series == 'D':
+        if self.cartan_type.series == "D":
             matrixform = eye(n)
             for elt in reflections:
                 a = int(elt)
                 mat = eye(n)
                 if a < n:
-                    mat[a-1, a-1] = 0
-                    mat[a-1, a] = 1
-                    mat[a, a-1] = 1
+                    mat[a - 1, a - 1] = 0
+                    mat[a - 1, a] = 1
+                    mat[a, a - 1] = 1
                     mat[a, a] = 0
                     matrixform *= mat
                 else:
-                    mat[n-2, n-1] = -1
-                    mat[n-2, n-2] = 0
-                    mat[n-1, n-2] = -1
-                    mat[n-1, n-1] = 0
+                    mat[n - 2, n - 1] = -1
+                    mat[n - 2, n - 2] = 0
+                    mat[n - 1, n - 2] = -1
+                    mat[n - 1, n - 1] = 0
                     matrixform *= mat
             return matrixform
 
-        if self.cartan_type.series == 'G':
+        if self.cartan_type.series == "G":
             matrixform = eye(3)
             for elt in reflections:
                 a = int(elt)
@@ -278,55 +283,157 @@ class WeylGroup(Basic):
                     gen1 = Matrix([[1, 0, 0], [0, 0, 1], [0, 1, 0]])
                     matrixform *= gen1
                 else:
-                    gen2 = Matrix([[Rational(2, 3), Rational(2, 3), Rational(-1, 3)],
-                                   [Rational(2, 3), Rational(-1, 3), Rational(2, 3)],
-                                   [Rational(-1, 3), Rational(2, 3), Rational(2, 3)]])
+                    gen2 = Matrix(
+                        [
+                            [Rational(2, 3), Rational(2, 3), Rational(-1, 3)],
+                            [Rational(2, 3), Rational(-1, 3), Rational(2, 3)],
+                            [Rational(-1, 3), Rational(2, 3), Rational(2, 3)],
+                        ]
+                    )
                     matrixform *= gen2
             return matrixform
 
-        if self.cartan_type.series == 'F':
+        if self.cartan_type.series == "F":
             matrixform = eye(4)
             for elt in reflections:
                 a = int(elt)
                 if a == 1:
-                    mat = Matrix([[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
+                    mat = Matrix(
+                        [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]
+                    )
                     matrixform *= mat
                 elif a == 2:
-                    mat = Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]])
+                    mat = Matrix(
+                        [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
+                    )
                     matrixform *= mat
                 elif a == 3:
-                    mat = Matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]])
+                    mat = Matrix(
+                        [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, -1]]
+                    )
                     matrixform *= mat
                 else:
 
-                    mat = Matrix([[Rational(1, 2), Rational(1, 2), Rational(1, 2), Rational(1, 2)],
-                        [Rational(1, 2), Rational(1, 2), Rational(-1, 2), Rational(-1, 2)],
-                        [Rational(1, 2), Rational(-1, 2), Rational(1, 2), Rational(-1, 2)],
-                        [Rational(1, 2), Rational(-1, 2), Rational(-1, 2), Rational(1, 2)]])
+                    mat = Matrix(
+                        [
+                            [
+                                Rational(1, 2),
+                                Rational(1, 2),
+                                Rational(1, 2),
+                                Rational(1, 2),
+                            ],
+                            [
+                                Rational(1, 2),
+                                Rational(1, 2),
+                                Rational(-1, 2),
+                                Rational(-1, 2),
+                            ],
+                            [
+                                Rational(1, 2),
+                                Rational(-1, 2),
+                                Rational(1, 2),
+                                Rational(-1, 2),
+                            ],
+                            [
+                                Rational(1, 2),
+                                Rational(-1, 2),
+                                Rational(-1, 2),
+                                Rational(1, 2),
+                            ],
+                        ]
+                    )
                     matrixform *= mat
             return matrixform
 
-        if self.cartan_type.series == 'E':
+        if self.cartan_type.series == "E":
             matrixform = eye(8)
             for elt in reflections:
                 a = int(elt)
                 if a == 1:
-                    mat = Matrix([[Rational(3, 4), Rational(1, 4), Rational(1, 4), Rational(1, 4),
-                        Rational(1, 4), Rational(1, 4), Rational(1, 4), Rational(-1, 4)],
-                        [Rational(1, 4), Rational(3, 4), Rational(-1, 4), Rational(-1, 4),
-                            Rational(-1, 4), Rational(-1, 4), Rational(1, 4), Rational(-1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(3, 4), Rational(-1, 4),
-                        Rational(-1, 4), Rational(-1, 4), Rational(-1, 4), Rational(1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(-1, 4), Rational(3, 4),
-                        Rational(-1, 4), Rational(-1, 4), Rational(-1, 4), Rational(1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(-1, 4), Rational(-1, 4),
-                        Rational(3, 4), Rational(-1, 4), Rational(-1, 4), Rational(1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(-1, 4), Rational(-1, 4),
-                        Rational(-1, 4), Rational(3, 4), Rational(-1, 4), Rational(1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(-1, 4), Rational(-1, 4),
-                        Rational(-1, 4), Rational(-1, 4), Rational(-3, 4), Rational(1, 4)],
-                        [Rational(1, 4), Rational(-1, 4), Rational(-1, 4), Rational(-1, 4),
-                        Rational(-1, 4), Rational(-1, 4), Rational(-1, 4), Rational(3, 4)]])
+                    mat = Matrix(
+                        [
+                            [
+                                Rational(3, 4),
+                                Rational(1, 4),
+                                Rational(1, 4),
+                                Rational(1, 4),
+                                Rational(1, 4),
+                                Rational(1, 4),
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(3, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(3, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(3, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(3, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(3, 4),
+                                Rational(-1, 4),
+                                Rational(1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-3, 4),
+                                Rational(1, 4),
+                            ],
+                            [
+                                Rational(1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(-1, 4),
+                                Rational(3, 4),
+                            ],
+                        ]
+                    )
                     matrixform *= mat
                 elif a == 2:
                     mat = eye(8)
@@ -337,15 +444,14 @@ class WeylGroup(Basic):
                     matrixform *= mat
                 else:
                     mat = eye(8)
-                    mat[a-3, a-3] = 0
-                    mat[a-3, a-2] = 1
-                    mat[a-2, a-3] = 1
-                    mat[a-2, a-2] = 0
+                    mat[a - 3, a - 3] = 0
+                    mat[a - 3, a - 2] = 1
+                    mat[a - 2, a - 3] = 1
+                    mat[a - 2, a - 2] = 0
                     matrixform *= mat
             return matrixform
 
-
-        if self.cartan_type.series == 'B' or self.cartan_type.series == 'C':
+        if self.cartan_type.series == "B" or self.cartan_type.series == "C":
             matrixform = eye(n)
             for elt in reflections:
                 a = int(elt)
@@ -355,13 +461,11 @@ class WeylGroup(Basic):
                     matrixform *= mat
                 else:
                     mat[a - 2, a - 2] = 0
-                    mat[a-2, a-1] = 1
+                    mat[a - 2, a - 1] = 1
                     mat[a - 1, a - 2] = 1
-                    mat[a -1, a - 1] = 0
+                    mat[a - 1, a - 1] = 0
                     matrixform *= mat
             return matrixform
-
-
 
     def coxeter_diagram(self):
         """
@@ -384,12 +488,16 @@ class WeylGroup(Basic):
         1   2   3
         """
         n = self.cartan_type.rank()
-        if self.cartan_type.series == "A" or self.cartan_type.series == "D" or self.cartan_type.series == "E":
+        if (
+            self.cartan_type.series == "A"
+            or self.cartan_type.series == "D"
+            or self.cartan_type.series == "E"
+        ):
             return self.cartan_type.dynkin_diagram()
 
-        if self.cartan_type.series == "B" or self.cartan_type.series ==  "C":
+        if self.cartan_type.series == "B" or self.cartan_type.series == "C":
             diag = "---".join("0" for i in range(1, n)) + "===0\n"
-            diag += "   ".join(str(i) for i in range(1, n+1))
+            diag += "   ".join(str(i) for i in range(1, n + 1))
             return diag
 
         if self.cartan_type.series == "F":

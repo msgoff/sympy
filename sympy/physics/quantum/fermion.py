@@ -6,11 +6,7 @@ from sympy.physics.quantum import HilbertSpace, Ket, Bra
 from sympy.functions.special.tensor_functions import KroneckerDelta
 
 
-__all__ = [
-    'FermionOp',
-    'FermionFockKet',
-    'FermionFockBra'
-]
+__all__ = ["FermionOp", "FermionFockKet", "FermionFockBra"]
 
 
 class FermionOp(Operator):
@@ -35,6 +31,7 @@ class FermionOp(Operator):
     >>> AntiCommutator(c, Dagger(c)).doit()
     1
     """
+
     @property
     def name(self):
         return self.args[0]
@@ -49,7 +46,7 @@ class FermionOp(Operator):
 
     def __new__(cls, *args, **hints):
         if not len(args) in [1, 2]:
-            raise ValueError('1 or 2 parameters expected, got %s' % args)
+            raise ValueError("1 or 2 parameters expected, got %s" % args)
 
         if len(args) == 1:
             args = (args[0], Integer(1))
@@ -60,7 +57,7 @@ class FermionOp(Operator):
         return Operator.__new__(cls, *args)
 
     def _eval_commutator_FermionOp(self, other, **hints):
-        if 'independent' in hints and hints['independent']:
+        if "independent" in hints and hints["independent"]:
             # [c, d] = 0
             return Integer(0)
 
@@ -72,7 +69,7 @@ class FermionOp(Operator):
             if not self.is_annihilation and other.is_annihilation:
                 return Integer(1)
 
-        elif 'independent' in hints and hints['independent']:
+        elif "independent" in hints and hints["independent"]:
             # {c, d} = 2 * c * d, because [c, d] = 0 for independent operators
             return 2 * self * other
 
@@ -90,23 +87,24 @@ class FermionOp(Operator):
 
     def _print_contents_latex(self, printer, *args):
         if self.is_annihilation:
-            return r'{%s}' % str(self.name)
+            return r"{%s}" % str(self.name)
         else:
-            return r'{{%s}^\dagger}' % str(self.name)
+            return r"{{%s}^\dagger}" % str(self.name)
 
     def _print_contents(self, printer, *args):
         if self.is_annihilation:
-            return r'%s' % str(self.name)
+            return r"%s" % str(self.name)
         else:
-            return r'Dagger(%s)' % str(self.name)
+            return r"Dagger(%s)" % str(self.name)
 
     def _print_contents_pretty(self, printer, *args):
         from sympy.printing.pretty.stringpict import prettyForm
+
         pform = printer._print(self.args[0], *args)
         if self.is_annihilation:
             return pform
         else:
-            return pform**prettyForm(u'\N{DAGGER}')
+            return pform ** prettyForm(u"\N{DAGGER}")
 
 
 class FermionFockKet(Ket):

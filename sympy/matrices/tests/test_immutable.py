@@ -1,8 +1,18 @@
 from itertools import product
 
-from sympy import (ImmutableMatrix, Matrix, eye, zeros, S, Equality,
-        Unequality, ImmutableSparseMatrix, SparseMatrix, sympify,
-        integrate)
+from sympy import (
+    ImmutableMatrix,
+    Matrix,
+    eye,
+    zeros,
+    S,
+    Equality,
+    Unequality,
+    ImmutableSparseMatrix,
+    SparseMatrix,
+    sympify,
+    integrate,
+)
 from sympy.abc import x, y
 from sympy.testing.pytest import raises
 
@@ -29,23 +39,27 @@ def test_slicing():
 def test_subs():
     A = ImmutableMatrix([[1, 2], [3, 4]])
     B = ImmutableMatrix([[1, 2], [x, 4]])
-    C = ImmutableMatrix([[-x, x*y], [-(x + y), y**2]])
+    C = ImmutableMatrix([[-x, x * y], [-(x + y), y ** 2]])
     assert B.subs(x, 3) == A
-    assert (x*B).subs(x, 3) == 3*A
-    assert (x*eye(2) + B).subs(x, 3) == 3*eye(2) + A
+    assert (x * B).subs(x, 3) == 3 * A
+    assert (x * eye(2) + B).subs(x, 3) == 3 * eye(2) + A
     assert C.subs([[x, -1], [y, -2]]) == A
     assert C.subs([(x, -1), (y, -2)]) == A
     assert C.subs({x: -1, y: -2}) == A
-    assert C.subs({x: y - 1, y: x - 1}, simultaneous=True) == \
-        ImmutableMatrix([[1 - y, (x - 1)*(y - 1)], [2 - x - y, (x - 1)**2]])
+    assert C.subs({x: y - 1, y: x - 1}, simultaneous=True) == ImmutableMatrix(
+        [[1 - y, (x - 1) * (y - 1)], [2 - x - y, (x - 1) ** 2]]
+    )
 
 
 def test_as_immutable():
     X = Matrix([[1, 2], [3, 4]])
     assert sympify(X) == X.as_immutable() == ImmutableMatrix([[1, 2], [3, 4]])
     X = SparseMatrix(5, 5, {})
-    assert sympify(X) == X.as_immutable() == ImmutableSparseMatrix(
-            [[0 for i in range(5)] for i in range(5)])
+    assert (
+        sympify(X)
+        == X.as_immutable()
+        == ImmutableSparseMatrix([[0 for i in range(5)] for i in range(5)])
+    )
 
 
 def test_function_return_types():
@@ -81,6 +95,7 @@ def test_function_return_types():
 
     assert type(X.minor_submatrix(0, 0)) == ImmutableMatrix
 
+
 # issue 6279
 # https://github.com/sympy/sympy/issues/6279
 # Test that Immutable _op_ Immutable => Immutable and not MatExpr
@@ -93,7 +108,7 @@ def test_immutable_evaluation():
     assert isinstance(X * A, ImmutableMatrix)
     assert isinstance(X * 2, ImmutableMatrix)
     assert isinstance(2 * X, ImmutableMatrix)
-    assert isinstance(A**2, ImmutableMatrix)
+    assert isinstance(A ** 2, ImmutableMatrix)
 
 
 def test_deterimant():
@@ -119,5 +134,6 @@ def test_Equality():
 def test_integrate():
     intIM = integrate(IM, x)
     assert intIM.shape == IM.shape
-    assert all([intIM[i, j] == (1 + j + 3*i)*x for i, j in
-                product(range(3), range(3))])
+    assert all(
+        [intIM[i, j] == (1 + j + 3 * i) * x for i, j in product(range(3), range(3))]
+    )

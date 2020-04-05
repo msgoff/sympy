@@ -26,11 +26,19 @@ from sympy.core.basic import Basic
 from sympy.core.compatibility import exec_
 from sympy.core.sympify import SympifyError
 
-from ast import parse, NodeTransformer, Call, Name, Load, \
-    fix_missing_locations, Str, Tuple
+from ast import (
+    parse,
+    NodeTransformer,
+    Call,
+    Name,
+    Load,
+    fix_missing_locations,
+    Str,
+    Tuple,
+)
+
 
 class Transform(NodeTransformer):
-
     def __init__(self, local_dict, global_dict):
         NodeTransformer.__init__(self)
         self.local_dict = local_dict
@@ -38,11 +46,13 @@ class Transform(NodeTransformer):
 
     def visit_Num(self, node):
         if isinstance(node.n, int):
-            return fix_missing_locations(Call(func=Name('Integer', Load()),
-                    args=[node], keywords=[]))
+            return fix_missing_locations(
+                Call(func=Name("Integer", Load()), args=[node], keywords=[])
+            )
         elif isinstance(node.n, float):
-            return fix_missing_locations(Call(func=Name('Float', Load()),
-                    args=[node], keywords=[]))
+            return fix_missing_locations(
+                Call(func=Name("Float", Load()), args=[node], keywords=[])
+            )
         return node
 
     def visit_Name(self, node):
@@ -53,17 +63,20 @@ class Transform(NodeTransformer):
 
             if isinstance(name_obj, (Basic, type)) or callable(name_obj):
                 return node
-        elif node.id in ['True', 'False']:
+        elif node.id in ["True", "False"]:
             return node
-        return fix_missing_locations(Call(func=Name('Symbol', Load()),
-                args=[Str(node.id)], keywords=[]))
+        return fix_missing_locations(
+            Call(func=Name("Symbol", Load()), args=[Str(node.id)], keywords=[])
+        )
 
     def visit_Lambda(self, node):
         args = [self.visit(arg) for arg in node.args.args]
         body = self.visit(node.body)
-        n = Call(func=Name('Lambda', Load()),
-            args=[Tuple(args, Load()), body], keywords=[])
+        n = Call(
+            func=Name("Lambda", Load()), args=[Tuple(args, Load()), body], keywords=[]
+        )
         return fix_missing_locations(n)
+
 
 def parse_expr(s, local_dict):
     """
@@ -73,7 +86,7 @@ def parse_expr(s, local_dict):
     automatically creates Symbols.
     """
     global_dict = {}
-    exec_('from sympy import *', global_dict)
+    exec_("from sympy import *", global_dict)
     try:
         a = parse(s.strip(), mode="eval")
     except SyntaxError:

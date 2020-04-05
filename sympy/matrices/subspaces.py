@@ -68,12 +68,12 @@ def _nullspace(M, simplify=False, iszerofunc=_iszero):
     reduced, pivots = M.rref(iszerofunc=iszerofunc, simplify=simplify)
 
     free_vars = [i for i in range(M.cols) if i not in pivots]
-    basis     = []
+    basis = []
 
     for free_var in free_vars:
         # for each free variable, we will set it to 1 and all others
         # to 0.  Then, we will use back substitution to solve the system
-        vec           = [M.zero] * M.cols
+        vec = [M.zero] * M.cols
         vec[free_var] = M.one
 
         for piv_row, piv_col in enumerate(pivots):
@@ -155,8 +155,8 @@ def _orthogonalize(cls, *vecs, **kwargs):
     .. [1] https://en.wikipedia.org/wiki/Gram%E2%80%93Schmidt_process
     """
 
-    normalize = kwargs.get('normalize', False)
-    rankcheck = kwargs.get('rankcheck', False)
+    normalize = kwargs.get("normalize", False)
+    rankcheck = kwargs.get("rankcheck", False)
 
     def project(a, b):
         return b * (a.dot(b, hermitian=True) / b.dot(b, hermitian=True))
@@ -172,8 +172,8 @@ def _orthogonalize(cls, *vecs, **kwargs):
 
         return vec - reduce(lambda a, b: a + b, components)
 
-    ret  = []
-    vecs = list(vecs) # make sure we start with a non-zero vector
+    ret = []
+    vecs = list(vecs)  # make sure we start with a non-zero vector
 
     while len(vecs) > 0 and vecs[0].is_zero_matrix:
         if rankcheck is False:

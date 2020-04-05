@@ -52,7 +52,7 @@ def singularityintegrate(f, x):
         a = sympify(f.args[1])
         n = sympify(f.args[2])
         if n.is_positive or n.is_zero:
-            return SingularityFunction(x, a, n + 1)/(n + 1)
+            return SingularityFunction(x, a, n + 1) / (n + 1)
         elif n == -1 or n == -2:
             return SingularityFunction(x, a, n + 1)
 

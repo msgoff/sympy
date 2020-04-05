@@ -12,13 +12,14 @@ from sympy.polys.domains.domainelement import DomainElement
 
 from sympy.utilities import public
 
+
 @public
 class ModularInteger(PicklableWithSlots, DomainElement):
     """A class representing a modular integer. """
 
     mod, dom, sym, _parent = None, None, None, None
 
-    __slots__ = ('val',)
+    __slots__ = ("val",)
 
     def parent(self):
         return self._parent
@@ -178,7 +179,9 @@ class ModularInteger(PicklableWithSlots, DomainElement):
     def invert(self):
         return self.__class__(self._invert(self.val))
 
+
 _modular_integer_cache = {}  # type: Dict[Tuple[Any, Any, Any], Type[ModularInteger]]
+
 
 def ModularIntegerFactory(_mod, _dom, _sym, parent):
     """Create custom class for specific integer modulus."""
@@ -197,6 +200,7 @@ def ModularIntegerFactory(_mod, _dom, _sym, parent):
     try:
         cls = _modular_integer_cache[key]
     except KeyError:
+
         class cls(ModularInteger):
             mod, dom, sym = _mod, _dom, _sym
             _parent = parent

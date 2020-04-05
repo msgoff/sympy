@@ -3,13 +3,11 @@ from __future__ import print_function, division
 from sympy import Number
 from sympy.core import Mul, Basic, sympify, S
 from sympy.functions import adjoint
-from sympy.strategies import (rm_id, unpack, typed, flatten, exhaust,
-        do_one, new)
+from sympy.strategies import rm_id, unpack, typed, flatten, exhaust, do_one, new
 from sympy.matrices.matrices import MatrixBase
 
 from .inverse import Inverse
-from .matexpr import \
-    MatrixExpr, ShapeError, Identity, ZeroMatrix, GenericIdentity
+from .matexpr import MatrixExpr, ShapeError, Identity, ZeroMatrix, GenericIdentity
 from .matpow import MatPow
 from .transpose import transpose
 from .permutation import PermutationMatrix
@@ -30,12 +28,13 @@ class MatMul(MatrixExpr, Mul):
     >>> MatMul(A, B, C)
     A*B*C
     """
+
     is_MatMul = True
 
     identity = GenericIdentity()
 
     def __new__(cls, *args, **kwargs):
-        check = kwargs.get('check', True)
+        check = kwargs.get("check", True)
 
         if not args:
             return cls.identity
@@ -68,8 +67,8 @@ class MatMul(MatrixExpr, Mul):
         if len(matrices) == 1:  # situation like 2*X, matmul is just X
             return coeff * matrices[0][i, j]
 
-        indices = [None]*(len(matrices) + 1)
-        ind_ranges = [None]*(len(matrices) - 1)
+        indices = [None] * (len(matrices) + 1)
+        ind_ranges = [None] * (len(matrices) - 1)
         indices[0] = i
         indices[-1] = j
 
@@ -86,14 +85,16 @@ class MatMul(MatrixExpr, Mul):
 
         for i, arg in enumerate(matrices[:-1]):
             ind_ranges[i] = arg.shape[1] - 1
-        matrices = [arg._entry(indices[i], indices[i+1], dummy_generator=dummy_generator) for i, arg in enumerate(matrices)]
+        matrices = [
+            arg._entry(indices[i], indices[i + 1], dummy_generator=dummy_generator)
+            for i, arg in enumerate(matrices)
+        ]
         expr_in_sum = Mul.fromiter(matrices)
         if any(v.has(ImmutableMatrix) for v in matrices):
             expand = True
-        result = coeff*Sum(
-                expr_in_sum,
-                *zip(indices[1:-1], [0]*len(ind_ranges), ind_ranges)
-            )
+        result = coeff * Sum(
+            expr_in_sum, *zip(indices[1:-1], [0] * len(ind_ranges), ind_ranges)
+        )
 
         # Don't waste time in result.doit() if the sum bounds are symbolic
         if not any(isinstance(v, (Integer, int)) for v in ind_ranges):
@@ -105,7 +106,9 @@ class MatMul(MatrixExpr, Mul):
         matrices = [x for x in self.args if x.is_Matrix]
         coeff = Mul(*scalars)
         if coeff.is_commutative is False:
-            raise NotImplementedError("noncommutative scalars in MatMul are not supported.")
+            raise NotImplementedError(
+                "noncommutative scalars in MatMul are not supported."
+            )
 
         return coeff, matrices
 
@@ -133,8 +136,7 @@ class MatMul(MatrixExpr, Mul):
         .. [1] https://en.wikipedia.org/wiki/Transpose
         """
         coeff, matrices = self.as_coeff_matrices()
-        return MatMul(
-            coeff, *[transpose(arg) for arg in matrices[::-1]]).doit()
+        return MatMul(coeff, *[transpose(arg) for arg in matrices[::-1]]).doit()
 
     def _eval_adjoint(self):
         return MatMul(*[adjoint(arg) for arg in self.args[::-1]]).doit()
@@ -143,26 +145,31 @@ class MatMul(MatrixExpr, Mul):
         factor, mmul = self.as_coeff_mmul()
         if factor != 1:
             from .trace import trace
+
             return factor * trace(mmul.doit())
         else:
             raise NotImplementedError("Can't simplify any further")
 
     def _eval_determinant(self):
         from sympy.matrices.expressions.determinant import Determinant
+
         factor, matrices = self.as_coeff_matrices()
         square_matrices = only_squares(*matrices)
-        return factor**self.rows * Mul(*list(map(Determinant, square_matrices)))
+        return factor ** self.rows * Mul(*list(map(Determinant, square_matrices)))
 
     def _eval_inverse(self):
         try:
-            return MatMul(*[
-                arg.inverse() if isinstance(arg, MatrixExpr) else arg**-1
-                    for arg in self.args[::-1]]).doit()
+            return MatMul(
+                *[
+                    arg.inverse() if isinstance(arg, MatrixExpr) else arg ** -1
+                    for arg in self.args[::-1]
+                ]
+            ).doit()
         except ShapeError:
             return Inverse(self)
 
     def doit(self, **kwargs):
-        deep = kwargs.get('deep', True)
+        deep = kwargs.get("deep", True)
         if deep:
             args = [arg.doit(**kwargs) for arg in self.args]
         else:
@@ -179,18 +186,24 @@ class MatMul(MatrixExpr, Mul):
 
     def _eval_derivative_matrix_lines(self, x):
         from .transpose import Transpose
+
         with_x_ind = [i for i, arg in enumerate(self.args) if arg.has(x)]
         lines = []
         for ind in with_x_ind:
             left_args = self.args[:ind]
-            right_args = self.args[ind+1:]
+            right_args = self.args[ind + 1 :]
 
             if right_args:
                 right_mat = MatMul.fromiter(right_args)
             else:
                 right_mat = Identity(self.shape[1])
             if left_args:
-                left_rev = MatMul.fromiter([Transpose(i).doit() if i.is_Matrix else i for i in reversed(left_args)])
+                left_rev = MatMul.fromiter(
+                    [
+                        Transpose(i).doit() if i.is_Matrix else i
+                        for i in reversed(left_args)
+                    ]
+                )
             else:
                 left_rev = Identity(self.shape[0])
 
@@ -205,10 +218,11 @@ class MatMul(MatrixExpr, Mul):
 
 def validate(*matrices):
     """ Checks for valid shapes for args of MatMul """
-    for i in range(len(matrices)-1):
-        A, B = matrices[i:i+2]
+    for i in range(len(matrices) - 1):
+        A, B = matrices[i : i + 2]
         if A.cols != B.rows:
-            raise ShapeError("Matrices %s and %s are not aligned"%(A, B))
+            raise ShapeError("Matrices %s and %s are not aligned" % (A, B))
+
 
 # Rules
 
@@ -218,12 +232,13 @@ def newmul(*args):
         args = args[1:]
     return new(MatMul, *args)
 
+
 def any_zeros(mul):
-    if any([arg.is_zero or (arg.is_Matrix and arg.is_ZeroMatrix)
-                       for arg in mul.args]):
+    if any([arg.is_zero or (arg.is_Matrix and arg.is_ZeroMatrix) for arg in mul.args]):
         matrices = [arg for arg in mul.args if arg.is_Matrix]
         return ZeroMatrix(matrices[0].rows, matrices[-1].cols)
     return mul
+
 
 def merge_explicit(matmul):
     """ Merge explicit MatrixBase arguments
@@ -258,7 +273,9 @@ def merge_explicit(matmul):
     newargs = []
     last = matmul.args[0]
     for arg in matmul.args[1:]:
-        if isinstance(arg, (MatrixBase, Number)) and isinstance(last, (MatrixBase, Number)):
+        if isinstance(arg, (MatrixBase, Number)) and isinstance(
+            last, (MatrixBase, Number)
+        ):
             last = last * arg
         else:
             newargs.append(last)
@@ -266,6 +283,7 @@ def merge_explicit(matmul):
     newargs.append(last)
 
     return MatMul(*newargs)
+
 
 def remove_ids(mul):
     """ Remove Identities from a MatMul
@@ -288,11 +306,13 @@ def remove_ids(mul):
     else:
         return mul
 
+
 def factor_in_front(mul):
     factor, matrices = mul.as_coeff_matrices()
     if factor != 1:
         return newmul(factor, *matrices)
     return mul
+
 
 def combine_powers(mul):
     """Combine consecutive powers with the same base into one
@@ -326,14 +346,14 @@ def combine_powers(mul):
         if A_base == B_base:
             new_exp = A_exp + B_exp
             new_args[-1] = MatPow(A_base, new_exp).doit(deep=False)
-        elif not isinstance(B_base, MatrixBase) and \
-            A_base == B_base.inverse():
+        elif not isinstance(B_base, MatrixBase) and A_base == B_base.inverse():
             new_exp = A_exp - B_exp
             new_args[-1] = MatPow(A_base, new_exp).doit(deep=False)
         else:
             new_args.append(B)
 
     return newmul(factor, *new_args)
+
 
 def combine_permutations(mul):
     """Refine products of permutation matrices as the products of cycles.
@@ -347,8 +367,7 @@ def combine_permutations(mul):
     for i in range(1, l):
         A = result[-1]
         B = args[i]
-        if isinstance(A, PermutationMatrix) and \
-            isinstance(B, PermutationMatrix):
+        if isinstance(A, PermutationMatrix) and isinstance(B, PermutationMatrix):
             cycle_1 = A.args[0]
             cycle_2 = B.args[0]
             result[-1] = PermutationMatrix(cycle_1 * cycle_2)
@@ -357,11 +376,21 @@ def combine_permutations(mul):
 
     return MatMul(*result)
 
+
 rules = (
-    any_zeros, remove_ids, combine_powers, unpack, rm_id(lambda x: x == 1),
-    merge_explicit, factor_in_front, flatten, combine_permutations)
+    any_zeros,
+    remove_ids,
+    combine_powers,
+    unpack,
+    rm_id(lambda x: x == 1),
+    merge_explicit,
+    factor_in_front,
+    flatten,
+    combine_permutations,
+)
 
 canonicalize = exhaust(typed({MatMul: do_one(*rules)}))
+
 
 def only_squares(*matrices):
     """factor matrices only if they are square"""
@@ -371,8 +400,8 @@ def only_squares(*matrices):
     start = 0
     for i, M in enumerate(matrices):
         if M.cols == matrices[start].rows:
-            out.append(MatMul(*matrices[start:i+1]).doit())
-            start = i+1
+            out.append(MatMul(*matrices[start : i + 1]).doit())
+            start = i + 1
     return out
 
 
@@ -414,4 +443,4 @@ def refine_MatMul(expr, assumptions):
     return MatMul(*newargs)
 
 
-handlers_dict['MatMul'] = refine_MatMul
+handlers_dict["MatMul"] = refine_MatMul

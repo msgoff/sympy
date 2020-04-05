@@ -45,14 +45,16 @@ def difference_delta(expr, n=None, step=1):
         elif len(f) == 0:
             return S.Zero
         else:
-            raise ValueError("Since there is more than one variable in the"
-                             " expression, a variable must be supplied to"
-                             " take the difference of %s" % expr)
+            raise ValueError(
+                "Since there is more than one variable in the"
+                " expression, a variable must be supplied to"
+                " take the difference of %s" % expr
+            )
     step = sympify(step)
     if step.is_number is False or step.is_finite is False:
         raise ValueError("Step should be a finite number.")
 
-    if hasattr(expr, '_eval_difference_delta'):
+    if hasattr(expr, "_eval_difference_delta"):
         result = expr._eval_difference_delta(n, step)
         if result:
             return result
@@ -198,6 +200,7 @@ def limit_seq(expr, n=None, trials=5):
 
     from sympy.concrete.summations import Sum
     from sympy.calculus.util import AccumulationBounds
+
     if n is None:
         free = expr.free_symbols
         if len(free) == 1:
@@ -205,8 +208,9 @@ def limit_seq(expr, n=None, trials=5):
         elif not free:
             return expr
         else:
-            raise ValueError("Expression has more than one variable. "
-                             "Please specify a variable.")
+            raise ValueError(
+                "Expression has more than one variable. " "Please specify a variable."
+            )
     elif n not in expr.free_symbols:
         return expr
 
@@ -218,8 +222,7 @@ def limit_seq(expr, n=None, trials=5):
     # If there is a negative term raised to a power involving n, or a
     # trigonometric function, then consider even and odd n separately.
     powers = (p.as_base_exp() for p in expr.atoms(Pow))
-    if (any(b.is_negative and e.has(n) for b, e in powers) or
-            expr.has(cos, sin)):
+    if any(b.is_negative and e.has(n) for b, e in powers) or expr.has(cos, sin):
         L1 = _limit_seq(expr.xreplace({n: n1}), n1, trials)
         if L1 is not None:
             L2 = _limit_seq(expr.xreplace({n: n2}), n2, trials)

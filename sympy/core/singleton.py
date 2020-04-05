@@ -79,6 +79,7 @@ class SingletonRegistry(Registry):
     ``Integer.__div__``, which knows how to return a ``Rational``.
 
     """
+
     __slots__ = ()
 
     # Also allow things like S(5)
@@ -111,8 +112,8 @@ class SingletonRegistry(Registry):
         it as an attribute of the given name, and unregisters the class."""
         if name not in self._classes_to_install:
             raise AttributeError(
-                "Attribute '%s' was not installed on SymPy registry %s" % (
-                name, self))
+                "Attribute '%s' was not installed on SymPy registry %s" % (name, self)
+            )
         class_to_install = self._classes_to_install[name]
         value_to_install = class_to_install()
         self.__setattr__(name, value_to_install)
@@ -121,6 +122,7 @@ class SingletonRegistry(Registry):
 
     def __repr__(self):
         return "S"
+
 
 S = SingletonRegistry()
 
@@ -174,12 +176,14 @@ class Singleton(ManagedProperties):
         # class of which Singleton is the metaclas.
         # __call__ is invoked first, before __new__() and __init__().
         if self not in Singleton._instances:
-            Singleton._instances[self] = \
-                super(Singleton, self).__call__(*args, **kwargs)
-                # Invokes the standard constructor of SomeClass.
+            Singleton._instances[self] = super(Singleton, self).__call__(
+                *args, **kwargs
+            )
+            # Invokes the standard constructor of SomeClass.
         return Singleton._instances[self]
 
         # Inject pickling support.
         def __getnewargs__(self):
             return ()
+
         self.__getnewargs__ = __getnewargs__

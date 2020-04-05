@@ -3,8 +3,18 @@
 from __future__ import print_function, division
 
 from sympy import (
-    S, Rational, AlgebraicNumber, GoldenRatio, TribonacciConstant,
-    Add, Mul, sympify, Dummy, expand_mul, I, pi
+    S,
+    Rational,
+    AlgebraicNumber,
+    GoldenRatio,
+    TribonacciConstant,
+    Add,
+    Mul,
+    sympify,
+    Dummy,
+    expand_mul,
+    I,
+    pi,
 )
 from sympy.functions import sqrt, cbrt
 from sympy.core.compatibility import reduce
@@ -23,8 +33,16 @@ from sympy.polys.polyerrors import (
     GeneratorsError,
 )
 from sympy.polys.polytools import (
-    Poly, PurePoly, invert, factor_list, groebner, resultant,
-    degree, poly_from_expr, parallel_poly_from_expr, lcm
+    Poly,
+    PurePoly,
+    invert,
+    factor_list,
+    groebner,
+    resultant,
+    degree,
+    poly_from_expr,
+    parallel_poly_from_expr,
+    lcm,
 )
 from sympy.polys.polyutils import dict_from_expr, expr_from_dict
 from sympy.polys.ring_series import rs_compose_add
@@ -35,12 +53,9 @@ from sympy.printing.lambdarepr import LambdaPrinter
 from sympy.printing.pycode import PythonCodePrinter, MpmathPrinter
 from sympy.simplify.radsimp import _split_gcd
 from sympy.simplify.simplify import _is_sum_surds
-from sympy.utilities import (
-    numbered_symbols, variations, lambdify, public, sift
-)
+from sympy.utilities import numbered_symbols, variations, lambdify, public, sift
 
 from mpmath import pslq, mp
-
 
 
 def _choose_factor(factors, x, v, dom=QQ, prec=200, bound=5):
@@ -53,11 +68,11 @@ def _choose_factor(factors, x, v, dom=QQ, prec=200, bound=5):
     if len(factors) == 1:
         return factors[0]
 
-    points = {x:v}
-    symbols = dom.symbols if hasattr(dom, 'symbols') else []
+    points = {x: v}
+    symbols = dom.symbols if hasattr(dom, "symbols") else []
     t = QQ(1, 10)
 
-    for n in range(bound**len(symbols)):
+    for n in range(bound ** len(symbols)):
         prec1 = 10
         n_temp = n
         for s in symbols:
@@ -66,7 +81,7 @@ def _choose_factor(factors, x, v, dom=QQ, prec=200, bound=5):
 
         while True:
             candidates = []
-            eps = t**(prec1 // 2)
+            eps = t ** (prec1 // 2)
             for f in factors:
                 if abs(f.as_expr().evalf(prec1, points)) < eps:
                     candidates.append(f)
@@ -78,7 +93,9 @@ def _choose_factor(factors, x, v, dom=QQ, prec=200, bound=5):
                 break
             prec1 *= 2
 
-    raise NotImplementedError("multiple candidates for the minimal polynomial of %s" % v)
+    raise NotImplementedError(
+        "multiple candidates for the minimal polynomial of %s" % v
+    )
 
 
 def _separate_sq(p):
@@ -108,14 +125,16 @@ def _separate_sq(p):
 
     """
     from sympy.utilities.iterables import sift
+
     def is_sqrt(expr):
         return expr.is_Pow and expr.exp is S.Half
+
     # p = c1*sqrt(q1) + ... + cn*sqrt(qn) -> a = [(c1, q1), .., (cn, qn)]
     a = []
     for y in p.args:
         if not y.is_Mul:
             if is_sqrt(y):
-                a.append((S.One, y**2))
+                a.append((S.One, y ** 2))
             elif y.is_Atom:
                 a.append((y, S.One))
             elif y.is_Pow and y.exp.is_integer:
@@ -124,7 +143,7 @@ def _separate_sq(p):
                 raise NotImplementedError
             continue
         T, F = sift(y.args, is_sqrt, binary=True)
-        a.append((Mul(*F), Mul(*T)**2))
+        a.append((Mul(*F), Mul(*T) ** 2))
     a.sort(key=lambda z: z[1])
     if a[-1][1] is S.One:
         # there are no surds
@@ -138,13 +157,14 @@ def _separate_sq(p):
     a2 = []
     for y, z in a:
         if z in b1:
-            a1.append(y*z**S.Half)
+            a1.append(y * z ** S.Half)
         else:
-            a2.append(y*z**S.Half)
+            a2.append(y * z ** S.Half)
     p1 = Add(*a1)
     p2 = Add(*a2)
-    p = _mexpand(p1**2) - _mexpand(p2**2)
+    p = _mexpand(p1 ** 2) - _mexpand(p2 ** 2)
     return p
+
 
 def _minimal_polynomial_sq(p, n, x):
     """
@@ -175,13 +195,13 @@ def _minimal_polynomial_sq(p, n, x):
     n = sympify(n)
     if not n.is_Integer or not n > 0 or not _is_sum_surds(p):
         return None
-    pn = p**Rational(1, n)
+    pn = p ** Rational(1, n)
     # eliminate the square roots
     p -= x
     while 1:
         p1 = _separate_sq(p)
         if p1 is p:
-            p = p1.subs({x:x**n})
+            p = p1.subs({x: x ** n})
             break
         else:
             p = p1
@@ -191,7 +211,7 @@ def _minimal_polynomial_sq(p, n, x):
     # if n > 1 it contains the minimal polynomial as a factor.
     if n == 1:
         p1 = Poly(p)
-        if p.coeff(x**p1.degree(x)) < 0:
+        if p.coeff(x ** p1.degree(x)) < 0:
             p = -p
         p = p.primitive()[1]
         return p
@@ -201,6 +221,7 @@ def _minimal_polynomial_sq(p, n, x):
 
     result = _choose_factor(factors, x, pn)
     return result
+
 
 def _minpoly_op_algebraic_element(op, ex1, ex2, x, dom, mp1=None, mp2=None):
     """
@@ -249,7 +270,7 @@ def _minpoly_op_algebraic_element(op, ex1, ex2, x, dom, mp1=None, mp2=None):
     if op is Add:
         # mp1a = mp1.subs({x: x - y})
         if dom == QQ:
-            R, X = ring('X', QQ)
+            R, X = ring("X", QQ)
             p1 = R(dict_from_expr(mp1)[0])
             p2 = R(dict_from_expr(mp2)[0])
         else:
@@ -260,7 +281,7 @@ def _minpoly_op_algebraic_element(op, ex1, ex2, x, dom, mp1=None, mp2=None):
     elif op is Mul:
         mp1a = _muly(mp1, x, y)
     else:
-        raise NotImplementedError('option not available')
+        raise NotImplementedError("option not available")
 
     if op is Mul or dom != QQ:
         r = resultant(mp1a, mp2, gens=[y, x])
@@ -288,7 +309,7 @@ def _invertx(p, x):
     p1 = poly_from_expr(p, x)[0]
 
     n = degree(p1)
-    a = [c * x**(n - i) for (i,), c in p1.terms()]
+    a = [c * x ** (n - i) for (i,), c in p1.terms()]
     return Add(*a)
 
 
@@ -299,7 +320,7 @@ def _muly(p, x, y):
     p1 = poly_from_expr(p, x)[0]
 
     n = degree(p1)
-    a = [c * x**i * y**(n - i) for (i,), c in p1.terms()]
+    a = [c * x ** i * y ** (n - i) for (i,), c in p1.terms()]
     return Add(*a)
 
 
@@ -340,19 +361,19 @@ def _minpoly_pow(ex, pw, x, dom, mp=None):
         raise NotAlgebraic("%s doesn't seem to be an algebraic element" % ex)
     if pw < 0:
         if mp == x:
-            raise ZeroDivisionError('%s is zero' % ex)
+            raise ZeroDivisionError("%s is zero" % ex)
         mp = _invertx(mp, x)
         if pw == -1:
             return mp
         pw = -pw
-        ex = 1/ex
+        ex = 1 / ex
 
     y = Dummy(str(x))
     mp = mp.subs({x: y})
     n, d = pw.as_numer_denom()
-    res = Poly(resultant(mp, x**d - y**n, gens=[y]), x, domain=dom)
+    res = Poly(resultant(mp, x ** d - y ** n, gens=[y]), x, domain=dom)
     _, factors = res.factor_list()
-    res = _choose_factor(factors, x, ex**pw, dom)
+    res = _choose_factor(factors, x, ex ** pw, dom)
     return res.as_expr()
 
 
@@ -395,23 +416,23 @@ def _minpoly_sin(ex, x):
                 # write sin(q*a) = mp(sin(a))*sin(a);
                 # the roots of mp(x) are sin(pi*p/q) for p = 1,..., q - 1
                 a = dup_chebyshevt(n, ZZ)
-                return Add(*[x**(n - i - 1)*a[i] for i in range(n)])
+                return Add(*[x ** (n - i - 1) * a[i] for i in range(n)])
             if c.p == 1:
                 if q == 9:
-                    return 64*x**6 - 96*x**4 + 36*x**2 - 3
+                    return 64 * x ** 6 - 96 * x ** 4 + 36 * x ** 2 - 3
 
             if n % 2 == 1:
                 # for a = pi*p/q with q odd, use
                 # sin(q*a) = 0 to see that the minimal polynomial must be
                 # a factor of dup_chebyshevt(n, ZZ)
                 a = dup_chebyshevt(n, ZZ)
-                a = [x**(n - i)*a[i] for i in range(n + 1)]
+                a = [x ** (n - i) * a[i] for i in range(n + 1)]
                 r = Add(*a)
                 _, factors = factor_list(r)
                 res = _choose_factor(factors, x, ex)
                 return res
 
-            expr = ((1 - cos(2*c*pi))/2)**S.Half
+            expr = ((1 - cos(2 * c * pi)) / 2) ** S.Half
             res = _minpoly_compose(expr, x, QQ)
             return res
 
@@ -424,25 +445,26 @@ def _minpoly_cos(ex, x):
     see http://mathworld.wolfram.com/TrigonometryAngles.html
     """
     from sympy import sqrt
+
     c, a = ex.args[0].as_coeff_Mul()
     if a is pi:
         if c.is_rational:
             if c.p == 1:
                 if c.q == 7:
-                    return 8*x**3 - 4*x**2 - 4*x + 1
+                    return 8 * x ** 3 - 4 * x ** 2 - 4 * x + 1
                 if c.q == 9:
-                    return 8*x**3 - 6*x + 1
+                    return 8 * x ** 3 - 6 * x + 1
             elif c.p == 2:
                 q = sympify(c.q)
                 if q.is_prime:
                     s = _minpoly_sin(ex, x)
-                    return _mexpand(s.subs({x:sqrt((1 - x)/2)}))
+                    return _mexpand(s.subs({x: sqrt((1 - x) / 2)}))
 
             # for a = pi*p/q, cos(q*a) =T_q(cos(a)) = (-1)**p
             n = int(c.q)
             a = dup_chebyshevt(n, ZZ)
-            a = [x**(n - i)*a[i] for i in range(n + 1)]
-            r = Add(*a) - (-1)**c.p
+            a = [x ** (n - i) * a[i] for i in range(n + 1)]
+            r = Add(*a) - (-1) ** c.p
             _, factors = factor_list(r)
             res = _choose_factor(factors, x, ex)
             return res
@@ -456,29 +478,29 @@ def _minpoly_exp(ex, x):
     """
     c, a = ex.args[0].as_coeff_Mul()
     q = sympify(c.q)
-    if a == I*pi:
+    if a == I * pi:
         if c.is_rational:
             if c.p == 1 or c.p == -1:
                 if q == 3:
-                    return x**2 - x + 1
+                    return x ** 2 - x + 1
                 if q == 4:
-                    return x**4 + 1
+                    return x ** 4 + 1
                 if q == 6:
-                    return x**4 - x**2 + 1
+                    return x ** 4 - x ** 2 + 1
                 if q == 8:
-                    return x**8 + 1
+                    return x ** 8 + 1
                 if q == 9:
-                    return x**6 - x**3 + 1
+                    return x ** 6 - x ** 3 + 1
                 if q == 10:
-                    return x**8 - x**6 + x**4 - x**2 + 1
+                    return x ** 8 - x ** 6 + x ** 4 - x ** 2 + 1
                 if q.is_prime:
                     s = 0
                     for i in range(q):
-                        s += (-x)**i
+                        s += (-x) ** i
                     return s
 
             # x**(2*q) = product(factors)
-            factors = [cyclotomic_poly(i, x) for i in divisors(2*q)]
+            factors = [cyclotomic_poly(i, x) for i in divisors(2 * q)]
             mp = _choose_factor(factors, x, ex)
             return mp
         else:
@@ -491,7 +513,7 @@ def _minpoly_rootof(ex, x):
     Returns the minimal polynomial of a ``CRootOf`` object.
     """
     p = ex.expr
-    p = p.subs({ex.poly.gens[0]:x})
+    p = p.subs({ex.poly.gens[0]: x})
     _, factors = factor_list(p, x)
     result = _choose_factor(factors, x, ex)
     return result
@@ -514,27 +536,27 @@ def _minpoly_compose(ex, x, dom):
 
     """
     if ex.is_Rational:
-        return ex.q*x - ex.p
+        return ex.q * x - ex.p
     if ex is I:
-        _, factors = factor_list(x**2 + 1, x, domain=dom)
-        return x**2 + 1 if len(factors) == 1 else x - I
+        _, factors = factor_list(x ** 2 + 1, x, domain=dom)
+        return x ** 2 + 1 if len(factors) == 1 else x - I
 
     if ex is GoldenRatio:
-        _, factors = factor_list(x**2 - x - 1, x, domain=dom)
+        _, factors = factor_list(x ** 2 - x - 1, x, domain=dom)
         if len(factors) == 1:
-            return x**2 - x - 1
+            return x ** 2 - x - 1
         else:
-            return _choose_factor(factors, x, (1 + sqrt(5))/2, dom=dom)
+            return _choose_factor(factors, x, (1 + sqrt(5)) / 2, dom=dom)
 
     if ex is TribonacciConstant:
-        _, factors = factor_list(x**3 - x**2 - x - 1, x, domain=dom)
+        _, factors = factor_list(x ** 3 - x ** 2 - x - 1, x, domain=dom)
         if len(factors) == 1:
-            return x**3 - x**2 - x - 1
+            return x ** 3 - x ** 2 - x - 1
         else:
-            fac = (1 + cbrt(19 - 3*sqrt(33)) + cbrt(19 + 3*sqrt(33))) / 3
+            fac = (1 + cbrt(19 - 3 * sqrt(33)) + cbrt(19 + 3 * sqrt(33))) / 3
             return _choose_factor(factors, x, fac, dom=dom)
 
-    if hasattr(dom, 'symbols') and ex in dom.symbols:
+    if hasattr(dom, "symbols") and ex in dom.symbols:
         return x - ex
 
     if dom.is_QQ and _is_sum_surds(ex):
@@ -553,13 +575,13 @@ def _minpoly_compose(ex, x, dom):
         f = Factors(ex).factors
         r = sift(f.items(), lambda itx: itx[0].is_Rational and itx[1].is_Rational)
         if r[True] and dom == QQ:
-            ex1 = Mul(*[bx**ex for bx, ex in r[False] + r[None]])
+            ex1 = Mul(*[bx ** ex for bx, ex in r[False] + r[None]])
             r1 = dict(r[True])
             dens = [y.q for y in r1.values()]
             lcmdens = reduce(lcm, dens, 1)
             neg1 = S.NegativeOne
             expn1 = r1.pop(neg1, S.Zero)
-            nums = [base**(y.p*lcmdens // y.q) for base, y in r1.items()]
+            nums = [base ** (y.p * lcmdens // y.q) for base, y in r1.items()]
             ex2 = Mul(*nums)
             mp1 = minimal_polynomial(ex1, x)
             # use the fact that in SymPy canonicalization products of integers
@@ -567,8 +589,8 @@ def _minpoly_compose(ex, x, dom):
             # bases, and that in ``base**(n/d)`` a perfect power is
             # simplified with the root
             # Powers of -1 have to be treated separately to preserve sign.
-            mp2 = ex2.q*x**lcmdens - ex2.p*neg1**(expn1*lcmdens)
-            ex2 = neg1**expn1 * ex2**Rational(1, lcmdens)
+            mp2 = ex2.q * x ** lcmdens - ex2.p * neg1 ** (expn1 * lcmdens)
+            ex2 = neg1 ** expn1 * ex2 ** Rational(1, lcmdens)
             res = _minpoly_op_algebraic_element(Mul, ex1, ex2, x, dom, mp1=mp1, mp2=mp2)
         else:
             res = _minpoly_mul(x, dom, *ex.args)
@@ -657,21 +679,22 @@ def minimal_polynomial(ex, x=None, compose=True, polys=False, domain=None):
     if x is not None:
         x, cls = sympify(x), Poly
     else:
-        x, cls = Dummy('x'), PurePoly
+        x, cls = Dummy("x"), PurePoly
 
     if not domain:
         if ex.free_symbols:
             domain = FractionField(QQ, list(ex.free_symbols))
         else:
             domain = QQ
-    if hasattr(domain, 'symbols') and x in domain.symbols:
-        raise GeneratorsError("the variable %s is an element of the ground "
-                              "domain %s" % (x, domain))
+    if hasattr(domain, "symbols") and x in domain.symbols:
+        raise GeneratorsError(
+            "the variable %s is an element of the ground " "domain %s" % (x, domain)
+        )
 
     if compose:
         result = _minpoly_compose(ex, x, domain)
         result = result.primitive()[1]
-        c = result.coeff(x**degree(result, x))
+        c = result.coeff(x ** degree(result, x))
         if c.is_negative:
             result = expand_mul(-result)
         return cls(result, x, field=True) if polys else result.collect(x)
@@ -700,7 +723,7 @@ def _minpoly_groebner(ex, x, cls):
     from sympy.polys.polytools import degree
     from sympy.core.function import expand_multinomial
 
-    generator = numbered_symbols('a', cls=Dummy)
+    generator = numbered_symbols("a", cls=Dummy)
     mapping, symbols = {}, {}
 
     def update_mapping(ex, exp, base=None):
@@ -708,7 +731,7 @@ def _minpoly_groebner(ex, x, cls):
         symbols[ex] = a
 
         if base is not None:
-            mapping[ex] = a**exp + base
+            mapping[ex] = a ** exp + base
         else:
             mapping[ex] = exp.as_expr(a)
 
@@ -724,9 +747,9 @@ def _minpoly_groebner(ex, x, cls):
             elif ex.is_Rational:
                 return ex
         elif ex.is_Add:
-            return Add(*[ bottom_up_scan(g) for g in ex.args ])
+            return Add(*[bottom_up_scan(g) for g in ex.args])
         elif ex.is_Mul:
-            return Mul(*[ bottom_up_scan(g) for g in ex.args ])
+            return Mul(*[bottom_up_scan(g) for g in ex.args])
         elif ex.is_Pow:
             if ex.exp.is_Rational:
                 if ex.exp < 0 and ex.base.is_Add:
@@ -742,17 +765,16 @@ def _minpoly_groebner(ex, x, cls):
                     if ex.exp == -1:
                         return bottom_up_scan(base)
                     else:
-                        ex = base**(-ex.exp)
+                        ex = base ** (-ex.exp)
                 if not ex.exp.is_Integer:
-                    base, exp = (
-                        ex.base**ex.exp.p).expand(), Rational(1, ex.exp.q)
+                    base, exp = (ex.base ** ex.exp.p).expand(), Rational(1, ex.exp.q)
                 else:
                     base, exp = ex.base, ex.exp
                 base = bottom_up_scan(base)
-                expr = base**exp
+                expr = base ** exp
 
                 if expr not in mapping:
-                    return update_mapping(expr, 1/exp, -base)
+                    return update_mapping(expr, 1 / exp, -base)
                 else:
                     return symbols[expr]
         elif ex.is_AlgebraicNumber:
@@ -769,7 +791,7 @@ def _minpoly_groebner(ex, x, cls):
         algorithm works better with the inverse
         """
         if ex.is_Pow:
-            if (1/ex.exp).is_integer and ex.exp < 0:
+            if (1 / ex.exp).is_integer and ex.exp < 0:
                 if ex.base.is_Add:
                     return True
         if ex.is_Mul:
@@ -790,14 +812,14 @@ def _minpoly_groebner(ex, x, cls):
     if ex.is_AlgebraicNumber:
         return ex.minpoly.as_expr(x)
     elif ex.is_Rational:
-        result = ex.q*x - ex.p
+        result = ex.q * x - ex.p
     else:
         inverted = simpler_inverse(ex)
         if inverted:
-            ex = ex**-1
+            ex = ex ** -1
         res = None
-        if ex.is_Pow and (1/ex.exp).is_Integer:
-            n = 1/ex.exp
+        if ex.is_Pow and (1 / ex.exp).is_Integer:
+            n = 1 / ex.exp
             res = _minimal_polynomial_sq(ex.base, n, x)
 
         elif _is_sum_surds(ex):
@@ -809,20 +831,21 @@ def _minpoly_groebner(ex, x, cls):
         if res is None:
             bus = bottom_up_scan(ex)
             F = [x - bus] + list(mapping.values())
-            G = groebner(F, list(symbols.values()) + [x], order='lex')
+            G = groebner(F, list(symbols.values()) + [x], order="lex")
 
             _, factors = factor_list(G[-1])
             # by construction G[-1] has root `ex`
             result = _choose_factor(factors, x, ex)
     if inverted:
         result = _invertx(result, x)
-        if result.coeff(x**degree(result, x)) < 0:
+        if result.coeff(x ** degree(result, x)) < 0:
             result = expand_mul(-result)
 
     return result
 
 
 minpoly = minimal_polynomial
+
 
 def _coeffs_generator(n):
     """Generate coefficients for `primitive_element()`. """
@@ -842,9 +865,9 @@ def primitive_element(extension, x=None, **args):
     if x is not None:
         x, cls = sympify(x), Poly
     else:
-        x, cls = Dummy('x'), PurePoly
+        x, cls = Dummy("x"), PurePoly
 
-    if not args.get('ex', False):
+    if not args.get("ex", False):
         gen, coeffs = extension[0], [1]
         # XXX when minimal_polynomial is extended to work
         # with AlgebraicNumbers this test can be removed
@@ -856,15 +879,15 @@ def primitive_element(extension, x=None, **args):
             _, factors = factor_list(g, extension=ext)
             g = _choose_factor(factors, x, gen)
             s, _, g = g.sqf_norm()
-            gen += s*ext
+            gen += s * ext
             coeffs.append(s)
 
-        if not args.get('polys', False):
+        if not args.get("polys", False):
             return g.as_expr(), coeffs
         else:
             return cls(g), coeffs
 
-    generator = numbered_symbols('y', cls=Dummy)
+    generator = numbered_symbols("y", cls=Dummy)
 
     F, Y = [], []
 
@@ -882,18 +905,17 @@ def primitive_element(extension, x=None, **args):
         F.append(f)
         Y.append(y)
 
-    coeffs_generator = args.get('coeffs', _coeffs_generator)
+    coeffs_generator = args.get("coeffs", _coeffs_generator)
 
     for coeffs in coeffs_generator(len(Y)):
-        f = x - sum([ c*y for c, y in zip(coeffs, Y)])
-        G = groebner(F + [f], Y + [x], order='lex', field=True)
+        f = x - sum([c * y for c, y in zip(coeffs, Y)])
+        G = groebner(F + [f], Y + [x], order="lex", field=True)
 
-        H, g = G[:-1], cls(G[-1], x, domain='QQ')
+        H, g = G[:-1], cls(G[-1], x, domain="QQ")
 
         for i, (h, y) in enumerate(zip(H, Y)):
             try:
-                H[i] = Poly(y - h, x,
-                            domain='QQ').all_coeffs()  # XXX: composite=False
+                H[i] = Poly(y - h, x, domain="QQ").all_coeffs()  # XXX: composite=False
             except CoercionFailed:  # pragma: no cover
                 break  # G is not a triangular set
         else:
@@ -903,7 +925,7 @@ def primitive_element(extension, x=None, **args):
 
     _, g = g.clear_denoms()
 
-    if not args.get('polys', False):
+    if not args.get("polys", False):
         return g.as_expr(), coeffs, H
     else:
         return g, coeffs, H
@@ -923,11 +945,11 @@ def is_isomorphism_possible(a, b):
     da = a.minpoly.discriminant()
     db = b.minpoly.discriminant()
 
-    i, k, half = 1, m//n, db//2
+    i, k, half = 1, m // n, db // 2
 
     while True:
         p = sieve[i]
-        P = p**k
+        P = p ** k
 
         if P > half:
             break
@@ -954,7 +976,7 @@ def field_isomorphism_pslq(a, b):
         A = a.root.evalf(n)
         B = b.root.evalf(n)
 
-        basis = [1, B] + [ B**i for i in range(2, m) ] + [A]
+        basis = [1, B] + [B ** i for i in range(2, m)] + [A]
 
         dps, mp.dps = mp.dps, n
         coeffs = pslq(basis, maxcoeff=int(1e10), maxsteps=1000)
@@ -968,26 +990,26 @@ def field_isomorphism_pslq(a, b):
         else:
             break
 
-        coeffs = [S(c)/coeffs[-1] for c in coeffs[:-1]]
+        coeffs = [S(c) / coeffs[-1] for c in coeffs[:-1]]
 
         while not coeffs[-1]:
             coeffs.pop()
 
         coeffs = list(reversed(coeffs))
-        h = Poly(coeffs, f.gen, domain='QQ')
+        h = Poly(coeffs, f.gen, domain="QQ")
 
         if f.compose(h).rem(g).is_zero:
             d, approx = len(coeffs) - 1, 0
 
             for i, coeff in enumerate(coeffs):
-                approx += coeff*B**(d - i)
+                approx += coeff * B ** (d - i)
 
-            if A*approx < 0:
-                return [ -c for c in coeffs ]
+            if A * approx < 0:
+                return [-c for c in coeffs]
             else:
                 return coeffs
         elif f.compose(-h).rem(g).is_zero:
-            return [ -c for c in coeffs ]
+            return [-c for c in coeffs]
         else:
             n *= 2
 
@@ -1004,7 +1026,7 @@ def field_isomorphism_factor(a, b):
             d, terms = len(coeffs) - 1, []
 
             for i, coeff in enumerate(coeffs):
-                terms.append(coeff*b.root**(d - i))
+                terms.append(coeff * b.root ** (d - i))
 
             root = Add(*terms)
 
@@ -1040,7 +1062,7 @@ def field_isomorphism(a, b, **args):
     if m % n != 0:
         return None
 
-    if args.get('fast', True):
+    if args.get("fast", True):
         try:
             result = field_isomorphism_pslq(a, b)
 
@@ -1055,9 +1077,9 @@ def field_isomorphism(a, b, **args):
 @public
 def to_number_field(extension, theta=None, **args):
     """Express `extension` in the field generated by `theta`. """
-    gen = args.get('gen')
+    gen = args.get("gen")
 
-    if hasattr(extension, '__iter__'):
+    if hasattr(extension, "__iter__"):
         extension = list(extension)
     else:
         extension = [extension]
@@ -1066,7 +1088,7 @@ def to_number_field(extension, theta=None, **args):
         return AlgebraicNumber(extension[0])
 
     minpoly, coeffs = primitive_element(extension, gen, polys=True)
-    root = sum([ coeff*ext for coeff, ext in zip(coeffs, extension) ])
+    root = sum([coeff * ext for coeff, ext in zip(coeffs, extension)])
 
     if theta is None:
         return AlgebraicNumber((minpoly, root))
@@ -1082,7 +1104,8 @@ def to_number_field(extension, theta=None, **args):
             return AlgebraicNumber(theta, coeffs)
         else:
             raise IsomorphismFailed(
-                "%s is not in a subfield of %s" % (root, theta.root))
+                "%s is not in a subfield of %s" % (root, theta.root)
+            )
 
 
 class IntervalPrinter(MpmathPrinter, LambdaPrinter):
@@ -1100,6 +1123,7 @@ class IntervalPrinter(MpmathPrinter, LambdaPrinter):
     def _print_Pow(self, expr):
         return super(MpmathPrinter, self)._print_Pow(expr, rational=True)
 
+
 @public
 def isolate(alg, eps=None, fast=False):
     """Give a rational isolating interval for an algebraic number. """
@@ -1108,8 +1132,7 @@ def isolate(alg, eps=None, fast=False):
     if alg.is_Rational:
         return (alg, alg)
     elif not alg.is_real:
-        raise NotImplementedError(
-            "complex algebraic numbers are not supported")
+        raise NotImplementedError("complex algebraic numbers are not supported")
 
     func = lambdify((), alg, modules="mpmath", printer=IntervalPrinter())
 

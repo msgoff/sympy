@@ -6,8 +6,14 @@ from sympy.polys.domains.characteristiczero import CharacteristicZero
 from sympy.polys.domains.field import Field
 from sympy.polys.domains.simpledomain import SimpleDomain
 from sympy.polys.polyclasses import ANP
-from sympy.polys.polyerrors import CoercionFailed, DomainError, NotAlgebraic, IsomorphismFailed
+from sympy.polys.polyerrors import (
+    CoercionFailed,
+    DomainError,
+    NotAlgebraic,
+    IsomorphismFailed,
+)
 from sympy.utilities import public
+
 
 @public
 class AlgebraicField(Field, CharacteristicZero, SimpleDomain):
@@ -43,15 +49,18 @@ class AlgebraicField(Field, CharacteristicZero, SimpleDomain):
         return self.dtype(element, self.mod.rep, self.dom)
 
     def __str__(self):
-        return str(self.dom) + '<' + str(self.ext) + '>'
+        return str(self.dom) + "<" + str(self.ext) + ">"
 
     def __hash__(self):
         return hash((self.__class__.__name__, self.dtype, self.dom, self.ext))
 
     def __eq__(self, other):
         """Returns ``True`` if two domains are equivalent. """
-        return isinstance(other, AlgebraicField) and \
-            self.dtype == other.dtype and self.ext == other.ext
+        return (
+            isinstance(other, AlgebraicField)
+            and self.dtype == other.dtype
+            and self.ext == other.ext
+        )
 
     def algebraic_field(self, *extension):
         r"""Returns an algebraic field, i.e. `\mathbb{Q}(\alpha, \ldots)`. """
@@ -60,6 +69,7 @@ class AlgebraicField(Field, CharacteristicZero, SimpleDomain):
     def to_sympy(self, a):
         """Convert ``a`` to a SymPy object. """
         from sympy.polys.numberfields import AlgebraicNumber
+
         return AlgebraicNumber(self.ext, a).as_expr()
 
     def from_sympy(self, a):
@@ -74,8 +84,7 @@ class AlgebraicField(Field, CharacteristicZero, SimpleDomain):
         try:
             return self(to_number_field(a, self.ext).native_coeffs())
         except (NotAlgebraic, IsomorphismFailed):
-            raise CoercionFailed(
-                "%s is not a valid algebraic number in %s" % (a, self))
+            raise CoercionFailed("%s is not a valid algebraic number in %s" % (a, self))
 
     def from_ZZ_python(K1, a, K0):
         """Convert a Python ``int`` object to ``dtype``. """
@@ -99,7 +108,7 @@ class AlgebraicField(Field, CharacteristicZero, SimpleDomain):
 
     def get_ring(self):
         """Returns a ring associated with ``self``. """
-        raise DomainError('there is no ring associated with %s' % self)
+        raise DomainError("there is no ring associated with %s" % self)
 
     def is_positive(self, a):
         """Returns True if ``a`` is positive. """

@@ -4,13 +4,17 @@ from sympy.concrete.expr_with_limits import ExprWithLimits
 from sympy.core.singleton import S
 from sympy.core.relational import Eq
 
+
 class ReorderError(NotImplementedError):
     """
     Exception raised when trying to reorder dependent limits.
     """
+
     def __init__(self, expr, msg):
         super(ReorderError, self).__init__(
-            "%s could not be reordered: %s." % (expr, msg))
+            "%s could not be reordered: %s." % (expr, msg)
+        )
+
 
 class ExprWithIntLimits(ExprWithLimits):
     """
@@ -23,6 +27,7 @@ class ExprWithIntLimits(ExprWithLimits):
     sympy.concrete.products.Product
     sympy.concrete.summations.Sum
     """
+
     def change_index(self, var, trafo, newvar=None):
         r"""
         Change index of a Sum or Product.
@@ -125,22 +130,29 @@ class ExprWithIntLimits(ExprWithLimits):
                 beta = p.coeff_monomial(S.One)
                 if alpha.is_number:
                     if alpha == S.One:
-                        limits.append((newvar, alpha*limit[1] + beta, alpha*limit[2] + beta))
+                        limits.append(
+                            (newvar, alpha * limit[1] + beta, alpha * limit[2] + beta)
+                        )
                     elif alpha == S.NegativeOne:
-                        limits.append((newvar, alpha*limit[2] + beta, alpha*limit[1] + beta))
+                        limits.append(
+                            (newvar, alpha * limit[2] + beta, alpha * limit[1] + beta)
+                        )
                     else:
-                        raise ValueError("Linear transformation results in non-linear summation stepsize")
+                        raise ValueError(
+                            "Linear transformation results in non-linear summation stepsize"
+                        )
                 else:
                     # Note that the case of alpha being symbolic can give issues if alpha < 0.
-                    limits.append((newvar, alpha*limit[2] + beta, alpha*limit[1] + beta))
+                    limits.append(
+                        (newvar, alpha * limit[2] + beta, alpha * limit[1] + beta)
+                    )
             else:
                 limits.append(limit)
 
-        function = self.function.subs(var, (var - beta)/alpha)
+        function = self.function.subs(var, (var - beta) / alpha)
         function = function.subs(var, newvar)
 
         return self.func(function, *limits)
-
 
     def index(expr, x):
         """
@@ -244,7 +256,6 @@ class ExprWithIntLimits(ExprWithLimits):
 
         return new_expr
 
-
     def reorder_limit(expr, x, y):
         """
         Interchange two limit tuples of a Sum or Product expression.
@@ -281,10 +292,12 @@ class ExprWithIntLimits(ExprWithLimits):
         limit_x = expr.limits[x]
         limit_y = expr.limits[y]
 
-        if (len(set(limit_x[1].free_symbols).intersection(var)) == 0 and
-            len(set(limit_x[2].free_symbols).intersection(var)) == 0 and
-            len(set(limit_y[1].free_symbols).intersection(var)) == 0 and
-            len(set(limit_y[2].free_symbols).intersection(var)) == 0):
+        if (
+            len(set(limit_x[1].free_symbols).intersection(var)) == 0
+            and len(set(limit_x[2].free_symbols).intersection(var)) == 0
+            and len(set(limit_y[1].free_symbols).intersection(var)) == 0
+            and len(set(limit_y[2].free_symbols).intersection(var)) == 0
+        ):
 
             limits = []
             for i, limit in enumerate(expr.limits):

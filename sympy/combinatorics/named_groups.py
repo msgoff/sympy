@@ -206,8 +206,13 @@ def DihedralGroup(n):
     if n == 1:
         return PermutationGroup([Permutation([1, 0])])
     if n == 2:
-        return PermutationGroup([Permutation([1, 0, 3, 2]),
-               Permutation([2, 3, 0, 1]), Permutation([3, 2, 1, 0])])
+        return PermutationGroup(
+            [
+                Permutation([1, 0, 3, 2]),
+                Permutation([2, 3, 0, 1]),
+                Permutation([3, 2, 1, 0]),
+            ]
+        )
 
     a = list(range(1, n))
     a.append(0)
@@ -217,7 +222,7 @@ def DihedralGroup(n):
     gen2 = _af_new(a)
     G = PermutationGroup([gen1, gen2])
     # if n is a power of 2, group is nilpotent
-    if n & (n-1) == 0:
+    if n & (n - 1) == 0:
         G._is_nilpotent = True
     else:
         G._is_nilpotent = False
@@ -225,7 +230,7 @@ def DihedralGroup(n):
     G._is_solvable = True
     G._degree = n
     G._is_transitive = True
-    G._order = 2*n
+    G._order = 2 * n
     return G
 
 
@@ -301,6 +306,7 @@ def RubikGroup(n):
     True
     """
     from sympy.combinatorics.generators import rubik
+
     if n <= 1:
         raise ValueError("Invalid cube. n has to be greater than 1")
     return PermutationGroup(rubik(n))

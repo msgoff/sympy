@@ -24,6 +24,7 @@ def _pinv_full_rank(M):
     else:
         return M.H.multiply(M.multiply(M.H).inv())
 
+
 def _pinv_rank_decomposition(M):
     """Subroutine for rank decomposition
 
@@ -42,6 +43,7 @@ def _pinv_rank_decomposition(M):
 
     return Cp.multiply(Bp)
 
+
 def _pinv_diagonalization(M):
     """Subroutine using diagonalization
 
@@ -52,29 +54,30 @@ def _pinv_diagonalization(M):
     if M.is_zero_matrix:
         return M.H
 
-    A  = M
+    A = M
     AH = M.H
 
     try:
         if M.rows >= M.cols:
-            P, D   = AH.multiply(A).diagonalize(normalize=True)
+            P, D = AH.multiply(A).diagonalize(normalize=True)
             D_pinv = D.applyfunc(lambda x: 0 if _iszero(x) else 1 / x)
 
             return P.multiply(D_pinv).multiply(P.H).multiply(AH)
 
         else:
-            P, D   = A.multiply(AH).diagonalize(
-                        normalize=True)
+            P, D = A.multiply(AH).diagonalize(normalize=True)
             D_pinv = D.applyfunc(lambda x: 0 if _iszero(x) else 1 / x)
 
             return AH.multiply(P).multiply(D_pinv).multiply(P.H)
 
     except MatrixError:
         raise NotImplementedError(
-            'pinv for rank-deficient matrices where '
-            'diagonalization of A.H*A fails is not supported yet.')
+            "pinv for rank-deficient matrices where "
+            "diagonalization of A.H*A fails is not supported yet."
+        )
 
-def _pinv(M, method='RD'):
+
+def _pinv(M, method="RD"):
     """Calculate the Moore-Penrose pseudoinverse of the matrix.
 
     The Moore-Penrose pseudoinverse exists and is unique for any matrix.
@@ -131,12 +134,12 @@ def _pinv(M, method='RD'):
     if M.is_zero_matrix:
         return M.H
 
-    if method == 'RD':
+    if method == "RD":
         return _pinv_rank_decomposition(M)
-    elif method == 'ED':
+    elif method == "ED":
         return _pinv_diagonalization(M)
     else:
-        raise ValueError('invalid pinv method %s' % repr(method))
+        raise ValueError("invalid pinv method %s" % repr(method))
 
 
 def _inv_mod(M, m):
@@ -170,18 +173,19 @@ def _inv_mod(M, m):
     if not M.is_square:
         raise NonSquareMatrixError()
 
-    N       = M.cols
-    det_K   = M.det()
+    N = M.cols
+    det_K = M.det()
     det_inv = None
 
     try:
         det_inv = mod_inverse(det_K, m)
     except ValueError:
-        raise NonInvertibleMatrixError('Matrix is not invertible (mod %d)' % m)
+        raise NonInvertibleMatrixError("Matrix is not invertible (mod %d)" % m)
 
     K_adj = M.adjugate()
-    K_inv = M.__class__(N, N,
-            [det_inv * K_adj[i, j] % m for i in range(N) for j in range(N)])
+    K_inv = M.__class__(
+        N, N, [det_inv * K_adj[i, j] % m for i in range(N) for j in range(N)]
+    )
 
     return K_inv
 
@@ -193,17 +197,18 @@ def _verify_invertible(M, iszerofunc=_iszero):
     if not M.is_square:
         raise NonSquareMatrixError("A Matrix must be square to invert.")
 
-    d    = M.det(method='berkowitz')
+    d = M.det(method="berkowitz")
     zero = d.equals(0)
 
-    if zero is None: # if equals() can't decide, will rref be able to?
-        ok   = M.rref(simplify=True)[0]
+    if zero is None:  # if equals() can't decide, will rref be able to?
+        ok = M.rref(simplify=True)[0]
         zero = any(iszerofunc(ok[j, j]) for j in range(ok.rows))
 
     if zero:
         raise NonInvertibleMatrixError("Matrix det == 0; not invertible.")
 
     return d
+
 
 def _inv_ADJ(M, iszerofunc=_iszero):
     """Calculates the inverse using the adjugate matrix and a determinant.
@@ -221,6 +226,7 @@ def _inv_ADJ(M, iszerofunc=_iszero):
     d = _verify_invertible(M, iszerofunc=iszerofunc)
 
     return M.adjugate() / d
+
 
 def _inv_GE(M, iszerofunc=_iszero):
     """Calculates the inverse using Gaussian elimination.
@@ -246,7 +252,8 @@ def _inv_GE(M, iszerofunc=_iszero):
     if any(iszerofunc(red[j, j]) for j in range(red.rows)):
         raise NonInvertibleMatrixError("Matrix det == 0; not invertible.")
 
-    return M._new(red[:, big.rows:])
+    return M._new(red[:, big.rows :])
+
 
 def _inv_LU(M, iszerofunc=_iszero):
     """Calculates the inverse using LU decomposition.
@@ -265,6 +272,7 @@ def _inv_LU(M, iszerofunc=_iszero):
 
     return M.LUsolve(M.eye(M.rows), iszerofunc=_iszero)
 
+
 def _inv_CH(M, iszerofunc=_iszero):
     """Calculates the inverse using cholesky decomposition.
 
@@ -281,6 +289,7 @@ def _inv_CH(M, iszerofunc=_iszero):
     _verify_invertible(M, iszerofunc=iszerofunc)
 
     return M.cholesky_solve(M.eye(M.rows))
+
 
 def _inv_LDL(M, iszerofunc=_iszero):
     """Calculates the inverse using LDL decomposition.
@@ -299,6 +308,7 @@ def _inv_LDL(M, iszerofunc=_iszero):
 
     return M.LDLsolve(M.eye(M.rows))
 
+
 def _inv_QR(M, iszerofunc=_iszero):
     """Calculates the inverse using QR decomposition.
 
@@ -315,6 +325,7 @@ def _inv_QR(M, iszerofunc=_iszero):
     _verify_invertible(M, iszerofunc=iszerofunc)
 
     return M.QRsolve(M.eye(M.rows))
+
 
 def _inv(M, method=None, iszerofunc=_iszero, try_block_diag=False):
     """
@@ -405,11 +416,11 @@ def _inv(M, method=None, iszerofunc=_iszero, try_block_diag=False):
     from sympy.matrices import diag, SparseMatrix
 
     if method is None:
-        method = 'LDL' if isinstance(M, SparseMatrix) else 'GE'
+        method = "LDL" if isinstance(M, SparseMatrix) else "GE"
 
     if try_block_diag:
         blocks = M.get_diag_blocks()
-        r      = []
+        r = []
 
         for block in blocks:
             r.append(block.inv(method=method, iszerofunc=iszerofunc))

@@ -3,12 +3,16 @@
 from __future__ import print_function, division
 
 from sympy.polys.domains.groundtypes import (
-    GMPYRational, SymPyRational,
-    gmpy_numer, gmpy_denom, gmpy_factorial,
+    GMPYRational,
+    SymPyRational,
+    gmpy_numer,
+    gmpy_denom,
+    gmpy_factorial,
 )
 from sympy.polys.domains.rationalfield import RationalField
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
+
 
 @public
 class GMPYRationalField(RationalField):
@@ -18,7 +22,7 @@ class GMPYRationalField(RationalField):
     zero = dtype(0)
     one = dtype(1)
     tp = type(one)
-    alias = 'QQ_gmpy'
+    alias = "QQ_gmpy"
 
     def __init__(self):
         pass
@@ -26,12 +30,12 @@ class GMPYRationalField(RationalField):
     def get_ring(self):
         """Returns ring associated with ``self``. """
         from sympy.polys.domains import GMPYIntegerRing
+
         return GMPYIntegerRing()
 
     def to_sympy(self, a):
         """Convert `a` to a SymPy object. """
-        return SymPyRational(int(gmpy_numer(a)),
-                             int(gmpy_denom(a)))
+        return SymPyRational(int(gmpy_numer(a)), int(gmpy_denom(a)))
 
     def from_sympy(self, a):
         """Convert SymPy's Integer to `dtype`. """
@@ -39,6 +43,7 @@ class GMPYRationalField(RationalField):
             return GMPYRational(a.p, a.q)
         elif a.is_Float:
             from sympy.polys.domains import RR
+
             return GMPYRational(*map(int, RR.to_rational(a)))
         else:
             raise CoercionFailed("expected `Rational` object, got %s" % a)

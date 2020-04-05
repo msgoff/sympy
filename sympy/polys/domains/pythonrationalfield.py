@@ -7,6 +7,7 @@ from sympy.polys.domains.rationalfield import RationalField
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
 
+
 @public
 class PythonRationalField(RationalField):
     """Rational field based on Python rational number type. """
@@ -14,7 +15,7 @@ class PythonRationalField(RationalField):
     dtype = PythonRational
     zero = dtype(0)
     one = dtype(1)
-    alias = 'QQ_python'
+    alias = "QQ_python"
 
     def __init__(self):
         pass
@@ -22,6 +23,7 @@ class PythonRationalField(RationalField):
     def get_ring(self):
         """Returns ring associated with ``self``. """
         from sympy.polys.domains import PythonIntegerRing
+
         return PythonIntegerRing()
 
     def to_sympy(self, a):
@@ -34,6 +36,7 @@ class PythonRationalField(RationalField):
             return PythonRational(a.p, a.q)
         elif a.is_Float:
             from sympy.polys.domains import RR
+
             p, q = RR.to_rational(a)
             return PythonRational(int(p), int(q))
         else:
@@ -53,8 +56,7 @@ class PythonRationalField(RationalField):
 
     def from_QQ_gmpy(K1, a, K0):
         """Convert a GMPY `mpq` object to `dtype`. """
-        return PythonRational(PythonInteger(a.numer()),
-                              PythonInteger(a.denom()))
+        return PythonRational(PythonInteger(a.numer()), PythonInteger(a.denom()))
 
     def from_RealField(K1, a, K0):
         """Convert a mpmath `mpf` object to `dtype`. """

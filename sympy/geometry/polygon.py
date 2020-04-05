@@ -11,7 +11,13 @@ from sympy.logic import And
 from sympy.matrices import Matrix
 from sympy.simplify import simplify
 from sympy.utilities import default_sort_key
-from sympy.utilities.iterables import has_dups, has_variety, uniq, rotate_left, least_rotation
+from sympy.utilities.iterables import (
+    has_dups,
+    has_variety,
+    uniq,
+    rotate_left,
+    least_rotation,
+)
 from sympy.utilities.misc import func_name
 
 from .entity import GeometryEntity, GeometrySet
@@ -110,8 +116,8 @@ class Polygon(GeometrySet):
     """
 
     def __new__(cls, *args, **kwargs):
-        if kwargs.get('n', 0):
-            n = kwargs.pop('n')
+        if kwargs.get("n", 0):
+            n = kwargs.pop("n")
             args = list(args)
             # return a virtual polygon with n sides
             if len(args) == 2:  # center, radius
@@ -199,7 +205,7 @@ class Polygon(GeometrySet):
         for i in range(len(args)):
             x1, y1 = args[i - 1].args
             x2, y2 = args[i].args
-            area += x1*y2 - x2*y1
+            area += x1 * y2 - x2 * y1
         return simplify(area) / 2
 
     @staticmethod
@@ -218,7 +224,7 @@ class Polygon(GeometrySet):
         """
         ba = b - a
         ca = c - a
-        t_area = simplify(ba.x*ca.y - ca.x*ba.y)
+        t_area = simplify(ba.x * ca.y - ca.x * ba.y)
         res = t_area.is_nonpositive
         if res is None:
             raise ValueError("Can't determine orientation")
@@ -263,7 +269,7 @@ class Polygon(GeometrySet):
             a, b, c = args[i - 2], args[i - 1], args[i]
             ang = Ray(b, a).angle_between(Ray(b, c))
             if cw ^ self._isright(a, b, c):
-                ret[b] = 2*S.Pi - ang
+                ret[b] = 2 * S.Pi - ang
             else:
                 ret[b] = ang
         return ret
@@ -361,17 +367,16 @@ class Polygon(GeometrySet):
         Point2D(31/18, 11/18)
 
         """
-        A = 1/(6*self.area)
+        A = 1 / (6 * self.area)
         cx, cy = 0, 0
         args = self.args
         for i in range(len(args)):
             x1, y1 = args[i - 1].args
             x2, y2 = args[i].args
-            v = x1*y2 - x2*y1
-            cx += v*(x1 + x2)
-            cy += v*(y1 + y2)
-        return Point(simplify(A*cx), simplify(A*cy))
-
+            v = x1 * y2 - x2 * y1
+            cx += v * (x1 + x2)
+            cy += v * (y1 + y2)
+        return Point(simplify(A * cx), simplify(A * cy))
 
     def second_moment_of_area(self, point=None):
         """Returns the second moment and product moment of area of a two dimensional polygon.
@@ -413,28 +418,27 @@ class Polygon(GeometrySet):
         I_xx, I_yy, I_xy = 0, 0, 0
         args = self.vertices
         for i in range(len(args)):
-            x1, y1 = args[i-1].args
+            x1, y1 = args[i - 1].args
             x2, y2 = args[i].args
-            v = x1*y2 - x2*y1
-            I_xx += (y1**2 + y1*y2 + y2**2)*v
-            I_yy += (x1**2 + x1*x2 + x2**2)*v
-            I_xy += (x1*y2 + 2*x1*y1 + 2*x2*y2 + x2*y1)*v
+            v = x1 * y2 - x2 * y1
+            I_xx += (y1 ** 2 + y1 * y2 + y2 ** 2) * v
+            I_yy += (x1 ** 2 + x1 * x2 + x2 ** 2) * v
+            I_xy += (x1 * y2 + 2 * x1 * y1 + 2 * x2 * y2 + x2 * y1) * v
         A = self.area
         c_x = self.centroid[0]
         c_y = self.centroid[1]
         # parallel axis theorem
-        I_xx_c = (I_xx/12) - (A*(c_y**2))
-        I_yy_c = (I_yy/12) - (A*(c_x**2))
-        I_xy_c = (I_xy/24) - (A*(c_x*c_y))
+        I_xx_c = (I_xx / 12) - (A * (c_y ** 2))
+        I_yy_c = (I_yy / 12) - (A * (c_x ** 2))
+        I_xy_c = (I_xy / 24) - (A * (c_x * c_y))
         if point is None:
             return I_xx_c, I_yy_c, I_xy_c
 
-        I_xx = (I_xx_c + A*((point[1]-c_y)**2))
-        I_yy = (I_yy_c + A*((point[0]-c_x)**2))
-        I_xy = (I_xy_c + A*((point[0]-c_x)*(point[1]-c_y)))
+        I_xx = I_xx_c + A * ((point[1] - c_y) ** 2)
+        I_yy = I_yy_c + A * ((point[0] - c_x) ** 2)
+        I_xy = I_xy_c + A * ((point[0] - c_x) * (point[1] - c_y))
 
         return I_xx, I_yy, I_xy
-
 
     def first_moment_of_area(self, point=None):
         """
@@ -501,11 +505,10 @@ class Polygon(GeometrySet):
         poly_1 = h_poly[0] if h_poly[0].area <= h_poly[1].area else h_poly[1]
         poly_2 = v_poly[0] if v_poly[0].area <= v_poly[1].area else v_poly[1]
 
-        Q_x = (poly_1.centroid.y - yc)*poly_1.area
-        Q_y = (poly_2.centroid.x - xc)*poly_2.area
+        Q_x = (poly_1.centroid.y - yc) * poly_1.area
+        Q_y = (poly_2.centroid.x - xc) * poly_2.area
 
         return Q_x, Q_y
-
 
     def polar_second_moment_of_area(self):
         """Returns the polar modulus of a two-dimensional polygon
@@ -535,7 +538,6 @@ class Polygon(GeometrySet):
         """
         second_moment = self.second_moment_of_area()
         return second_moment[0] + second_moment[1]
-
 
     def section_modulus(self, point=None):
         """Returns a tuple with the section modulus of a two-dimensional
@@ -589,12 +591,11 @@ class Polygon(GeometrySet):
             y = point.y - y_c
             x = point.x - x_c
 
-        second_moment= self.second_moment_of_area()
-        S_x = second_moment[0]/y
-        S_y = second_moment[1]/x
+        second_moment = self.second_moment_of_area()
+        S_x = second_moment[0] / y
+        S_y = second_moment[1] / x
 
         return S_x, S_y
-
 
     @property
     def sides(self):
@@ -754,7 +755,7 @@ class Polygon(GeometrySet):
             for i in indices:
                 a = args[i]
                 b = args[i + 1]
-                test = ((-a.y)*(b.x - a.x) - (-a.x)*(b.y - a.y)).is_negative
+                test = ((-a.y) * (b.x - a.x) - (-a.x) * (b.y - a.y)).is_negative
                 if orientation is None:
                     orientation = test
                 elif test is not orientation:
@@ -769,13 +770,13 @@ class Polygon(GeometrySet):
                 if 0 <= max(p1y, p2y):
                     if 0 <= max(p1x, p2x):
                         if p1y != p2y:
-                            xinters = (-p1y)*(p2x - p1x)/(p2y - p1y) + p1x
+                            xinters = (-p1y) * (p2x - p1x) / (p2y - p1y) + p1x
                             if p1x == p2x or 0 <= xinters:
                                 hit_odd = not hit_odd
             p1x, p1y = p2x, p2y
         return hit_odd
 
-    def arbitrary_point(self, parameter='t'):
+    def arbitrary_point(self, parameter="t"):
         """A parameterized point on the polygon.
 
         The parameter, varying from 0 to 1, assigns points to the position on
@@ -820,30 +821,34 @@ class Polygon(GeometrySet):
         """
         t = _symbol(parameter, real=True)
         if t.name in (f.name for f in self.free_symbols):
-            raise ValueError('Symbol %s already appears in object and cannot be used as a parameter.' % t.name)
+            raise ValueError(
+                "Symbol %s already appears in object and cannot be used as a parameter."
+                % t.name
+            )
         sides = []
         perimeter = self.perimeter
         perim_fraction_start = 0
         for s in self.sides:
-            side_perim_fraction = s.length/perimeter
+            side_perim_fraction = s.length / perimeter
             perim_fraction_end = perim_fraction_start + side_perim_fraction
             pt = s.arbitrary_point(parameter).subs(
-                t, (t - perim_fraction_start)/side_perim_fraction)
-            sides.append(
-                (pt, (And(perim_fraction_start <= t, t < perim_fraction_end))))
+                t, (t - perim_fraction_start) / side_perim_fraction
+            )
+            sides.append((pt, (And(perim_fraction_start <= t, t < perim_fraction_end))))
             perim_fraction_start = perim_fraction_end
         return Piecewise(*sides)
 
     def parameter_value(self, other, t):
         from sympy.solvers.solvers import solve
-        if not isinstance(other,GeometryEntity):
+
+        if not isinstance(other, GeometryEntity):
             other = Point(other, dim=self.ambient_dimension)
-        if not isinstance(other,Point):
+        if not isinstance(other, Point):
             raise ValueError("other must be a point")
         if other.free_symbols:
-            raise NotImplementedError('non-numeric coordinates')
+            raise NotImplementedError("non-numeric coordinates")
         unknown = False
-        T = Dummy('t', real=True)
+        T = Dummy("t", real=True)
         p = self.arbitrary_point(T)
         for pt, cond in p.args:
             sol = solve(pt - other, T, dict=True)
@@ -857,7 +862,7 @@ class Polygon(GeometrySet):
             raise ValueError("Given point may not be on %s" % func_name(self))
         raise ValueError("Given point is not on %s" % func_name(self))
 
-    def plot_interval(self, parameter='t'):
+    def plot_interval(self, parameter="t"):
         """The plot interval for the default geometric plot of the polygon.
 
         Parameters
@@ -929,17 +934,27 @@ class Polygon(GeometrySet):
 
         intersection_result = list(uniq(intersection_result))
         points = [entity for entity in intersection_result if isinstance(entity, Point)]
-        segments = [entity for entity in intersection_result if isinstance(entity, Segment)]
+        segments = [
+            entity for entity in intersection_result if isinstance(entity, Segment)
+        ]
 
         if points and segments:
-            points_in_segments = list(uniq([point for point in points for segment in segments if point in segment]))
+            points_in_segments = list(
+                uniq(
+                    [
+                        point
+                        for point in points
+                        for segment in segments
+                        if point in segment
+                    ]
+                )
+            )
             if points_in_segments:
                 for i in points_in_segments:
                     points.remove(i)
             return list(ordered(segments + points))
         else:
             return list(ordered(intersection_result))
-
 
     def cut_section(self, line):
         """
@@ -998,7 +1013,7 @@ class Polygon(GeometrySet):
         points = list(self.vertices)
         points.append(points[0])
 
-        x, y = symbols('x, y', real=True, cls=Dummy)
+        x, y = symbols("x, y", real=True, cls=Dummy)
         eq = line.equation(x, y)
 
         # considering equation of line to be `ax +by + c`
@@ -1013,8 +1028,9 @@ class Polygon(GeometrySet):
         for point in points:
             # when coefficient of y is 0, right side of the line is
             # considered
-            compare = eq.subs({x: point.x, y: point.y})/b if b \
-                    else eq.subs(x, point.x)/a
+            compare = (
+                eq.subs({x: point.x, y: point.y}) / b if b else eq.subs(x, point.x) / a
+            )
 
             # if point lies above line
             if compare > 0:
@@ -1045,7 +1061,6 @@ class Polygon(GeometrySet):
             lower_polygon = Polygon(*lower_vertices)
 
         return upper_polygon, lower_polygon
-
 
     def distance(self, o):
         """
@@ -1115,7 +1130,7 @@ class Polygon(GeometrySet):
         """
         e1 = self
 
-        '''Tests for a possible intersection between the polygons and outputs a warning'''
+        """Tests for a possible intersection between the polygons and outputs a warning"""
         e1_center = e1.centroid
         e2_center = e2.centroid
         e1_max_radius = S.Zero
@@ -1132,9 +1147,9 @@ class Polygon(GeometrySet):
         if center_dist <= e1_max_radius + e2_max_radius:
             warnings.warn("Polygons may intersect producing erroneous output")
 
-        '''
+        """
         Find the upper rightmost vertex of e1 and the lowest leftmost vertex of e2
-        '''
+        """
         e1_ymax = Point(0, -oo)
         e2_ymin = Point(0, oo)
 
@@ -1146,10 +1161,10 @@ class Polygon(GeometrySet):
                 e2_ymin = vertex
         min_dist = Point.distance(e1_ymax, e2_ymin)
 
-        '''
+        """
         Produce a dictionary with vertices of e1 as the keys and, for each vertex, the points
         to which the vertex is connected as its value. The same is then done for e2.
-        '''
+        """
         e1_connections = {}
         e2_connections = {}
 
@@ -1179,11 +1194,11 @@ class Polygon(GeometrySet):
         e2_current = e2_ymin
         support_line = Line(Point(S.Zero, S.Zero), Point(S.One, S.Zero))
 
-        '''
+        """
         Determine which point in e1 and e2 will be selected after e2_ymin and e1_ymax,
         this information combined with the above produced dictionaries determines the
         path that will be taken around the polygons
-        '''
+        """
         point1 = e1_connections[e1_ymax][0]
         point2 = e1_connections[e1_ymax][1]
         angle1 = support_line.angle_between(Line(e1_ymax, point1))
@@ -1210,14 +1225,13 @@ class Polygon(GeometrySet):
         else:
             e2_next = point1
 
-        '''
+        """
         Loop which determines the distance between anti-podal pairs and updates the
         minimum distance accordingly. It repeats until it reaches the starting position.
-        '''
+        """
         while True:
             e1_angle = support_line.angle_between(Line(e1_current, e1_next))
-            e2_angle = pi - support_line.angle_between(Line(
-                e2_current, e2_next))
+            e2_angle = pi - support_line.angle_between(Line(e2_current, e2_next))
 
             if (e1_angle < e2_angle) is True:
                 support_line = Line(e1_current, e1_next)
@@ -1275,7 +1289,7 @@ class Polygon(GeometrySet):
                 break
         return min_dist
 
-    def _svg(self, scale_factor=1., fill_color="#66cc99"):
+    def _svg(self, scale_factor=1.0, fill_color="#66cc99"):
         """Returns SVG path element for the Polygon.
 
         Parameters
@@ -1295,11 +1309,12 @@ class Polygon(GeometrySet):
         return (
             '<path fill-rule="evenodd" fill="{2}" stroke="#555555" '
             'stroke-width="{0}" opacity="0.6" d="{1}" />'
-            ).format(2. * scale_factor, path, fill_color)
+        ).format(2.0 * scale_factor, path, fill_color)
 
     def _hashable_content(self):
 
         D = {}
+
         def ref_list(point_list):
             kee = {}
             for i, p in enumerate(ordered(set(point_list))):
@@ -1315,7 +1330,7 @@ class Polygon(GeometrySet):
             r = r_nor
         else:
             r = r_rev
-        canonical_args = [ D[order] for order in r ]
+        canonical_args = [D[order] for order in r]
         return tuple(canonical_args)
 
     def __contains__(self, o):
@@ -1396,9 +1411,9 @@ class Polygon(GeometrySet):
         for v, a in p.angles.items():
             i = pts.index(v)
             p1, p2 = Point._normalize_dimension(pts[i], pts[i + 1])
-            ray = Ray(p1, p2).rotate(a/2, v)
+            ray = Ray(p1, p2).rotate(a / 2, v)
             dir = ray.direction
-            ray = Ray(ray.p1, ray.p1 + dir/dir.distance((0, 0)))
+            ray = Ray(ray.p1, ray.p1 + dir / dir.distance((0, 0)))
             if prec is not None:
                 ray = Ray(ray.p1, ray.p2.n(prec))
             b[v] = ray
@@ -1467,7 +1482,7 @@ class RegularPolygon(Polygon):
 
     """
 
-    __slots__ = ('_n', '_center', '_radius', '_rot')
+    __slots__ = ("_n", "_center", "_radius", "_rot")
 
     def __new__(self, c, r, n, rot=0, **kwargs):
         r, n, rot = map(sympify, (r, n, rot))
@@ -1483,7 +1498,7 @@ class RegularPolygon(Polygon):
         obj._n = n
         obj._center = c
         obj._radius = r
-        obj._rot = rot % (2*S.Pi/n) if rot.is_number else rot
+        obj._rot = rot % (2 * S.Pi / n) if rot.is_number else rot
         return obj
 
     @property
@@ -1503,10 +1518,10 @@ class RegularPolygon(Polygon):
         return self._center, self._radius, self._n, self._rot
 
     def __str__(self):
-        return 'RegularPolygon(%s, %s, %s, %s)' % tuple(self.args)
+        return "RegularPolygon(%s, %s, %s, %s)" % tuple(self.args)
 
     def __repr__(self):
-        return 'RegularPolygon(%s, %s, %s, %s)' % tuple(self.args)
+        return "RegularPolygon(%s, %s, %s, %s)" % tuple(self.args)
 
     @property
     def area(self):
@@ -1523,7 +1538,7 @@ class RegularPolygon(Polygon):
         True
         """
         c, r, n, rot = self.args
-        return sign(r)*n*self.length**2/(4*tan(pi/n))
+        return sign(r) * n * self.length ** 2 / (4 * tan(pi / n))
 
     @property
     def length(self):
@@ -1545,7 +1560,7 @@ class RegularPolygon(Polygon):
         True
 
         """
-        return self.radius*2*sin(pi/self._n)
+        return self.radius * 2 * sin(pi / self._n)
 
     @property
     def center(self):
@@ -1691,7 +1706,7 @@ class RegularPolygon(Polygon):
         sqrt(2)*r/2
 
         """
-        return self.radius * cos(S.Pi/self._n)
+        return self.radius * cos(S.Pi / self._n)
 
     @property
     def inradius(self):
@@ -1733,7 +1748,7 @@ class RegularPolygon(Polygon):
         3*pi/4
 
         """
-        return (self._n - 2)*S.Pi/self._n
+        return (self._n - 2) * S.Pi / self._n
 
     @property
     def exterior_angle(self):
@@ -1758,7 +1773,7 @@ class RegularPolygon(Polygon):
         pi/4
 
         """
-        return 2*S.Pi/self._n
+        return 2 * S.Pi / self._n
 
     @property
     def circumcircle(self):
@@ -2016,10 +2031,12 @@ class RegularPolygon(Polygon):
         c = self._center
         r = abs(self._radius)
         rot = self._rot
-        v = 2*S.Pi/self._n
+        v = 2 * S.Pi / self._n
 
-        return [Point(c.x + r*cos(k*v + rot), c.y + r*sin(k*v + rot))
-                for k in range(self._n)]
+        return [
+            Point(c.x + r * cos(k * v + rot), c.y + r * sin(k * v + rot))
+            for k in range(self._n)
+        ]
 
     def __eq__(self, o):
         if not isinstance(o, Polygon):
@@ -2092,12 +2109,12 @@ class Triangle(Polygon):
 
     def __new__(cls, *args, **kwargs):
         if len(args) != 3:
-            if 'sss' in kwargs:
-                return _sss(*[simplify(a) for a in kwargs['sss']])
-            if 'asa' in kwargs:
-                return _asa(*[simplify(a) for a in kwargs['asa']])
-            if 'sas' in kwargs:
-                return _sas(*[simplify(a) for a in kwargs['sas']])
+            if "sss" in kwargs:
+                return _sss(*[simplify(a) for a in kwargs["sss"]])
+            if "asa" in kwargs:
+                return _asa(*[simplify(a) for a in kwargs["asa"]])
+            if "sas" in kwargs:
+                return _sas(*[simplify(a) for a in kwargs["sas"]])
             msg = "Triangle instantiates with three points or a valid keyword."
             raise GeometryError(msg)
 
@@ -2116,7 +2133,8 @@ class Triangle(Polygon):
         i = -3
         while i < len(nodup) - 3 and len(nodup) > 2:
             a, b, c = sorted(
-                [nodup[i], nodup[i + 1], nodup[i + 2]], key=default_sort_key)
+                [nodup[i], nodup[i + 1], nodup[i + 2]], key=default_sort_key
+            )
             if Point.is_collinear(a, b, c):
                 nodup[i] = a
                 nodup[i + 1] = None
@@ -2199,18 +2217,20 @@ class Triangle(Polygon):
         s2 = [side.length for side in t2.sides]
 
         def _are_similar(u1, u2, u3, v1, v2, v3):
-            e1 = simplify(u1/v1)
-            e2 = simplify(u2/v2)
-            e3 = simplify(u3/v3)
+            e1 = simplify(u1 / v1)
+            e2 = simplify(u2 / v2)
+            e3 = simplify(u3 / v3)
             return bool(e1 == e2) and bool(e2 == e3)
 
         # There's only 6 permutations, so write them out
-        return _are_similar(s1_1, s1_2, s1_3, *s2) or \
-            _are_similar(s1_1, s1_3, s1_2, *s2) or \
-            _are_similar(s1_2, s1_1, s1_3, *s2) or \
-            _are_similar(s1_2, s1_3, s1_1, *s2) or \
-            _are_similar(s1_3, s1_1, s1_2, *s2) or \
-            _are_similar(s1_3, s1_2, s1_1, *s2)
+        return (
+            _are_similar(s1_1, s1_2, s1_3, *s2)
+            or _are_similar(s1_1, s1_3, s1_2, *s2)
+            or _are_similar(s1_2, s1_1, s1_3, *s2)
+            or _are_similar(s1_2, s1_3, s1_1, *s2)
+            or _are_similar(s1_3, s1_1, s1_2, *s2)
+            or _are_similar(s1_3, s1_2, s1_1, *s2)
+        )
 
     def is_equilateral(self):
         """Are all the sides the same length?
@@ -2314,9 +2334,11 @@ class Triangle(Polygon):
 
         """
         s = self.sides
-        return Segment.is_perpendicular(s[0], s[1]) or \
-            Segment.is_perpendicular(s[1], s[2]) or \
-            Segment.is_perpendicular(s[0], s[2])
+        return (
+            Segment.is_perpendicular(s[0], s[1])
+            or Segment.is_perpendicular(s[1], s[2])
+            or Segment.is_perpendicular(s[0], s[2])
+        )
 
     @property
     def altitudes(self):
@@ -2350,9 +2372,11 @@ class Triangle(Polygon):
         """
         s = self.sides
         v = self.vertices
-        return {v[0]: s[1].perpendicular_segment(v[0]),
-                v[1]: s[2].perpendicular_segment(v[1]),
-                v[2]: s[0].perpendicular_segment(v[2])}
+        return {
+            v[0]: s[1].perpendicular_segment(v[0]),
+            v[1]: s[2].perpendicular_segment(v[1]),
+            v[2]: s[0].perpendicular_segment(v[2]),
+        }
 
     @property
     def orthocenter(self):
@@ -2412,7 +2436,7 @@ class Triangle(Polygon):
         """
         a, b, c = [x.perpendicular_bisector() for x in self.sides]
         if not a.intersection(b):
-            print(a,b,a.intersection(b))
+            print(a, b, a.intersection(b))
         return a.intersection(b)[0]
 
     @property
@@ -2539,8 +2563,8 @@ class Triangle(Polygon):
         l = Matrix([s[i].length for i in [1, 2, 0]])
         p = sum(l)
         v = self.vertices
-        x = simplify(l.dot(Matrix([vi.x for vi in v]))/p)
-        y = simplify(l.dot(Matrix([vi.y for vi in v]))/p)
+        x = simplify(l.dot(Matrix([vi.x for vi in v])) / p)
+        y = simplify(l.dot(Matrix([vi.y for vi in v])) / p)
         return Point(x, y)
 
     @property
@@ -2640,11 +2664,13 @@ class Triangle(Polygon):
         a = side[0].length
         b = side[1].length
         c = side[2].length
-        s = (a+b+c)/2
+        s = (a + b + c) / 2
         area = self.area
-        exradii = {self.sides[0]: simplify(area/(s-a)),
-                   self.sides[1]: simplify(area/(s-b)),
-                   self.sides[2]: simplify(area/(s-c))}
+        exradii = {
+            self.sides[0]: simplify(area / (s - a)),
+            self.sides[1]: simplify(area / (s - b)),
+            self.sides[2]: simplify(area / (s - c)),
+        }
 
         return exradii
 
@@ -2695,18 +2721,18 @@ class Triangle(Polygon):
         y = [v[0].y, v[1].y, v[2].y]
 
         exc_coords = {
-            "x1": simplify(-a*x[0]+b*x[1]+c*x[2]/(-a+b+c)),
-            "x2": simplify(a*x[0]-b*x[1]+c*x[2]/(a-b+c)),
-            "x3": simplify(a*x[0]+b*x[1]-c*x[2]/(a+b-c)),
-            "y1": simplify(-a*y[0]+b*y[1]+c*y[2]/(-a+b+c)),
-            "y2": simplify(a*y[0]-b*y[1]+c*y[2]/(a-b+c)),
-            "y3": simplify(a*y[0]+b*y[1]-c*y[2]/(a+b-c))
+            "x1": simplify(-a * x[0] + b * x[1] + c * x[2] / (-a + b + c)),
+            "x2": simplify(a * x[0] - b * x[1] + c * x[2] / (a - b + c)),
+            "x3": simplify(a * x[0] + b * x[1] - c * x[2] / (a + b - c)),
+            "y1": simplify(-a * y[0] + b * y[1] + c * y[2] / (-a + b + c)),
+            "y2": simplify(a * y[0] - b * y[1] + c * y[2] / (a - b + c)),
+            "y3": simplify(a * y[0] + b * y[1] - c * y[2] / (a + b - c)),
         }
 
         excenters = {
             s[0]: Point(exc_coords["x1"], exc_coords["y1"]),
             s[1]: Point(exc_coords["x2"], exc_coords["y2"]),
-            s[2]: Point(exc_coords["x3"], exc_coords["y3"])
+            s[2]: Point(exc_coords["x3"], exc_coords["y3"]),
         }
 
         return excenters
@@ -2743,9 +2769,11 @@ class Triangle(Polygon):
         """
         s = self.sides
         v = self.vertices
-        return {v[0]: Segment(v[0], s[1].midpoint),
-                v[1]: Segment(v[1], s[2].midpoint),
-                v[2]: Segment(v[2], s[0].midpoint)}
+        return {
+            v[0]: Segment(v[0], s[1].midpoint),
+            v[1]: Segment(v[1], s[2].midpoint),
+            v[2]: Segment(v[2], s[0].midpoint),
+        }
 
     @property
     def medial(self):
@@ -2834,14 +2862,15 @@ class Triangle(Polygon):
             return self.orthocenter
         return Line(self.orthocenter, self.circumcenter)
 
+
 def rad(d):
     """Return the radian value for the given degrees (pi = 180 degrees)."""
-    return d*pi/180
+    return d * pi / 180
 
 
 def deg(r):
     """Return the degree value for the given radians (pi = 180 degrees)."""
-    return r/pi*180
+    return r / pi * 180
 
 
 def _slope(d):
@@ -2852,7 +2881,8 @@ def _slope(d):
 def _asa(d1, l, d2):
     """Return triangle having side with length l on the x-axis."""
     xy = Line((0, 0), slope=_slope(d1)).intersection(
-        Line((l, 0), slope=_slope(180 - d2)))[0]
+        Line((l, 0), slope=_slope(180 - d2))
+    )[0]
     return Triangle((0, 0), (l, 0), xy)
 
 
@@ -2871,5 +2901,5 @@ def _sas(l1, d, l2):
     """Return triangle having side with length l2 on the x-axis."""
     p1 = Point(0, 0)
     p2 = Point(l2, 0)
-    p3 = Point(cos(rad(d))*l1, sin(rad(d))*l1)
+    p3 = Point(cos(rad(d)) * l1, sin(rad(d)) * l1)
     return Triangle(p1, p2, p3)

@@ -108,9 +108,9 @@ class SingularityFunction(Function):
             a = sympify(self.args[1])
             n = sympify(self.args[2])
             if n == 0 or n == -1:
-                return self.func(x, a, n-1)
+                return self.func(x, a, n - 1)
             elif n.is_positive:
-                return n*self.func(x, a, n-1)
+                return n * self.func(x, a, n - 1)
         else:
             raise ArgumentIndexError(self, argindex)
 
@@ -162,20 +162,24 @@ class SingularityFunction(Function):
         x = sympify(variable)
         a = sympify(offset)
         n = sympify(exponent)
-        shift = (x - a)
+        shift = x - a
 
         if fuzzy_not(im(shift).is_zero):
             raise ValueError("Singularity Functions are defined only for Real Numbers.")
         if fuzzy_not(im(n).is_zero):
-            raise ValueError("Singularity Functions are not defined for imaginary exponents.")
+            raise ValueError(
+                "Singularity Functions are not defined for imaginary exponents."
+            )
         if shift is S.NaN or n is S.NaN:
             return S.NaN
         if (n + 2).is_negative:
-            raise ValueError("Singularity Functions are not defined for exponents less than -2.")
+            raise ValueError(
+                "Singularity Functions are not defined for exponents less than -2."
+            )
         if shift.is_extended_negative:
             return S.Zero
         if n.is_nonnegative and shift.is_extended_nonnegative:
-            return (x - a)**n
+            return (x - a) ** n
         if n == -1 or n == -2:
             if shift.is_negative or shift.is_extended_positive:
                 return S.Zero
@@ -183,10 +187,10 @@ class SingularityFunction(Function):
                 return S.Infinity
 
     def _eval_rewrite_as_Piecewise(self, *args, **kwargs):
-        '''
+        """
         Converts a Singularity Function expression into its Piecewise form.
 
-        '''
+        """
         x = self.args[0]
         a = self.args[1]
         n = sympify(self.args[2])
@@ -194,13 +198,13 @@ class SingularityFunction(Function):
         if n == -1 or n == -2:
             return Piecewise((oo, Eq((x - a), 0)), (0, True))
         elif n.is_nonnegative:
-            return Piecewise(((x - a)**n, (x - a) > 0), (0, True))
+            return Piecewise(((x - a) ** n, (x - a) > 0), (0, True))
 
     def _eval_rewrite_as_Heaviside(self, *args, **kwargs):
-        '''
+        """
         Rewrites a Singularity Function expression using Heavisides and DiracDeltas.
 
-        '''
+        """
         x = self.args[0]
         a = self.args[1]
         n = sympify(self.args[2])
@@ -210,7 +214,7 @@ class SingularityFunction(Function):
         if n == -1:
             return diff(Heaviside(x - a), x.free_symbols.pop(), 1)
         if n.is_nonnegative:
-            return (x - a)**n*Heaviside(x - a)
+            return (x - a) ** n * Heaviside(x - a)
 
     _eval_rewrite_as_DiracDelta = _eval_rewrite_as_Heaviside
     _eval_rewrite_as_HeavisideDiracDelta = _eval_rewrite_as_Heaviside

@@ -96,8 +96,7 @@ def _rank_decomposition(M, iszerofunc=_iszero, simplify=False):
     rref
     """
 
-    F, pivot_cols = M.rref(simplify=simplify, iszerofunc=iszerofunc,
-            pivots=True)
+    F, pivot_cols = M.rref(simplify=simplify, iszerofunc=iszerofunc, pivots=True)
     rank = len(pivot_cols)
 
     C = M.extract(range(M.rows), pivot_cols)
@@ -138,21 +137,22 @@ def _liupc(M):
         if c <= r:
             R[r].append(c)
 
-    inf     = len(R)  # nothing will be this large
-    parent  = [inf]*M.rows
-    virtual = [inf]*M.rows
+    inf = len(R)  # nothing will be this large
+    parent = [inf] * M.rows
+    virtual = [inf] * M.rows
 
     for r in range(M.rows):
         for c in R[r][:-1]:
             while virtual[c] < r:
-                t          = virtual[c]
+                t = virtual[c]
                 virtual[c] = r
-                c          = t
+                c = t
 
             if virtual[c] == inf:
                 parent[c] = virtual[c] = r
 
     return R, parent
+
 
 def _row_structure_symbolic_cholesky(M):
     """Symbolic cholesky factorization, for pre-determination of the
@@ -179,8 +179,8 @@ def _row_structure_symbolic_cholesky(M):
     """
 
     R, parent = M.liupc()
-    inf       = len(R)  # this acts as infinity
-    Lrow      = copy.deepcopy(R)
+    inf = len(R)  # this acts as infinity
+    Lrow = copy.deepcopy(R)
 
     for k in range(M.rows):
         for j in R[k]:
@@ -260,33 +260,34 @@ def _cholesky(M, hermitian=True):
         raise ValueError("Matrix must be symmetric.")
 
     dps = _get_intermediate_simp(expand_mul, expand_mul)
-    L   = MutableDenseMatrix.zeros(M.rows, M.rows)
+    L = MutableDenseMatrix.zeros(M.rows, M.rows)
 
     if hermitian:
         for i in range(M.rows):
             for j in range(i):
-                L[i, j] = dps((1 / L[j, j])*(M[i, j] -
-                    sum(L[i, k]*L[j, k].conjugate() for k in range(j))))
+                L[i, j] = dps(
+                    (1 / L[j, j])
+                    * (M[i, j] - sum(L[i, k] * L[j, k].conjugate() for k in range(j)))
+                )
 
-            Lii2 = dps(M[i, i] -
-                sum(L[i, k]*L[i, k].conjugate() for k in range(i)))
+            Lii2 = dps(M[i, i] - sum(L[i, k] * L[i, k].conjugate() for k in range(i)))
 
             if Lii2.is_positive is False:
-                raise NonPositiveDefiniteMatrixError(
-                    "Matrix must be positive-definite")
+                raise NonPositiveDefiniteMatrixError("Matrix must be positive-definite")
 
             L[i, i] = sqrt(Lii2)
 
     else:
         for i in range(M.rows):
             for j in range(i):
-                L[i, j] = dps((1 / L[j, j])*(M[i, j] -
-                    sum(L[i, k]*L[j, k] for k in range(j))))
+                L[i, j] = dps(
+                    (1 / L[j, j]) * (M[i, j] - sum(L[i, k] * L[j, k] for k in range(j)))
+                )
 
-            L[i, i] = sqrt(dps(M[i, i] -
-                sum(L[i, k]**2 for k in range(i))))
+            L[i, i] = sqrt(dps(M[i, i] - sum(L[i, k] ** 2 for k in range(i))))
 
     return M._new(L)
+
 
 def _cholesky_sparse(M, hermitian=True):
     """
@@ -351,15 +352,15 @@ def _cholesky_sparse(M, hermitian=True):
     if not hermitian and not M.is_symmetric():
         raise ValueError("Matrix must be symmetric.")
 
-    dps       = _get_intermediate_simp(expand_mul, expand_mul)
+    dps = _get_intermediate_simp(expand_mul, expand_mul)
     Crowstruc = M.row_structure_symbolic_cholesky()
-    C         = MutableDenseMatrix.zeros(M.rows)
+    C = MutableDenseMatrix.zeros(M.rows)
 
     for i in range(len(Crowstruc)):
         for j in Crowstruc[i]:
             if i != j:
                 C[i, j] = M[i, j]
-                summ    = 0
+                summ = 0
 
                 for p1 in Crowstruc[i]:
                     if p1 < j:
@@ -367,9 +368,9 @@ def _cholesky_sparse(M, hermitian=True):
                             if p2 < j:
                                 if p1 == p2:
                                     if hermitian:
-                                        summ += C[i, p1]*C[j, p1].conjugate()
+                                        summ += C[i, p1] * C[j, p1].conjugate()
                                     else:
-                                        summ += C[i, p1]*C[j, p1]
+                                        summ += C[i, p1] * C[j, p1]
                             else:
                                 break
                         else:
@@ -377,16 +378,16 @@ def _cholesky_sparse(M, hermitian=True):
 
                 C[i, j] = dps((C[i, j] - summ) / C[j, j])
 
-            else: # i == j
+            else:  # i == j
                 C[j, j] = M[j, j]
-                summ    = 0
+                summ = 0
 
                 for k in Crowstruc[j]:
                     if k < j:
                         if hermitian:
-                            summ += C[j, k]*C[j, k].conjugate()
+                            summ += C[j, k] * C[j, k].conjugate()
                         else:
-                            summ += C[j, k]**2
+                            summ += C[j, k] ** 2
                     else:
                         break
 
@@ -394,7 +395,8 @@ def _cholesky_sparse(M, hermitian=True):
 
                 if hermitian and Cjj2.is_positive is False:
                     raise NonPositiveDefiniteMatrixError(
-                        "Matrix must be positive-definite")
+                        "Matrix must be positive-definite"
+                    )
 
                 C[j, j] = sqrt(Cjj2)
 
@@ -463,31 +465,39 @@ def _LDLdecomposition(M, hermitian=True):
         raise ValueError("Matrix must be symmetric.")
 
     dps = _get_intermediate_simp(expand_mul, expand_mul)
-    D   = MutableDenseMatrix.zeros(M.rows, M.rows)
-    L   = MutableDenseMatrix.eye(M.rows)
+    D = MutableDenseMatrix.zeros(M.rows, M.rows)
+    L = MutableDenseMatrix.eye(M.rows)
 
     if hermitian:
         for i in range(M.rows):
             for j in range(i):
-                L[i, j] = dps((1 / D[j, j])*(M[i, j] - sum(
-                    L[i, k]*L[j, k].conjugate()*D[k, k] for k in range(j))))
+                L[i, j] = dps(
+                    (1 / D[j, j])
+                    * (
+                        M[i, j]
+                        - sum(L[i, k] * L[j, k].conjugate() * D[k, k] for k in range(j))
+                    )
+                )
 
-            D[i, i] = dps(M[i, i] -
-                sum(L[i, k]*L[i, k].conjugate()*D[k, k] for k in range(i)))
+            D[i, i] = dps(
+                M[i, i] - sum(L[i, k] * L[i, k].conjugate() * D[k, k] for k in range(i))
+            )
 
             if D[i, i].is_positive is False:
-                raise NonPositiveDefiniteMatrixError(
-                    "Matrix must be positive-definite")
+                raise NonPositiveDefiniteMatrixError("Matrix must be positive-definite")
 
     else:
         for i in range(M.rows):
             for j in range(i):
-                L[i, j] = dps((1 / D[j, j])*(M[i, j] - sum(
-                    L[i, k]*L[j, k]*D[k, k] for k in range(j))))
+                L[i, j] = dps(
+                    (1 / D[j, j])
+                    * (M[i, j] - sum(L[i, k] * L[j, k] * D[k, k] for k in range(j)))
+                )
 
-            D[i, i] = dps(M[i, i] - sum(L[i, k]**2*D[k, k] for k in range(i)))
+            D[i, i] = dps(M[i, i] - sum(L[i, k] ** 2 * D[k, k] for k in range(i)))
 
     return M._new(L), M._new(D)
+
 
 def _LDLdecomposition_sparse(M, hermitian=True):
     """
@@ -528,16 +538,16 @@ def _LDLdecomposition_sparse(M, hermitian=True):
     if not hermitian and not M.is_symmetric():
         raise ValueError("Matrix must be symmetric.")
 
-    dps       = _get_intermediate_simp(expand_mul, expand_mul)
+    dps = _get_intermediate_simp(expand_mul, expand_mul)
     Lrowstruc = M.row_structure_symbolic_cholesky()
-    L         = MutableDenseMatrix.eye(M.rows)
-    D         = MutableDenseMatrix.zeros(M.rows, M.cols)
+    L = MutableDenseMatrix.eye(M.rows)
+    D = MutableDenseMatrix.zeros(M.rows, M.cols)
 
     for i in range(len(Lrowstruc)):
         for j in Lrowstruc[i]:
             if i != j:
                 L[i, j] = M[i, j]
-                summ    = 0
+                summ = 0
 
                 for p1 in Lrowstruc[i]:
                     if p1 < j:
@@ -545,9 +555,11 @@ def _LDLdecomposition_sparse(M, hermitian=True):
                             if p2 < j:
                                 if p1 == p2:
                                     if hermitian:
-                                        summ += L[i, p1]*L[j, p1].conjugate()*D[p1, p1]
+                                        summ += (
+                                            L[i, p1] * L[j, p1].conjugate() * D[p1, p1]
+                                        )
                                     else:
-                                        summ += L[i, p1]*L[j, p1]*D[p1, p1]
+                                        summ += L[i, p1] * L[j, p1] * D[p1, p1]
                             else:
                                 break
                     else:
@@ -555,16 +567,16 @@ def _LDLdecomposition_sparse(M, hermitian=True):
 
                 L[i, j] = dps((L[i, j] - summ) / D[j, j])
 
-            else: # i == j
+            else:  # i == j
                 D[i, i] = M[i, i]
-                summ    = 0
+                summ = 0
 
                 for k in Lrowstruc[i]:
                     if k < i:
                         if hermitian:
-                            summ += L[i, k]*L[i, k].conjugate()*D[k, k]
+                            summ += L[i, k] * L[i, k].conjugate() * D[k, k]
                         else:
-                            summ += L[i, k]**2*D[k, k]
+                            summ += L[i, k] ** 2 * D[k, k]
                     else:
                         break
 
@@ -572,7 +584,8 @@ def _LDLdecomposition_sparse(M, hermitian=True):
 
                 if hermitian and D[i, i].is_positive is False:
                     raise NonPositiveDefiniteMatrixError(
-                        "Matrix must be positive-definite")
+                        "Matrix must be positive-definite"
+                    )
 
     return M._new(L), M._new(D)
 
@@ -647,8 +660,9 @@ def _LUdecomposition(M, iszerofunc=_iszero, simpfunc=None, rankcheck=False):
     LUsolve
     """
 
-    combined, p = M.LUdecomposition_Simple(iszerofunc=iszerofunc,
-        simpfunc=simpfunc, rankcheck=rankcheck)
+    combined, p = M.LUdecomposition_Simple(
+        iszerofunc=iszerofunc, simpfunc=simpfunc, rankcheck=rankcheck
+    )
 
     # L is lower triangular ``M.rows x M.rows``
     # U is upper triangular ``M.rows x M.cols``
@@ -678,8 +692,8 @@ def _LUdecomposition(M, iszerofunc=_iszero, simpfunc=None, rankcheck=False):
 
     return L, U, p
 
-def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
-        rankcheck=False):
+
+def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None, rankcheck=False):
     r"""Compute the PLU decomposition of the matrix.
 
     Parameters
@@ -945,8 +959,8 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
         # of the same dimensions with all zero entries.
         return M.zeros(M.rows, M.cols), []
 
-    dps       = _get_intermediate_simp()
-    lu        = M.as_mutable()
+    dps = _get_intermediate_simp()
+    lu = M.as_mutable()
     row_swaps = []
 
     pivot_col = 0
@@ -966,8 +980,12 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
         while pivot_col != M.cols and iszeropivot:
             sub_col = (lu[r, pivot_col] for r in range(pivot_row, M.rows))
 
-            pivot_row_offset, pivot_value, is_assumed_non_zero, ind_simplified_pairs =\
-                _find_reasonable_pivot_naive(sub_col, iszerofunc, simpfunc)
+            (
+                pivot_row_offset,
+                pivot_value,
+                is_assumed_non_zero,
+                ind_simplified_pairs,
+            ) = _find_reasonable_pivot_naive(sub_col, iszerofunc, simpfunc)
 
             iszeropivot = pivot_value is None
 
@@ -982,13 +1000,17 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
             # strictly less than min(num rows, num cols)
             # Mimic behavior of previous implementation, by throwing a
             # ValueError.
-            raise ValueError("Rank of matrix is strictly less than"
-                                " number of rows or columns."
-                                " Pass keyword argument"
-                                " rankcheck=False to compute"
-                                " the LU decomposition of this matrix.")
+            raise ValueError(
+                "Rank of matrix is strictly less than"
+                " number of rows or columns."
+                " Pass keyword argument"
+                " rankcheck=False to compute"
+                " the LU decomposition of this matrix."
+            )
 
-        candidate_pivot_row = None if pivot_row_offset is None else pivot_row + pivot_row_offset
+        candidate_pivot_row = (
+            None if pivot_row_offset is None else pivot_row + pivot_row_offset
+        )
 
         if candidate_pivot_row is None and iszeropivot:
             # If candidate_pivot_row is None and iszeropivot is True
@@ -1011,12 +1033,19 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
             row_swaps.append([pivot_row, candidate_pivot_row])
 
             # Update L.
-            lu[pivot_row, 0:pivot_row], lu[candidate_pivot_row, 0:pivot_row] = \
-                lu[candidate_pivot_row, 0:pivot_row], lu[pivot_row, 0:pivot_row]
+            lu[pivot_row, 0:pivot_row], lu[candidate_pivot_row, 0:pivot_row] = (
+                lu[candidate_pivot_row, 0:pivot_row],
+                lu[pivot_row, 0:pivot_row],
+            )
 
             # Swap pivot row of U with candidate pivot row.
-            lu[pivot_row, pivot_col:lu.cols], lu[candidate_pivot_row, pivot_col:lu.cols] = \
-                lu[candidate_pivot_row, pivot_col:lu.cols], lu[pivot_row, pivot_col:lu.cols]
+            (
+                lu[pivot_row, pivot_col : lu.cols],
+                lu[candidate_pivot_row, pivot_col : lu.cols],
+            ) = (
+                lu[candidate_pivot_row, pivot_col : lu.cols],
+                lu[pivot_row, pivot_col : lu.cols],
+            )
 
         # Introduce zeros below the pivot by adding a multiple of the
         # pivot row to a row under it, and store the result in the
@@ -1028,8 +1057,7 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
         for row in range(pivot_row + 1, lu.rows):
             # Store factors of L in the subcolumn below
             # (pivot_row, pivot_row).
-            lu[row, pivot_row] = \
-                dps(lu[row, pivot_col]/lu[pivot_row, pivot_col])
+            lu[row, pivot_row] = dps(lu[row, pivot_col] / lu[pivot_row, pivot_col])
 
             # Form the linear combination of the pivot row and the current
             # row below the pivot row that zeros the entries below the pivot.
@@ -1038,7 +1066,7 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
             # in sympy/matrices/tests/test_sparse.py.
             # c = pivot_row + 1 if pivot_row == pivot_col else pivot_col
             for c in range(start_col, lu.cols):
-                lu[row, c] = dps(lu[row, c] - lu[row, pivot_row]*lu[pivot_row, c])
+                lu[row, c] = dps(lu[row, c] - lu[row, pivot_row] * lu[pivot_row, c])
 
         if pivot_row != pivot_col:
             # matrix rank < min(num rows, num cols),
@@ -1056,15 +1084,17 @@ def _LUdecomposition_Simple(M, iszerofunc=_iszero, simpfunc=None,
             return lu, row_swaps
 
     if rankcheck:
-        if iszerofunc(
-                lu[Min(lu.rows, lu.cols) - 1, Min(lu.rows, lu.cols) - 1]):
-            raise ValueError("Rank of matrix is strictly less than"
-                                " number of rows or columns."
-                                " Pass keyword argument"
-                                " rankcheck=False to compute"
-                                " the LU decomposition of this matrix.")
+        if iszerofunc(lu[Min(lu.rows, lu.cols) - 1, Min(lu.rows, lu.cols) - 1]):
+            raise ValueError(
+                "Rank of matrix is strictly less than"
+                " number of rows or columns."
+                " Pass keyword argument"
+                " rankcheck=False to compute"
+                " the LU decomposition of this matrix."
+            )
 
     return lu, row_swaps
+
 
 def _LUdecompositionFF(M):
     """Compute a fraction-free LU decomposition.
@@ -1090,11 +1120,11 @@ def _LUdecompositionFF(M):
 
     from sympy.matrices import SparseMatrix
 
-    zeros    = SparseMatrix.zeros
-    eye      = SparseMatrix.eye
-    n, m     = M.rows, M.cols
-    U, L, P  = M.as_mutable(), eye(n), eye(n)
-    DD       = zeros(n, n)
+    zeros = SparseMatrix.zeros
+    eye = SparseMatrix.eye
+    n, m = M.rows, M.cols
+    U, L, P = M.as_mutable(), eye(n), eye(n)
+    DD = zeros(n, n)
     oldpivot = 1
 
     for k in range(n - 1):
@@ -1107,9 +1137,9 @@ def _LUdecompositionFF(M):
 
             U[k, k:], U[kpivot, k:] = U[kpivot, k:], U[k, k:]
             L[k, :k], L[kpivot, :k] = L[kpivot, :k], L[k, :k]
-            P[k, :], P[kpivot, :]   = P[kpivot, :], P[k, :]
+            P[k, :], P[kpivot, :] = P[kpivot, :], P[k, :]
 
-        L [k, k] = Ukk = U[k, k]
+        L[k, k] = Ukk = U[k, k]
         DD[k, k] = oldpivot * Ukk
 
         for i in range(k + 1, n):
@@ -1175,19 +1205,19 @@ def _QRdecomposition(M):
     QRsolve
     """
 
-    dps    = _get_intermediate_simp(expand_mul, expand_mul)
-    cls    = M.__class__
-    mat    = M.as_mutable()
-    n      = mat.rows
-    m      = mat.cols
+    dps = _get_intermediate_simp(expand_mul, expand_mul)
+    cls = M.__class__
+    mat = M.as_mutable()
+    n = mat.rows
+    m = mat.cols
     ranked = list()
 
     # Pad with additional rows to make wide matrices square
     # nOrig keeps track of original size so zeros can be trimmed from Q
     if n < m:
         nOrig = n
-        n     = m
-        mat   = mat.col_join(mat.zeros(n - nOrig, m))
+        n = m
+        mat = mat.col_join(mat.zeros(n - nOrig, m))
     else:
         nOrig = n
 
@@ -1198,8 +1228,8 @@ def _QRdecomposition(M):
 
         for i in range(j):
             # subtract the project of mat on new vector
-            R[i, j]  = dps(Q[:, i].dot(mat[:, j], hermitian=True))
-            tmp     -= Q[:, i] * R[i, j]
+            R[i, j] = dps(Q[:, i].dot(mat[:, j], hermitian=True))
+            tmp -= Q[:, i] * R[i, j]
 
         tmp = dps(tmp)
 
@@ -1210,10 +1240,11 @@ def _QRdecomposition(M):
             ranked.append(j)
             Q[:, j] = tmp / R[j, j]
 
-
     if len(ranked) != 0:
-        return (cls(Q.extract(range(nOrig), ranked)),
-                cls(R.extract(ranked, range(R.cols))))
+        return (
+            cls(Q.extract(range(nOrig), ranked)),
+            cls(R.extract(ranked, range(R.cols))),
+        )
 
     else:
         # Trivial case handling for zero-rank matrix
@@ -1221,5 +1252,7 @@ def _QRdecomposition(M):
         for i in range(Min(nOrig, m)):
             Q[i, i] = 1
 
-        return (cls(Q.extract(range(nOrig), range(Min(nOrig, m)))),
-                cls(R.extract(range(Min(nOrig, m)), range(R.cols))))
+        return (
+            cls(Q.extract(range(nOrig), range(Min(nOrig, m)))),
+            cls(R.extract(range(Min(nOrig, m)), range(R.cols))),
+        )

@@ -1,16 +1,60 @@
 from __future__ import absolute_import
 import numbers as nums
 import decimal
-from sympy import (Rational, Symbol, Float, I, sqrt, cbrt, oo, nan, pi, E,
-                   Integer, S, factorial, Catalan, EulerGamma, GoldenRatio,
-                   TribonacciConstant, cos, exp,
-                   Number, zoo, log, Mul, Pow, Tuple, latex, Gt, Lt, Ge, Le,
-                   AlgebraicNumber, simplify, sin, fibonacci, RealField,
-                   sympify, srepr, Dummy, Sum)
+from sympy import (
+    Rational,
+    Symbol,
+    Float,
+    I,
+    sqrt,
+    cbrt,
+    oo,
+    nan,
+    pi,
+    E,
+    Integer,
+    S,
+    factorial,
+    Catalan,
+    EulerGamma,
+    GoldenRatio,
+    TribonacciConstant,
+    cos,
+    exp,
+    Number,
+    zoo,
+    log,
+    Mul,
+    Pow,
+    Tuple,
+    latex,
+    Gt,
+    Lt,
+    Ge,
+    Le,
+    AlgebraicNumber,
+    simplify,
+    sin,
+    fibonacci,
+    RealField,
+    sympify,
+    srepr,
+    Dummy,
+    Sum,
+)
 from sympy.core.compatibility import long
 from sympy.core.logic import fuzzy_not
-from sympy.core.numbers import (igcd, ilcm, igcdex, seterr,
-    igcd2, igcd_lehmer, mpf_norm, comp, mod_inverse)
+from sympy.core.numbers import (
+    igcd,
+    ilcm,
+    igcdex,
+    seterr,
+    igcd2,
+    igcd_lehmer,
+    mpf_norm,
+    comp,
+    mod_inverse,
+)
 from sympy.core.power import integer_nthroot, isqrt, integer_log
 from sympy.polys.domains.groundtypes import PythonRational
 from sympy.utilities.decorator import conserve_mpmath_dps
@@ -21,10 +65,12 @@ from mpmath import mpf
 from mpmath.rational import mpq
 import mpmath
 from sympy.core import numbers
-t = Symbol('t', real=False)
+
+t = Symbol("t", real=False)
 
 _ninf = float(-oo)
 _inf = float(oo)
+
 
 def same_and_same_prec(a, b):
     # stricter matching for Floats
@@ -33,7 +79,7 @@ def same_and_same_prec(a, b):
 
 def test_seterr():
     seterr(divide=True)
-    raises(ValueError, lambda: S.Zero/S.Zero)
+    raises(ValueError, lambda: S.Zero / S.Zero)
     seterr(divide=False)
     assert S.Zero / S.Zero is S.NaN
 
@@ -55,11 +101,11 @@ def test_mod():
 
     a = Float(2.6)
 
-    assert (a % .2) == 0.0
+    assert (a % 0.2) == 0.0
     assert (a % 2).round(15) == 0.6
     assert (a % 0.5).round(15) == 0.1
 
-    p = Symbol('p', infinite=True)
+    p = Symbol("p", infinite=True)
 
     assert oo % oo is nan
     assert zoo % oo is nan
@@ -71,11 +117,11 @@ def test_mod():
     # likely that the change made now gives an answer
     # with degraded accuracy.
     r = Rational(500, 41)
-    f = Float('.36', 3)
+    f = Float(".36", 3)
     m = r % f
     ans = Float(r % Rational(f), 3)
     assert m == ans and m._prec == ans._prec
-    f = Float('8.36', 3)
+    f = Float("8.36", 3)
     m = f % r
     ans = Float(Rational(f) % r, 3)
     assert m == ans and m._prec == ans._prec
@@ -88,9 +134,9 @@ def test_mod():
     # exactly.
     assert Rational(3, 4) % Float(1.1) == 0.75
     assert Float(1.5) % Rational(5, 4) == 0.25
-    assert Rational(5, 4).__rmod__(Float('1.5')) == 0.25
-    assert Float('1.5').__rmod__(Float('2.75')) == Float('1.25')
-    assert 2.75 % Float('1.5') == Float('1.25')
+    assert Rational(5, 4).__rmod__(Float("1.5")) == 0.25
+    assert Float("1.5").__rmod__(Float("2.75")) == Float("1.25")
+    assert 2.75 % Float("1.5") == Float("1.25")
 
     a = Integer(7)
     b = Integer(4)
@@ -160,13 +206,13 @@ def test_divmod():
     assert divmod(1.5, S("0.1")) == Tuple(S("15"), S("0"))
     assert divmod(S("0.1"), 0.3) == Tuple(S("0"), S("0.1"))
 
-    assert str(divmod(S("2"), 0.3)) == '(6, 0.2)'
-    assert str(divmod(S("3.5"), S("1/3"))) == '(10, 0.166666666666667)'
-    assert str(divmod(S("3.5"), 0.3)) == '(11, 0.2)'
-    assert str(divmod(S("1/3"), S("0.1"))) == '(3, 0.0333333333333333)'
-    assert str(divmod(1.5, S("1/3"))) == '(4, 0.166666666666667)'
-    assert str(divmod(S("1/3"), 0.3)) == '(1, 0.0333333333333333)'
-    assert str(divmod(0.3, S("0.1"))) == '(2, 0.1)'
+    assert str(divmod(S("2"), 0.3)) == "(6, 0.2)"
+    assert str(divmod(S("3.5"), S("1/3"))) == "(10, 0.166666666666667)"
+    assert str(divmod(S("3.5"), 0.3)) == "(11, 0.2)"
+    assert str(divmod(S("1/3"), S("0.1"))) == "(3, 0.0333333333333333)"
+    assert str(divmod(1.5, S("1/3"))) == "(4, 0.166666666666667)"
+    assert str(divmod(S("1/3"), 0.3)) == "(1, 0.0333333333333333)"
+    assert str(divmod(0.3, S("0.1"))) == "(2, 0.1)"
 
     assert divmod(-3, S(2)) == (-2, 1)
     assert divmod(S(-3), S(2)) == (-2, 1)
@@ -174,13 +220,13 @@ def test_divmod():
 
     assert divmod(S(4), S(-3.1)) == Tuple(-2, -2.2)
     assert divmod(S(4), S(-2.1)) == divmod(4, -2.1)
-    assert divmod(S(-8), S(-2.5) ) == Tuple(3 , -0.5)
+    assert divmod(S(-8), S(-2.5)) == Tuple(3, -0.5)
 
     assert divmod(oo, 1) == (S.NaN, S.NaN)
     assert divmod(S.NaN, 1) == (S.NaN, S.NaN)
     assert divmod(1, S.NaN) == (S.NaN, S.NaN)
     ans = [(-1, oo), (-1, oo), (0, 0), (0, 1), (0, 2)]
-    OO = float('inf')
+    OO = float("inf")
     ANS = [tuple(map(float, i)) for i in ans]
     assert [divmod(i, oo) for i in range(-2, 3)] == ans
     ans = [(0, -2), (0, -1), (0, 0), (-1, -oo), (-1, -oo)]
@@ -227,18 +273,20 @@ def test_igcd_lehmer():
     # small divisors, long Euclidean sequence
     assert igcd_lehmer(a, b) == 1
     c = fibonacci(100)
-    assert igcd_lehmer(a*c, b*c) == c
+    assert igcd_lehmer(a * c, b * c) == c
     # big divisor
-    assert igcd_lehmer(a, 10**1000) == 1
+    assert igcd_lehmer(a, 10 ** 1000) == 1
     # swapping argmument
     assert igcd_lehmer(1, 2) == igcd_lehmer(2, 1)
 
+
 def test_igcd2():
     # short loop
-    assert igcd2(2**100 - 1, 2**99 - 1) == 1
+    assert igcd2(2 ** 100 - 1, 2 ** 99 - 1) == 1
     # Lehmer's algorithm
     a, b = int(fibonacci(10001)), int(fibonacci(10000))
     assert igcd2(a, b) == 1
+
 
 def test_ilcm():
     assert ilcm(0, 0) == 0
@@ -264,8 +312,7 @@ def test_igcdex():
 
 
 def _strictly_equal(a, b):
-    return (a.p, a.q, type(a.p), type(a.q)) == \
-           (b.p, b.q, type(b.p), type(b.q))
+    return (a.p, a.q, type(a.p), type(a.q)) == (b.p, b.q, type(b.p), type(b.q))
 
 
 def _test_rational_new(cls):
@@ -276,16 +323,16 @@ def _test_rational_new(cls):
     assert cls(1) is S.One
     assert cls(-1) is S.NegativeOne
     # These look odd, but are similar to int():
-    assert cls('1') is S.One
-    assert cls(u'-1') is S.NegativeOne
+    assert cls("1") is S.One
+    assert cls(u"-1") is S.NegativeOne
 
     i = Integer(10)
-    assert _strictly_equal(i, cls('10'))
-    assert _strictly_equal(i, cls(u'10'))
+    assert _strictly_equal(i, cls("10"))
+    assert _strictly_equal(i, cls(u"10"))
     assert _strictly_equal(i, cls(long(10)))
     assert _strictly_equal(i, cls(i))
 
-    raises(TypeError, lambda: cls(Symbol('x')))
+    raises(TypeError, lambda: cls(Symbol("x")))
 
 
 def test_Integer_new():
@@ -297,7 +344,7 @@ def test_Integer_new():
     assert _strictly_equal(Integer(0.9), S.Zero)
     assert _strictly_equal(Integer(10.5), Integer(10))
     raises(ValueError, lambda: Integer("10.5"))
-    assert Integer(Rational('1.' + '9'*20)) == 1
+    assert Integer(Rational("1." + "9" * 20)) == 1
 
 
 def test_Rational_new():
@@ -315,27 +362,28 @@ def test_Rational_new():
     assert Rational(3, 2) == Rational(S.Half, Rational(1, 3))
     assert Rational(3, 1) == Rational(1, Rational(1, 3))
     n3_4 = Rational(3, 4)
-    assert Rational('3/4') == n3_4
-    assert -Rational('-3/4') == n3_4
-    assert Rational('.76').limit_denominator(4) == n3_4
+    assert Rational("3/4") == n3_4
+    assert -Rational("-3/4") == n3_4
+    assert Rational(".76").limit_denominator(4) == n3_4
     assert Rational(19, 25).limit_denominator(4) == n3_4
-    assert Rational('19/25').limit_denominator(4) == n3_4
+    assert Rational("19/25").limit_denominator(4) == n3_4
     assert Rational(1.0, 3) == Rational(1, 3)
     assert Rational(1, 3.0) == Rational(1, 3)
     assert Rational(Float(0.5)) == S.Half
-    assert Rational('1e2/1e-2') == Rational(10000)
-    assert Rational('1 234') == Rational(1234)
-    assert Rational('1/1 234') == Rational(1, 1234)
+    assert Rational("1e2/1e-2") == Rational(10000)
+    assert Rational("1 234") == Rational(1234)
+    assert Rational("1/1 234") == Rational(1, 1234)
     assert Rational(-1, 0) is S.ComplexInfinity
     assert Rational(1, 0) is S.ComplexInfinity
     # Make sure Rational doesn't lose precision on Floats
     assert Rational(pi.evalf(100)).evalf(100) == pi.evalf(100)
-    raises(TypeError, lambda: Rational('3**3'))
-    raises(TypeError, lambda: Rational('1/2 + 2/3'))
+    raises(TypeError, lambda: Rational("3**3"))
+    raises(TypeError, lambda: Rational("1/2 + 2/3"))
 
     # handle fractions.Fraction instances
     try:
         import fractions
+
         assert Rational(fractions.Fraction(1, 2)) == S.Half
     except ImportError:
         pass
@@ -354,16 +402,16 @@ def test_Number_new():
     assert Number(-622).__class__ is Integer
     assert Number(5, 3).__class__ is Rational
     assert Number(5.3).__class__ is Float
-    assert Number('1') is S.One
-    assert Number('2').__class__ is Integer
-    assert Number('-622').__class__ is Integer
-    assert Number('5/3').__class__ is Rational
-    assert Number('5.3').__class__ is Float
-    raises(ValueError, lambda: Number('cos'))
+    assert Number("1") is S.One
+    assert Number("2").__class__ is Integer
+    assert Number("-622").__class__ is Integer
+    assert Number("5/3").__class__ is Rational
+    assert Number("5.3").__class__ is Float
+    raises(ValueError, lambda: Number("cos"))
     raises(TypeError, lambda: Number(cos))
     a = Rational(3, 5)
     assert Number(a) is a  # Check idempotence on Numbers
-    u = ['inf', '-inf', 'nan', 'iNF', '+inf']
+    u = ["inf", "-inf", "nan", "iNF", "+inf"]
     v = [oo, -oo, nan, oo, oo]
     for i, a in zip(u, v):
         assert Number(i) is a, (i, Number(i), a)
@@ -401,8 +449,8 @@ def test_Rational_cmp():
     assert n6 < n7
     assert n8 < n7
     assert n7 > n8
-    assert (n1 + 1)**n2 < 2
-    assert ((n1 + n6)/n7) < 1
+    assert (n1 + 1) ** n2 < 2
+    assert ((n1 + n6) / n7) < 1
 
     assert n4 < n3
     assert n2 < n3
@@ -421,9 +469,9 @@ def test_Rational_cmp():
 def test_Float():
     def eq(a, b):
         t = Float("1.0E-15")
-        return (-t < a - b < t)
+        return -t < a - b < t
 
-    zeros = (0, S.Zero, 0., Float(0))
+    zeros = (0, S.Zero, 0.0, Float(0))
     for i, j in permutations(zeros, 2):
         assert i == j
     for z in zeros:
@@ -435,10 +483,10 @@ def test_Float():
     assert eq((pi ** -1).evalf(), Float("0.31830988618379067"))
     a = Float(2) ** Float(4)
     assert eq(a.evalf(), Float(16))
-    assert (S(.3) == S(.5)) is False
+    assert (S(0.3) == S(0.5)) is False
     mpf = (0, 5404319552844595, -52, 53)
-    x_str =  Float((0, '13333333333333', -52, 53))
-    x2_str = Float((0, '26666666666666', -53, 54))
+    x_str = Float((0, "13333333333333", -52, 53))
+    x2_str = Float((0, "26666666666666", -53, 54))
     x_hex = Float((0, long(0x13333333333333), -52, 53))
     x_dec = Float(mpf)
     assert x_str == x_hex == x_dec == Float(1.2)
@@ -458,13 +506,13 @@ def test_Float():
     assert Float((0, long(0), -456)) == Float(0)
     assert Float((1, long(0), -789)) == Float(0)
 
-    raises(ValueError, lambda: Float((0, 7, 1, 3), ''))
+    raises(ValueError, lambda: Float((0, 7, 1, 3), ""))
 
-    assert Float('0.0').is_finite is True
-    assert Float('0.0').is_negative is False
-    assert Float('0.0').is_positive is False
-    assert Float('0.0').is_infinite is False
-    assert Float('0.0').is_zero is True
+    assert Float("0.0").is_finite is True
+    assert Float("0.0").is_negative is False
+    assert Float("0.0").is_positive is False
+    assert Float("0.0").is_infinite is False
+    assert Float("0.0").is_zero is True
 
     # rationality properties
     # if the integer test fails then the use of intlike
@@ -483,85 +531,89 @@ def test_Float():
         assert (a != a.evalf()) is True
 
     teq(pi)
-    teq(2*pi)
+    teq(2 * pi)
     teq(cos(0.1, evaluate=False))
 
     # long integer
     i = 12345678901234567890
-    assert same_and_same_prec(Float(12, ''), Float('12', ''))
-    assert same_and_same_prec(Float(Integer(i), ''), Float(i, ''))
-    assert same_and_same_prec(Float(i, ''), Float(str(i), 20))
-    assert same_and_same_prec(Float(str(i)), Float(i, ''))
-    assert same_and_same_prec(Float(i), Float(i, ''))
+    assert same_and_same_prec(Float(12, ""), Float("12", ""))
+    assert same_and_same_prec(Float(Integer(i), ""), Float(i, ""))
+    assert same_and_same_prec(Float(i, ""), Float(str(i), 20))
+    assert same_and_same_prec(Float(str(i)), Float(i, ""))
+    assert same_and_same_prec(Float(i), Float(i, ""))
 
     # inexact floats (repeating binary = denom not multiple of 2)
     # cannot have precision greater than 15
-    assert Float(.125, 22) == .125
+    assert Float(0.125, 22) == 0.125
     assert Float(2.0, 22) == 2
-    assert float(Float('.12500000000000001', '')) == .125
-    raises(ValueError, lambda: Float(.12500000000000001, ''))
+    assert float(Float(".12500000000000001", "")) == 0.125
+    raises(ValueError, lambda: Float(0.12500000000000001, ""))
 
     # allow spaces
-    Float('123 456.123 456') == Float('123456.123456')
-    Integer('123 456') == Integer('123456')
-    Rational('123 456.123 456') == Rational('123456.123456')
-    assert Float(' .3e2') == Float('0.3e2')
+    Float("123 456.123 456") == Float("123456.123456")
+    Integer("123 456") == Integer("123456")
+    Rational("123 456.123 456") == Rational("123456.123456")
+    assert Float(" .3e2") == Float("0.3e2")
 
     # allow underscore
-    assert Float('1_23.4_56') == Float('123.456')
-    assert Float('1_23.4_5_6', 12) == Float('123.456', 12)
+    assert Float("1_23.4_56") == Float("123.456")
+    assert Float("1_23.4_5_6", 12) == Float("123.456", 12)
     # ...but not in all cases (per Py 3.6)
-    raises(ValueError, lambda: Float('_1'))
-    raises(ValueError, lambda: Float('1_'))
-    raises(ValueError, lambda: Float('1_.'))
-    raises(ValueError, lambda: Float('1._'))
-    raises(ValueError, lambda: Float('1__2'))
-    raises(ValueError, lambda: Float('_inf'))
+    raises(ValueError, lambda: Float("_1"))
+    raises(ValueError, lambda: Float("1_"))
+    raises(ValueError, lambda: Float("1_."))
+    raises(ValueError, lambda: Float("1._"))
+    raises(ValueError, lambda: Float("1__2"))
+    raises(ValueError, lambda: Float("_inf"))
 
     # allow auto precision detection
-    assert Float('.1', '') == Float(.1, 1)
-    assert Float('.125', '') == Float(.125, 3)
-    assert Float('.100', '') == Float(.1, 3)
-    assert Float('2.0', '') == Float('2', 2)
+    assert Float(".1", "") == Float(0.1, 1)
+    assert Float(".125", "") == Float(0.125, 3)
+    assert Float(".100", "") == Float(0.1, 3)
+    assert Float("2.0", "") == Float("2", 2)
 
     raises(ValueError, lambda: Float("12.3d-4", ""))
     raises(ValueError, lambda: Float(12.3, ""))
-    raises(ValueError, lambda: Float('.'))
-    raises(ValueError, lambda: Float('-.'))
+    raises(ValueError, lambda: Float("."))
+    raises(ValueError, lambda: Float("-."))
 
-    zero = Float('0.0')
-    assert Float('-0') == zero
-    assert Float('.0') == zero
-    assert Float('-.0') == zero
-    assert Float('-0.0') == zero
+    zero = Float("0.0")
+    assert Float("-0") == zero
+    assert Float(".0") == zero
+    assert Float("-.0") == zero
+    assert Float("-0.0") == zero
     assert Float(0.0) == zero
     assert Float(0) == zero
-    assert Float(0, '') == Float('0', '')
+    assert Float(0, "") == Float("0", "")
     assert Float(1) == Float(1.0)
     assert Float(S.Zero) == zero
     assert Float(S.One) == Float(1.0)
 
-    assert Float(decimal.Decimal('0.1'), 3) == Float('.1', 3)
-    assert Float(decimal.Decimal('nan')) is S.NaN
-    assert Float(decimal.Decimal('Infinity')) is S.Infinity
-    assert Float(decimal.Decimal('-Infinity')) is S.NegativeInfinity
+    assert Float(decimal.Decimal("0.1"), 3) == Float(".1", 3)
+    assert Float(decimal.Decimal("nan")) is S.NaN
+    assert Float(decimal.Decimal("Infinity")) is S.Infinity
+    assert Float(decimal.Decimal("-Infinity")) is S.NegativeInfinity
 
-    assert '{0:.3f}'.format(Float(4.236622)) == '4.237'
-    assert '{0:.35f}'.format(Float(pi.n(40), 40)) == \
-        '3.14159265358979323846264338327950288'
+    assert "{0:.3f}".format(Float(4.236622)) == "4.237"
+    assert (
+        "{0:.35f}".format(Float(pi.n(40), 40))
+        == "3.14159265358979323846264338327950288"
+    )
 
     # unicode
-    assert Float(u'0.73908513321516064100000000') == \
-        Float('0.73908513321516064100000000')
-    assert Float(u'0.73908513321516064100000000', 28) == \
-        Float('0.73908513321516064100000000', 28)
+    assert Float(u"0.73908513321516064100000000") == Float(
+        "0.73908513321516064100000000"
+    )
+    assert Float(u"0.73908513321516064100000000", 28) == Float(
+        "0.73908513321516064100000000", 28
+    )
 
     # binary precision
     # Decimal value 0.1 cannot be expressed precisely as a base 2 fraction
-    a = Float(S.One/10, dps=15)
-    b = Float(S.One/10, dps=16)
-    p = Float(S.One/10, precision=53)
-    q = Float(S.One/10, precision=54)
+    a = Float(S.One / 10, dps=15)
+    b = Float(S.One / 10, dps=16)
+    p = Float(S.One / 10, precision=53)
+    q = Float(S.One / 10, precision=54)
     assert a._mpf_ == p._mpf_
     assert not a._mpf_ == q._mpf_
     assert not b._mpf_ == q._mpf_
@@ -577,16 +629,16 @@ def test_Float():
     assert same_and_same_prec(Float(Catalan), Catalan.evalf())
 
     # oo and nan
-    u = ['inf', '-inf', 'nan', 'iNF', '+inf']
+    u = ["inf", "-inf", "nan", "iNF", "+inf"]
     v = [oo, -oo, nan, oo, oo]
     for i, a in zip(u, v):
         assert Float(i) is a
 
 
-
 @conserve_mpmath_dps
 def test_float_mpf():
     import mpmath
+
     mpmath.mp.dps = 100
     mp_pi = mpmath.pi()
 
@@ -596,20 +648,22 @@ def test_float_mpf():
 
     assert Float(mp_pi, 100) == Float(mp_pi._mpf_, 100) == pi.evalf(100)
 
+
 def test_Float_RealElement():
     repi = RealField(dps=100)(pi.evalf(100))
     # We still have to pass the precision because Float doesn't know what
     # RealElement is, but make sure it keeps full precision from the result.
     assert Float(repi, 100) == pi.evalf(100)
 
+
 def test_Float_default_to_highprec_from_str():
     s = str(pi.evalf(128))
-    assert same_and_same_prec(Float(s), Float(s, ''))
+    assert same_and_same_prec(Float(s), Float(s, ""))
 
 
 def test_Float_eval():
     a = Float(3.2)
-    assert (a**2).is_Float
+    assert (a ** 2).is_Float
 
 
 def test_Float_issue_2107():
@@ -637,34 +691,34 @@ def test_issue_14289():
 
 
 def test_Float_from_tuple():
-    a = Float((0, '1L', 0, 1))
-    b = Float((0, '1', 0, 1))
+    a = Float((0, "1L", 0, 1))
+    b = Float((0, "1", 0, 1))
     assert a == b
 
 
 def test_Infinity():
     assert oo != 1
-    assert 1*oo is oo
+    assert 1 * oo is oo
     assert 1 != oo
     assert oo != -oo
-    assert oo != Symbol("x")**3
+    assert oo != Symbol("x") ** 3
     assert oo + 1 is oo
     assert 2 + oo is oo
-    assert 3*oo + 2 is oo
-    assert S.Half**oo == 0
-    assert S.Half**(-oo) is oo
-    assert -oo*3 is -oo
+    assert 3 * oo + 2 is oo
+    assert S.Half ** oo == 0
+    assert S.Half ** (-oo) is oo
+    assert -oo * 3 is -oo
     assert oo + oo is oo
-    assert -oo + oo*(-5) is -oo
-    assert 1/oo == 0
-    assert 1/(-oo) == 0
-    assert 8/oo == 0
+    assert -oo + oo * (-5) is -oo
+    assert 1 / oo == 0
+    assert 1 / (-oo) == 0
+    assert 8 / oo == 0
     assert oo % 2 is nan
     assert 2 % oo is nan
-    assert oo/oo is nan
-    assert oo/-oo is nan
-    assert -oo/oo is nan
-    assert -oo/-oo is nan
+    assert oo / oo is nan
+    assert oo / -oo is nan
+    assert -oo / oo is nan
+    assert -oo / -oo is nan
     assert oo - oo is nan
     assert oo - -oo is oo
     assert -oo - oo is -oo
@@ -675,18 +729,18 @@ def test_Infinity():
     assert -oo + oo is nan
     assert oo + -oo is nan
     assert -oo + -oo is -oo
-    assert oo*oo is oo
-    assert -oo*oo is -oo
-    assert oo*-oo is -oo
-    assert -oo*-oo is oo
-    assert oo/0 is oo
-    assert -oo/0 is -oo
-    assert 0/oo == 0
-    assert 0/-oo == 0
-    assert oo*0 is nan
-    assert -oo*0 is nan
-    assert 0*oo is nan
-    assert 0*-oo is nan
+    assert oo * oo is oo
+    assert -oo * oo is -oo
+    assert oo * -oo is -oo
+    assert -oo * -oo is oo
+    assert oo / 0 is oo
+    assert -oo / 0 is -oo
+    assert 0 / oo == 0
+    assert 0 / -oo == 0
+    assert oo * 0 is nan
+    assert -oo * 0 is nan
+    assert 0 * oo is nan
+    assert 0 * -oo is nan
     assert oo + 0 is oo
     assert -oo + 0 is -oo
     assert 0 + oo is oo
@@ -695,21 +749,21 @@ def test_Infinity():
     assert -oo - 0 is -oo
     assert 0 - oo is -oo
     assert 0 - -oo is oo
-    assert oo/2 is oo
-    assert -oo/2 is -oo
-    assert oo/-2 is -oo
-    assert -oo/-2 is oo
-    assert oo*2 is oo
-    assert -oo*2 is -oo
-    assert oo*-2 is -oo
-    assert 2/oo == 0
-    assert 2/-oo == 0
-    assert -2/oo == 0
-    assert -2/-oo == 0
-    assert 2*oo is oo
-    assert 2*-oo is -oo
-    assert -2*oo is -oo
-    assert -2*-oo is oo
+    assert oo / 2 is oo
+    assert -oo / 2 is -oo
+    assert oo / -2 is -oo
+    assert -oo / -2 is oo
+    assert oo * 2 is oo
+    assert -oo * 2 is -oo
+    assert oo * -2 is -oo
+    assert 2 / oo == 0
+    assert 2 / -oo == 0
+    assert -2 / oo == 0
+    assert -2 / -oo == 0
+    assert 2 * oo is oo
+    assert 2 * -oo is -oo
+    assert -2 * oo is -oo
+    assert -2 * -oo is oo
     assert 2 + oo is oo
     assert 2 - oo is -oo
     assert -2 + oo is oo
@@ -720,28 +774,28 @@ def test_Infinity():
     assert -2 - -oo is oo
     assert S(2) + oo is oo
     assert S(2) - oo is -oo
-    assert oo/I == -oo*I
-    assert -oo/I == oo*I
-    assert oo*float(1) == _inf and (oo*float(1)) is oo
-    assert -oo*float(1) == _ninf and (-oo*float(1)) is -oo
-    assert oo/float(1) == _inf and (oo/float(1)) is oo
-    assert -oo/float(1) == _ninf and (-oo/float(1)) is -oo
-    assert oo*float(-1) == _ninf and (oo*float(-1)) is -oo
-    assert -oo*float(-1) == _inf and (-oo*float(-1)) is oo
-    assert oo/float(-1) == _ninf and (oo/float(-1)) is -oo
-    assert -oo/float(-1) == _inf and (-oo/float(-1)) is oo
+    assert oo / I == -oo * I
+    assert -oo / I == oo * I
+    assert oo * float(1) == _inf and (oo * float(1)) is oo
+    assert -oo * float(1) == _ninf and (-oo * float(1)) is -oo
+    assert oo / float(1) == _inf and (oo / float(1)) is oo
+    assert -oo / float(1) == _ninf and (-oo / float(1)) is -oo
+    assert oo * float(-1) == _ninf and (oo * float(-1)) is -oo
+    assert -oo * float(-1) == _inf and (-oo * float(-1)) is oo
+    assert oo / float(-1) == _ninf and (oo / float(-1)) is -oo
+    assert -oo / float(-1) == _inf and (-oo / float(-1)) is oo
     assert oo + float(1) == _inf and (oo + float(1)) is oo
     assert -oo + float(1) == _ninf and (-oo + float(1)) is -oo
     assert oo - float(1) == _inf and (oo - float(1)) is oo
     assert -oo - float(1) == _ninf and (-oo - float(1)) is -oo
-    assert float(1)*oo == _inf and (float(1)*oo) is oo
-    assert float(1)*-oo == _ninf and (float(1)*-oo) is -oo
-    assert float(1)/oo == 0
-    assert float(1)/-oo == 0
-    assert float(-1)*oo == _ninf and (float(-1)*oo) is -oo
-    assert float(-1)*-oo == _inf and (float(-1)*-oo) is oo
-    assert float(-1)/oo == 0
-    assert float(-1)/-oo == 0
+    assert float(1) * oo == _inf and (float(1) * oo) is oo
+    assert float(1) * -oo == _ninf and (float(1) * -oo) is -oo
+    assert float(1) / oo == 0
+    assert float(1) / -oo == 0
+    assert float(-1) * oo == _ninf and (float(-1) * oo) is -oo
+    assert float(-1) * -oo == _inf and (float(-1) * -oo) is oo
+    assert float(-1) / oo == 0
+    assert float(-1) / -oo == 0
     assert float(1) + oo is oo
     assert float(1) + -oo is -oo
     assert float(1) - oo is -oo
@@ -753,23 +807,23 @@ def test_Infinity():
     assert (-oo != float(-oo)) is False
     assert type(float(-oo)) is float
 
-    assert Float('nan') is nan
-    assert nan*1.0 is nan
-    assert -1.0*nan is nan
-    assert nan*oo is nan
-    assert nan*-oo is nan
-    assert nan/oo is nan
-    assert nan/-oo is nan
+    assert Float("nan") is nan
+    assert nan * 1.0 is nan
+    assert -1.0 * nan is nan
+    assert nan * oo is nan
+    assert nan * -oo is nan
+    assert nan / oo is nan
+    assert nan / -oo is nan
     assert nan + oo is nan
     assert nan + -oo is nan
     assert nan - oo is nan
     assert nan - -oo is nan
     assert -oo * S.Zero is nan
 
-    assert oo*nan is nan
-    assert -oo*nan is nan
-    assert oo/nan is nan
-    assert -oo/nan is nan
+    assert oo * nan is nan
+    assert -oo * nan is nan
+    assert oo / nan is nan
+    assert -oo / nan is nan
     assert oo + nan is nan
     assert -oo + nan is nan
     assert oo - nan is nan
@@ -778,74 +832,74 @@ def test_Infinity():
     assert oo.is_Rational is False
     assert isinstance(oo, Rational) is False
 
-    assert S.One/oo == 0
-    assert -S.One/oo == 0
-    assert S.One/-oo == 0
-    assert -S.One/-oo == 0
-    assert S.One*oo is oo
-    assert -S.One*oo is -oo
-    assert S.One*-oo is -oo
-    assert -S.One*-oo is oo
-    assert S.One/nan is nan
+    assert S.One / oo == 0
+    assert -S.One / oo == 0
+    assert S.One / -oo == 0
+    assert -S.One / -oo == 0
+    assert S.One * oo is oo
+    assert -S.One * oo is -oo
+    assert S.One * -oo is -oo
+    assert -S.One * -oo is oo
+    assert S.One / nan is nan
     assert S.One - -oo is oo
     assert S.One + nan is nan
     assert S.One - nan is nan
     assert nan - S.One is nan
-    assert nan/S.One is nan
+    assert nan / S.One is nan
     assert -oo - S.One is -oo
 
 
 def test_Infinity_2():
-    x = Symbol('x')
-    assert oo*x != oo
-    assert oo*(pi - 1) is oo
-    assert oo*(1 - pi) is -oo
+    x = Symbol("x")
+    assert oo * x != oo
+    assert oo * (pi - 1) is oo
+    assert oo * (1 - pi) is -oo
 
-    assert (-oo)*x != -oo
-    assert (-oo)*(pi - 1) is -oo
-    assert (-oo)*(1 - pi) is oo
+    assert (-oo) * x != -oo
+    assert (-oo) * (pi - 1) is -oo
+    assert (-oo) * (1 - pi) is oo
 
-    assert (-1)**S.NaN is S.NaN
+    assert (-1) ** S.NaN is S.NaN
     assert oo - _inf is S.NaN
     assert oo + _ninf is S.NaN
-    assert oo*0 is S.NaN
-    assert oo/_inf is S.NaN
-    assert oo/_ninf is S.NaN
-    assert oo**S.NaN is S.NaN
+    assert oo * 0 is S.NaN
+    assert oo / _inf is S.NaN
+    assert oo / _ninf is S.NaN
+    assert oo ** S.NaN is S.NaN
     assert -oo + _inf is S.NaN
     assert -oo - _ninf is S.NaN
-    assert -oo*S.NaN is S.NaN
-    assert -oo*0 is S.NaN
-    assert -oo/_inf is S.NaN
-    assert -oo/_ninf is S.NaN
-    assert -oo/S.NaN is S.NaN
+    assert -oo * S.NaN is S.NaN
+    assert -oo * 0 is S.NaN
+    assert -oo / _inf is S.NaN
+    assert -oo / _ninf is S.NaN
+    assert -oo / S.NaN is S.NaN
     assert abs(-oo) is oo
-    assert all((-oo)**i is S.NaN for i in (oo, -oo, S.NaN))
-    assert (-oo)**3 is -oo
-    assert (-oo)**2 is oo
+    assert all((-oo) ** i is S.NaN for i in (oo, -oo, S.NaN))
+    assert (-oo) ** 3 is -oo
+    assert (-oo) ** 2 is oo
     assert abs(S.ComplexInfinity) is oo
 
 
 def test_Mul_Infinity_Zero():
-    assert Float(0)*_inf is nan
-    assert Float(0)*_ninf is nan
-    assert Float(0)*_inf is nan
-    assert Float(0)*_ninf is nan
-    assert _inf*Float(0) is nan
-    assert _ninf*Float(0) is nan
-    assert _inf*Float(0) is nan
-    assert _ninf*Float(0) is nan
+    assert Float(0) * _inf is nan
+    assert Float(0) * _ninf is nan
+    assert Float(0) * _inf is nan
+    assert Float(0) * _ninf is nan
+    assert _inf * Float(0) is nan
+    assert _ninf * Float(0) is nan
+    assert _inf * Float(0) is nan
+    assert _ninf * Float(0) is nan
 
 
 def test_Div_By_Zero():
-    assert 1/S.Zero is zoo
-    assert 1/Float(0) is zoo
-    assert 0/S.Zero is nan
-    assert 0/Float(0) is nan
-    assert S.Zero/0 is nan
-    assert Float(0)/0 is nan
-    assert -1/S.Zero is zoo
-    assert -1/Float(0) is zoo
+    assert 1 / S.Zero is zoo
+    assert 1 / Float(0) is zoo
+    assert 0 / S.Zero is nan
+    assert 0 / Float(0) is nan
+    assert S.Zero / 0 is nan
+    assert Float(0) / 0 is nan
+    assert -1 / S.Zero is zoo
+    assert -1 / Float(0) is zoo
 
 
 def test_Infinity_inequations():
@@ -884,13 +938,13 @@ def test_Infinity_inequations():
     assert (oo > oo) == False
     assert (-oo > -oo) == False and (-oo < -oo) == False
     assert oo >= oo and oo <= oo and -oo >= -oo and -oo <= -oo
-    assert (-oo < -_inf) ==  False
+    assert (-oo < -_inf) == False
     assert (oo > _inf) == False
     assert -oo >= -_inf
     assert oo <= _inf
 
-    x = Symbol('x')
-    b = Symbol('b', finite=True, real=True)
+    x = Symbol("x")
+    b = Symbol("b", finite=True, real=True)
     assert (x < oo) == Lt(x, oo)  # issue 7775
     assert b < oo and b > -oo and b <= oo and b >= -oo
     assert oo > b and oo >= b and (oo < b) == False and (oo <= b) == False
@@ -904,16 +958,16 @@ def test_Infinity_inequations():
 def test_NaN():
     assert nan is nan
     assert nan != 1
-    assert 1*nan is nan
+    assert 1 * nan is nan
     assert 1 != nan
     assert -nan is nan
-    assert oo != Symbol("x")**3
+    assert oo != Symbol("x") ** 3
     assert 2 + nan is nan
-    assert 3*nan + 2 is nan
-    assert -nan*3 is nan
+    assert 3 * nan + 2 is nan
+    assert -nan * 3 is nan
     assert nan + nan is nan
-    assert -nan + nan*(-5) is nan
-    assert 8/nan is nan
+    assert -nan + nan * (-5) is nan
+    assert 8 / nan is nan
     raises(TypeError, lambda: nan > 0)
     raises(TypeError, lambda: nan < 0)
     raises(TypeError, lambda: nan >= 0)
@@ -922,17 +976,17 @@ def test_NaN():
     raises(TypeError, lambda: 0 > nan)
     raises(TypeError, lambda: 0 <= nan)
     raises(TypeError, lambda: 0 >= nan)
-    assert nan**0 == 1  # as per IEEE 754
-    assert 1**nan is nan # IEEE 754 is not the best choice for symbolic work
+    assert nan ** 0 == 1  # as per IEEE 754
+    assert 1 ** nan is nan  # IEEE 754 is not the best choice for symbolic work
     # test Pow._eval_power's handling of NaN
-    assert Pow(nan, 0, evaluate=False)**2 == 1
-    for n in (1, 1., S.One, S.NegativeOne, Float(1)):
+    assert Pow(nan, 0, evaluate=False) ** 2 == 1
+    for n in (1, 1.0, S.One, S.NegativeOne, Float(1)):
         assert n + nan is nan
         assert n - nan is nan
         assert nan + n is nan
         assert nan - n is nan
-        assert n/nan is nan
-        assert nan/n is nan
+        assert n / nan is nan
+        assert nan / n is nan
 
 
 def test_special_numbers():
@@ -961,9 +1015,9 @@ def test_powers():
     assert integer_nthroot(2, 2) == (1, False)
     assert integer_nthroot(2, 5) == (1, False)
     assert integer_nthroot(4, 2) == (2, True)
-    assert integer_nthroot(123**25, 25) == (123, True)
-    assert integer_nthroot(123**25 + 1, 25) == (123, False)
-    assert integer_nthroot(123**25 - 1, 25) == (122, False)
+    assert integer_nthroot(123 ** 25, 25) == (123, True)
+    assert integer_nthroot(123 ** 25 + 1, 25) == (123, False)
+    assert integer_nthroot(123 ** 25 - 1, 25) == (122, False)
     assert integer_nthroot(1, 1) == (1, True)
     assert integer_nthroot(0, 1) == (0, True)
     assert integer_nthroot(0, 3) == (0, True)
@@ -971,34 +1025,34 @@ def test_powers():
     assert integer_nthroot(4, 2) == (2, True)
     assert integer_nthroot(16, 2) == (4, True)
     assert integer_nthroot(26, 2) == (5, False)
-    assert integer_nthroot(1234567**7, 7) == (1234567, True)
-    assert integer_nthroot(1234567**7 + 1, 7) == (1234567, False)
-    assert integer_nthroot(1234567**7 - 1, 7) == (1234566, False)
-    b = 25**1000
+    assert integer_nthroot(1234567 ** 7, 7) == (1234567, True)
+    assert integer_nthroot(1234567 ** 7 + 1, 7) == (1234567, False)
+    assert integer_nthroot(1234567 ** 7 - 1, 7) == (1234566, False)
+    b = 25 ** 1000
     assert integer_nthroot(b, 1000) == (25, True)
     assert integer_nthroot(b + 1, 1000) == (25, False)
     assert integer_nthroot(b - 1, 1000) == (24, False)
-    c = 10**400
-    c2 = c**2
+    c = 10 ** 400
+    c2 = c ** 2
     assert integer_nthroot(c2, 2) == (c, True)
     assert integer_nthroot(c2 + 1, 2) == (c, False)
     assert integer_nthroot(c2 - 1, 2) == (c - 1, False)
-    assert integer_nthroot(2, 10**10) == (1, False)
+    assert integer_nthroot(2, 10 ** 10) == (1, False)
 
     p, r = integer_nthroot(int(factorial(10000)), 100)
-    assert p % (10**10) == 5322420655
+    assert p % (10 ** 10) == 5322420655
     assert not r
 
     # Test that this is fast
-    assert integer_nthroot(2, 10**10) == (1, False)
+    assert integer_nthroot(2, 10 ** 10) == (1, False)
 
     # output should be int if possible
-    assert type(integer_nthroot(2**61, 2)[0]) is int
+    assert type(integer_nthroot(2 ** 61, 2)[0]) is int
 
 
 def test_integer_nthroot_overflow():
-    assert integer_nthroot(10**(50*50), 50) == (10**50, True)
-    assert integer_nthroot(10**100000, 10000) == (10**10, True)
+    assert integer_nthroot(10 ** (50 * 50), 50) == (10 ** 50, True)
+    assert integer_nthroot(10 ** 100000, 10000) == (10 ** 10, True)
 
 
 def test_integer_log():
@@ -1011,10 +1065,10 @@ def test_integer_log():
     assert integer_log(1, 3) == (0, True)
     assert integer_log(2, 3) == (0, False)
     assert integer_log(3, 3) == (1, True)
-    assert integer_log(3*2, 3) == (1, False)
-    assert integer_log(3**2, 3) == (2, True)
-    assert integer_log(3*4, 3) == (2, False)
-    assert integer_log(3**3, 3) == (3, True)
+    assert integer_log(3 * 2, 3) == (1, False)
+    assert integer_log(3 ** 2, 3) == (2, True)
+    assert integer_log(3 * 4, 3) == (2, False)
+    assert integer_log(3 ** 3, 3) == (3, True)
     assert integer_log(27, 5) == (2, False)
     assert integer_log(2, 3) == (0, False)
     assert integer_log(-4, -2) == (2, False)
@@ -1025,6 +1079,7 @@ def test_integer_log():
 
 def test_isqrt():
     from math import sqrt as _sqrt
+
     limit = 4503599761588223
     assert int(_sqrt(limit)) == integer_nthroot(limit, 2)[0]
     assert int(_sqrt(limit + 1)) != integer_nthroot(limit + 1, 2)[0]
@@ -1039,17 +1094,18 @@ def test_isqrt():
 
     # Other corner cases, especially involving non-integers.
     raises(ValueError, lambda: isqrt(-1))
-    raises(ValueError, lambda: isqrt(-10**1000))
+    raises(ValueError, lambda: isqrt(-(10 ** 1000)))
     raises(ValueError, lambda: isqrt(Rational(-1, 2)))
 
-    tiny = Rational(1, 10**1000)
+    tiny = Rational(1, 10 ** 1000)
     raises(ValueError, lambda: isqrt(-tiny))
-    assert isqrt(1-tiny) == 0
-    assert isqrt(4503599761588224-tiny) == 67108864
-    assert isqrt(10**100 - tiny) == 10**50 - 1
+    assert isqrt(1 - tiny) == 0
+    assert isqrt(4503599761588224 - tiny) == 67108864
+    assert isqrt(10 ** 100 - tiny) == 10 ** 50 - 1
 
     # Check that using an inaccurate math.sqrt doesn't affect the results.
     from sympy.core import power
+
     old_sqrt = power._sqrt
     power._sqrt = lambda x: 2.999999999
     try:
@@ -1063,9 +1119,9 @@ def test_powers_Integer():
     """Test Integer._eval_power"""
     # check infinity
     assert S.One ** S.Infinity is S.NaN
-    assert S.NegativeOne** S.Infinity is S.NaN
+    assert S.NegativeOne ** S.Infinity is S.NaN
     assert S(2) ** S.Infinity is S.Infinity
-    assert S(-2)** S.Infinity == S.Infinity + S.Infinity * S.ImaginaryUnit
+    assert S(-2) ** S.Infinity == S.Infinity + S.Infinity * S.ImaginaryUnit
     assert S(0) ** S.Infinity is S.Zero
 
     # check Nan
@@ -1073,34 +1129,36 @@ def test_powers_Integer():
     assert S.NegativeOne ** S.NaN is S.NaN
 
     # check for exact roots
-    assert S.NegativeOne ** Rational(6, 5) == - (-1)**(S.One/5)
+    assert S.NegativeOne ** Rational(6, 5) == -((-1) ** (S.One / 5))
     assert sqrt(S(4)) == 2
     assert sqrt(S(-4)) == I * 2
     assert S(16) ** Rational(1, 4) == 2
-    assert S(-16) ** Rational(1, 4) == 2 * (-1)**Rational(1, 4)
+    assert S(-16) ** Rational(1, 4) == 2 * (-1) ** Rational(1, 4)
     assert S(9) ** Rational(3, 2) == 27
-    assert S(-9) ** Rational(3, 2) == -27*I
+    assert S(-9) ** Rational(3, 2) == -27 * I
     assert S(27) ** Rational(2, 3) == 9
     assert S(-27) ** Rational(2, 3) == 9 * (S.NegativeOne ** Rational(2, 3))
     assert (-2) ** Rational(-2, 1) == Rational(1, 4)
 
     # not exact roots
-    assert sqrt(-3) == I*sqrt(3)
+    assert sqrt(-3) == I * sqrt(3)
     assert (3) ** (Rational(3, 2)) == 3 * sqrt(3)
-    assert (-3) ** (Rational(3, 2)) == - 3 * sqrt(-3)
+    assert (-3) ** (Rational(3, 2)) == -3 * sqrt(-3)
     assert (-3) ** (Rational(5, 2)) == 9 * I * sqrt(3)
-    assert (-3) ** (Rational(7, 2)) == - I * 27 * sqrt(3)
+    assert (-3) ** (Rational(7, 2)) == -I * 27 * sqrt(3)
     assert (2) ** (Rational(3, 2)) == 2 * sqrt(2)
     assert (2) ** (Rational(-3, 2)) == sqrt(2) / 4
     assert (81) ** (Rational(2, 3)) == 9 * (S(3) ** (Rational(2, 3)))
     assert (-81) ** (Rational(2, 3)) == 9 * (S(-3) ** (Rational(2, 3)))
-    assert (-3) ** Rational(-7, 3) == \
-        -(-1)**Rational(2, 3)*3**Rational(2, 3)/27
-    assert (-3) ** Rational(-2, 3) == \
-        -(-1)**Rational(1, 3)*3**Rational(1, 3)/3
+    assert (-3) ** Rational(-7, 3) == -((-1) ** Rational(2, 3)) * 3 ** Rational(
+        2, 3
+    ) / 27
+    assert (-3) ** Rational(-2, 3) == -((-1) ** Rational(1, 3)) * 3 ** Rational(
+        1, 3
+    ) / 3
 
     # join roots
-    assert sqrt(6) + sqrt(24) == 3*sqrt(6)
+    assert sqrt(6) + sqrt(24) == 3 * sqrt(6)
     assert sqrt(2) * sqrt(3) == sqrt(6)
 
     # separate symbols & constansts
@@ -1109,61 +1167,77 @@ def test_powers_Integer():
     assert sqrt((3 - sqrt(pi)) ** 2) == 3 - sqrt(pi)
 
     # check that it is fast for big numbers
-    assert (2**64 + 1) ** Rational(4, 3)
-    assert (2**64 + 1) ** Rational(17, 25)
+    assert (2 ** 64 + 1) ** Rational(4, 3)
+    assert (2 ** 64 + 1) ** Rational(17, 25)
 
     # negative rational power and negative base
-    assert (-3) ** Rational(-7, 3) == \
-        -(-1)**Rational(2, 3)*3**Rational(2, 3)/27
-    assert (-3) ** Rational(-2, 3) == \
-        -(-1)**Rational(1, 3)*3**Rational(1, 3)/3
-    assert (-2) ** Rational(-10, 3) == \
-        (-1)**Rational(2, 3)*2**Rational(2, 3)/16
-    assert abs(Pow(-2, Rational(-10, 3)).n() -
-        Pow(-2, Rational(-10, 3), evaluate=False).n()) < 1e-16
+    assert (-3) ** Rational(-7, 3) == -((-1) ** Rational(2, 3)) * 3 ** Rational(
+        2, 3
+    ) / 27
+    assert (-3) ** Rational(-2, 3) == -((-1) ** Rational(1, 3)) * 3 ** Rational(
+        1, 3
+    ) / 3
+    assert (-2) ** Rational(-10, 3) == (-1) ** Rational(2, 3) * 2 ** Rational(2, 3) / 16
+    assert (
+        abs(
+            Pow(-2, Rational(-10, 3)).n()
+            - Pow(-2, Rational(-10, 3), evaluate=False).n()
+        )
+        < 1e-16
+    )
 
     # negative base and rational power with some simplification
-    assert (-8) ** Rational(2, 5) == \
-        2*(-1)**Rational(2, 5)*2**Rational(1, 5)
-    assert (-4) ** Rational(9, 5) == \
-        -8*(-1)**Rational(4, 5)*2**Rational(3, 5)
+    assert (-8) ** Rational(2, 5) == 2 * (-1) ** Rational(2, 5) * 2 ** Rational(1, 5)
+    assert (-4) ** Rational(9, 5) == -8 * (-1) ** Rational(4, 5) * 2 ** Rational(3, 5)
 
     assert S(1234).factors() == {617: 1, 2: 1}
-    assert Rational(2*3, 3*5*7).factors() == {2: 1, 5: -1, 7: -1}
+    assert Rational(2 * 3, 3 * 5 * 7).factors() == {2: 1, 5: -1, 7: -1}
 
     # test that eval_power factors numbers bigger than
     # the current limit in factor_trial_division (2**15)
     from sympy import nextprime
-    n = nextprime(2**15)
-    assert sqrt(n**2) == n
-    assert sqrt(n**3) == n*sqrt(n)
-    assert sqrt(4*n) == 2*sqrt(n)
+
+    n = nextprime(2 ** 15)
+    assert sqrt(n ** 2) == n
+    assert sqrt(n ** 3) == n * sqrt(n)
+    assert sqrt(4 * n) == 2 * sqrt(n)
 
     # check that factors of base with powers sharing gcd with power are removed
-    assert (2**4*3)**Rational(1, 6) == 2**Rational(2, 3)*3**Rational(1, 6)
-    assert (2**4*3)**Rational(5, 6) == 8*2**Rational(1, 3)*3**Rational(5, 6)
+    assert (2 ** 4 * 3) ** Rational(1, 6) == 2 ** Rational(2, 3) * 3 ** Rational(1, 6)
+    assert (2 ** 4 * 3) ** Rational(5, 6) == 8 * 2 ** Rational(1, 3) * 3 ** Rational(
+        5, 6
+    )
 
     # check that bases sharing a gcd are exptracted
-    assert 2**Rational(1, 3)*3**Rational(1, 4)*6**Rational(1, 5) == \
-        2**Rational(8, 15)*3**Rational(9, 20)
-    assert sqrt(8)*24**Rational(1, 3)*6**Rational(1, 5) == \
-        4*2**Rational(7, 10)*3**Rational(8, 15)
-    assert sqrt(8)*(-24)**Rational(1, 3)*(-6)**Rational(1, 5) == \
-        4*(-3)**Rational(8, 15)*2**Rational(7, 10)
-    assert 2**Rational(1, 3)*2**Rational(8, 9) == 2*2**Rational(2, 9)
-    assert 2**Rational(2, 3)*6**Rational(1, 3) == 2*3**Rational(1, 3)
-    assert 2**Rational(2, 3)*6**Rational(8, 9) == \
-        2*2**Rational(5, 9)*3**Rational(8, 9)
-    assert (-2)**Rational(2, S(3))*(-4)**Rational(1, S(3)) == -2*2**Rational(1, 3)
-    assert 3*Pow(3, 2, evaluate=False) == 3**3
-    assert 3*Pow(3, Rational(-1, 3), evaluate=False) == 3**Rational(2, 3)
-    assert (-2)**Rational(1, 3)*(-3)**Rational(1, 4)*(-5)**Rational(5, 6) == \
-        -(-1)**Rational(5, 12)*2**Rational(1, 3)*3**Rational(1, 4) * \
-        5**Rational(5, 6)
+    assert 2 ** Rational(1, 3) * 3 ** Rational(1, 4) * 6 ** Rational(
+        1, 5
+    ) == 2 ** Rational(8, 15) * 3 ** Rational(9, 20)
+    assert sqrt(8) * 24 ** Rational(1, 3) * 6 ** Rational(1, 5) == 4 * 2 ** Rational(
+        7, 10
+    ) * 3 ** Rational(8, 15)
+    assert sqrt(8) * (-24) ** Rational(1, 3) * (-6) ** Rational(1, 5) == 4 * (
+        -3
+    ) ** Rational(8, 15) * 2 ** Rational(7, 10)
+    assert 2 ** Rational(1, 3) * 2 ** Rational(8, 9) == 2 * 2 ** Rational(2, 9)
+    assert 2 ** Rational(2, 3) * 6 ** Rational(1, 3) == 2 * 3 ** Rational(1, 3)
+    assert 2 ** Rational(2, 3) * 6 ** Rational(8, 9) == 2 * 2 ** Rational(
+        5, 9
+    ) * 3 ** Rational(8, 9)
+    assert (-2) ** Rational(2, S(3)) * (-4) ** Rational(1, S(3)) == -2 * 2 ** Rational(
+        1, 3
+    )
+    assert 3 * Pow(3, 2, evaluate=False) == 3 ** 3
+    assert 3 * Pow(3, Rational(-1, 3), evaluate=False) == 3 ** Rational(2, 3)
+    assert (-2) ** Rational(1, 3) * (-3) ** Rational(1, 4) * (-5) ** Rational(
+        5, 6
+    ) == -((-1) ** Rational(5, 12)) * 2 ** Rational(1, 3) * 3 ** Rational(
+        1, 4
+    ) * 5 ** Rational(
+        5, 6
+    )
 
-    assert Integer(-2)**Symbol('', even=True) == \
-        Integer(2)**Symbol('', even=True)
-    assert (-1)**Float(.5) == 1.0*I
+    assert Integer(-2) ** Symbol("", even=True) == Integer(2) ** Symbol("", even=True)
+    assert (-1) ** Float(0.5) == 1.0 * I
 
 
 def test_powers_Rational():
@@ -1172,8 +1246,7 @@ def test_powers_Rational():
     assert S.Half ** S.Infinity == 0
     assert Rational(3, 2) ** S.Infinity is S.Infinity
     assert Rational(-1, 2) ** S.Infinity == 0
-    assert Rational(-3, 2) ** S.Infinity == \
-        S.Infinity + S.Infinity * S.ImaginaryUnit
+    assert Rational(-3, 2) ** S.Infinity == S.Infinity + S.Infinity * S.ImaginaryUnit
 
     # check Nan
     assert Rational(3, 4) ** S.NaN is S.NaN
@@ -1183,9 +1256,9 @@ def test_powers_Rational():
     assert sqrt(Rational(4, 3)) == 2 * sqrt(3) / 3
     assert Rational(4, 3) ** Rational(3, 2) == 8 * sqrt(3) / 9
     assert sqrt(Rational(-4, 3)) == I * 2 * sqrt(3) / 3
-    assert Rational(-4, 3) ** Rational(3, 2) == - I * 8 * sqrt(3) / 9
+    assert Rational(-4, 3) ** Rational(3, 2) == -I * 8 * sqrt(3) / 9
     assert Rational(27, 2) ** Rational(1, 3) == 3 * (2 ** Rational(2, 3)) / 2
-    assert Rational(5**3, 8**3) ** Rational(4, 3) == Rational(5**4, 8**4)
+    assert Rational(5 ** 3, 8 ** 3) ** Rational(4, 3) == Rational(5 ** 4, 8 ** 4)
 
     # exact root on denominator
     assert sqrt(Rational(1, 4)) == S.Half
@@ -1197,26 +1270,38 @@ def test_powers_Rational():
     # not exact roots
     assert sqrt(S.Half) == sqrt(2) / 2
     assert sqrt(Rational(-4, 7)) == I * sqrt(Rational(4, 7))
-    assert Rational(-3, 2)**Rational(-7, 3) == \
-        -4*(-1)**Rational(2, 3)*2**Rational(1, 3)*3**Rational(2, 3)/27
-    assert Rational(-3, 2)**Rational(-2, 3) == \
-        -(-1)**Rational(1, 3)*2**Rational(2, 3)*3**Rational(1, 3)/3
-    assert Rational(-3, 2)**Rational(-10, 3) == \
-        8*(-1)**Rational(2, 3)*2**Rational(1, 3)*3**Rational(2, 3)/81
-    assert abs(Pow(Rational(-2, 3), Rational(-7, 4)).n() -
-        Pow(Rational(-2, 3), Rational(-7, 4), evaluate=False).n()) < 1e-16
+    assert (
+        Rational(-3, 2) ** Rational(-7, 3)
+        == -4 * (-1) ** Rational(2, 3) * 2 ** Rational(1, 3) * 3 ** Rational(2, 3) / 27
+    )
+    assert (
+        Rational(-3, 2) ** Rational(-2, 3)
+        == -((-1) ** Rational(1, 3)) * 2 ** Rational(2, 3) * 3 ** Rational(1, 3) / 3
+    )
+    assert (
+        Rational(-3, 2) ** Rational(-10, 3)
+        == 8 * (-1) ** Rational(2, 3) * 2 ** Rational(1, 3) * 3 ** Rational(2, 3) / 81
+    )
+    assert (
+        abs(
+            Pow(Rational(-2, 3), Rational(-7, 4)).n()
+            - Pow(Rational(-2, 3), Rational(-7, 4), evaluate=False).n()
+        )
+        < 1e-16
+    )
 
     # negative integer power and negative rational base
     assert Rational(-2, 3) ** Rational(-2, 1) == Rational(9, 4)
 
     a = Rational(1, 10)
-    assert a**Float(a, 2) == Float(a, 2)**Float(a, 2)
-    assert Rational(-2, 3)**Symbol('', even=True) == \
-        Rational(2, 3)**Symbol('', even=True)
+    assert a ** Float(a, 2) == Float(a, 2) ** Float(a, 2)
+    assert Rational(-2, 3) ** Symbol("", even=True) == Rational(2, 3) ** Symbol(
+        "", even=True
+    )
 
 
 def test_powers_Float():
-    assert str((S('-1/10')**S('3/10')).n()) == str(Float(-.1)**(.3))
+    assert str((S("-1/10") ** S("3/10")).n()) == str(Float(-0.1) ** (0.3))
 
 
 def test_abs1():
@@ -1238,7 +1323,7 @@ def test_int():
     assert int(a) == 5
     a = Rational(9, 10)
     assert int(a) == int(-a) == 0
-    assert 1/(-1)**Rational(2, 3) == -(-1)**Rational(1, 3)
+    assert 1 / (-1) ** Rational(2, 3) == -((-1) ** Rational(1, 3))
     assert int(pi) == 3
     assert int(E) == 2
     assert int(GoldenRatio) == 1
@@ -1253,7 +1338,7 @@ def test_long():
     assert long(a) == 5
     a = Rational(9, 10)
     assert long(a) == long(-a) == 0
-    a = Integer(2**100)
+    a = Integer(2 ** 100)
     assert long(a) == a
     assert long(pi) == 3
     assert long(E) == 2
@@ -1263,17 +1348,18 @@ def test_long():
 
 def test_real_bug():
     x = Symbol("x")
-    assert str(2.0*x*x) in ["(2.0*x)*x", "2.0*x**2", "2.00000000000000*x**2"]
-    assert str(2.1*x*x) != "(2.0*x)*x"
+    assert str(2.0 * x * x) in ["(2.0*x)*x", "2.0*x**2", "2.00000000000000*x**2"]
+    assert str(2.1 * x * x) != "(2.0*x)*x"
 
 
 def test_bug_sqrt():
-    assert ((sqrt(Rational(2)) + 1)*(sqrt(Rational(2)) - 1)).expand() == 1
+    assert ((sqrt(Rational(2)) + 1) * (sqrt(Rational(2)) - 1)).expand() == 1
 
 
 def test_pi_Pi():
     "Test that pi (instance) is imported, but Pi (class) is not"
     from sympy import pi  # noqa
+
     with raises(ImportError):
         from sympy import Pi  # noqa
 
@@ -1286,21 +1372,22 @@ def test_no_len():
 
 
 def test_issue_3321():
-    assert sqrt(Rational(1, 5)) == Rational(1, 5)**S.Half
+    assert sqrt(Rational(1, 5)) == Rational(1, 5) ** S.Half
     assert 5 * sqrt(Rational(1, 5)) == sqrt(5)
 
 
 def test_issue_3692():
-    assert ((-1)**Rational(1, 6)).expand(complex=True) == I/2 + sqrt(3)/2
-    assert ((-5)**Rational(1, 6)).expand(complex=True) == \
-        5**Rational(1, 6)*I/2 + 5**Rational(1, 6)*sqrt(3)/2
-    assert ((-64)**Rational(1, 6)).expand(complex=True) == I + sqrt(3)
+    assert ((-1) ** Rational(1, 6)).expand(complex=True) == I / 2 + sqrt(3) / 2
+    assert ((-5) ** Rational(1, 6)).expand(complex=True) == 5 ** Rational(
+        1, 6
+    ) * I / 2 + 5 ** Rational(1, 6) * sqrt(3) / 2
+    assert ((-64) ** Rational(1, 6)).expand(complex=True) == I + sqrt(3)
 
 
 def test_issue_3423():
     x = Symbol("x")
     assert sqrt(x - 1).as_base_exp() == (x - 1, S.Half)
-    assert sqrt(x - 1) != I*sqrt(1 - x)
+    assert sqrt(x - 1) != I * sqrt(1 - x)
 
 
 def test_issue_3449():
@@ -1310,10 +1397,10 @@ def test_issue_3449():
 
 def test_issue_13890():
     x = Symbol("x")
-    e = (-x/4 - S.One/12)**x - 1
+    e = (-x / 4 - S.One / 12) ** x - 1
     f = simplify(e)
     a = Rational(9, 5)
-    assert abs(e.subs(x,a).evalf() - f.subs(x,a).evalf()) < 1e-15
+    assert abs(e.subs(x, a).evalf() - f.subs(x, a).evalf()) < 1e-15
 
 
 def test_Integer_factors():
@@ -1384,15 +1471,15 @@ def test_Rational_factors():
 
 
 def test_issue_4107():
-    assert pi*(E + 10) + pi*(-E - 10) != 0
-    assert pi*(E + 10**10) + pi*(-E - 10**10) != 0
-    assert pi*(E + 10**20) + pi*(-E - 10**20) != 0
-    assert pi*(E + 10**80) + pi*(-E - 10**80) != 0
+    assert pi * (E + 10) + pi * (-E - 10) != 0
+    assert pi * (E + 10 ** 10) + pi * (-E - 10 ** 10) != 0
+    assert pi * (E + 10 ** 20) + pi * (-E - 10 ** 20) != 0
+    assert pi * (E + 10 ** 80) + pi * (-E - 10 ** 80) != 0
 
-    assert (pi*(E + 10) + pi*(-E - 10)).expand() == 0
-    assert (pi*(E + 10**10) + pi*(-E - 10**10)).expand() == 0
-    assert (pi*(E + 10**20) + pi*(-E - 10**20)).expand() == 0
-    assert (pi*(E + 10**80) + pi*(-E - 10**80)).expand() == 0
+    assert (pi * (E + 10) + pi * (-E - 10)).expand() == 0
+    assert (pi * (E + 10 ** 10) + pi * (-E - 10 ** 10)).expand() == 0
+    assert (pi * (E + 10 ** 20) + pi * (-E - 10 ** 20)).expand() == 0
+    assert (pi * (E + 10 ** 80) + pi * (-E - 10 ** 80)).expand() == 0
 
 
 def test_IntegerInteger():
@@ -1407,8 +1494,8 @@ def test_Rational_gcd_lcm_cofactors():
     assert Integer(4).lcm(2) == Integer(4)
     assert Integer(4).gcd(Integer(2)) == Integer(2)
     assert Integer(4).lcm(Integer(2)) == Integer(4)
-    a, b = 720**99911, 480**12342
-    assert Integer(a).lcm(b) == a*b/Integer(a).gcd(b)
+    a, b = 720 ** 99911, 480 ** 12342
+    assert Integer(a).lcm(b) == a * b / Integer(a).gcd(b)
 
     assert Integer(4).gcd(3) == Integer(1)
     assert Integer(4).lcm(3) == Integer(12)
@@ -1427,11 +1514,12 @@ def test_Rational_gcd_lcm_cofactors():
     assert Rational(4, 3).lcm(Rational(2, 9)) == Rational(4, 3)
     assert Rational(4, 5).gcd(Rational(2, 9)) == Rational(2, 45)
     assert Rational(4, 5).lcm(Rational(2, 9)) == Integer(4)
-    assert Rational(5, 9).lcm(Rational(3, 7)) == Rational(Integer(5).lcm(3),Integer(9).gcd(7))
+    assert Rational(5, 9).lcm(Rational(3, 7)) == Rational(
+        Integer(5).lcm(3), Integer(9).gcd(7)
+    )
 
     assert Integer(4).cofactors(2) == (Integer(2), Integer(2), Integer(1))
-    assert Integer(4).cofactors(Integer(2)) == \
-        (Integer(2), Integer(2), Integer(1))
+    assert Integer(4).cofactors(Integer(2)) == (Integer(2), Integer(2), Integer(1))
 
     assert Integer(4).gcd(Float(2.0)) == S.One
     assert Integer(4).lcm(Float(2.0)) == Float(8.0)
@@ -1439,8 +1527,7 @@ def test_Rational_gcd_lcm_cofactors():
 
     assert S.Half.gcd(Float(2.0)) == S.One
     assert S.Half.lcm(Float(2.0)) == Float(1.0)
-    assert S.Half.cofactors(Float(2.0)) == \
-        (S.One, S.Half, Float(2.0))
+    assert S.Half.cofactors(Float(2.0)) == (S.One, S.Half, Float(2.0))
 
 
 def test_Float_gcd_lcm_cofactors():
@@ -1450,8 +1537,7 @@ def test_Float_gcd_lcm_cofactors():
 
     assert Float(2.0).gcd(S.Half) == S.One
     assert Float(2.0).lcm(S.Half) == Float(1.0)
-    assert Float(2.0).cofactors(S.Half) == \
-        (S.One, Float(2.0), S.Half)
+    assert Float(2.0).cofactors(S.Half) == (S.One, Float(2.0), S.Half)
 
 
 def test_issue_4611():
@@ -1475,27 +1561,31 @@ def test_issue_4611():
 def test_conversion_to_mpmath():
     assert mpmath.mpmathify(Integer(1)) == mpmath.mpf(1)
     assert mpmath.mpmathify(S.Half) == mpmath.mpf(0.5)
-    assert mpmath.mpmathify(Float('1.23', 15)) == mpmath.mpf('1.23')
+    assert mpmath.mpmathify(Float("1.23", 15)) == mpmath.mpf("1.23")
 
     assert mpmath.mpmathify(I) == mpmath.mpc(1j)
 
-    assert mpmath.mpmathify(1 + 2*I) == mpmath.mpc(1 + 2j)
-    assert mpmath.mpmathify(1.0 + 2*I) == mpmath.mpc(1 + 2j)
-    assert mpmath.mpmathify(1 + 2.0*I) == mpmath.mpc(1 + 2j)
-    assert mpmath.mpmathify(1.0 + 2.0*I) == mpmath.mpc(1 + 2j)
-    assert mpmath.mpmathify(S.Half + S.Half*I) == mpmath.mpc(0.5 + 0.5j)
+    assert mpmath.mpmathify(1 + 2 * I) == mpmath.mpc(1 + 2j)
+    assert mpmath.mpmathify(1.0 + 2 * I) == mpmath.mpc(1 + 2j)
+    assert mpmath.mpmathify(1 + 2.0 * I) == mpmath.mpc(1 + 2j)
+    assert mpmath.mpmathify(1.0 + 2.0 * I) == mpmath.mpc(1 + 2j)
+    assert mpmath.mpmathify(S.Half + S.Half * I) == mpmath.mpc(0.5 + 0.5j)
 
-    assert mpmath.mpmathify(2*I) == mpmath.mpc(2j)
-    assert mpmath.mpmathify(2.0*I) == mpmath.mpc(2j)
-    assert mpmath.mpmathify(S.Half*I) == mpmath.mpc(0.5j)
+    assert mpmath.mpmathify(2 * I) == mpmath.mpc(2j)
+    assert mpmath.mpmathify(2.0 * I) == mpmath.mpc(2j)
+    assert mpmath.mpmathify(S.Half * I) == mpmath.mpc(0.5j)
 
     mpmath.mp.dps = 100
-    assert mpmath.mpmathify(pi.evalf(100) + pi.evalf(100)*I) == mpmath.pi + mpmath.pi*mpmath.j
-    assert mpmath.mpmathify(pi.evalf(100)*I) == mpmath.pi*mpmath.j
+    assert (
+        mpmath.mpmathify(pi.evalf(100) + pi.evalf(100) * I)
+        == mpmath.pi + mpmath.pi * mpmath.j
+    )
+    assert mpmath.mpmathify(pi.evalf(100) * I) == mpmath.pi * mpmath.j
+
 
 def test_relational():
     # real
-    x = S(.1)
+    x = S(0.1)
     assert (x != cos) is True
     assert (x == cos) is False
 
@@ -1513,28 +1603,46 @@ def test_relational():
 
 
 def test_Integer_as_index():
-    assert 'hello'[Integer(2):] == 'llo'
+    assert "hello"[Integer(2) :] == "llo"
 
 
 def test_Rational_int():
-    assert int( Rational(7, 5)) == 1
-    assert int( S.Half) == 0
+    assert int(Rational(7, 5)) == 1
+    assert int(S.Half) == 0
     assert int(Rational(-1, 2)) == 0
     assert int(-Rational(7, 5)) == -1
 
 
 def test_zoo():
-    b = Symbol('b', finite=True)
-    nz = Symbol('nz', nonzero=True)
-    p = Symbol('p', positive=True)
-    n = Symbol('n', negative=True)
-    im = Symbol('i', imaginary=True)
-    c = Symbol('c', complex=True)
-    pb = Symbol('pb', positive=True, finite=True)
-    nb = Symbol('nb', negative=True, finite=True)
-    imb = Symbol('ib', imaginary=True, finite=True)
-    for i in [I, S.Infinity, S.NegativeInfinity, S.Zero, S.One, S.Pi, S.Half, S(3), log(3),
-              b, nz, p, n, im, pb, nb, imb, c]:
+    b = Symbol("b", finite=True)
+    nz = Symbol("nz", nonzero=True)
+    p = Symbol("p", positive=True)
+    n = Symbol("n", negative=True)
+    im = Symbol("i", imaginary=True)
+    c = Symbol("c", complex=True)
+    pb = Symbol("pb", positive=True, finite=True)
+    nb = Symbol("nb", negative=True, finite=True)
+    imb = Symbol("ib", imaginary=True, finite=True)
+    for i in [
+        I,
+        S.Infinity,
+        S.NegativeInfinity,
+        S.Zero,
+        S.One,
+        S.Pi,
+        S.Half,
+        S(3),
+        log(3),
+        b,
+        nz,
+        p,
+        n,
+        im,
+        pb,
+        nb,
+        imb,
+        c,
+    ]:
         if i.is_finite and (i.is_real or i.is_imaginary):
             assert i + zoo is zoo
             assert i - zoo is zoo
@@ -1552,73 +1660,75 @@ def test_zoo():
             assert (zoo - i) is S.NaN
 
         if fuzzy_not(i.is_zero) and (i.is_extended_real or i.is_imaginary):
-            assert i*zoo is zoo
-            assert zoo*i is zoo
+            assert i * zoo is zoo
+            assert zoo * i is zoo
         elif i.is_zero:
-            assert i*zoo is S.NaN
-            assert zoo*i is S.NaN
+            assert i * zoo is S.NaN
+            assert zoo * i is S.NaN
         else:
-            assert (i*zoo).is_Mul
-            assert (zoo*i).is_Mul
+            assert (i * zoo).is_Mul
+            assert (zoo * i).is_Mul
 
-        if fuzzy_not((1/i).is_zero) and (i.is_real or i.is_imaginary):
-            assert zoo/i is zoo
-        elif (1/i).is_zero:
-            assert zoo/i is S.NaN
+        if fuzzy_not((1 / i).is_zero) and (i.is_real or i.is_imaginary):
+            assert zoo / i is zoo
+        elif (1 / i).is_zero:
+            assert zoo / i is S.NaN
         elif i.is_zero:
-            assert zoo/i is zoo
+            assert zoo / i is zoo
         else:
-            assert (zoo/i).is_Mul
+            assert (zoo / i).is_Mul
 
-    assert (I*oo).is_Mul  # allow directed infinity
+    assert (I * oo).is_Mul  # allow directed infinity
     assert zoo + zoo is S.NaN
     assert zoo * zoo is zoo
     assert zoo - zoo is S.NaN
-    assert zoo/zoo is S.NaN
-    assert zoo**zoo is S.NaN
-    assert zoo**0 is S.One
-    assert zoo**2 is zoo
-    assert 1/zoo is S.Zero
+    assert zoo / zoo is S.NaN
+    assert zoo ** zoo is S.NaN
+    assert zoo ** 0 is S.One
+    assert zoo ** 2 is zoo
+    assert 1 / zoo is S.Zero
 
     assert Mul.flatten([S.NegativeOne, oo, S(0)]) == ([S.NaN], [], None)
 
 
 def test_issue_4122():
-    x = Symbol('x', nonpositive=True)
+    x = Symbol("x", nonpositive=True)
     assert oo + x is oo
-    x = Symbol('x', extended_nonpositive=True)
+    x = Symbol("x", extended_nonpositive=True)
     assert (oo + x).is_Add
-    x = Symbol('x', finite=True)
+    x = Symbol("x", finite=True)
     assert (oo + x).is_Add  # x could be imaginary
-    x = Symbol('x', nonnegative=True)
+    x = Symbol("x", nonnegative=True)
     assert oo + x is oo
-    x = Symbol('x', extended_nonnegative=True)
+    x = Symbol("x", extended_nonnegative=True)
     assert oo + x is oo
-    x = Symbol('x', finite=True, real=True)
+    x = Symbol("x", finite=True, real=True)
     assert oo + x is oo
 
     # similarly for negative infinity
-    x = Symbol('x', nonnegative=True)
+    x = Symbol("x", nonnegative=True)
     assert -oo + x is -oo
-    x = Symbol('x', extended_nonnegative=True)
+    x = Symbol("x", extended_nonnegative=True)
     assert (-oo + x).is_Add
-    x = Symbol('x', finite=True)
+    x = Symbol("x", finite=True)
     assert (-oo + x).is_Add
-    x = Symbol('x', nonpositive=True)
+    x = Symbol("x", nonpositive=True)
     assert -oo + x is -oo
-    x = Symbol('x', extended_nonpositive=True)
+    x = Symbol("x", extended_nonpositive=True)
     assert -oo + x is -oo
-    x = Symbol('x', finite=True, real=True)
+    x = Symbol("x", finite=True, real=True)
     assert -oo + x is -oo
 
 
 def test_GoldenRatio_expand():
-    assert GoldenRatio.expand(func=True) == S.Half + sqrt(5)/2
+    assert GoldenRatio.expand(func=True) == S.Half + sqrt(5) / 2
 
 
 def test_TribonacciConstant_expand():
-        assert TribonacciConstant.expand(func=True) == \
-          (1 + cbrt(19 - 3*sqrt(33)) + cbrt(19 + 3*sqrt(33))) / 3
+    assert (
+        TribonacciConstant.expand(func=True)
+        == (1 + cbrt(19 - 3 * sqrt(33)) + cbrt(19 + 3 * sqrt(33))) / 3
+    )
 
 
 def test_as_content_primitive():
@@ -1636,18 +1746,18 @@ def test_hashing_sympy_integers():
 
 
 def test_rounding_issue_4172():
-    assert int((E**100).round()) == \
-        26881171418161354484126255515800135873611119
-    assert int((pi**100).round()) == \
-        51878483143196131920862615246303013562686760680406
-    assert int((Rational(1)/EulerGamma**100).round()) == \
-        734833795660954410469466
+    assert int((E ** 100).round()) == 26881171418161354484126255515800135873611119
+    assert (
+        int((pi ** 100).round()) == 51878483143196131920862615246303013562686760680406
+    )
+    assert int((Rational(1) / EulerGamma ** 100).round()) == 734833795660954410469466
 
 
 @XFAIL
 def test_mpmath_issues():
     from mpmath.libmp.libmpf import _normalize
     import mpmath.libmp as mlib
+
     rnd = mlib.round_nearest
     mpf = (0, long(0), -123, -1, 53, rnd)  # nan
     assert _normalize(mpf, 53) != (0, long(0), 0, 0)
@@ -1657,6 +1767,7 @@ def test_mpmath_issues():
     assert _normalize(mpf, 53) != (0, long(0), 0, 0)
 
     from mpmath.libmp.libmpf import fnan
+
     assert mlib.mpf_eq(fnan, fnan)
 
 
@@ -1673,11 +1784,12 @@ def test_Catalan_EulerGamma_prec():
     assert f._prec == 20
     assert n._as_mpf_val(20) == f._mpf_
 
+
 def test_Catalan_rewrite():
-    k = Dummy('k', integer=True, nonnegative=True)
-    assert Catalan.rewrite(Sum).dummy_eq(
-            Sum((-1)**k/(2*k + 1)**2, (k, 0, oo)))
+    k = Dummy("k", integer=True, nonnegative=True)
+    assert Catalan.rewrite(Sum).dummy_eq(Sum((-1) ** k / (2 * k + 1) ** 2, (k, 0, oo)))
     assert Catalan.rewrite() == Catalan
+
 
 def test_bool_eq():
     assert 0 == False
@@ -1690,49 +1802,55 @@ def test_bool_eq():
 
 def test_Float_eq():
     # all .5 values are the same
-    assert Float(.5, 10) == Float(.5, 11) == Float(.5, 1)
+    assert Float(0.5, 10) == Float(0.5, 11) == Float(0.5, 1)
     # but floats that aren't exact in base-2 still
     # don't compare the same because they have different
     # underlying mpf values
-    assert Float(.12, 3) != Float(.12, 4)
-    assert Float(.12, 3) != .12
-    assert 0.12 != Float(.12, 3)
-    assert Float('.12', 22) != .12
+    assert Float(0.12, 3) != Float(0.12, 4)
+    assert Float(0.12, 3) != 0.12
+    assert 0.12 != Float(0.12, 3)
+    assert Float(".12", 22) != 0.12
     # issue 11707
     # but Float/Rational -- except for 0 --
     # are exact so Rational(x) = Float(y) only if
     # Rational(x) == Rational(Float(y))
-    assert Float('1.1') != Rational(11, 10)
-    assert Rational(11, 10) != Float('1.1')
+    assert Float("1.1") != Rational(11, 10)
+    assert Rational(11, 10) != Float("1.1")
     # coverage
     assert not Float(3) == 2
-    assert not Float(2**2) == S.Half
-    assert Float(2**2) == 4
-    assert not Float(2**-2) == 1
-    assert Float(2**-1) == S.Half
-    assert not Float(2*3) == 3
-    assert not Float(2*3) == S.Half
-    assert Float(2*3) == 6
-    assert not Float(2*3) == 8
-    assert Float(.75) == Rational(3, 4)
-    assert Float(5/18) == 5/18
+    assert not Float(2 ** 2) == S.Half
+    assert Float(2 ** 2) == 4
+    assert not Float(2 ** -2) == 1
+    assert Float(2 ** -1) == S.Half
+    assert not Float(2 * 3) == 3
+    assert not Float(2 * 3) == S.Half
+    assert Float(2 * 3) == 6
+    assert not Float(2 * 3) == 8
+    assert Float(0.75) == Rational(3, 4)
+    assert Float(5 / 18) == 5 / 18
     # 4473
-    assert Float(2.) != 3
-    assert Float((0,1,-3)) == S.One/8
-    assert Float((0,1,-3)) != S.One/9
+    assert Float(2.0) != 3
+    assert Float((0, 1, -3)) == S.One / 8
+    assert Float((0, 1, -3)) != S.One / 9
     # 16196
     assert 2 == Float(2)  # as per Python
     # but in a computation...
-    assert t**2 != t**2.0
+    assert t ** 2 != t ** 2.0
 
 
 def test_int_NumberSymbols():
-    assert [int(i) for i in [pi, EulerGamma, E, GoldenRatio, Catalan]] == \
-        [3, 0, 2, 1, 0]
+    assert [int(i) for i in [pi, EulerGamma, E, GoldenRatio, Catalan]] == [
+        3,
+        0,
+        2,
+        1,
+        0,
+    ]
 
 
 def test_issue_6640():
     from mpmath.libmp.libmpf import finf, fninf
+
     # fnan is not included because Float no longer returns fnan,
     # but otherwise, the same sort of test could apply
     assert Float(finf).is_zero is False
@@ -1741,14 +1859,16 @@ def test_issue_6640():
 
 
 def test_issue_6349():
-    assert Float('23.e3', '')._prec == 10
-    assert Float('23e3', '')._prec == 20
-    assert Float('23000', '')._prec == 20
-    assert Float('-23000', '')._prec == 20
+    assert Float("23.e3", "")._prec == 10
+    assert Float("23e3", "")._prec == 20
+    assert Float("23000", "")._prec == 20
+    assert Float("-23000", "")._prec == 20
+
 
 def test_mpf_norm():
-    assert mpf_norm((1, 0, 1, 0), 10) == mpf('0')._mpf_
-    assert Float._new((1, 0, 1, 0), 10)._mpf_ == mpf('0')._mpf_
+    assert mpf_norm((1, 0, 1, 0), 10) == mpf("0")._mpf_
+    assert Float._new((1, 0, 1, 0), 10)._mpf_ == mpf("0")._mpf_
+
 
 def test_latex():
     assert latex(pi) == r"\pi"
@@ -1769,23 +1889,27 @@ def test_issue_7742():
 
 def test_simplify_AlgebraicNumber():
     A = AlgebraicNumber
-    e = 3**(S.One/6)*(3 + (135 + 78*sqrt(3))**Rational(2, 3))/(45 + 26*sqrt(3))**(S.One/3)
+    e = (
+        3 ** (S.One / 6)
+        * (3 + (135 + 78 * sqrt(3)) ** Rational(2, 3))
+        / (45 + 26 * sqrt(3)) ** (S.One / 3)
+    )
     assert simplify(A(e)) == A(12)  # wester test_C20
 
-    e = (41 + 29*sqrt(2))**(S.One/5)
+    e = (41 + 29 * sqrt(2)) ** (S.One / 5)
     assert simplify(A(e)) == A(1 + sqrt(2))  # wester test_C21
 
-    e = (3 + 4*I)**Rational(3, 2)
-    assert simplify(A(e)) == A(2 + 11*I)  # issue 4401
+    e = (3 + 4 * I) ** Rational(3, 2)
+    assert simplify(A(e)) == A(2 + 11 * I)  # issue 4401
 
 
 def test_Float_idempotence():
-    x = Float('1.23', '')
+    x = Float("1.23", "")
     y = Float(x)
     z = Float(x, 15)
     assert same_and_same_prec(y, x)
     assert not same_and_same_prec(z, x)
-    x = Float(10**20)
+    x = Float(10 ** 20)
     y = Float(x)
     z = Float(x, 15)
     assert same_and_same_prec(y, x)
@@ -1800,60 +1924,61 @@ def test_comp1():
     #                  ...
     assert comp(a, 1.4142141)
     assert comp(a, 1.4142142) is False
-    assert comp(sqrt(2).n(2), '1.4')
-    assert comp(sqrt(2).n(2), Float(1.4, 2), '')
-    assert comp(sqrt(2).n(2), 1.4, '')
-    assert comp(sqrt(2).n(2), Float(1.4, 3), '') is False
-    assert comp(sqrt(2) + sqrt(3)*I, 1.4 + 1.7*I, .1)
-    assert not comp(sqrt(2) + sqrt(3)*I, (1.5 + 1.7*I)*0.89, .1)
-    assert comp(sqrt(2) + sqrt(3)*I, (1.5 + 1.7*I)*0.90, .1)
-    assert comp(sqrt(2) + sqrt(3)*I, (1.5 + 1.7*I)*1.07, .1)
-    assert not comp(sqrt(2) + sqrt(3)*I, (1.5 + 1.7*I)*1.08, .1)
-    assert [(i, j)
-            for i in range(130, 150)
-            for j in range(170, 180)
-            if comp((sqrt(2)+ I*sqrt(3)).n(3), i/100. + I*j/100.)] == [
-        (141, 173), (142, 173)]
-    raises(ValueError, lambda: comp(t, '1'))
+    assert comp(sqrt(2).n(2), "1.4")
+    assert comp(sqrt(2).n(2), Float(1.4, 2), "")
+    assert comp(sqrt(2).n(2), 1.4, "")
+    assert comp(sqrt(2).n(2), Float(1.4, 3), "") is False
+    assert comp(sqrt(2) + sqrt(3) * I, 1.4 + 1.7 * I, 0.1)
+    assert not comp(sqrt(2) + sqrt(3) * I, (1.5 + 1.7 * I) * 0.89, 0.1)
+    assert comp(sqrt(2) + sqrt(3) * I, (1.5 + 1.7 * I) * 0.90, 0.1)
+    assert comp(sqrt(2) + sqrt(3) * I, (1.5 + 1.7 * I) * 1.07, 0.1)
+    assert not comp(sqrt(2) + sqrt(3) * I, (1.5 + 1.7 * I) * 1.08, 0.1)
+    assert [
+        (i, j)
+        for i in range(130, 150)
+        for j in range(170, 180)
+        if comp((sqrt(2) + I * sqrt(3)).n(3), i / 100.0 + I * j / 100.0)
+    ] == [(141, 173), (142, 173)]
+    raises(ValueError, lambda: comp(t, "1"))
     raises(ValueError, lambda: comp(t, 1))
     assert comp(0, 0.0)
-    assert comp(.5, S.Half)
+    assert comp(0.5, S.Half)
     assert comp(2 + sqrt(2), 2.0 + sqrt(2))
     assert not comp(0, 1)
     assert not comp(2, sqrt(2))
     assert not comp(2 + I, 2.0 + sqrt(2))
     assert not comp(2.0 + sqrt(2), 2 + I)
     assert not comp(2.0 + sqrt(2), sqrt(3))
-    assert comp(1/pi.n(4), 0.3183, 1e-5)
-    assert not comp(1/pi.n(4), 0.3183, 8e-6)
+    assert comp(1 / pi.n(4), 0.3183, 1e-5)
+    assert not comp(1 / pi.n(4), 0.3183, 8e-6)
 
 
 def test_issue_9491():
-    assert oo**zoo is nan
+    assert oo ** zoo is nan
 
 
 def test_issue_10063():
-    assert 2**Float(3) == Float(8)
+    assert 2 ** Float(3) == Float(8)
 
 
 def test_issue_10020():
-    assert oo**I is S.NaN
-    assert oo**(1 + I) is S.ComplexInfinity
-    assert oo**(-1 + I) is S.Zero
-    assert (-oo)**I is S.NaN
-    assert (-oo)**(-1 + I) is S.Zero
-    assert oo**t == Pow(oo, t, evaluate=False)
-    assert (-oo)**t == Pow(-oo, t, evaluate=False)
+    assert oo ** I is S.NaN
+    assert oo ** (1 + I) is S.ComplexInfinity
+    assert oo ** (-1 + I) is S.Zero
+    assert (-oo) ** I is S.NaN
+    assert (-oo) ** (-1 + I) is S.Zero
+    assert oo ** t == Pow(oo, t, evaluate=False)
+    assert (-oo) ** t == Pow(-oo, t, evaluate=False)
 
 
 def test_invert_numbers():
     assert S(2).invert(5) == 3
     assert S(2).invert(Rational(5, 2)) == S.Half
-    assert S(2).invert(5.) == 0.5
+    assert S(2).invert(5.0) == 0.5
     assert S(2).invert(S(5)) == 3
-    assert S(2.).invert(5) == 0.5
-    assert S(sqrt(2)).invert(5) == 1/sqrt(2)
-    assert S(sqrt(2)).invert(sqrt(3)) == 1/sqrt(2)
+    assert S(2.0).invert(5) == 0.5
+    assert S(sqrt(2)).invert(5) == 1 / sqrt(2)
+    assert S(sqrt(2)).invert(sqrt(3)) == 1 / sqrt(2)
 
 
 def test_mod_inverse():
@@ -1869,20 +1994,22 @@ def test_mod_inverse():
     assert mod_inverse(2, -5) == -2
     assert mod_inverse(-2, -5) == -3
     assert mod_inverse(-3, -7) == -5
-    x = Symbol('x')
+    x = Symbol("x")
     assert S(2).invert(x) == S.Half
     raises(TypeError, lambda: mod_inverse(2, x))
     raises(ValueError, lambda: mod_inverse(2, S.Half))
-    raises(ValueError, lambda: mod_inverse(2, cos(1)**2 + sin(1)**2))
+    raises(ValueError, lambda: mod_inverse(2, cos(1) ** 2 + sin(1) ** 2))
 
 
 def test_golden_ratio_rewrite_as_sqrt():
-    assert GoldenRatio.rewrite(sqrt) == S.Half + sqrt(5)*S.Half
+    assert GoldenRatio.rewrite(sqrt) == S.Half + sqrt(5) * S.Half
 
 
 def test_tribonacci_constant_rewrite_as_sqrt():
-    assert TribonacciConstant.rewrite(sqrt) == \
-      (1 + cbrt(19 - 3*sqrt(33)) + cbrt(19 + 3*sqrt(33))) / 3
+    assert (
+        TribonacciConstant.rewrite(sqrt)
+        == (1 + cbrt(19 - 3 * sqrt(33)) + cbrt(19 + 3 * sqrt(33))) / 3
+    )
 
 
 def test_comparisons_with_unknown_type():
@@ -1917,6 +2044,7 @@ def test_comparisons_with_unknown_type():
         NotImplemented singleton for symmetric equality relations.
 
         """
+
         def __eq__(self, other):
             if other in (oo, -oo, zoo, nan):
                 return False
@@ -1951,44 +2079,50 @@ def test_comparisons_with_unknown_type():
         raises(TypeError, lambda: n >= bar)
         raises(TypeError, lambda: bar <= n)
 
+
 def test_NumberSymbol_comparison():
     from sympy.core.tests.test_relational import rel_check
-    rpi = Rational('905502432259640373/288230376151711744')
+
+    rpi = Rational("905502432259640373/288230376151711744")
     fpi = Float(float(pi))
     assert rel_check(rpi, fpi)
 
+
 def test_Integer_precision():
     # Make sure Integer inputs for keyword args work
-    assert Float('1.0', dps=Integer(15))._prec == 53
-    assert Float('1.0', precision=Integer(15))._prec == 15
-    assert type(Float('1.0', precision=Integer(15))._prec) == int
-    assert sympify(srepr(Float('1.0', precision=15))) == Float('1.0', precision=15)
+    assert Float("1.0", dps=Integer(15))._prec == 53
+    assert Float("1.0", precision=Integer(15))._prec == 15
+    assert type(Float("1.0", precision=Integer(15))._prec) == int
+    assert sympify(srepr(Float("1.0", precision=15))) == Float("1.0", precision=15)
+
 
 def test_numpy_to_float():
     from sympy.testing.pytest import skip
     from sympy.external import import_module
-    np = import_module('numpy')
+
+    np = import_module("numpy")
     if not np:
-        skip('numpy not installed. Abort numpy tests.')
+        skip("numpy not installed. Abort numpy tests.")
 
     def check_prec_and_relerr(npval, ratval):
         prec = np.finfo(npval).nmant + 1
         x = Float(npval)
         assert x._prec == prec
         y = Float(ratval, precision=prec)
-        assert abs((x - y)/y) < 2**(-(prec + 1))
+        assert abs((x - y) / y) < 2 ** (-(prec + 1))
 
-    check_prec_and_relerr(np.float16(2.0/3), Rational(2, 3))
-    check_prec_and_relerr(np.float32(2.0/3), Rational(2, 3))
-    check_prec_and_relerr(np.float64(2.0/3), Rational(2, 3))
+    check_prec_and_relerr(np.float16(2.0 / 3), Rational(2, 3))
+    check_prec_and_relerr(np.float32(2.0 / 3), Rational(2, 3))
+    check_prec_and_relerr(np.float64(2.0 / 3), Rational(2, 3))
     # extended precision, on some arch/compilers:
-    x = np.longdouble(2)/3
+    x = np.longdouble(2) / 3
     check_prec_and_relerr(x, Rational(2, 3))
     y = Float(x, precision=10)
     assert same_and_same_prec(y, Float(Rational(2, 3), precision=10))
 
-    raises(TypeError, lambda: Float(np.complex64(1+2j)))
-    raises(TypeError, lambda: Float(np.complex128(1+2j)))
+    raises(TypeError, lambda: Float(np.complex64(1 + 2j)))
+    raises(TypeError, lambda: Float(np.complex128(1 + 2j)))
+
 
 def test_Integer_ceiling_floor():
     a = Integer(4)
@@ -1996,26 +2130,31 @@ def test_Integer_ceiling_floor():
     assert a.floor() == a
     assert a.ceiling() == a
 
+
 def test_ComplexInfinity():
     assert zoo.floor() is zoo
     assert zoo.ceiling() is zoo
-    assert zoo**zoo is S.NaN
+    assert zoo ** zoo is S.NaN
+
 
 def test_Infinity_floor_ceiling_power():
     assert oo.floor() is oo
     assert oo.ceiling() is oo
-    assert oo**S.NaN is S.NaN
-    assert oo**zoo is S.NaN
+    assert oo ** S.NaN is S.NaN
+    assert oo ** zoo is S.NaN
+
 
 def test_One_power():
-    assert S.One**12 is S.One
-    assert S.NegativeOne**S.NaN is S.NaN
+    assert S.One ** 12 is S.One
+    assert S.NegativeOne ** S.NaN is S.NaN
+
 
 def test_NegativeInfinity():
     assert (-oo).floor() is -oo
     assert (-oo).ceiling() is -oo
-    assert (-oo)**11 is -oo
-    assert (-oo)**12 is oo
+    assert (-oo) ** 11 is -oo
+    assert (-oo) ** 12 is oo
+
 
 def test_issue_6133():
     raises(TypeError, lambda: (-oo < None))
@@ -2024,18 +2163,20 @@ def test_issue_6133():
     raises(TypeError, lambda: (oo > None))
     raises(TypeError, lambda: (S(2) < None))
 
+
 def test_abc():
     x = numbers.Float(5)
-    assert(isinstance(x, nums.Number))
-    assert(isinstance(x, numbers.Number))
-    assert(isinstance(x, nums.Real))
+    assert isinstance(x, nums.Number)
+    assert isinstance(x, numbers.Number)
+    assert isinstance(x, nums.Real)
     y = numbers.Rational(1, 3)
-    assert(isinstance(y, nums.Number))
-    assert(y.numerator() == 1)
-    assert(y.denominator() == 3)
-    assert(isinstance(y, nums.Rational))
+    assert isinstance(y, nums.Number)
+    assert y.numerator() == 1
+    assert y.denominator() == 3
+    assert isinstance(y, nums.Rational)
     z = numbers.Integer(3)
-    assert(isinstance(z, nums.Number))
+    assert isinstance(z, nums.Number)
+
 
 def test_floordiv():
-    assert S(2)//S.Half == 4
+    assert S(2) // S.Half == 4

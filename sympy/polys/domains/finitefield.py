@@ -9,11 +9,12 @@ from sympy.polys.domains.simpledomain import SimpleDomain
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
 
+
 @public
 class FiniteField(Field, SimpleDomain):
     """General class for finite fields. """
 
-    rep = 'FF'
+    rep = "FF"
 
     is_FiniteField = is_FF = True
     is_Numerical = True
@@ -26,9 +27,10 @@ class FiniteField(Field, SimpleDomain):
 
     def __init__(self, mod, dom=None, symmetric=True):
         if mod <= 0:
-            raise ValueError('modulus must be a positive integer, got %s' % mod)
+            raise ValueError("modulus must be a positive integer, got %s" % mod)
         if dom is None:
             from sympy.polys.domains import ZZ
+
             dom = ZZ
 
         self.dtype = ModularIntegerFactory(mod, dom, symmetric, self)
@@ -38,15 +40,18 @@ class FiniteField(Field, SimpleDomain):
         self.mod = mod
 
     def __str__(self):
-        return 'GF(%s)' % self.mod
+        return "GF(%s)" % self.mod
 
     def __hash__(self):
         return hash((self.__class__.__name__, self.dtype, self.mod, self.dom))
 
     def __eq__(self, other):
         """Returns ``True`` if two domains are equivalent. """
-        return isinstance(other, FiniteField) and \
-            self.mod == other.mod and self.dom == other.dom
+        return (
+            isinstance(other, FiniteField)
+            and self.mod == other.mod
+            and self.dom == other.dom
+        )
 
     def characteristic(self):
         """Return the characteristic of this domain. """

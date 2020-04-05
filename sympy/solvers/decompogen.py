@@ -1,4 +1,4 @@
-from sympy.core import (Function, Pow, sympify, Expr)
+from sympy.core import Function, Pow, sympify, Expr
 from sympy.core.relational import Relational
 from sympy.polys import Poly, decompose
 from sympy.utilities.misc import func_name
@@ -34,7 +34,7 @@ def decompogen(f, symbol):
     """
     f = sympify(f)
     if not isinstance(f, Expr) or isinstance(f, Relational):
-        raise TypeError('expecting Expr but got: `%s`' % func_name(f))
+        raise TypeError("expecting Expr but got: `%s`" % func_name(f))
     if symbol not in f.free_symbols:
         return [f]
 
@@ -49,7 +49,7 @@ def decompogen(f, symbol):
 
     # ===== Convert to Polynomial ===== #
     fp = Poly(f)
-    gens = list(filter(lambda x: symbol in x.free_symbols , fp.gens))
+    gens = list(filter(lambda x: symbol in x.free_symbols, fp.gens))
 
     if len(gens) == 1 and gens[0] != symbol:
         f1 = f.subs(gens[0], symbol)

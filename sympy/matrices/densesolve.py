@@ -10,13 +10,18 @@ import copy
 from sympy.core.power import isqrt
 from sympy.core.symbol import symbols
 from sympy.matrices.densetools import (
-    augment, col, conjugate_transpose, eye, rowadd, rowmul)
+    augment,
+    col,
+    conjugate_transpose,
+    eye,
+    rowadd,
+    rowmul,
+)
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
 SymPyDeprecationWarning(
-    feature="densesolve",
-    issue=12695,
-    deprecated_since_version="1.1").warn()
+    feature="densesolve", issue=12695, deprecated_since_version="1.1"
+).warn()
 
 
 def row_echelon(matlist, K):
@@ -44,10 +49,10 @@ def row_echelon(matlist, K):
     result_matlist = copy.deepcopy(matlist)
     nrow = len(result_matlist)
     for i in range(nrow):
-        if (result_matlist[i][i] != 1 and result_matlist[i][i] != 0):
-            rowmul(result_matlist, i, 1/result_matlist[i][i], K)
+        if result_matlist[i][i] != 1 and result_matlist[i][i] != 0:
+            rowmul(result_matlist, i, 1 / result_matlist[i][i], K)
         for j in range(i + 1, nrow):
-            if (result_matlist[j][i] != 0):
+            if result_matlist[j][i] != 0:
                 rowadd(result_matlist, j, i, -result_matlist[j][i], K)
     return result_matlist
 
@@ -83,7 +88,7 @@ def rref(matlist, K):
     return result_matlist
 
 
-def LU(matlist, K, reverse = 0):
+def LU(matlist, K, reverse=0):
     """
     It computes the LU decomposition of a matrix and returns L and U
     matrices.
@@ -110,9 +115,9 @@ def LU(matlist, K, reverse = 0):
     new_matlist1, new_matlist2 = eye(nrow, K), copy.deepcopy(matlist)
     for i in range(nrow):
         for j in range(i + 1, nrow):
-            if (new_matlist2[j][i] != 0):
-                new_matlist1[j][i] = new_matlist2[j][i]/new_matlist2[i][i]
-                rowadd(new_matlist2, j, i, -new_matlist2[j][i]/new_matlist2[i][i], K)
+            if new_matlist2[j][i] != 0:
+                new_matlist1[j][i] = new_matlist2[j][i] / new_matlist2[i][i]
+                rowadd(new_matlist2, j, i, -new_matlist2[j][i] / new_matlist2[i][i], K)
     return new_matlist1, new_matlist2
 
 
@@ -141,11 +146,11 @@ def cholesky(matlist, K):
         for j in range(i + 1):
             a = K.zero
             for k in range(j):
-                a += L[i][k]*L[j][k]
+                a += L[i][k] * L[j][k]
             if i == j:
                 L[i][j] = isqrt(new_matlist[i][j] - a)
             else:
-                L[i][j] = (new_matlist[i][j] - a)/L[j][j]
+                L[i][j] = (new_matlist[i][j] - a) / L[j][j]
     return L, conjugate_transpose(L, K)
 
 
@@ -175,11 +180,11 @@ def LDL(matlist, K):
         for j in range(i + 1):
             a = K.zero
             for k in range(j):
-                a += L[i][k]*L[j][k]*D[k][k]
+                a += L[i][k] * L[j][k] * D[k][k]
             if i == j:
                 D[j][j] = new_matlist[j][j] - a
             else:
-                L[i][j] = (new_matlist[i][j] - a)/D[j][j]
+                L[i][j] = (new_matlist[i][j] - a) / D[j][j]
     return L, D, conjugate_transpose(L, K)
 
 
@@ -233,7 +238,7 @@ def lower_triangle(matlist, K):
     LU
     """
     copy_matlist = copy.deepcopy(matlist)
-    lower_triangle, upper_triangle = LU(copy_matlist, K, reverse = 1)
+    lower_triangle, upper_triangle = LU(copy_matlist, K, reverse=1)
     return lower_triangle
 
 
@@ -313,7 +318,7 @@ def LU_solve(matlist, variable, constant, K):
     new_matlist = copy.deepcopy(matlist)
     nrow = len(new_matlist)
     L, U = LU(new_matlist, K)
-    y = [[i] for i in symbols('y:%i' % nrow)]
+    y = [[i] for i in symbols("y:%i" % nrow)]
     forward_substitution(L, y, constant, K)
     backward_substitution(U, variable, y, K)
     return variable
@@ -356,7 +361,7 @@ def cholesky_solve(matlist, variable, constant, K):
     new_matlist = copy.deepcopy(matlist)
     nrow = len(new_matlist)
     L, Lstar = cholesky(new_matlist, K)
-    y = [[i] for i in symbols('y:%i' % nrow)]
+    y = [[i] for i in symbols("y:%i" % nrow)]
     forward_substitution(L, y, constant, K)
     backward_substitution(Lstar, variable, y, K)
     return variable
@@ -400,8 +405,8 @@ def forward_substitution(lower_triangle, variable, constant, K):
     for i in range(nrow):
         a = K.zero
         for j in range(i):
-            a += copy_lower_triangle[i][j]*variable[j][0]
-        variable[i][0] = (constant[i][0] - a)/copy_lower_triangle[i][i]
+            a += copy_lower_triangle[i][j] * variable[j][0]
+        variable[i][0] = (constant[i][0] - a) / copy_lower_triangle[i][i]
     return variable
 
 
@@ -443,6 +448,6 @@ def backward_substitution(upper_triangle, variable, constant, K):
     for i in reversed(range(nrow)):
         a = K.zero
         for j in reversed(range(i + 1, nrow)):
-            a += copy_upper_triangle[i][j]*variable[j][0]
-        variable[i][0] = (constant[i][0] - a)/copy_upper_triangle[i][i]
+            a += copy_upper_triangle[i][j] * variable[j][0]
+        variable[i][0] = (constant[i][0] - a) / copy_upper_triangle[i][i]
     return variable

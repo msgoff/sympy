@@ -45,8 +45,8 @@ def change_mul(node, x):
     new_args = []
     dirac = None
 
-    #Sorting is needed so that we consistently collapse the same delta;
-    #However, we must preserve the ordering of non-commutative terms
+    # Sorting is needed so that we consistently collapse the same delta;
+    # However, we must preserve the ordering of non-commutative terms
     c, nc = node.args_cnc()
     sorted_args = sorted(c, key=default_sort_key)
     sorted_args.extend(nc)
@@ -65,7 +65,9 @@ def change_mul(node, x):
             if isinstance(arg, DiracDelta):
                 new_args.append(arg.expand(diracdelta=True, wrt=x))
             elif arg.is_Pow and isinstance(arg.base, DiracDelta):
-                new_args.append(arg.func(arg.base.expand(diracdelta=True, wrt=x), arg.exp))
+                new_args.append(
+                    arg.func(arg.base.expand(diracdelta=True, wrt=x), arg.exp)
+                )
             else:
                 new_args.append(arg)
         if new_args != sorted_args:
@@ -139,14 +141,15 @@ def deltaintegrate(f, x):
     if f.func == DiracDelta:
         h = f.expand(diracdelta=True, wrt=x)
         if h == f:  # can't simplify the expression
-            #FIXME: the second term tells whether is DeltaDirac or Derivative
-            #For integrating derivatives of DiracDelta we need the chain rule
+            # FIXME: the second term tells whether is DeltaDirac or Derivative
+            # For integrating derivatives of DiracDelta we need the chain rule
             if f.is_simple(x):
-                if (len(f.args) <= 1 or f.args[1] == 0):
+                if len(f.args) <= 1 or f.args[1] == 0:
                     return Heaviside(f.args[0])
                 else:
-                    return (DiracDelta(f.args[0], f.args[1] - 1) /
-                        f.args[0].as_poly().LC())
+                    return (
+                        DiracDelta(f.args[0], f.args[1] - 1) / f.args[0].as_poly().LC()
+                    )
         else:  # let's try to integrate the simplified expression
             fh = integrate(h, x)
             return fh
@@ -168,7 +171,7 @@ def deltaintegrate(f, x):
                 deltaterm = deltaterm.expand(diracdelta=True, wrt=x)
                 if deltaterm.is_Mul:  # Take out any extracted factors
                     deltaterm, rest_mult_2 = change_mul(deltaterm, x)
-                    rest_mult = rest_mult*rest_mult_2
+                    rest_mult = rest_mult * rest_mult_2
                 point = solve(deltaterm.args[0], x)[0]
 
                 # Return the largest hyperreal term left after
@@ -180,18 +183,18 @@ def deltaintegrate(f, x):
                 # will return y*DiracDelta(x) instead of 0 or DiracDelta(x),
                 # both of which are correct everywhere the value is defined
                 # but give wrong answers for nested integration.
-                n = (0 if len(deltaterm.args)==1 else deltaterm.args[1])
+                n = 0 if len(deltaterm.args) == 1 else deltaterm.args[1]
                 m = 0
                 while n >= 0:
-                    r = (-1)**n*rest_mult.diff(x, n).subs(x, point)
+                    r = (-1) ** n * rest_mult.diff(x, n).subs(x, point)
                     if r.is_zero:
                         n -= 1
                         m += 1
                     else:
                         if m == 0:
-                            return r*Heaviside(x - point)
+                            return r * Heaviside(x - point)
                         else:
-                            return r*DiracDelta(x,m-1)
+                            return r * DiracDelta(x, m - 1)
                 # In some very weak sense, x=0 is still a singularity,
                 # but we hope will not be of any practical consequence.
                 return S.Zero

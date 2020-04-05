@@ -2,15 +2,23 @@ from __future__ import division, print_function
 
 from types import FunctionType
 
-from sympy.simplify.simplify import (
-    simplify as _simplify, dotprodsimp as _dotprodsimp)
+from sympy.simplify.simplify import simplify as _simplify, dotprodsimp as _dotprodsimp
 
 from .utilities import _get_intermediate_simp, _iszero
 from .determinant import _find_reasonable_pivot
 
 
-def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
-                normalize_last=True, normalize=True, zero_above=True):
+def _row_reduce_list(
+    mat,
+    rows,
+    cols,
+    one,
+    iszerofunc,
+    simpfunc,
+    normalize_last=True,
+    normalize=True,
+    zero_above=True,
+):
     """Row reduce a flat list representation of a matrix and return a tuple
     (rref_matrix, pivot_cols, swaps) where ``rref_matrix`` is a flat list,
     ``pivot_cols`` are the pivot columns and ``swaps`` are any row swaps that
@@ -50,14 +58,16 @@ def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
         return mat[i::cols]
 
     def row_swap(i, j):
-        mat[i*cols:(i + 1)*cols], mat[j*cols:(j + 1)*cols] = \
-            mat[j*cols:(j + 1)*cols], mat[i*cols:(i + 1)*cols]
+        mat[i * cols : (i + 1) * cols], mat[j * cols : (j + 1) * cols] = (
+            mat[j * cols : (j + 1) * cols],
+            mat[i * cols : (i + 1) * cols],
+        )
 
     def cross_cancel(a, i, b, j):
         """Does the row op row[i] = a*row[i] - b*row[j]"""
-        q = (j - i)*cols
-        for p in range(i*cols, (i + 1)*cols):
-            mat[p] = isimp(a*mat[p] - b*mat[p + q])
+        q = (j - i) * cols
+        for p in range(i * cols, (i + 1) * cols):
+            mat[p] = isimp(a * mat[p] - b * mat[p + q])
 
     isimp = _get_intermediate_simp(_dotprodsimp)
     piv_row, piv_col = 0, 0
@@ -66,15 +76,18 @@ def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
 
     # use a fraction free method to zero above and below each pivot
     while piv_col < cols and piv_row < rows:
-        pivot_offset, pivot_val, \
-        assumed_nonzero, newly_determined = _find_reasonable_pivot(
-                get_col(piv_col)[piv_row:], iszerofunc, simpfunc)
+        (
+            pivot_offset,
+            pivot_val,
+            assumed_nonzero,
+            newly_determined,
+        ) = _find_reasonable_pivot(get_col(piv_col)[piv_row:], iszerofunc, simpfunc)
 
         # _find_reasonable_pivot may have simplified some things
         # in the process.  Let's not let them go to waste
         for (offset, val) in newly_determined:
             offset += piv_row
-            mat[offset*cols + piv_col] = val
+            mat[offset * cols + piv_col] = val
 
         if pivot_offset is None:
             piv_col += 1
@@ -89,8 +102,8 @@ def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
         # before we zero the other rows
         if normalize_last is False:
             i, j = piv_row, piv_col
-            mat[i*cols + j] = one
-            for p in range(i*cols + j + 1, (i + 1)*cols):
+            mat[i * cols + j] = one
+            for p in range(i * cols + j + 1, (i + 1) * cols):
                 mat[p] = isimp(mat[p] / pivot_val)
             # after normalizing, the pivot value is 1
             pivot_val = one
@@ -104,7 +117,7 @@ def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
             if zero_above is False and row < piv_row:
                 continue
             # if we're already a zero, don't do anything
-            val = mat[row*cols + piv_col]
+            val = mat[row * cols + piv_col]
             if iszerofunc(val):
                 continue
 
@@ -114,21 +127,30 @@ def _row_reduce_list(mat, rows, cols, one, iszerofunc, simpfunc,
     # normalize each row
     if normalize_last is True and normalize is True:
         for piv_i, piv_j in enumerate(pivot_cols):
-            pivot_val = mat[piv_i*cols + piv_j]
-            mat[piv_i*cols + piv_j] = one
-            for p in range(piv_i*cols + piv_j + 1, (piv_i + 1)*cols):
+            pivot_val = mat[piv_i * cols + piv_j]
+            mat[piv_i * cols + piv_j] = one
+            for p in range(piv_i * cols + piv_j + 1, (piv_i + 1) * cols):
                 mat[p] = isimp(mat[p] / pivot_val)
 
     return mat, tuple(pivot_cols), tuple(swaps)
 
 
 # This functions is a candidate for caching if it gets implemented for matrices.
-def _row_reduce(M, iszerofunc, simpfunc, normalize_last=True,
-                normalize=True, zero_above=True):
+def _row_reduce(
+    M, iszerofunc, simpfunc, normalize_last=True, normalize=True, zero_above=True
+):
 
-    mat, pivot_cols, swaps = _row_reduce_list(list(M), M.rows, M.cols, M.one,
-            iszerofunc, simpfunc, normalize_last=normalize_last,
-            normalize=normalize, zero_above=zero_above)
+    mat, pivot_cols, swaps = _row_reduce_list(
+        list(M),
+        M.rows,
+        M.cols,
+        M.one,
+        iszerofunc,
+        simpfunc,
+        normalize_last=normalize_last,
+        normalize=normalize,
+        zero_above=zero_above,
+    )
 
     return M._new(M.rows, M.cols, mat), pivot_cols, swaps
 
@@ -167,8 +189,9 @@ def _echelon_form(M, iszerofunc=_iszero, simplify=False, with_pivots=False):
 
     simpfunc = simplify if isinstance(simplify, FunctionType) else _simplify
 
-    mat, pivots, _ = _row_reduce(M, iszerofunc, simpfunc,
-            normalize_last=True, normalize=False, zero_above=False)
+    mat, pivots, _ = _row_reduce(
+        M, iszerofunc, simpfunc, normalize_last=True, normalize=False, zero_above=False
+    )
 
     if with_pivots:
         return mat, pivots
@@ -209,9 +232,9 @@ def _rank(M, iszerofunc=_iszero, simplify=False):
             return sum(1 if iszerofunc(e) is None else 0 for e in M[:, i])
 
         complex = [(complexity(i), i) for i in range(M.cols)]
-        perm    = [j for (i, j) in sorted(complex)]
+        perm = [j for (i, j) in sorted(complex)]
 
-        return (M.permute(perm, orientation='cols'), perm)
+        return (M.permute(perm, orientation="cols"), perm)
 
     simpfunc = simplify if isinstance(simplify, FunctionType) else _simplify
 
@@ -240,15 +263,20 @@ def _rank(M, iszerofunc=_iszero, simplify=False):
         if iszerofunc(d) is False:
             return 2
 
-    mat, _       = _permute_complexity_right(M, iszerofunc=iszerofunc)
-    _, pivots, _ = _row_reduce(mat, iszerofunc, simpfunc, normalize_last=True,
-            normalize=False, zero_above=False)
+    mat, _ = _permute_complexity_right(M, iszerofunc=iszerofunc)
+    _, pivots, _ = _row_reduce(
+        mat,
+        iszerofunc,
+        simpfunc,
+        normalize_last=True,
+        normalize=False,
+        zero_above=False,
+    )
 
     return len(pivots)
 
 
-def _rref(M, iszerofunc=_iszero, simplify=False, pivots=True,
-        normalize_last=True):
+def _rref(M, iszerofunc=_iszero, simplify=False, pivots=True, normalize_last=True):
     """Return reduced row-echelon form of matrix and indices of pivot vars.
 
     Parameters
@@ -304,8 +332,9 @@ def _rref(M, iszerofunc=_iszero, simplify=False, pivots=True,
 
     simpfunc = simplify if isinstance(simplify, FunctionType) else _simplify
 
-    mat, pivot_cols, _ = _row_reduce(M, iszerofunc, simpfunc,
-            normalize_last, normalize=True, zero_above=True)
+    mat, pivot_cols, _ = _row_reduce(
+        M, iszerofunc, simpfunc, normalize_last, normalize=True, zero_above=True
+    )
 
     if pivots:
         mat = (mat, pivot_cols)

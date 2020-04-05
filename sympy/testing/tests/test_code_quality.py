@@ -32,7 +32,7 @@ message_tabs = "File contains tabs instead of spaces: %s, line %s."
 message_carriage = "File contains carriage returns at end of line: %s, line %s"
 message_str_raise = "File contains string exception: %s, line %s"
 message_gen_raise = "File contains generic exception: %s, line %s"
-message_old_raise = "File contains old-style raise statement: %s, line %s, \"%s\""
+message_old_raise = 'File contains old-style raise statement: %s, line %s, "%s"'
 message_eof = "File does not end with a newline: %s, line %s"
 message_multi_eof = "File ends with more than 1 newline: %s, line %s"
 message_test_suite_def = "Function should start with 'test_' or '_': %s, line %s"
@@ -40,27 +40,27 @@ message_duplicate_test = "This is a duplicate test function: %s, line %s"
 message_self_assignments = "File contains assignments to self/cls: %s, line %s."
 message_func_is = "File contains '.func is': %s, line %s."
 
-implicit_test_re = re.compile(r'^\s*(>>> )?(\.\.\. )?from .* import .*\*')
-str_raise_re = re.compile(
-    r'^\s*(>>> )?(\.\.\. )?raise(\s+(\'|\")|\s*(\(\s*)+(\'|\"))')
+implicit_test_re = re.compile(r"^\s*(>>> )?(\.\.\. )?from .* import .*\*")
+str_raise_re = re.compile(r"^\s*(>>> )?(\.\.\. )?raise(\s+(\'|\")|\s*(\(\s*)+(\'|\"))")
 gen_raise_re = re.compile(
-    r'^\s*(>>> )?(\.\.\. )?raise(\s+Exception|\s*(\(\s*)+Exception)')
-old_raise_re = re.compile(r'^\s*(>>> )?(\.\.\. )?raise((\s*\(\s*)|\s+)\w+\s*,')
-test_suite_def_re = re.compile(r'^def\s+(?!(_|test))[^(]*\(\s*\)\s*:$')
-test_ok_def_re = re.compile(r'^def\s+test_.*:$')
-test_file_re = re.compile(r'.*[/\\]test_.*\.py$')
-func_is_re = re.compile(r'\.\s*func\s+is')
+    r"^\s*(>>> )?(\.\.\. )?raise(\s+Exception|\s*(\(\s*)+Exception)"
+)
+old_raise_re = re.compile(r"^\s*(>>> )?(\.\.\. )?raise((\s*\(\s*)|\s+)\w+\s*,")
+test_suite_def_re = re.compile(r"^def\s+(?!(_|test))[^(]*\(\s*\)\s*:$")
+test_ok_def_re = re.compile(r"^def\s+test_.*:$")
+test_file_re = re.compile(r".*[/\\]test_.*\.py$")
+func_is_re = re.compile(r"\.\s*func\s+is")
 
 
 def tab_in_leading(s):
     """Returns True if there are tabs in the leading whitespace of a line,
     including the whitespace of docstring code samples."""
     n = len(s) - len(s.lstrip())
-    if not s[n:n + 3] in ['...', '>>>']:
+    if not s[n : n + 3] in ["...", ">>>"]:
         check = s[:n]
     else:
-        smore = s[n + 3:]
-        check = s[:n] + smore[:len(smore) - len(smore.lstrip())]
+        smore = s[n + 3 :]
+        check = s[:n] + smore[: len(smore) - len(smore.lstrip())]
     return not (check.expandtabs() == check)
 
 
@@ -76,10 +76,13 @@ def find_self_assignments(s):
         for n in c.body:
             if not isinstance(n, ast.FunctionDef):
                 continue
-            if any(d.id == 'staticmethod'
-                   for d in n.decorator_list if isinstance(d, ast.Name)):
+            if any(
+                d.id == "staticmethod"
+                for d in n.decorator_list
+                if isinstance(d, ast.Name)
+            ):
                 continue
-            if n.name == '__new__':
+            if n.name == "__new__":
                 continue
             if not n.args.args:
                 continue
@@ -90,9 +93,9 @@ def find_self_assignments(s):
                     for a in m.targets:
                         if isinstance(a, ast.Name) and a.id == first_arg:
                             bad.append(m)
-                        elif (isinstance(a, ast.Tuple) and
-                              any(q.id == first_arg for q in a.elts
-                                  if isinstance(q, ast.Name))):
+                        elif isinstance(a, ast.Tuple) and any(
+                            q.id == first_arg for q in a.elts if isinstance(q, ast.Name)
+                        ):
                             bad.append(m)
 
     return bad
@@ -144,7 +147,7 @@ def test_files():
     def test(fname):
         with open(fname, "rt", encoding="utf8") as test_file:
             test_this_file(fname, test_file)
-        with open(fname, 'rt', encoding='utf8') as test_file:
+        with open(fname, "rt", encoding="utf8") as test_file:
             test_this_file_encoding(fname, test_file)
 
     def test_this_file(fname, test_file):
@@ -157,7 +160,7 @@ def test_files():
                     assert False, message_test_suite_def % (fname, idx + 1)
                 if test_ok_def_re.match(line):
                     tests += 1
-                    test_set.add(line[3:].split('(')[0].strip())
+                    test_set.add(line[3:].split("(")[0].strip())
                     if len(test_set) != tests:
                         assert False, message_duplicate_test % (fname, idx + 1)
             if line.endswith(" \n") or line.endswith("\t\n"):
@@ -170,8 +173,9 @@ def test_files():
                 assert False, message_str_raise % (fname, idx + 1)
             if gen_raise_re.search(line):
                 assert False, message_gen_raise % (fname, idx + 1)
-            if (implicit_test_re.search(line) and
-                    not list(filter(lambda ex: ex in fname, import_exclude))):
+            if implicit_test_re.search(line) and not list(
+                filter(lambda ex: ex in fname, import_exclude)
+            ):
                 assert False, message_implicit % (fname, idx + 1)
             if func_is_re.search(line) and not test_file_re.search(fname):
                 assert False, message_func_is % (fname, idx + 1)
@@ -179,64 +183,69 @@ def test_files():
             result = old_raise_re.search(line)
 
             if result is not None:
-                assert False, message_old_raise % (
-                    fname, idx + 1, result.group(2))
+                assert False, message_old_raise % (fname, idx + 1, result.group(2))
 
         if line is not None:
-            if line == '\n' and idx > 0:
+            if line == "\n" and idx > 0:
                 assert False, message_multi_eof % (fname, idx + 1)
-            elif not line.endswith('\n'):
+            elif not line.endswith("\n"):
                 # eof newline check
                 assert False, message_eof % (fname, idx + 1)
 
-
     # Files to test at top level
-    top_level_files = [join(TOP_PATH, file) for file in [
-        "isympy.py",
-        "build.py",
-        "setup.py",
-        "setupegg.py",
-    ]]
+    top_level_files = [
+        join(TOP_PATH, file)
+        for file in ["isympy.py", "build.py", "setup.py", "setupegg.py",]
+    ]
     # Files to exclude from all tests
-    exclude = set([
-        "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevparser.py" % sepd,
-        "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevlexer.py" % sepd,
-        "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevlistener.py" % sepd,
-        "%(sep)ssympy%(sep)sparsing%(sep)slatex%(sep)s_antlr%(sep)slatexparser.py" % sepd,
-        "%(sep)ssympy%(sep)sparsing%(sep)slatex%(sep)s_antlr%(sep)slatexlexer.py" % sepd,
-    ])
+    exclude = set(
+        [
+            "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevparser.py"
+            % sepd,
+            "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevlexer.py"
+            % sepd,
+            "%(sep)ssympy%(sep)sparsing%(sep)sautolev%(sep)s_antlr%(sep)sautolevlistener.py"
+            % sepd,
+            "%(sep)ssympy%(sep)sparsing%(sep)slatex%(sep)s_antlr%(sep)slatexparser.py"
+            % sepd,
+            "%(sep)ssympy%(sep)sparsing%(sep)slatex%(sep)s_antlr%(sep)slatexlexer.py"
+            % sepd,
+        ]
+    )
     # Files to exclude from the implicit import test
-    import_exclude = set([
-        # glob imports are allowed in top-level __init__.py:
-        "%(sep)ssympy%(sep)s__init__.py" % sepd,
-        # these __init__.py should be fixed:
-        # XXX: not really, they use useful import pattern (DRY)
-        "%(sep)svector%(sep)s__init__.py" % sepd,
-        "%(sep)smechanics%(sep)s__init__.py" % sepd,
-        "%(sep)squantum%(sep)s__init__.py" % sepd,
-        "%(sep)spolys%(sep)s__init__.py" % sepd,
-        "%(sep)spolys%(sep)sdomains%(sep)s__init__.py" % sepd,
-        # interactive sympy executes ``from sympy import *``:
-        "%(sep)sinteractive%(sep)ssession.py" % sepd,
-        # isympy.py executes ``from sympy import *``:
-        "%(sep)sisympy.py" % sepd,
-        # these two are import timing tests:
-        "%(sep)sbin%(sep)ssympy_time.py" % sepd,
-        "%(sep)sbin%(sep)ssympy_time_cache.py" % sepd,
-        # Taken from Python stdlib:
-        "%(sep)sparsing%(sep)ssympy_tokenize.py" % sepd,
-        # this one should be fixed:
-        "%(sep)splotting%(sep)spygletplot%(sep)s" % sepd,
-        # False positive in the docstring
-        "%(sep)sbin%(sep)stest_external_imports.py" % sepd,
-        # These are deprecated stubs that can be removed at some point:
-        "%(sep)sutilities%(sep)sruntests.py" % sepd,
-        "%(sep)sutilities%(sep)spytest.py" % sepd,
-        "%(sep)sutilities%(sep)srandtest.py" % sepd,
-        "%(sep)sutilities%(sep)stmpfiles.py" % sepd,
-        "%(sep)sutilities%(sep)squality_unicode.py" % sepd,
-        "%(sep)sutilities%(sep)sbenchmarking.py" % sepd,
-    ])
+    import_exclude = set(
+        [
+            # glob imports are allowed in top-level __init__.py:
+            "%(sep)ssympy%(sep)s__init__.py" % sepd,
+            # these __init__.py should be fixed:
+            # XXX: not really, they use useful import pattern (DRY)
+            "%(sep)svector%(sep)s__init__.py" % sepd,
+            "%(sep)smechanics%(sep)s__init__.py" % sepd,
+            "%(sep)squantum%(sep)s__init__.py" % sepd,
+            "%(sep)spolys%(sep)s__init__.py" % sepd,
+            "%(sep)spolys%(sep)sdomains%(sep)s__init__.py" % sepd,
+            # interactive sympy executes ``from sympy import *``:
+            "%(sep)sinteractive%(sep)ssession.py" % sepd,
+            # isympy.py executes ``from sympy import *``:
+            "%(sep)sisympy.py" % sepd,
+            # these two are import timing tests:
+            "%(sep)sbin%(sep)ssympy_time.py" % sepd,
+            "%(sep)sbin%(sep)ssympy_time_cache.py" % sepd,
+            # Taken from Python stdlib:
+            "%(sep)sparsing%(sep)ssympy_tokenize.py" % sepd,
+            # this one should be fixed:
+            "%(sep)splotting%(sep)spygletplot%(sep)s" % sepd,
+            # False positive in the docstring
+            "%(sep)sbin%(sep)stest_external_imports.py" % sepd,
+            # These are deprecated stubs that can be removed at some point:
+            "%(sep)sutilities%(sep)sruntests.py" % sepd,
+            "%(sep)sutilities%(sep)spytest.py" % sepd,
+            "%(sep)sutilities%(sep)srandtest.py" % sepd,
+            "%(sep)sutilities%(sep)stmpfiles.py" % sepd,
+            "%(sep)sutilities%(sep)squality_unicode.py" % sepd,
+            "%(sep)sutilities%(sep)sbenchmarking.py" % sepd,
+        ]
+    )
     check_files(top_level_files, test)
     check_directory_tree(BIN_PATH, test, set(["~", ".pyc", ".sh"]), "*")
     check_directory_tree(SYMPY_PATH, test, exclude)
@@ -245,7 +254,7 @@ def test_files():
 
 def _with_space(c):
     # return c with a random amount of leading space
-    return random.randint(0, 10)*' ' + c
+    return random.randint(0, 10) * " " + c
 
 
 def test_raise_statement_regular_expression():
@@ -375,17 +384,19 @@ def test_test_duplicate_defs():
         "def test_():\ndef test_ ():\n",
         "def test_1():\ndef  test_1():\n",
     ]
-    ok = (None, 'check')
+    ok = (None, "check")
+
     def check(file):
         tests = 0
         test_set = set()
         for idx, line in enumerate(file.splitlines()):
             if test_ok_def_re.match(line):
                 tests += 1
-                test_set.add(line[3:].split('(')[0].strip())
+                test_set.add(line[3:].split("(")[0].strip())
                 if len(test_set) != tests:
-                    return False, message_duplicate_test % ('check', idx + 1)
-        return None, 'check'
+                    return False, message_duplicate_test % ("check", idx + 1)
+        return None, "check"
+
     for c in candidates_ok:
         assert check(c) == ok
     for c in candidates_fail:
@@ -415,65 +426,98 @@ def test_find_self_assignments():
 
 
 def test_test_unicode_encoding():
-    unicode_whitelist = ['foo']
-    unicode_strict_whitelist = ['bar']
+    unicode_whitelist = ["foo"]
+    unicode_strict_whitelist = ["bar"]
 
-    fname = 'abc'
-    test_file = ['α']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "abc"
+    test_file = ["α"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'abc'
-    test_file = ['# coding=utf-8', 'α']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "abc"
+    test_file = ["# coding=utf-8", "α"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'abc'
-    test_file = ['# coding=utf-8', 'abc']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "abc"
+    test_file = ["# coding=utf-8", "abc"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'abc'
-    test_file = ['abc']
+    fname = "abc"
+    test_file = ["abc"]
     test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist)
+        fname, test_file, unicode_whitelist, unicode_strict_whitelist
+    )
 
-    fname = 'foo'
-    test_file = ['α']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "foo"
+    test_file = ["α"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'foo'
-    test_file = ['# coding=utf-8', 'α']
+    fname = "foo"
+    test_file = ["# coding=utf-8", "α"]
     test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist)
+        fname, test_file, unicode_whitelist, unicode_strict_whitelist
+    )
 
-    fname = 'foo'
-    test_file = ['# coding=utf-8', 'abc']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "foo"
+    test_file = ["# coding=utf-8", "abc"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'foo'
-    test_file = ['abc']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "foo"
+    test_file = ["abc"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'bar'
-    test_file = ['α']
-    raises(AssertionError, lambda: test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist))
+    fname = "bar"
+    test_file = ["α"]
+    raises(
+        AssertionError,
+        lambda: test_this_file_encoding(
+            fname, test_file, unicode_whitelist, unicode_strict_whitelist
+        ),
+    )
 
-    fname = 'bar'
-    test_file = ['# coding=utf-8', 'α']
+    fname = "bar"
+    test_file = ["# coding=utf-8", "α"]
     test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist)
+        fname, test_file, unicode_whitelist, unicode_strict_whitelist
+    )
 
-    fname = 'bar'
-    test_file = ['# coding=utf-8', 'abc']
+    fname = "bar"
+    test_file = ["# coding=utf-8", "abc"]
     test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist)
+        fname, test_file, unicode_whitelist, unicode_strict_whitelist
+    )
 
-    fname = 'bar'
-    test_file = ['abc']
+    fname = "bar"
+    test_file = ["abc"]
     test_this_file_encoding(
-        fname, test_file, unicode_whitelist, unicode_strict_whitelist)
+        fname, test_file, unicode_whitelist, unicode_strict_whitelist
+    )

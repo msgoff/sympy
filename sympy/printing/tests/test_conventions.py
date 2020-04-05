@@ -5,6 +5,7 @@ from sympy.functions.combinatorial.numbers import bell
 from sympy.printing.conventions import split_super_sub, requires_partial
 from sympy.testing.pytest import XFAIL
 
+
 def test_super_sub():
     assert split_super_sub("beta_13_2") == ("beta", [], ["13", "2"])
     assert split_super_sub("beta_132_20") == ("beta", [], ["132", "20"])
@@ -33,15 +34,20 @@ def test_super_sub():
 
 
 def test_requires_partial():
-    x, y, z, t, nu = symbols('x y z t nu')
-    n = symbols('n', integer=True)
+    x, y, z, t, nu = symbols("x y z t nu")
+    n = symbols("n", integer=True)
 
     f = x * y
     assert requires_partial(Derivative(f, x)) is True
     assert requires_partial(Derivative(f, y)) is True
 
     ## integrating out one of the variables
-    assert requires_partial(Derivative(Integral(exp(-x * y), (x, 0, oo)), y, evaluate=False)) is False
+    assert (
+        requires_partial(
+            Derivative(Integral(exp(-x * y), (x, 0, oo)), y, evaluate=False)
+        )
+        is False
+    )
 
     ## bessel function with smooth parameter
     f = besselj(nu, x)
@@ -74,14 +80,21 @@ def test_requires_partial():
     f = x ** n
     assert requires_partial(Derivative(f, x)) is False
 
-    assert requires_partial(Derivative(Integral((x*y) ** n * exp(-x * y), (x, 0, oo)), y, evaluate=False)) is False
+    assert (
+        requires_partial(
+            Derivative(
+                Integral((x * y) ** n * exp(-x * y), (x, 0, oo)), y, evaluate=False
+            )
+        )
+        is False
+    )
 
     # parametric equation
     f = (exp(t), cos(t))
     g = sum(f)
     assert requires_partial(Derivative(g, t)) is False
 
-    f = symbols('f', cls=Function)
+    f = symbols("f", cls=Function)
     assert requires_partial(Derivative(f(x), x)) is False
     assert requires_partial(Derivative(f(x), y)) is False
     assert requires_partial(Derivative(f(x, y), x)) is True
@@ -89,10 +102,11 @@ def test_requires_partial():
     assert requires_partial(Derivative(f(x, y), z)) is True
     assert requires_partial(Derivative(f(x, y), x, y)) is True
 
+
 @XFAIL
 def test_requires_partial_unspecified_variables():
-    x, y = symbols('x y')
+    x, y = symbols("x y")
     # function of unspecified variables
-    f = symbols('f', cls=Function)
+    f = symbols("f", cls=Function)
     assert requires_partial(Derivative(f, x)) is False
     assert requires_partial(Derivative(f, x, y)) is True

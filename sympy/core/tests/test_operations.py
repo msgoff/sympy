@@ -31,7 +31,7 @@ def test_lattice_shortcircuit():
 
 
 def test_lattice_print():
-    assert str(join(5, 4, 3, 2)) == 'join(2, 3, 4, 5)'
+    assert str(join(5, 4, 3, 2)) == "join(2, 3, 4, 5)"
 
 
 def test_lattice_make_args():
@@ -42,23 +42,25 @@ def test_lattice_make_args():
 
 
 def test_issue_14025():
-    a, b, c, d = symbols('a,b,c,d', commutative=False)
-    assert Mul(a, b, c).has(c*b) == False
-    assert Mul(a, b, c).has(b*c) == True
-    assert Mul(a, b, c, d).has(b*c*d) == True
+    a, b, c, d = symbols("a,b,c,d", commutative=False)
+    assert Mul(a, b, c).has(c * b) == False
+    assert Mul(a, b, c).has(b * c) == True
+    assert Mul(a, b, c, d).has(b * c * d) == True
 
 
 def test_AssocOp_flatten():
-    a, b, c, d = symbols('a,b,c,d')
+    a, b, c, d = symbols("a,b,c,d")
 
     class MyAssoc(AssocOp):
         identity = S.One
 
-    assert MyAssoc(a, MyAssoc(b, c)).args == \
-        MyAssoc(MyAssoc(a, b), c).args == \
-        MyAssoc(MyAssoc(a, b, c)).args == \
-        MyAssoc(a, b, c).args == \
-            (a, b, c)
+    assert (
+        MyAssoc(a, MyAssoc(b, c)).args
+        == MyAssoc(MyAssoc(a, b), c).args
+        == MyAssoc(MyAssoc(a, b, c)).args
+        == MyAssoc(a, b, c).args
+        == (a, b, c)
+    )
     u = MyAssoc(b, c)
     v = MyAssoc(u, d, evaluate=False)
     assert v.args == (u, d)

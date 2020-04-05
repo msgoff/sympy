@@ -2,7 +2,7 @@ from sympy.core.backend import eye, Matrix, zeros
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.mechanics.functions import find_dynamicsymbols
 
-__all__ = ['SymbolicSystem']
+__all__ = ["SymbolicSystem"]
 
 
 class SymbolicSystem(object):
@@ -206,10 +206,20 @@ class SymbolicSystem(object):
 
     """
 
-    def __init__(self, coord_states, right_hand_side, speeds=None,
-                 mass_matrix=None, coordinate_derivatives=None, alg_con=None,
-                 output_eqns={}, coord_idxs=None, speed_idxs=None, bodies=None,
-                 loads=None):
+    def __init__(
+        self,
+        coord_states,
+        right_hand_side,
+        speeds=None,
+        mass_matrix=None,
+        coordinate_derivatives=None,
+        alg_con=None,
+        output_eqns={},
+        coord_idxs=None,
+        speed_idxs=None,
+        bodies=None,
+        loads=None,
+    ):
         """Initializes a SymbolicSystem object"""
 
         # Extract information on speeds, coordinates and states
@@ -303,8 +313,10 @@ class SymbolicSystem(object):
         implicit form, M x' = F, where the kinematical equations are not
         included"""
         if self._dyn_implicit_mat is None:
-            raise AttributeError("dyn_implicit_mat is not specified for "
-                                 "equations of motion form [1] or [2].")
+            raise AttributeError(
+                "dyn_implicit_mat is not specified for "
+                "equations of motion form [1] or [2]."
+            )
         else:
             return self._dyn_implicit_mat
 
@@ -314,8 +326,10 @@ class SymbolicSystem(object):
         in implicit form, M x' = F, where the kinematical equations are not
         included"""
         if self._dyn_implicit_rhs is None:
-            raise AttributeError("dyn_implicit_rhs is not specified for "
-                                 "equations of motion form [1] or [2].")
+            raise AttributeError(
+                "dyn_implicit_rhs is not specified for "
+                "equations of motion form [1] or [2]."
+            )
         else:
             return self._dyn_implicit_rhs
 
@@ -335,8 +349,10 @@ class SymbolicSystem(object):
                 self._comb_implicit_mat = inter1.col_join(inter2)
                 return self._comb_implicit_mat
             else:
-                raise AttributeError("comb_implicit_mat is not specified for "
-                                     "equations of motion form [1].")
+                raise AttributeError(
+                    "comb_implicit_mat is not specified for "
+                    "equations of motion form [1]."
+                )
         else:
             return self._comb_implicit_mat
 
@@ -352,8 +368,10 @@ class SymbolicSystem(object):
                 self._comb_implicit_rhs = kin_inter.col_join(dyn_inter)
                 return self._comb_implicit_rhs
             else:
-                raise AttributeError("comb_implicit_mat is not specified for "
-                                     "equations of motion in form [1].")
+                raise AttributeError(
+                    "comb_implicit_mat is not specified for "
+                    "equations of motion in form [1]."
+                )
         else:
             return self._comb_implicit_rhs
 
@@ -364,7 +382,7 @@ class SymbolicSystem(object):
         if self._comb_explicit_rhs is not None:
             raise AttributeError("comb_explicit_rhs is already formed.")
 
-        inter1 = getattr(self, 'kin_explicit_rhs', None)
+        inter1 = getattr(self, "kin_explicit_rhs", None)
         if inter1 is not None:
             inter2 = self._dyn_implicit_mat.LUsolve(self._dyn_implicit_rhs)
             out = inter1.col_join(inter2)
@@ -378,8 +396,10 @@ class SymbolicSystem(object):
         """Returns the right hand side of the equations of motion in explicit
         form, x' = F, where the kinematical equations are included"""
         if self._comb_explicit_rhs is None:
-            raise AttributeError("Please run .combute_explicit_form before "
-                                 "attempting to access comb_explicit_rhs.")
+            raise AttributeError(
+                "Please run .combute_explicit_form before "
+                "attempting to access comb_explicit_rhs."
+            )
         else:
             return self._comb_explicit_rhs
 
@@ -388,8 +408,10 @@ class SymbolicSystem(object):
         """Returns the right hand side of the kinematical equations in explicit
         form, q' = G"""
         if self._kin_explicit_rhs is None:
-            raise AttributeError("kin_explicit_rhs is not specified for "
-                                 "equations of motion form [1] or [2].")
+            raise AttributeError(
+                "kin_explicit_rhs is not specified for "
+                "equations of motion form [1] or [2]."
+            )
         else:
             return self._kin_explicit_rhs
 
@@ -398,15 +420,13 @@ class SymbolicSystem(object):
         that depend on time"""
         # Create a list of all of the expressions in the equations of motion
         if self._comb_explicit_rhs is None:
-            eom_expressions = (self.comb_implicit_mat[:] +
-                               self.comb_implicit_rhs[:])
+            eom_expressions = self.comb_implicit_mat[:] + self.comb_implicit_rhs[:]
         else:
-            eom_expressions = (self._comb_explicit_rhs[:])
+            eom_expressions = self._comb_explicit_rhs[:]
 
         functions_of_time = set()
         for expr in eom_expressions:
-            functions_of_time = functions_of_time.union(
-                find_dynamicsymbols(expr))
+            functions_of_time = functions_of_time.union(find_dynamicsymbols(expr))
         functions_of_time = functions_of_time.union(self._states)
 
         return tuple(functions_of_time)
@@ -416,10 +436,9 @@ class SymbolicSystem(object):
         that do not depend on time"""
         # Create a list of all of the expressions in the equations of motion
         if self._comb_explicit_rhs is None:
-            eom_expressions = (self.comb_implicit_mat[:] +
-                               self.comb_implicit_rhs[:])
+            eom_expressions = self.comb_implicit_mat[:] + self.comb_implicit_rhs[:]
         else:
-            eom_expressions = (self._comb_explicit_rhs[:])
+            eom_expressions = self._comb_explicit_rhs[:]
 
         constants = set()
         for expr in eom_expressions:

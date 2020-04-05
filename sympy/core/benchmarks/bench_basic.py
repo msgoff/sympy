@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 from sympy.core import symbols, S
 
-x, y = symbols('x,y')
+x, y = symbols("x,y")
 
 
 def timeit_Symbol_meth_lookup():

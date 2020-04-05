@@ -112,7 +112,7 @@ class AskNegativeHandler(CommonHandler):
             if ask(Q.odd(expr.exp), assumptions):
                 return ask(Q.negative(expr.base), assumptions)
 
-    ImaginaryUnit, Abs = [staticmethod(CommonHandler.AlwaysFalse)]*2
+    ImaginaryUnit, Abs = [staticmethod(CommonHandler.AlwaysFalse)] * 2
 
     @staticmethod
     def exp(expr, assumptions):
@@ -121,7 +121,6 @@ class AskNegativeHandler(CommonHandler):
 
 
 class AskNonNegativeHandler(CommonHandler):
-
     @staticmethod
     def Expr(expr, assumptions):
         return expr.is_nonnegative
@@ -153,15 +152,18 @@ class AskNonZeroHandler(CommonHandler):
         if expr.is_number:
             # if there are no symbols just evalf
             i = expr.evalf(2)
+
             def nonz(i):
                 if i._prec != 1:
                     return i != 0
+
             return fuzzy_or(nonz(i) for i in i.as_real_imag())
 
     @staticmethod
     def Add(expr, assumptions):
-        if all(ask(Q.positive(x), assumptions) for x in expr.args) \
-                or all(ask(Q.negative(x), assumptions) for x in expr.args):
+        if all(ask(Q.positive(x), assumptions) for x in expr.args) or all(
+            ask(Q.negative(x), assumptions) for x in expr.args
+        ):
             return True
 
     @staticmethod
@@ -185,24 +187,28 @@ class AskNonZeroHandler(CommonHandler):
     def Abs(expr, assumptions):
         return ask(Q.nonzero(expr.args[0]), assumptions)
 
-class AskZeroHandler(CommonHandler):
 
+class AskZeroHandler(CommonHandler):
     @staticmethod
     def Expr(expr, assumptions):
         return expr.is_zero
 
     @staticmethod
     def Basic(expr, assumptions):
-        return fuzzy_and([fuzzy_not(ask(Q.nonzero(expr), assumptions)),
-            ask(Q.real(expr), assumptions)])
+        return fuzzy_and(
+            [
+                fuzzy_not(ask(Q.nonzero(expr), assumptions)),
+                ask(Q.real(expr), assumptions),
+            ]
+        )
 
     @staticmethod
     def Mul(expr, assumptions):
         # TODO: This should be deducible from the nonzero handler
         return fuzzy_or(ask(Q.zero(arg), assumptions) for arg in expr.args)
 
-class AskNonPositiveHandler(CommonHandler):
 
+class AskNonPositiveHandler(CommonHandler):
     @staticmethod
     def Expr(expr, assumptions):
         return expr.is_nonpositive
@@ -215,6 +221,7 @@ class AskNonPositiveHandler(CommonHandler):
                 return ask(Q.real(expr), assumptions)
             else:
                 return notpositive
+
 
 class AskPositiveHandler(CommonHandler):
     """
@@ -304,7 +311,8 @@ class AskPositiveHandler(CommonHandler):
             return True
         if ask(Q.imaginary(expr.args[0]), assumptions):
             from sympy import pi, I
-            return ask(Q.even(expr.args[0]/(I*pi)), assumptions)
+
+            return ask(Q.even(expr.args[0] / (I * pi)), assumptions)
 
     @staticmethod
     def log(expr, assumptions):
@@ -340,8 +348,7 @@ class AskPositiveHandler(CommonHandler):
 
     @staticmethod
     def MatrixElement(expr, assumptions):
-        if (expr.i == expr.j
-                and ask(Q.positive_definite(expr.parent), assumptions)):
+        if expr.i == expr.j and ask(Q.positive_definite(expr.parent), assumptions):
             return True
 
     @staticmethod

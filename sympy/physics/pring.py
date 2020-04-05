@@ -74,6 +74,6 @@ def energy(n, m, r):
     """
     n, m, r = S(n), S(m), S(r)
     if n.is_integer:
-        return (n**2 * hbar**2) / (2 * m * r**2)
+        return (n ** 2 * hbar ** 2) / (2 * m * r ** 2)
     else:
         raise ValueError("'n' must be integer")

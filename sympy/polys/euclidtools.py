@@ -5,48 +5,75 @@ from __future__ import print_function, division
 from sympy.ntheory import nextprime
 from sympy.polys.densearith import (
     dup_sub_mul,
-    dup_neg, dmp_neg,
+    dup_neg,
+    dmp_neg,
     dmp_add,
     dmp_sub,
-    dup_mul, dmp_mul,
+    dup_mul,
+    dmp_mul,
     dmp_pow,
-    dup_div, dmp_div,
+    dup_div,
+    dmp_div,
     dup_rem,
-    dup_quo, dmp_quo,
-    dup_prem, dmp_prem,
-    dup_mul_ground, dmp_mul_ground,
+    dup_quo,
+    dmp_quo,
+    dup_prem,
+    dmp_prem,
+    dup_mul_ground,
+    dmp_mul_ground,
     dmp_mul_term,
-    dup_quo_ground, dmp_quo_ground,
-    dup_max_norm, dmp_max_norm)
+    dup_quo_ground,
+    dmp_quo_ground,
+    dup_max_norm,
+    dmp_max_norm,
+)
 from sympy.polys.densebasic import (
-    dup_strip, dmp_raise,
-    dmp_zero, dmp_one, dmp_ground,
-    dmp_one_p, dmp_zero_p,
+    dup_strip,
+    dmp_raise,
+    dmp_zero,
+    dmp_one,
+    dmp_ground,
+    dmp_one_p,
+    dmp_zero_p,
     dmp_zeros,
-    dup_degree, dmp_degree, dmp_degree_in,
-    dup_LC, dmp_LC, dmp_ground_LC,
-    dmp_multi_deflate, dmp_inflate,
-    dup_convert, dmp_convert,
-    dmp_apply_pairs)
+    dup_degree,
+    dmp_degree,
+    dmp_degree_in,
+    dup_LC,
+    dmp_LC,
+    dmp_ground_LC,
+    dmp_multi_deflate,
+    dmp_inflate,
+    dup_convert,
+    dmp_convert,
+    dmp_apply_pairs,
+)
 from sympy.polys.densetools import (
-    dup_clear_denoms, dmp_clear_denoms,
-    dup_diff, dmp_diff,
-    dup_eval, dmp_eval, dmp_eval_in,
-    dup_trunc, dmp_ground_trunc,
-    dup_monic, dmp_ground_monic,
-    dup_primitive, dmp_ground_primitive,
-    dup_extract, dmp_ground_extract)
-from sympy.polys.galoistools import (
-    gf_int, gf_crt)
+    dup_clear_denoms,
+    dmp_clear_denoms,
+    dup_diff,
+    dmp_diff,
+    dup_eval,
+    dmp_eval,
+    dmp_eval_in,
+    dup_trunc,
+    dmp_ground_trunc,
+    dup_monic,
+    dmp_ground_monic,
+    dup_primitive,
+    dmp_ground_primitive,
+    dup_extract,
+    dmp_ground_extract,
+)
+from sympy.polys.galoistools import gf_int, gf_crt
 from sympy.polys.polyconfig import query
 from sympy.polys.polyerrors import (
     MultivariatePolynomialError,
     HeuristicGCDFailed,
     HomomorphismFailed,
     NotInvertible,
-    DomainError)
-
-
+    DomainError,
+)
 
 
 def dup_half_gcdex(f, g, K):
@@ -351,13 +378,13 @@ def dup_inner_subresultants(f, g, K):
     R = [f, g]
     d = n - m
 
-    b = (-K.one)**(d + 1)
+    b = (-K.one) ** (d + 1)
 
     h = dup_prem(f, g, K)
     h = dup_mul_ground(h, b, K)
 
     lc = dup_LC(g, K)
-    c = lc**d
+    c = lc ** d
 
     # Conventional first scalar subdeterminant is 1
     S = [K.one, c]
@@ -369,16 +396,16 @@ def dup_inner_subresultants(f, g, K):
 
         f, g, m, d = g, h, k, m - k
 
-        b = -lc * c**d
+        b = -lc * c ** d
 
         h = dup_prem(f, g, K)
         h = dup_quo_ground(h, b, K)
 
         lc = dup_LC(g, K)
 
-        if d > 1:        # abnormal case
-            q = c**(d - 1)
-            c = K.quo((-lc)**d, q)
+        if d > 1:  # abnormal case
+            q = c ** (d - 1)
+            c = K.quo((-lc) ** d, q)
         else:
             c = -lc
 
@@ -508,11 +535,10 @@ def dmp_inner_subresultants(f, g, u, K):
 
         f, g, m, d = g, h, k, m - k
 
-        b = dmp_mul(dmp_neg(lc, v, K),
-                    dmp_pow(c, d, v, K), v, K)
+        b = dmp_mul(dmp_neg(lc, v, K), dmp_pow(c, d, v, K), v, K)
 
         h = dmp_prem(f, g, u, K)
-        h = [ dmp_quo(ch, b, v, K) for ch in h ]
+        h = [dmp_quo(ch, b, v, K) for ch in h]
 
         lc = dmp_LC(g, K)
 
@@ -619,7 +645,7 @@ def dmp_zz_modular_resultant(f, g, p, u, K):
     N = dmp_degree_in(f, 1, u)
     M = dmp_degree_in(g, 1, u)
 
-    B = n*M + m*N
+    B = n * M + m * N
 
     D, a = [K.one], -K.one
     r = dmp_zero(v)
@@ -629,7 +655,7 @@ def dmp_zz_modular_resultant(f, g, p, u, K):
             a += K.one
 
             if a == p:
-                raise HomomorphismFailed('no luck')
+                raise HomomorphismFailed("no luck")
 
             F = dmp_eval_in(f, gf_int(a, p), 1, u, K)
 
@@ -666,7 +692,7 @@ def dmp_zz_modular_resultant(f, g, p, u, K):
 
 def _collins_crt(r, R, P, p, K):
     """Wrapper of CRT for Collins's resultant algorithm. """
-    return gf_int(gf_crt([r, R], [P, p], K), P*p)
+    return gf_int(gf_crt([r, R], [P, p], K), P * p)
 
 
 def dmp_zz_collins_resultant(f, g, u, K):
@@ -701,7 +727,7 @@ def dmp_zz_collins_resultant(f, g, u, K):
 
     v = u - 1
 
-    B = K(2)*K.factorial(K(n + m))*A**m*B**n
+    B = K(2) * K.factorial(K(n + m)) * A ** m * B ** n
     r, p, P = dmp_zero(v), K.one, K.one
 
     while P <= B:
@@ -762,7 +788,7 @@ def dmp_qq_collins_resultant(f, g, u, K0):
     r = dmp_zz_collins_resultant(f, g, u, K1)
     r = dmp_convert(r, u - 1, K1, K0)
 
-    c = K0.convert(cf**m * cg**n, K1)
+    c = K0.convert(cf ** m * cg ** n, K1)
 
     return dmp_quo_ground(r, c, u - 1, K0)
 
@@ -791,10 +817,10 @@ def dmp_resultant(f, g, u, K, includePRS=False):
         return dmp_prs_resultant(f, g, u, K)
 
     if K.is_Field:
-        if K.is_QQ and query('USE_COLLINS_RESULTANT'):
+        if K.is_QQ and query("USE_COLLINS_RESULTANT"):
             return dmp_qq_collins_resultant(f, g, u, K)
     else:
-        if K.is_ZZ and query('USE_COLLINS_RESULTANT'):
+        if K.is_ZZ and query("USE_COLLINS_RESULTANT"):
             return dmp_zz_collins_resultant(f, g, u, K)
 
     return dmp_prs_resultant(f, g, u, K)[0]
@@ -819,12 +845,12 @@ def dup_discriminant(f, K):
     if d <= 0:
         return K.zero
     else:
-        s = (-1)**((d*(d - 1)) // 2)
+        s = (-1) ** ((d * (d - 1)) // 2)
         c = dup_LC(f, K)
 
         r = dup_resultant(f, dup_diff(f, 1, K), K)
 
-        return K.quo(r, c*K(s))
+        return K.quo(r, c * K(s))
 
 
 def dmp_discriminant(f, u, K):
@@ -849,7 +875,7 @@ def dmp_discriminant(f, u, K):
     if d <= 0:
         return dmp_zero(v)
     else:
-        s = (-1)**((d*(d - 1)) // 2)
+        s = (-1) ** ((d * (d - 1)) // 2)
         c = dmp_LC(f, K)
 
         r = dmp_resultant(f, dmp_diff(f, 1, u, K), u, K)
@@ -908,7 +934,7 @@ def _dmp_rr_trivial_gcd(f, g, u, K):
             return dmp_neg(f, u, K), dmp_ground(-K.one, u), dmp_zero(u)
     elif if_contain_one:
         return dmp_one(u, K), f, g
-    elif query('USE_SIMPLIFY_GCD'):
+    elif query("USE_SIMPLIFY_GCD"):
         return _dmp_simplify_gcd(f, g, u, K)
     else:
         return None
@@ -922,14 +948,18 @@ def _dmp_ff_trivial_gcd(f, g, u, K):
     if zero_f and zero_g:
         return tuple(dmp_zeros(3, u, K))
     elif zero_f:
-        return (dmp_ground_monic(g, u, K),
-                dmp_zero(u),
-                dmp_ground(dmp_ground_LC(g, u, K), u))
+        return (
+            dmp_ground_monic(g, u, K),
+            dmp_zero(u),
+            dmp_ground(dmp_ground_LC(g, u, K), u),
+        )
     elif zero_g:
-        return (dmp_ground_monic(f, u, K),
-                dmp_ground(dmp_ground_LC(f, u, K), u),
-                dmp_zero(u))
-    elif query('USE_SIMPLIFY_GCD'):
+        return (
+            dmp_ground_monic(f, u, K),
+            dmp_ground(dmp_ground_LC(f, u, K), u),
+            dmp_zero(u),
+        )
+    elif query("USE_SIMPLIFY_GCD"):
         return _dmp_simplify_gcd(f, g, u, K)
     else:
         return None
@@ -957,8 +987,8 @@ def _dmp_simplify_gcd(f, g, u, K):
     v = u - 1
     h = dmp_gcd(F, G, v, K)
 
-    cff = [ dmp_quo(cf, h, v, K) for cf in f ]
-    cfg = [ dmp_quo(cg, h, v, K) for cg in g ]
+    cff = [dmp_quo(cf, h, v, K) for cf in f]
+    cfg = [dmp_quo(cg, h, v, K) for cg in g]
 
     return [h], cff, cfg
 
@@ -1124,6 +1154,7 @@ def dmp_ff_prs_gcd(f, g, u, K):
 
     return h, cff, cfg
 
+
 HEU_GCD_MAX = 6
 
 
@@ -1194,11 +1225,12 @@ def dup_zz_heu_gcd(f, g, K):
     f_norm = dup_max_norm(f, K)
     g_norm = dup_max_norm(g, K)
 
-    B = K(2*min(f_norm, g_norm) + 29)
+    B = K(2 * min(f_norm, g_norm) + 29)
 
-    x = max(min(B, 99*K.sqrt(B)),
-            2*min(f_norm // abs(dup_LC(f, K)),
-                  g_norm // abs(dup_LC(g, K))) + 2)
+    x = max(
+        min(B, 99 * K.sqrt(B)),
+        2 * min(f_norm // abs(dup_LC(f, K)), g_norm // abs(dup_LC(g, K))) + 2,
+    )
 
     for i in range(0, HEU_GCD_MAX):
         ff = dup_eval(f, x, K)
@@ -1244,9 +1276,9 @@ def dup_zz_heu_gcd(f, g, K):
                     h = dup_mul_ground(h, gcd, K)
                     return h, cff_, cfg
 
-        x = 73794*x * K.sqrt(K.sqrt(x)) // 27011
+        x = 73794 * x * K.sqrt(K.sqrt(x)) // 27011
 
-    raise HeuristicGCDFailed('no luck')
+    raise HeuristicGCDFailed("no luck")
 
 
 def _dmp_zz_gcd_interpolate(h, x, v, K):
@@ -1319,11 +1351,16 @@ def dmp_zz_heu_gcd(f, g, u, K):
     f_norm = dmp_max_norm(f, u, K)
     g_norm = dmp_max_norm(g, u, K)
 
-    B = K(2*min(f_norm, g_norm) + 29)
+    B = K(2 * min(f_norm, g_norm) + 29)
 
-    x = max(min(B, 99*K.sqrt(B)),
-            2*min(f_norm // abs(dmp_ground_LC(f, u, K)),
-                  g_norm // abs(dmp_ground_LC(g, u, K))) + 2)
+    x = max(
+        min(B, 99 * K.sqrt(B)),
+        2
+        * min(
+            f_norm // abs(dmp_ground_LC(f, u, K)), g_norm // abs(dmp_ground_LC(g, u, K))
+        )
+        + 2,
+    )
 
     for i in range(0, HEU_GCD_MAX):
         ff = dmp_eval(f, x, u, K)
@@ -1368,9 +1405,9 @@ def dmp_zz_heu_gcd(f, g, u, K):
                     h = dmp_mul_ground(h, gcd, u, K)
                     return h, cff_, cfg
 
-        x = 73794*x * K.sqrt(K.sqrt(x)) // 27011
+        x = 73794 * x * K.sqrt(K.sqrt(x)) // 27011
 
-    raise HeuristicGCDFailed('no luck')
+    raise HeuristicGCDFailed("no luck")
 
 
 def dup_qq_heu_gcd(f, g, K0):
@@ -1505,7 +1542,7 @@ def dup_inner_gcd(f, g, K):
 
         return h, cff, cfg
     elif K.is_Field:
-        if K.is_QQ and query('USE_HEU_GCD'):
+        if K.is_QQ and query("USE_HEU_GCD"):
             try:
                 return dup_qq_heu_gcd(f, g, K)
             except HeuristicGCDFailed:
@@ -1513,7 +1550,7 @@ def dup_inner_gcd(f, g, K):
 
         return dup_ff_prs_gcd(f, g, K)
     else:
-        if K.is_ZZ and query('USE_HEU_GCD'):
+        if K.is_ZZ and query("USE_HEU_GCD"):
             try:
                 return dup_zz_heu_gcd(f, g, K)
             except HeuristicGCDFailed:
@@ -1541,7 +1578,7 @@ def _dmp_inner_gcd(f, g, u, K):
 
         return h, cff, cfg
     elif K.is_Field:
-        if K.is_QQ and query('USE_HEU_GCD'):
+        if K.is_QQ and query("USE_HEU_GCD"):
             try:
                 return dmp_qq_heu_gcd(f, g, u, K)
             except HeuristicGCDFailed:
@@ -1549,7 +1586,7 @@ def _dmp_inner_gcd(f, g, u, K):
 
         return dmp_ff_prs_gcd(f, g, u, K)
     else:
-        if K.is_ZZ and query('USE_HEU_GCD'):
+        if K.is_ZZ and query("USE_HEU_GCD"):
             try:
                 return dmp_zz_heu_gcd(f, g, u, K)
             except HeuristicGCDFailed:
@@ -1584,9 +1621,11 @@ def dmp_inner_gcd(f, g, u, K):
     J, (f, g) = dmp_multi_deflate((f, g), u, K)
     h, cff, cfg = _dmp_inner_gcd(f, g, u, K)
 
-    return (dmp_inflate(h, J, u, K),
-            dmp_inflate(cff, J, u, K),
-            dmp_inflate(cfg, J, u, K))
+    return (
+        dmp_inflate(h, J, u, K),
+        dmp_inflate(cff, J, u, K),
+        dmp_inflate(cfg, J, u, K),
+    )
 
 
 def dup_gcd(f, g, K):
@@ -1645,8 +1684,7 @@ def dup_rr_lcm(f, g, K):
 
     c = K.lcm(fc, gc)
 
-    h = dup_quo(dup_mul(f, g, K),
-                dup_gcd(f, g, K), K)
+    h = dup_quo(dup_mul(f, g, K), dup_gcd(f, g, K), K)
 
     return dup_mul_ground(h, c, K)
 
@@ -1668,8 +1706,7 @@ def dup_ff_lcm(f, g, K):
     x**3 + 7/2*x**2 + 3*x
 
     """
-    h = dup_quo(dup_mul(f, g, K),
-                dup_gcd(f, g, K), K)
+    h = dup_quo(dup_mul(f, g, K), dup_gcd(f, g, K), K)
 
     return dup_monic(h, K)
 
@@ -1716,8 +1753,7 @@ def dmp_rr_lcm(f, g, u, K):
 
     c = K.lcm(fc, gc)
 
-    h = dmp_quo(dmp_mul(f, g, u, K),
-                dmp_gcd(f, g, u, K), u, K)
+    h = dmp_quo(dmp_mul(f, g, u, K), dmp_gcd(f, g, u, K), u, K)
 
     return dmp_mul_ground(h, c, u, K)
 
@@ -1739,8 +1775,7 @@ def dmp_ff_lcm(f, g, u, K):
     x**3 + 4*x**2*y + 4*x*y**2
 
     """
-    h = dmp_quo(dmp_mul(f, g, u, K),
-                dmp_gcd(f, g, u, K), u, K)
+    h = dmp_quo(dmp_mul(f, g, u, K), dmp_gcd(f, g, u, K), u, K)
 
     return dmp_ground_monic(h, u, K)
 
@@ -1821,7 +1856,7 @@ def dmp_primitive(f, u, K):
     if dmp_zero_p(f, u) or dmp_one_p(cont, v, K):
         return cont, f
     else:
-        return cont, [ dmp_quo(c, cont, v, K) for c in f ]
+        return cont, [dmp_quo(c, cont, v, K) for c in f]
 
 
 def dup_cancel(f, g, K, include=True):

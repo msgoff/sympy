@@ -128,8 +128,7 @@ class AskFiniteHandler(CommonHandler):
             # if there has been more than one sign or if the sign of this arg
             # is None and Bounded is None or there was already
             # an unknown sign, return None
-            if sign != -1 and s != sign or \
-                    s is None and (s == _bounded or s == sign):
+            if sign != -1 and s != sign or s is None and (s == _bounded or s == sign):
                 return None
             else:
                 sign = s
@@ -225,7 +224,8 @@ class AskFiniteHandler(CommonHandler):
 
     exp = log
 
-    cos, sin, Number, Pi, Exp1, GoldenRatio, TribonacciConstant, ImaginaryUnit, sign = \
-        [staticmethod(CommonHandler.AlwaysTrue)]*9
+    cos, sin, Number, Pi, Exp1, GoldenRatio, TribonacciConstant, ImaginaryUnit, sign = [
+        staticmethod(CommonHandler.AlwaysTrue)
+    ] * 9
 
-    Infinity, NegativeInfinity = [staticmethod(CommonHandler.AlwaysFalse)]*2
+    Infinity, NegativeInfinity = [staticmethod(CommonHandler.AlwaysFalse)] * 2

@@ -14,18 +14,15 @@ from sympy.physics.quantum.state import Ket, Bra
 from sympy.physics.quantum.matrixutils import (
     numpy_ndarray,
     scipy_sparse_matrix,
-    matrix_tensor_product
+    matrix_tensor_product,
 )
 
 
-__all__ = [
-    'TensorProduct',
-    'tensor_product_simp'
-]
+__all__ = ["TensorProduct", "tensor_product_simp"]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tensor product
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 _combined_printing = False
 
@@ -114,6 +111,7 @@ class TensorProduct(Expr):
         >>> tp.expand(tensorproduct=True)
         AxC + BxC
     """
+
     is_commutative = False
 
     def __new__(cls, *args):
@@ -150,89 +148,98 @@ class TensorProduct(Expr):
 
     def _sympystr(self, printer, *args):
         from sympy.printing.str import sstr
+
         length = len(self.args)
-        s = ''
+        s = ""
         for i in range(length):
             if isinstance(self.args[i], (Add, Pow, Mul)):
-                s = s + '('
+                s = s + "("
             s = s + sstr(self.args[i])
             if isinstance(self.args[i], (Add, Pow, Mul)):
-                s = s + ')'
+                s = s + ")"
             if i != length - 1:
-                s = s + 'x'
+                s = s + "x"
         return s
 
     def _pretty(self, printer, *args):
 
-        if (_combined_printing and
-                (all([isinstance(arg, Ket) for arg in self.args]) or
-                 all([isinstance(arg, Bra) for arg in self.args]))):
+        if _combined_printing and (
+            all([isinstance(arg, Ket) for arg in self.args])
+            or all([isinstance(arg, Bra) for arg in self.args])
+        ):
 
             length = len(self.args)
-            pform = printer._print('', *args)
+            pform = printer._print("", *args)
             for i in range(length):
-                next_pform = printer._print('', *args)
+                next_pform = printer._print("", *args)
                 length_i = len(self.args[i].args)
                 for j in range(length_i):
                     part_pform = printer._print(self.args[i].args[j], *args)
                     next_pform = prettyForm(*next_pform.right(part_pform))
                     if j != length_i - 1:
-                        next_pform = prettyForm(*next_pform.right(', '))
+                        next_pform = prettyForm(*next_pform.right(", "))
 
                 if len(self.args[i].args) > 1:
-                    next_pform = prettyForm(
-                        *next_pform.parens(left='{', right='}'))
+                    next_pform = prettyForm(*next_pform.parens(left="{", right="}"))
                 pform = prettyForm(*pform.right(next_pform))
                 if i != length - 1:
-                    pform = prettyForm(*pform.right(',' + ' '))
+                    pform = prettyForm(*pform.right("," + " "))
 
             pform = prettyForm(*pform.left(self.args[0].lbracket))
             pform = prettyForm(*pform.right(self.args[0].rbracket))
             return pform
 
         length = len(self.args)
-        pform = printer._print('', *args)
+        pform = printer._print("", *args)
         for i in range(length):
             next_pform = printer._print(self.args[i], *args)
             if isinstance(self.args[i], (Add, Mul)):
-                next_pform = prettyForm(
-                    *next_pform.parens(left='(', right=')')
-                )
+                next_pform = prettyForm(*next_pform.parens(left="(", right=")"))
             pform = prettyForm(*pform.right(next_pform))
             if i != length - 1:
                 if printer._use_unicode:
-                    pform = prettyForm(*pform.right(u'\N{N-ARY CIRCLED TIMES OPERATOR}' + u' '))
+                    pform = prettyForm(
+                        *pform.right(u"\N{N-ARY CIRCLED TIMES OPERATOR}" + u" ")
+                    )
                 else:
-                    pform = prettyForm(*pform.right('x' + ' '))
+                    pform = prettyForm(*pform.right("x" + " "))
         return pform
 
     def _latex(self, printer, *args):
 
-        if (_combined_printing and
-                (all([isinstance(arg, Ket) for arg in self.args]) or
-                 all([isinstance(arg, Bra) for arg in self.args]))):
+        if _combined_printing and (
+            all([isinstance(arg, Ket) for arg in self.args])
+            or all([isinstance(arg, Bra) for arg in self.args])
+        ):
 
             def _label_wrap(label, nlabels):
                 return label if nlabels == 1 else r"\left\{%s\right\}" % label
 
-            s = r", ".join([_label_wrap(arg._print_label_latex(printer, *args),
-                                        len(arg.args)) for arg in self.args])
+            s = r", ".join(
+                [
+                    _label_wrap(arg._print_label_latex(printer, *args), len(arg.args))
+                    for arg in self.args
+                ]
+            )
 
-            return r"{%s%s%s}" % (self.args[0].lbracket_latex, s,
-                                  self.args[0].rbracket_latex)
+            return r"{%s%s%s}" % (
+                self.args[0].lbracket_latex,
+                s,
+                self.args[0].rbracket_latex,
+            )
 
         length = len(self.args)
-        s = ''
+        s = ""
         for i in range(length):
             if isinstance(self.args[i], (Add, Mul)):
-                s = s + '\\left('
+                s = s + "\\left("
             # The extra {} brackets are needed to get matplotlib's latex
             # rendered to render this properly.
-            s = s + '{' + printer._print(self.args[i], *args) + '}'
+            s = s + "{" + printer._print(self.args[i], *args) + "}"
             if isinstance(self.args[i], (Add, Mul)):
-                s = s + '\\right)'
+                s = s + "\\right)"
             if i != length - 1:
-                s = s + '\\otimes '
+                s = s + "\\otimes "
         return s
 
     def doit(self, **hints):
@@ -245,7 +252,7 @@ class TensorProduct(Expr):
         for i in range(len(args)):
             if isinstance(args[i], Add):
                 for aa in args[i].args:
-                    tp = TensorProduct(*args[:i] + (aa,) + args[i + 1:])
+                    tp = TensorProduct(*args[:i] + (aa,) + args[i + 1 :])
                     if isinstance(tp, TensorProduct):
                         tp = tp._eval_expand_tensorproduct()
                     add_args.append(tp)
@@ -257,14 +264,18 @@ class TensorProduct(Expr):
             return self
 
     def _eval_trace(self, **kwargs):
-        indices = kwargs.get('indices', None)
+        indices = kwargs.get("indices", None)
         exp = tensor_product_simp(self)
 
         if indices is None or len(indices) == 0:
             return Mul(*[Tr(arg).doit() for arg in exp.args])
         else:
-            return Mul(*[Tr(value).doit() if idx in indices else value
-                         for idx, value in enumerate(exp.args)])
+            return Mul(
+                *[
+                    Tr(value).doit() if idx in indices else value
+                    for idx, value in enumerate(exp.args)
+                ]
+            )
 
 
 def tensor_product_simp_Mul(e):
@@ -319,7 +330,7 @@ def tensor_product_simp_Mul(e):
         return e
     elif n_nc == 1:
         if isinstance(nc_part[0], Pow):
-            return  Mul(*c_part) * tensor_product_simp_Pow(nc_part[0])
+            return Mul(*c_part) * tensor_product_simp_Pow(nc_part[0])
         return e
     elif e.has(TensorProduct):
         current = nc_part[0]
@@ -328,7 +339,7 @@ def tensor_product_simp_Mul(e):
                 if isinstance(current.base, TensorProduct):
                     current = tensor_product_simp_Pow(current)
             else:
-                raise TypeError('TensorProduct expected, got: %r' % current)
+                raise TypeError("TensorProduct expected, got: %r" % current)
         n_terms = len(current.args)
         new_args = list(current.args)
         for next in nc_part[1:]:
@@ -336,8 +347,8 @@ def tensor_product_simp_Mul(e):
             if isinstance(next, TensorProduct):
                 if n_terms != len(next.args):
                     raise QuantumError(
-                        'TensorProducts of different lengths: %r and %r' %
-                        (current, next)
+                        "TensorProducts of different lengths: %r and %r"
+                        % (current, next)
                     )
                 for i in range(len(new_args)):
                     new_args[i] = new_args[i] * next.args[i]
@@ -348,16 +359,17 @@ def tensor_product_simp_Mul(e):
                         for i in range(len(new_args)):
                             new_args[i] = new_args[i] * new_tp.args[i]
                     else:
-                        raise TypeError('TensorProduct expected, got: %r' % next)
+                        raise TypeError("TensorProduct expected, got: %r" % next)
                 else:
-                    raise TypeError('TensorProduct expected, got: %r' % next)
+                    raise TypeError("TensorProduct expected, got: %r" % next)
             current = next
         return Mul(*c_part) * TensorProduct(*new_args)
     elif e.has(Pow):
-        new_args = [ tensor_product_simp_Pow(nc) for nc in nc_part ]
+        new_args = [tensor_product_simp_Pow(nc) for nc in nc_part]
         return tensor_product_simp_Mul(Mul(*c_part) * TensorProduct(*new_args))
     else:
         return e
+
 
 def tensor_product_simp_Pow(e):
     """Evaluates ``Pow`` expressions whose base is ``TensorProduct``"""
@@ -365,9 +377,10 @@ def tensor_product_simp_Pow(e):
         return e
 
     if isinstance(e.base, TensorProduct):
-        return TensorProduct(*[ b**e.exp for b in e.base.args])
+        return TensorProduct(*[b ** e.exp for b in e.base.args])
     else:
         return e
+
 
 def tensor_product_simp(e, **hints):
     """Try to simplify and combine TensorProducts.

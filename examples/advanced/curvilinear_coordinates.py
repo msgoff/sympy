@@ -9,8 +9,22 @@ and calculates all kinds of interesting properties, like Jacobian, metric
 tensor, Laplace operator, ...
 """
 
-from sympy import var, sin, cos, pprint, Matrix, eye, trigsimp, Eq, \
-    Function, simplify, sinh, cosh, expand, symbols
+from sympy import (
+    var,
+    sin,
+    cos,
+    pprint,
+    Matrix,
+    eye,
+    trigsimp,
+    Eq,
+    Function,
+    simplify,
+    sinh,
+    cosh,
+    expand,
+    symbols,
+)
 
 
 def laplace(f, g_inv, g_det, X):
@@ -21,11 +35,15 @@ def laplace(f, g_inv, g_det, X):
     r = 0
     for i in range(len(X)):
         for j in range(len(X)):
-            r += g_inv[i, j]*f.diff(X[i]).diff(X[j])
+            r += g_inv[i, j] * f.diff(X[i]).diff(X[j])
     for sigma in range(len(X)):
         for alpha in range(len(X)):
-            r += g_det.diff(X[sigma]) * g_inv[sigma, alpha] * \
-                f.diff(X[alpha]) / (2*g_det)
+            r += (
+                g_det.diff(X[sigma])
+                * g_inv[sigma, alpha]
+                * f.diff(X[alpha])
+                / (2 * g_det)
+            )
     return r
 
 
@@ -46,14 +64,14 @@ def transform(name, X, Y, g_correct=None, recursive=False):
     recursive ... apply recursive trigonometric simplification (use only when
                   needed, as it is an expensive operation)
     """
-    print("_"*80)
+    print("_" * 80)
     print("Transformation:", name)
     for x, y in zip(X, Y):
         pprint(Eq(y, x))
     J = X.jacobian(Y)
     print("Jacobian:")
     pprint(J)
-    g = J.T*eye(J.shape[0])*J
+    g = J.T * eye(J.shape[0]) * J
 
     g = g.applyfunc(expand)
     print("metric tensor g_{ij}:")
@@ -76,41 +94,49 @@ def transform(name, X, Y, g_correct=None, recursive=False):
 
 def main():
     mu, nu, rho, theta, phi, sigma, tau, a, t, x, y, z, w = symbols(
-        "mu, nu, rho, theta, phi, sigma, tau, a, t, x, y, z, w")
+        "mu, nu, rho, theta, phi, sigma, tau, a, t, x, y, z, w"
+    )
 
-    transform("polar", Matrix([rho*cos(phi), rho*sin(phi)]), [rho, phi])
+    transform("polar", Matrix([rho * cos(phi), rho * sin(phi)]), [rho, phi])
 
-    transform("cylindrical", Matrix([rho*cos(phi), rho*sin(phi), z]),
-              [rho, phi, z])
+    transform("cylindrical", Matrix([rho * cos(phi), rho * sin(phi), z]), [rho, phi, z])
 
-    transform("spherical",
-              Matrix([rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi),
-                      rho*cos(theta)]),
-              [rho, theta, phi],
-              recursive=True
-              )
+    transform(
+        "spherical",
+        Matrix(
+            [rho * sin(theta) * cos(phi), rho * sin(theta) * sin(phi), rho * cos(theta)]
+        ),
+        [rho, theta, phi],
+        recursive=True,
+    )
 
-    transform("rotating disk",
-              Matrix([t,
-                      x*cos(w*t) - y*sin(w*t),
-                      x*sin(w*t) + y*cos(w*t),
-                      z]),
-              [t, x, y, z])
+    transform(
+        "rotating disk",
+        Matrix(
+            [t, x * cos(w * t) - y * sin(w * t), x * sin(w * t) + y * cos(w * t), z]
+        ),
+        [t, x, y, z],
+    )
 
-    transform("parabolic",
-              Matrix([sigma*tau, (tau**2 - sigma**2) / 2]),
-              [sigma, tau])
+    transform(
+        "parabolic", Matrix([sigma * tau, (tau ** 2 - sigma ** 2) / 2]), [sigma, tau]
+    )
 
-    transform("bipolar",
-            Matrix([a*sinh(tau)/(cosh(tau)-cos(sigma)),
-                a*sin(sigma)/(cosh(tau)-cos(sigma))]),
-            [sigma, tau]
-            )
+    transform(
+        "bipolar",
+        Matrix(
+            [
+                a * sinh(tau) / (cosh(tau) - cos(sigma)),
+                a * sin(sigma) / (cosh(tau) - cos(sigma)),
+            ]
+        ),
+        [sigma, tau],
+    )
 
-    transform("elliptic",
-              Matrix([a*cosh(mu)*cos(nu), a*sinh(mu)*sin(nu)]),
-              [mu, nu]
-              )
+    transform(
+        "elliptic", Matrix([a * cosh(mu) * cos(nu), a * sinh(mu) * sin(nu)]), [mu, nu]
+    )
+
 
 if __name__ == "__main__":
     main()

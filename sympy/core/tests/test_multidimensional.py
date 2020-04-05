@@ -1,7 +1,8 @@
 from sympy import diff, sin, symbols, Function, Derivative
 from sympy.core.multidimensional import vectorize
-x, y, z = symbols('x y z')
-f, g, h = list(map(Function, 'fgh'))
+
+x, y, z = symbols("x y z")
+f, g, h = list(map(Function, "fgh"))
 
 
 def test_vectorize():
@@ -15,8 +16,20 @@ def test_vectorize():
     def vdiff(f, y):
         return diff(f, y)
 
-    assert vdiff([f(x, y, z), g(x, y, z), h(x, y, z)], [x, y, z]) == \
-         [[Derivative(f(x, y, z), x), Derivative(f(x, y, z), y),
-           Derivative(f(x, y, z), z)], [Derivative(g(x, y, z), x),
-                     Derivative(g(x, y, z), y), Derivative(g(x, y, z), z)],
-         [Derivative(h(x, y, z), x), Derivative(h(x, y, z), y), Derivative(h(x, y, z), z)]]
+    assert vdiff([f(x, y, z), g(x, y, z), h(x, y, z)], [x, y, z]) == [
+        [
+            Derivative(f(x, y, z), x),
+            Derivative(f(x, y, z), y),
+            Derivative(f(x, y, z), z),
+        ],
+        [
+            Derivative(g(x, y, z), x),
+            Derivative(g(x, y, z), y),
+            Derivative(g(x, y, z), z),
+        ],
+        [
+            Derivative(h(x, y, z), x),
+            Derivative(h(x, y, z), y),
+            Derivative(h(x, y, z), z),
+        ],
+    ]

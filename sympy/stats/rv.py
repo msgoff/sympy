@@ -17,16 +17,36 @@ from __future__ import print_function, division
 
 from typing import Tuple as tTuple
 
-from sympy import (Basic, S, Expr, Symbol, Tuple, And, Add, Eq, lambdify,
-                   Equality, Lambda, sympify, Dummy, Ne, KroneckerDelta,
-                   DiracDelta, Mul, Indexed, MatrixSymbol, Function)
+from sympy import (
+    Basic,
+    S,
+    Expr,
+    Symbol,
+    Tuple,
+    And,
+    Add,
+    Eq,
+    lambdify,
+    Equality,
+    Lambda,
+    sympify,
+    Dummy,
+    Ne,
+    KroneckerDelta,
+    DiracDelta,
+    Mul,
+    Indexed,
+    MatrixSymbol,
+    Function,
+)
 from sympy.core.relational import Relational
 from sympy.core.sympify import _sympify
 from sympy.logic.boolalg import Boolean
 from sympy.sets.sets import FiniteSet, ProductSet, Intersection
 from sympy.solvers.solveset import solveset
 
-x = Symbol('x')
+x = Symbol("x")
+
 
 class RandomDomain(Basic):
     """
@@ -73,6 +93,7 @@ class SingleDomain(RandomDomain):
     sympy.stats.crv.SingleContinuousDomain
     sympy.stats.frv.SingleFiniteDomain
     """
+
     def __new__(cls, symbol, set):
         assert symbol.is_Symbol
         return Basic.__new__(cls, symbol, set)
@@ -102,9 +123,11 @@ class ConditionalDomain(RandomDomain):
     sympy.stats.crv.ConditionalContinuousDomain
     sympy.stats.frv.ConditionalFiniteDomain
     """
+
     def __new__(cls, fulldomain, condition):
-        condition = condition.xreplace(dict((rs, rs.symbol)
-            for rs in random_symbols(condition)))
+        condition = condition.xreplace(
+            dict((rs, rs.symbol) for rs in random_symbols(condition))
+        )
         return Basic.__new__(cls, fulldomain, condition)
 
     @property
@@ -184,6 +207,7 @@ class SinglePSpace(PSpace):
     Represents the probabilities of a set of random events that can be
     attributed to a single variable/symbol.
     """
+
     def __new__(cls, s, distribution):
         if isinstance(s, str):
             s = Symbol(s)
@@ -236,6 +260,7 @@ class RandomSymbol(Expr):
 
     def __new__(cls, symbol, pspace=None):
         from sympy.stats.joint_rv import JointRandomSymbol
+
         if pspace is None:
             # Allow single arg, representing pspace == PSpace()
             pspace = PSpace()
@@ -255,7 +280,7 @@ class RandomSymbol(Expr):
 
     pspace = property(lambda self: self.args[1])
     symbol = property(lambda self: self.args[0])
-    name   = property(lambda self: self.symbol.name)
+    name = property(lambda self: self.symbol.name)
 
     def _eval_is_positive(self):
         return self.symbol.is_positive
@@ -274,11 +299,13 @@ class RandomSymbol(Expr):
     def free_symbols(self):
         return {self}
 
-class RandomIndexedSymbol(RandomSymbol):
 
+class RandomIndexedSymbol(RandomSymbol):
     def __new__(cls, idx_obj, pspace=None):
         if not isinstance(idx_obj, (Indexed, Function)):
-            raise TypeError("An Function or Indexed object is expected not %s"%(idx_obj))
+            raise TypeError(
+                "An Function or Indexed object is expected not %s" % (idx_obj)
+            )
         return Basic.__new__(cls, idx_obj, pspace)
 
     symbol = property(lambda self: self.args[0])
@@ -291,6 +318,7 @@ class RandomIndexedSymbol(RandomSymbol):
         elif isinstance(self.symbol, Function):
             return self.symbol.args[0]
 
+
 class RandomMatrixSymbol(MatrixSymbol):
     def __new__(cls, symbol, n, m, pspace=None):
         n, m = _sympify(n), _sympify(m)
@@ -299,6 +327,7 @@ class RandomMatrixSymbol(MatrixSymbol):
 
     symbol = property(lambda self: self.args[0])
     pspace = property(lambda self: self.args[3])
+
 
 class ProductPSpace(PSpace):
     """
@@ -311,7 +340,9 @@ class ProductPSpace(PSpace):
     sympy.stats.rv.IndependentProductPSpace
     sympy.stats.joint_rv.JointPSpace
     """
+
     pass
+
 
 class IndependentProductPSpace(ProductPSpace):
     """
@@ -331,13 +362,19 @@ class IndependentProductPSpace(ProductPSpace):
 
         # Overlapping symbols
         from sympy.stats.joint_rv import MarginalDistribution, CompoundDistribution
-        if len(symbols) < sum(len(space.symbols) for space in spaces if not
-         isinstance(space.distribution, (
-            CompoundDistribution, MarginalDistribution))):
+
+        if len(symbols) < sum(
+            len(space.symbols)
+            for space in spaces
+            if not isinstance(
+                space.distribution, (CompoundDistribution, MarginalDistribution)
+            )
+        ):
             raise ValueError("Overlapping Random Variables")
 
         if all(space.is_Finite for space in spaces):
             from sympy.stats.frv import ProductFinitePSpace
+
             cls = ProductFinitePSpace
 
         obj = Basic.__new__(cls, *FiniteSet(*spaces))
@@ -373,8 +410,10 @@ class IndependentProductPSpace(ProductPSpace):
         rvs = rvs or self.values
         rvs = frozenset(rvs)
         for space in self.spaces:
-            expr = space.compute_expectation(expr, rvs & space.values, evaluate=False, **kwargs)
-        if evaluate and hasattr(expr, 'doit'):
+            expr = space.compute_expectation(
+                expr, rvs & space.values, evaluate=False, **kwargs
+            )
+        if evaluate and hasattr(expr, "doit"):
             return expr.doit(**kwargs)
         return expr
 
@@ -387,8 +426,7 @@ class IndependentProductPSpace(ProductPSpace):
         raise NotImplementedError("Density not available for ProductSpaces")
 
     def sample(self):
-        return {k: v for space in self.spaces
-            for k, v in space.sample().items()}
+        return {k: v for space in self.spaces for k, v in space.sample().items()}
 
     def probability(self, condition, **kwargs):
         cond_inv = False
@@ -399,8 +437,11 @@ class IndependentProductPSpace(ProductPSpace):
         rvs = random_symbols(expr)
         dens = self.compute_density(expr)
         if any([pspace(rv).is_Continuous for rv in rvs]):
-            from sympy.stats.crv import (ContinuousDistributionHandmade,
-                SingleContinuousPSpace)
+            from sympy.stats.crv import (
+                ContinuousDistributionHandmade,
+                SingleContinuousPSpace,
+            )
+
             if expr in self.values:
                 # Marginalize all other random symbols out of the density
                 randomsymbols = tuple(set(self.values) - frozenset([expr]))
@@ -408,14 +449,17 @@ class IndependentProductPSpace(ProductPSpace):
                 pdf = self.domain.integrate(self.pdf, symbols, **kwargs)
                 return Lambda(expr.symbol, pdf)
             dens = ContinuousDistributionHandmade(dens)
-            z = Dummy('z', real=True)
+            z = Dummy("z", real=True)
             space = SingleContinuousPSpace(z, dens)
             result = space.probability(condition.__class__(space.value, 0))
         else:
-            from sympy.stats.drv import (DiscreteDistributionHandmade,
-                SingleDiscretePSpace)
+            from sympy.stats.drv import (
+                DiscreteDistributionHandmade,
+                SingleDiscretePSpace,
+            )
+
             dens = DiscreteDistributionHandmade(dens)
-            z = Dummy('z', integer=True)
+            z = Dummy("z", integer=True)
             space = SingleDiscretePSpace(z, dens)
             result = space.probability(condition.__class__(space.value, 0))
         return result if not cond_inv else S.One - result
@@ -423,13 +467,11 @@ class IndependentProductPSpace(ProductPSpace):
     def compute_density(self, expr, **kwargs):
         rvs = random_symbols(expr)
         if any(pspace(rv).is_Continuous for rv in rvs):
-            z = Dummy('z', real=True)
-            expr = self.compute_expectation(DiracDelta(expr - z),
-             **kwargs)
+            z = Dummy("z", real=True)
+            expr = self.compute_expectation(DiracDelta(expr - z), **kwargs)
         else:
-            z = Dummy('z', integer=True)
-            expr = self.compute_expectation(KroneckerDelta(expr, z),
-             **kwargs)
+            z = Dummy("z", integer=True)
+            expr = self.compute_expectation(KroneckerDelta(expr, z), **kwargs)
         return Lambda(z, expr)
 
     def compute_cdf(self, expr, **kwargs):
@@ -439,20 +481,21 @@ class IndependentProductPSpace(ProductPSpace):
         rvs = random_symbols(condition)
         condition = condition.xreplace(dict((rv, rv.symbol) for rv in self.values))
         if any([pspace(rv).is_Continuous for rv in rvs]):
-            from sympy.stats.crv import (ConditionalContinuousDomain,
-                ContinuousPSpace)
+            from sympy.stats.crv import ConditionalContinuousDomain, ContinuousPSpace
+
             space = ContinuousPSpace
             domain = ConditionalContinuousDomain(self.domain, condition)
         elif any([pspace(rv).is_Discrete for rv in rvs]):
-            from sympy.stats.drv import (ConditionalDiscreteDomain,
-                DiscretePSpace)
+            from sympy.stats.drv import ConditionalDiscreteDomain, DiscretePSpace
+
             space = DiscretePSpace
             domain = ConditionalDiscreteDomain(self.domain, condition)
         elif all([pspace(rv).is_Finite for rv in rvs]):
             from sympy.stats.frv import FinitePSpace
+
             return FinitePSpace.conditional_space(self, condition)
         if normalize:
-            replacement  = {rv: Dummy(str(rv)) for rv in self.symbols}
+            replacement = {rv: Dummy(str(rv)) for rv in self.symbols}
             norm = domain.compute_expectation(self.pdf, **kwargs)
             pdf = self.pdf / norm.xreplace(replacement)
             # XXX: Converting symbols from set to tuple. The order matters to
@@ -460,6 +503,7 @@ class IndependentProductPSpace(ProductPSpace):
             density = Lambda(tuple(domain.symbols), pdf)
 
         return space(domain, density)
+
 
 class ProductDomain(RandomDomain):
     """
@@ -470,6 +514,7 @@ class ProductDomain(RandomDomain):
     sympy.stats.crv.ProductContinuousDomain
     sympy.stats.frv.ProductFiniteDomain
     """
+
     is_ProductDomain = True
 
     def __new__(cls, *domains):
@@ -484,25 +529,28 @@ class ProductDomain(RandomDomain):
 
         if all(domain.is_Finite for domain in domains2):
             from sympy.stats.frv import ProductFiniteDomain
+
             cls = ProductFiniteDomain
         if all(domain.is_Continuous for domain in domains2):
             from sympy.stats.crv import ProductContinuousDomain
+
             cls = ProductContinuousDomain
         if all(domain.is_Discrete for domain in domains2):
             from sympy.stats.drv import ProductDiscreteDomain
+
             cls = ProductDiscreteDomain
 
         return Basic.__new__(cls, *domains2)
 
     @property
     def sym_domain_dict(self):
-        return dict((symbol, domain) for domain in self.domains
-                                     for symbol in domain.symbols)
+        return dict(
+            (symbol, domain) for domain in self.domains for symbol in domain.symbols
+        )
 
     @property
     def symbols(self):
-        return FiniteSet(*[sym for domain in self.domains
-                               for sym    in domain.symbols])
+        return FiniteSet(*[sym for domain in self.domains for sym in domain.symbols])
 
     @property
     def domains(self):
@@ -516,9 +564,13 @@ class ProductDomain(RandomDomain):
         # Split event into each subdomain
         for domain in self.domains:
             # Collect the parts of this event which associate to this domain
-            elem = frozenset([item for item in other
-                              if sympify(domain.symbols.contains(item[0]))
-                              is S.true])
+            elem = frozenset(
+                [
+                    item
+                    for item in other
+                    if sympify(domain.symbols.contains(item[0])) is S.true
+                ]
+            )
             # Test this sub-event
             if elem not in domain:
                 return False
@@ -533,7 +585,7 @@ def random_symbols(expr):
     """
     Returns all RandomSymbols within a SymPy Expression.
     """
-    atoms = getattr(expr, 'atoms', None)
+    atoms = getattr(expr, "atoms", None)
     if atoms is not None:
         comp = lambda rv: rv.symbol.name
         l = list(atoms(RandomSymbol))
@@ -566,7 +618,9 @@ def pspace(expr):
 
     rvs = random_symbols(expr)
     if not rvs:
-        raise ValueError("Expression containing Random Variable expected, not %s" % (expr))
+        raise ValueError(
+            "Expression containing Random Variable expected, not %s" % (expr)
+        )
     # If only one space present
     if all(rv.pspace == rvs[0].pspace for rv in rvs):
         return rvs[0].pspace
@@ -642,8 +696,11 @@ def given(expr, condition=None, **kwargs):
         condition = Eq(condition, condition.symbol)
 
     condsymbols = random_symbols(condition)
-    if (isinstance(condition, Equality) and len(condsymbols) == 1 and
-        not isinstance(pspace(expr).domain, ConditionalDomain)):
+    if (
+        isinstance(condition, Equality)
+        and len(condsymbols) == 1
+        and not isinstance(pspace(expr).domain, ConditionalDomain)
+    ):
         rv = tuple(condsymbols)[0]
 
         results = solveset(condition, rv)
@@ -728,19 +785,19 @@ def expectation(expr, condition=None, numsamples=None, evaluate=True, **kwargs):
     # A few known statements for efficiency
 
     if expr.is_Add:  # We know that E is Linear
-        return Add(*[expectation(arg, evaluate=evaluate)
-                     for arg in expr.args])
+        return Add(*[expectation(arg, evaluate=evaluate) for arg in expr.args])
 
     # Otherwise case is simple, pass work off to the ProbabilitySpace
     result = pspace(expr).compute_expectation(expr, evaluate=evaluate, **kwargs)
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit(**kwargs)
     else:
         return result
 
 
-def probability(condition, given_condition=None, numsamples=None,
-                evaluate=True, **kwargs):
+def probability(
+    condition, given_condition=None, numsamples=None, evaluate=True, **kwargs
+):
     """
     Probability that a condition is true, optionally given a second condition
 
@@ -775,43 +832,49 @@ def probability(condition, given_condition=None, numsamples=None,
     given_condition = sympify(given_condition)
 
     if condition.has(RandomIndexedSymbol):
-        return pspace(condition).probability(condition, given_condition, evaluate, **kwargs)
+        return pspace(condition).probability(
+            condition, given_condition, evaluate, **kwargs
+        )
 
     if isinstance(given_condition, RandomSymbol):
         condrv = random_symbols(condition)
         if len(condrv) == 1 and condrv[0] == given_condition:
             from sympy.stats.frv_types import BernoulliDistribution
+
             return BernoulliDistribution(probability(condition), 0, 1)
         if any([dependent(rv, given_condition) for rv in condrv]):
             from sympy.stats.symbolic_probability import Probability
+
             return Probability(condition, given_condition)
         else:
             return probability(condition)
 
-    if given_condition is not None and \
-            not isinstance(given_condition, (Relational, Boolean)):
-        raise ValueError("%s is not a relational or combination of relationals"
-                % (given_condition))
+    if given_condition is not None and not isinstance(
+        given_condition, (Relational, Boolean)
+    ):
+        raise ValueError(
+            "%s is not a relational or combination of relationals" % (given_condition)
+        )
     if given_condition == False:
         return S.Zero
     if not isinstance(condition, (Relational, Boolean)):
-        raise ValueError("%s is not a relational or combination of relationals"
-                % (condition))
+        raise ValueError(
+            "%s is not a relational or combination of relationals" % (condition)
+        )
     if condition is S.true:
         return S.One
     if condition is S.false:
         return S.Zero
 
     if numsamples:
-        return sampling_P(condition, given_condition, numsamples=numsamples,
-                **kwargs)
+        return sampling_P(condition, given_condition, numsamples=numsamples, **kwargs)
     if given_condition is not None:  # If there is a condition
         # Recompute on new conditional expr
         return probability(given(condition, given_condition, **kwargs), **kwargs)
 
     # Otherwise pass work off to the ProbabilitySpace
     result = pspace(condition).probability(condition, **kwargs)
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit()
     else:
         return result
@@ -830,6 +893,7 @@ class Density(Basic):
     def doit(self, evaluate=True, **kwargs):
         from sympy.stats.joint_rv import JointPSpace
         from sympy.stats.frv import SingleFiniteDistribution
+
         expr, condition = self.expr, self.condition
         if _sympify(expr).has(RandomMatrixSymbol):
             return pspace(expr).compute_density(expr)
@@ -838,18 +902,19 @@ class Density(Basic):
         if condition is not None:
             # Recompute on new conditional expr
             expr = given(expr, condition, **kwargs)
-        if isinstance(expr, RandomSymbol) and \
-            isinstance(expr.pspace, JointPSpace):
+        if isinstance(expr, RandomSymbol) and isinstance(expr.pspace, JointPSpace):
             return expr.pspace.distribution
         if not random_symbols(expr):
             return Lambda(x, DiracDelta(x - expr))
-        if (isinstance(expr, RandomSymbol) and
-            hasattr(expr.pspace, 'distribution') and
-            isinstance(pspace(expr), (SinglePSpace))):
+        if (
+            isinstance(expr, RandomSymbol)
+            and hasattr(expr.pspace, "distribution")
+            and isinstance(pspace(expr), (SinglePSpace))
+        ):
             return expr.pspace.distribution
         result = pspace(expr).compute_density(expr, **kwargs)
 
-        if evaluate and hasattr(result, 'doit'):
+        if evaluate and hasattr(result, "doit"):
             return result.doit()
         else:
             return result
@@ -894,8 +959,7 @@ def density(expr, condition=None, evaluate=True, numsamples=None, **kwargs):
     """
 
     if numsamples:
-        return sampling_density(expr, condition, numsamples=numsamples,
-                **kwargs)
+        return sampling_density(expr, condition, numsamples=numsamples, **kwargs)
 
     return Density(expr, condition).doit(evaluate=evaluate, **kwargs)
 
@@ -936,7 +1000,7 @@ def cdf(expr, condition=None, evaluate=True, **kwargs):
     # Otherwise pass work off to the ProbabilitySpace
     result = pspace(expr).compute_cdf(expr, **kwargs)
 
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit()
     else:
         return result
@@ -970,10 +1034,11 @@ def characteristic_function(expr, condition=None, evaluate=True, **kwargs):
 
     result = pspace(expr).compute_characteristic_function(expr, **kwargs)
 
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit()
     else:
         return result
+
 
 def moment_generating_function(expr, condition=None, evaluate=True, **kwargs):
     if condition is not None:
@@ -981,10 +1046,11 @@ def moment_generating_function(expr, condition=None, evaluate=True, **kwargs):
 
     result = pspace(expr).compute_moment_generating_function(expr, **kwargs)
 
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit()
     else:
         return result
+
 
 def where(condition, given_condition=None, **kwargs):
     """
@@ -1073,6 +1139,7 @@ def sample_iter(expr, condition=None, numsamples=S.Infinity, **kwargs):
     except TypeError:
         return sample_iter_subs(expr, condition, numsamples, **kwargs)
 
+
 def quantile(expr, evaluate=True, **kwargs):
     r"""
     Return the :math:`p^{th}` order quantile of a probability distribution.
@@ -1114,10 +1181,11 @@ def quantile(expr, evaluate=True, **kwargs):
     """
     result = pspace(expr).compute_quantile(expr, **kwargs)
 
-    if evaluate and hasattr(result, 'doit'):
+    if evaluate and hasattr(result, "doit"):
         return result.doit()
     else:
         return result
+
 
 def sample_iter_lambdify(expr, condition=None, numsamples=S.Infinity, **kwargs):
     """
@@ -1156,13 +1224,13 @@ def sample_iter_lambdify(expr, condition=None, numsamples=S.Infinity, **kwargs):
             if condition:  # Check that these values satisfy the condition
                 gd = given_fn(*args)
                 if gd != True and gd != False:
-                    raise ValueError(
-                        "Conditions must not contain free symbols")
+                    raise ValueError("Conditions must not contain free symbols")
                 if not gd:  # If the values don't satisfy then try again
                     continue
 
             yield fn(*args)
             count += 1
+
     return return_generator()
 
 
@@ -1196,8 +1264,7 @@ def sample_iter_subs(expr, condition=None, numsamples=S.Infinity, **kwargs):
         count += 1
 
 
-def sampling_P(condition, given_condition=None, numsamples=1,
-               evalf=True, **kwargs):
+def sampling_P(condition, given_condition=None, numsamples=1, evalf=True, **kwargs):
     """
     Sampling version of P
 
@@ -1213,8 +1280,7 @@ def sampling_P(condition, given_condition=None, numsamples=1,
     count_true = 0
     count_false = 0
 
-    samples = sample_iter(condition, given_condition,
-                          numsamples=numsamples, **kwargs)
+    samples = sample_iter(condition, given_condition, numsamples=numsamples, **kwargs)
 
     for sample in samples:
         if sample != True and sample != False:
@@ -1232,8 +1298,7 @@ def sampling_P(condition, given_condition=None, numsamples=1,
         return result
 
 
-def sampling_E(expr, given_condition=None, numsamples=1,
-               evalf=True, **kwargs):
+def sampling_E(expr, given_condition=None, numsamples=1, evalf=True, **kwargs):
     """
     Sampling version of E
 
@@ -1245,14 +1310,14 @@ def sampling_E(expr, given_condition=None, numsamples=1,
     sampling_density
     """
 
-    samples = sample_iter(expr, given_condition,
-                          numsamples=numsamples, **kwargs)
+    samples = sample_iter(expr, given_condition, numsamples=numsamples, **kwargs)
 
     result = Add(*list(samples)) / numsamples
     if evalf:
         return result.evalf()
     else:
         return result
+
 
 def sampling_density(expr, given_condition=None, numsamples=1, **kwargs):
     """
@@ -1266,8 +1331,7 @@ def sampling_density(expr, given_condition=None, numsamples=1, **kwargs):
     """
 
     results = {}
-    for result in sample_iter(expr, given_condition,
-                              numsamples=numsamples, **kwargs):
+    for result in sample_iter(expr, given_condition, numsamples=numsamples, **kwargs):
         results[result] = results.get(result, 0) + 1
     return results
 
@@ -1302,11 +1366,10 @@ def dependent(a, b):
     if pspace_independent(a, b):
         return False
 
-    z = Symbol('z', real=True)
+    z = Symbol("z", real=True)
     # Dependent if density is unchanged when one is given information about
     # the other
-    return (density(a, Eq(b, z)) != density(a) or
-            density(b, Eq(a, z)) != density(b))
+    return density(a, Eq(b, z)) != density(a) or density(b, Eq(a, z)) != density(b)
 
 
 def independent(a, b):
@@ -1375,6 +1438,7 @@ def rv_subs(expr, symbols=None):
     swapdict = {rv: rv.symbol for rv in symbols}
     return expr.subs(swapdict)
 
+
 class NamedArgsMixin(object):
     _argnames = ()  # type: tTuple[str, ...]
 
@@ -1382,8 +1446,10 @@ class NamedArgsMixin(object):
         try:
             return self.args[self._argnames.index(attr)]
         except ValueError:
-            raise AttributeError("'%s' object has no attribute '%s'" % (
-                type(self).__name__, attr))
+            raise AttributeError(
+                "'%s' object has no attribute '%s'" % (type(self).__name__, attr)
+            )
+
 
 def _value_check(condition, message):
     """
@@ -1437,12 +1503,14 @@ def _value_check(condition, message):
     """
     from sympy.core.compatibility import iterable
     from sympy.core.logic import fuzzy_and
+
     if not iterable(condition):
         condition = [condition]
     truth = fuzzy_and(condition)
     if truth == False:
         raise ValueError(message)
     return truth == True
+
 
 def _symbol_converter(sym):
     """
@@ -1485,7 +1553,7 @@ def _symbol_converter(sym):
     True
     """
     if isinstance(sym, str):
-            sym = Symbol(sym)
+        sym = Symbol(sym)
     if not isinstance(sym, Symbol):
-        raise TypeError("%s is neither a Symbol nor a string"%(sym))
+        raise TypeError("%s is neither a Symbol nor a string" % (sym))
     return sym

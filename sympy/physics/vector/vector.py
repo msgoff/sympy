@@ -1,10 +1,17 @@
-from sympy.core.backend import (S, sympify, expand, sqrt, Add, zeros,
-    ImmutableMatrix as Matrix)
+from sympy.core.backend import (
+    S,
+    sympify,
+    expand,
+    sqrt,
+    Add,
+    zeros,
+    ImmutableMatrix as Matrix,
+)
 from sympy import trigsimp
 from sympy.core.compatibility import unicode
 from sympy.utilities.misc import filldedent
 
-__all__ = ['Vector']
+__all__ = ["Vector"]
 
 
 class Vector(object):
@@ -91,15 +98,14 @@ class Vector(object):
         """
 
         from sympy.physics.vector.dyadic import Dyadic
+
         if isinstance(other, Dyadic):
             return NotImplemented
         other = _check_vector(other)
         out = S.Zero
         for i, v1 in enumerate(self.args):
             for j, v2 in enumerate(other.args):
-                out += ((v2[0].T)
-                        * (v2[1].dcm(v1[1]))
-                        * (v1[0]))[0]
+                out += ((v2[0].T) * (v2[1].dcm(v1[1])) * (v1[0]))[0]
         if Vector.simp:
             return trigsimp(sympify(out), recursive=True)
         else:
@@ -195,6 +201,7 @@ class Vector(object):
         """
 
         from sympy.physics.vector.dyadic import Dyadic
+
         other = _check_vector(other)
         ol = Dyadic(0)
         for i, v in enumerate(self.args):
@@ -226,26 +233,26 @@ class Vector(object):
             for j in 0, 1, 2:
                 # if the coef of the basis vector is 1, we skip the 1
                 if ar[i][0][j] == 1:
-                    ol.append(' + ' + ar[i][1].latex_vecs[j])
+                    ol.append(" + " + ar[i][1].latex_vecs[j])
                 # if the coef of the basis vector is -1, we skip the 1
                 elif ar[i][0][j] == -1:
-                    ol.append(' - ' + ar[i][1].latex_vecs[j])
+                    ol.append(" - " + ar[i][1].latex_vecs[j])
                 elif ar[i][0][j] != 0:
                     # If the coefficient of the basis vector is not 1 or -1;
                     # also, we might wrap it in parentheses, for readability.
                     arg_str = VectorLatexPrinter().doprint(ar[i][0][j])
                     if isinstance(ar[i][0][j], Add):
                         arg_str = "(%s)" % arg_str
-                    if arg_str[0] == '-':
+                    if arg_str[0] == "-":
                         arg_str = arg_str[1:]
-                        str_start = ' - '
+                        str_start = " - "
                     else:
-                        str_start = ' + '
+                        str_start = " + "
                     ol.append(str_start + arg_str + ar[i][1].latex_vecs[j])
-        outstr = ''.join(ol)
-        if outstr.startswith(' + '):
+        outstr = "".join(ol)
+        if outstr.startswith(" + "):
             outstr = outstr[3:]
-        elif outstr.startswith(' '):
+        elif outstr.startswith(" "):
             outstr = outstr[1:]
         return outstr
 
@@ -253,10 +260,10 @@ class Vector(object):
         """Pretty Printing method. """
         from sympy.physics.vector.printing import VectorPrettyPrinter
         from sympy.printing.pretty.stringpict import prettyForm
+
         e = self
 
         class Fake(object):
-
             def render(self, *args, **kwargs):
                 ar = e.args  # just to shorten things
                 if len(ar) == 0:
@@ -284,8 +291,9 @@ class Vector(object):
                                 tmp = pform.parens()
                                 pform = prettyForm(tmp[0], tmp[1])
 
-                            pform = prettyForm(*pform.right(" ",
-                                                ar[i][1].pretty_vecs[j]))
+                            pform = prettyForm(
+                                *pform.right(" ", ar[i][1].pretty_vecs[j])
+                            )
                         else:
                             continue
                         pforms.append(pform)
@@ -321,6 +329,7 @@ class Vector(object):
         """
 
         from sympy.physics.vector.dyadic import Dyadic
+
         other = _check_vector(other)
         ol = Dyadic(0)
         for i, v in enumerate(other.args):
@@ -361,26 +370,26 @@ class Vector(object):
             for j in 0, 1, 2:
                 # if the coef of the basis vector is 1, we skip the 1
                 if ar[i][0][j] == 1:
-                    ol.append(' + ' + ar[i][1].str_vecs[j])
+                    ol.append(" + " + ar[i][1].str_vecs[j])
                 # if the coef of the basis vector is -1, we skip the 1
                 elif ar[i][0][j] == -1:
-                    ol.append(' - ' + ar[i][1].str_vecs[j])
+                    ol.append(" - " + ar[i][1].str_vecs[j])
                 elif ar[i][0][j] != 0:
                     # If the coefficient of the basis vector is not 1 or -1;
                     # also, we might wrap it in parentheses, for readability.
                     arg_str = VectorStrPrinter().doprint(ar[i][0][j])
                     if isinstance(ar[i][0][j], Add):
                         arg_str = "(%s)" % arg_str
-                    if arg_str[0] == '-':
+                    if arg_str[0] == "-":
                         arg_str = arg_str[1:]
-                        str_start = ' - '
+                        str_start = " - "
                     else:
-                        str_start = ' + '
-                    ol.append(str_start + arg_str + '*' + ar[i][1].str_vecs[j])
-        outstr = ''.join(ol)
-        if outstr.startswith(' + '):
+                        str_start = " + "
+                    ol.append(str_start + arg_str + "*" + ar[i][1].str_vecs[j])
+        outstr = "".join(ol)
+        if outstr.startswith(" + "):
             outstr = outstr[3:]
-        elif outstr.startswith(' '):
+        elif outstr.startswith(" "):
             outstr = outstr[1:]
         return outstr
 
@@ -417,6 +426,7 @@ class Vector(object):
         """
 
         from sympy.physics.vector.dyadic import Dyadic
+
         if isinstance(other, Dyadic):
             return NotImplemented
         other = _check_vector(other)
@@ -431,10 +441,11 @@ class Vector(object):
 
             """
 
-            return (mat[0][0] * (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1])
-                    + mat[0][1] * (mat[1][2] * mat[2][0] - mat[1][0] *
-                    mat[2][2]) + mat[0][2] * (mat[1][0] * mat[2][1] -
-                    mat[1][1] * mat[2][0]))
+            return (
+                mat[0][0] * (mat[1][1] * mat[2][2] - mat[1][2] * mat[2][1])
+                + mat[0][1] * (mat[1][2] * mat[2][0] - mat[1][0] * mat[2][2])
+                + mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0])
+            )
 
         outlist = []
         ar = other.args  # For brevity
@@ -442,12 +453,17 @@ class Vector(object):
             tempx = v[1].x
             tempy = v[1].y
             tempz = v[1].z
-            tempm = ([[tempx, tempy, tempz], [self & tempx, self & tempy,
-                self & tempz], [Vector([ar[i]]) & tempx,
-                Vector([ar[i]]) & tempy, Vector([ar[i]]) & tempz]])
+            tempm = [
+                [tempx, tempy, tempz],
+                [self & tempx, self & tempy, self & tempz],
+                [
+                    Vector([ar[i]]) & tempx,
+                    Vector([ar[i]]) & tempy,
+                    Vector([ar[i]]) & tempz,
+                ],
+            ]
             outlist += _det(tempm).args
         return Vector(outlist)
-
 
     # We don't define _repr_png_ here because it would add a large amount of
     # data to any notebook containing SymPy expressions, without adding
@@ -463,7 +479,8 @@ class Vector(object):
         SymPy objects, like lists and dictionaries of expressions.
         """
         from sympy.printing.latex import latex
-        s = latex(self, mode='plain')
+
+        s = latex(self, mode="plain")
         return "$\\displaystyle %s$" % s
 
     _repr_latex_orig = _repr_latex_
@@ -502,14 +519,17 @@ class Vector(object):
 
     def dot(self, other):
         return self & other
+
     dot.__doc__ = __and__.__doc__
 
     def cross(self, other):
         return self ^ other
+
     cross.__doc__ = __xor__.__doc__
 
     def outer(self, other):
         return self | other
+
     outer.__doc__ = __or__.__doc__
 
     def diff(self, var, frame, var_in_dcm=True):
@@ -566,10 +586,10 @@ class Vector(object):
             else:
                 # If the direction cosine matrix relating the component frame
                 # with the derivative frame does not contain the variable.
-                if not var_in_dcm or (frame.dcm(component_frame).diff(var) ==
-                                      zeros(3, 3)):
-                    inlist += [(measure_number.diff(var),
-                                        component_frame)]
+                if not var_in_dcm or (
+                    frame.dcm(component_frame).diff(var) == zeros(3, 3)
+                ):
+                    inlist += [(measure_number.diff(var), component_frame)]
                 else:  # else express in the frame
                     reexp_vec_comp = Vector([vector_component]).express(frame)
                     deriv = reexp_vec_comp.args[0][0].diff(var)
@@ -604,6 +624,7 @@ class Vector(object):
 
         """
         from sympy.physics.vector import express
+
         return express(self, otherframe, variables=variables)
 
     def to_matrix(self, reference_frame):
@@ -644,8 +665,9 @@ class Vector(object):
 
         """
 
-        return Matrix([self.dot(unit_vec) for unit_vec in
-                       reference_frame]).reshape(3, 1)
+        return Matrix([self.dot(unit_vec) for unit_vec in reference_frame]).reshape(
+            3, 1
+        )
 
     def doit(self, **hints):
         """Calls .doit() on each term in the Vector"""
@@ -669,6 +691,7 @@ class Vector(object):
 
         """
         from sympy.physics.vector import time_derivative
+
         return time_derivative(self, otherframe)
 
     def simplify(self):
@@ -735,14 +758,15 @@ class Vector(object):
 
 
 class VectorTypeError(TypeError):
-
     def __init__(self, other, want):
-        msg = filldedent("Expected an instance of %s, but received object "
-                         "'%s' of %s." % (type(want), other, type(other)))
+        msg = filldedent(
+            "Expected an instance of %s, but received object "
+            "'%s' of %s." % (type(want), other, type(other))
+        )
         super(VectorTypeError, self).__init__(msg)
 
 
 def _check_vector(other):
     if not isinstance(other, Vector):
-        raise TypeError('A Vector must be supplied')
+        raise TypeError("A Vector must be supplied")
     return other

@@ -1,13 +1,20 @@
 """Module for querying SymPy objects about assumptions."""
 from __future__ import print_function, division
 
-from sympy.assumptions.assume import (global_assumptions, Predicate,
-        AppliedPredicate)
+from sympy.assumptions.assume import global_assumptions, Predicate, AppliedPredicate
 from sympy.core import sympify
 from sympy.core.cache import cacheit
 from sympy.core.relational import Relational
-from sympy.logic.boolalg import (to_cnf, And, Not, Or, Implies, Equivalent,
-                                 BooleanFunction, BooleanAtom)
+from sympy.logic.boolalg import (
+    to_cnf,
+    And,
+    Not,
+    Or,
+    Implies,
+    Equivalent,
+    BooleanFunction,
+    BooleanAtom,
+)
 from sympy.logic.inference import satisfiable
 from sympy.utilities.decorator import memoize_property
 from sympy.assumptions.cnf import CNF, EncodedCNF, Literal
@@ -39,7 +46,7 @@ class AssumptionKeys(object):
 
         """
         # TODO: Add examples
-        return Predicate('hermitian')
+        return Predicate("hermitian")
 
     @memoize_property
     def antihermitian(self):
@@ -57,7 +64,7 @@ class AssumptionKeys(object):
 
         """
         # TODO: Add examples
-        return Predicate('antihermitian')
+        return Predicate("antihermitian")
 
     @memoize_property
     def real(self):
@@ -114,7 +121,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Real_number
 
         """
-        return Predicate('real')
+        return Predicate("real")
 
     @memoize_property
     def extended_real(self):
@@ -138,7 +145,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('extended_real')
+        return Predicate("extended_real")
 
     @memoize_property
     def imaginary(self):
@@ -166,7 +173,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Imaginary_number
 
         """
-        return Predicate('imaginary')
+        return Predicate("imaginary")
 
     @memoize_property
     def complex(self):
@@ -194,7 +201,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Complex_number
 
         """
-        return Predicate('complex')
+        return Predicate("complex")
 
     @memoize_property
     def algebraic(self):
@@ -221,7 +228,7 @@ class AssumptionKeys(object):
 
         .. [1] https://en.wikipedia.org/wiki/Algebraic_number
         """
-        return Predicate('algebraic')
+        return Predicate("algebraic")
 
     @memoize_property
     def transcendental(self):
@@ -234,7 +241,7 @@ class AssumptionKeys(object):
 
         """
         # TODO: Add examples
-        return Predicate('transcendental')
+        return Predicate("transcendental")
 
     @memoize_property
     def integer(self):
@@ -258,7 +265,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Integer
 
         """
-        return Predicate('integer')
+        return Predicate("integer")
 
     @memoize_property
     def rational(self):
@@ -285,7 +292,7 @@ class AssumptionKeys(object):
         https://en.wikipedia.org/wiki/Rational_number
 
         """
-        return Predicate('rational')
+        return Predicate("rational")
 
     @memoize_property
     def irrational(self):
@@ -314,7 +321,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Irrational_number
 
         """
-        return Predicate('irrational')
+        return Predicate("irrational")
 
     @memoize_property
     def finite(self):
@@ -345,8 +352,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Finite
 
         """
-        return Predicate('finite')
-
+        return Predicate("finite")
 
     @memoize_property
     def infinite(self):
@@ -358,8 +364,7 @@ class AssumptionKeys(object):
 
         """
         # TODO: Add examples
-        return Predicate('infinite')
-
+        return Predicate("infinite")
 
     @memoize_property
     def positive(self):
@@ -397,7 +402,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('positive')
+        return Predicate("positive")
 
     @memoize_property
     def negative(self):
@@ -435,7 +440,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('negative')
+        return Predicate("negative")
 
     @memoize_property
     def zero(self):
@@ -461,7 +466,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('zero')
+        return Predicate("zero")
 
     @memoize_property
     def nonzero(self):
@@ -501,7 +506,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('nonzero')
+        return Predicate("nonzero")
 
     @memoize_property
     def nonpositive(self):
@@ -535,7 +540,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('nonpositive')
+        return Predicate("nonpositive")
 
     @memoize_property
     def nonnegative(self):
@@ -568,7 +573,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('nonnegative')
+        return Predicate("nonnegative")
 
     @memoize_property
     def even(self):
@@ -592,7 +597,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('even')
+        return Predicate("even")
 
     @memoize_property
     def odd(self):
@@ -615,7 +620,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('odd')
+        return Predicate("odd")
 
     @memoize_property
     def prime(self):
@@ -642,7 +647,7 @@ class AssumptionKeys(object):
         False
 
         """
-        return Predicate('prime')
+        return Predicate("prime")
 
     @memoize_property
     def composite(self):
@@ -666,7 +671,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('composite')
+        return Predicate("composite")
 
     @memoize_property
     def commutative(self):
@@ -678,7 +683,7 @@ class AssumptionKeys(object):
 
         """
         # TODO: Add examples
-        return Predicate('commutative')
+        return Predicate("commutative")
 
     @memoize_property
     def is_true(self):
@@ -697,7 +702,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('is_true')
+        return Predicate("is_true")
 
     @memoize_property
     def symmetric(self):
@@ -730,7 +735,7 @@ class AssumptionKeys(object):
         """
         # TODO: Add handlers to make these keys work with
         # actual matrices and add more examples in the docstring.
-        return Predicate('symmetric')
+        return Predicate("symmetric")
 
     @memoize_property
     def invertible(self):
@@ -760,7 +765,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Invertible_matrix
 
         """
-        return Predicate('invertible')
+        return Predicate("invertible")
 
     @memoize_property
     def orthogonal(self):
@@ -795,7 +800,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Orthogonal_matrix
 
         """
-        return Predicate('orthogonal')
+        return Predicate("orthogonal")
 
     @memoize_property
     def unitary(self):
@@ -827,7 +832,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Unitary_matrix
 
         """
-        return Predicate('unitary')
+        return Predicate("unitary")
 
     @memoize_property
     def positive_definite(self):
@@ -859,7 +864,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Positive-definite_matrix
 
         """
-        return Predicate('positive_definite')
+        return Predicate("positive_definite")
 
     @memoize_property
     def upper_triangular(self):
@@ -884,7 +889,7 @@ class AssumptionKeys(object):
         .. [1] http://mathworld.wolfram.com/UpperTriangularMatrix.html
 
         """
-        return Predicate('upper_triangular')
+        return Predicate("upper_triangular")
 
     @memoize_property
     def lower_triangular(self):
@@ -908,7 +913,7 @@ class AssumptionKeys(object):
 
         .. [1] http://mathworld.wolfram.com/LowerTriangularMatrix.html
         """
-        return Predicate('lower_triangular')
+        return Predicate("lower_triangular")
 
     @memoize_property
     def diagonal(self):
@@ -936,7 +941,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Diagonal_matrix
 
         """
-        return Predicate('diagonal')
+        return Predicate("diagonal")
 
     @memoize_property
     def fullrank(self):
@@ -961,7 +966,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('fullrank')
+        return Predicate("fullrank")
 
     @memoize_property
     def square(self):
@@ -992,7 +997,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Square_matrix
 
         """
-        return Predicate('square')
+        return Predicate("square")
 
     @memoize_property
     def integer_elements(self):
@@ -1011,7 +1016,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('integer_elements')
+        return Predicate("integer_elements")
 
     @memoize_property
     def real_elements(self):
@@ -1030,7 +1035,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('real_elements')
+        return Predicate("real_elements")
 
     @memoize_property
     def complex_elements(self):
@@ -1051,7 +1056,7 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('complex_elements')
+        return Predicate("complex_elements")
 
     @memoize_property
     def singular(self):
@@ -1076,7 +1081,7 @@ class AssumptionKeys(object):
         .. [1] http://mathworld.wolfram.com/SingularMatrix.html
 
         """
-        return Predicate('singular')
+        return Predicate("singular")
 
     @memoize_property
     def normal(self):
@@ -1099,7 +1104,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Normal_matrix
 
         """
-        return Predicate('normal')
+        return Predicate("normal")
 
     @memoize_property
     def triangular(self):
@@ -1124,7 +1129,7 @@ class AssumptionKeys(object):
         .. [1] https://en.wikipedia.org/wiki/Triangular_matrix
 
         """
-        return Predicate('triangular')
+        return Predicate("triangular")
 
     @memoize_property
     def unit_triangular(self):
@@ -1143,10 +1148,11 @@ class AssumptionKeys(object):
         True
 
         """
-        return Predicate('unit_triangular')
+        return Predicate("unit_triangular")
 
 
 Q = AssumptionKeys()
+
 
 def _extract_facts(expr, symbol, check_reversed_rel=True):
     """
@@ -1238,10 +1244,14 @@ def ask(proposition, assumptions=True, context=global_assumptions):
     """
     from sympy.assumptions.satask import satask
 
-    if not isinstance(proposition, (BooleanFunction, AppliedPredicate, bool, BooleanAtom)):
+    if not isinstance(
+        proposition, (BooleanFunction, AppliedPredicate, bool, BooleanAtom)
+    ):
         raise TypeError("proposition must be a valid logical expression")
 
-    if not isinstance(assumptions, (BooleanFunction, AppliedPredicate, bool, BooleanAtom)):
+    if not isinstance(
+        assumptions, (BooleanFunction, AppliedPredicate, bool, BooleanAtom)
+    ):
         raise TypeError("assumptions must be a valid logical expression")
 
     if isinstance(proposition, AppliedPredicate):
@@ -1267,14 +1277,14 @@ def ask(proposition, assumptions=True, context=global_assumptions):
     if local_facts.clauses:
 
         if len(local_facts.clauses) == 1:
-            cl, = local_facts.clauses
-            f, = cl if len(cl)==1 else [None]
+            (cl,) = local_facts.clauses
+            (f,) = cl if len(cl) == 1 else [None]
             if f and f.is_Not and f.arg in known_facts_dict.get(key, []):
                 return False
 
         for clause in local_facts.clauses:
             if len(clause) == 1:
-                f, = clause
+                (f,) = clause
                 fdict = known_facts_dict.get(f.arg, None) if not f.is_Not else None
                 if fdict and key in fdict:
                     return True
@@ -1358,7 +1368,8 @@ def compute_known_facts(known_facts, known_facts_keys):
     """
     from textwrap import dedent, wrap
 
-    fact_string = dedent('''\
+    fact_string = dedent(
+        '''\
     """
     The contents of this file are the return value of
     ``sympy.assumptions.ask.compute_known_facts``.
@@ -1392,77 +1403,99 @@ def compute_known_facts(known_facts, known_facts_keys):
         return {
             %s
         }
-    ''')
+    '''
+    )
     # Compute the known facts in CNF form for logical inference
     LINE = ",\n        "
-    HANG = ' '*8
+    HANG = " " * 8
     cnf = to_cnf(known_facts)
     cnf_ = CNF.to_CNF(known_facts)
     c = LINE.join([str(a) for a in cnf.args])
 
-    p = LINE.join(sorted(['frozenset((' + ', '.join(str(lit) for lit in sorted(clause, key=str)) +'))' for clause in cnf_.clauses]))
+    p = LINE.join(
+        sorted(
+            [
+                "frozenset(("
+                + ", ".join(str(lit) for lit in sorted(clause, key=str))
+                + "))"
+                for clause in cnf_.clauses
+            ]
+        )
+    )
     mapping = single_fact_lookup(known_facts_keys, cnf)
     items = sorted(mapping.items(), key=str)
     keys = [str(i[0]) for i in items]
-    values = ['set(%s)' % sorted(i[1], key=str) for i in items]
-    m = LINE.join(['\n'.join(
-        wrap("%s: %s" % (k, v),
-            subsequent_indent=HANG,
-            break_long_words=False))
-        for k, v in zip(keys, values)]) + ','
+    values = ["set(%s)" % sorted(i[1], key=str) for i in items]
+    m = (
+        LINE.join(
+            [
+                "\n".join(
+                    wrap(
+                        "%s: %s" % (k, v),
+                        subsequent_indent=HANG,
+                        break_long_words=False,
+                    )
+                )
+                for k, v in zip(keys, values)
+            ]
+        )
+        + ","
+    )
     return fact_string % (p, c, m)
+
 
 # handlers tells us what ask handler we should use
 # for a particular key
-_val_template = 'sympy.assumptions.handlers.%s'
+_val_template = "sympy.assumptions.handlers.%s"
 _handlers = [
-    ("antihermitian",     "sets.AskAntiHermitianHandler"),
-    ("finite",           "calculus.AskFiniteHandler"),
-    ("commutative",       "AskCommutativeHandler"),
-    ("complex",           "sets.AskComplexHandler"),
-    ("composite",         "ntheory.AskCompositeHandler"),
-    ("even",              "ntheory.AskEvenHandler"),
-    ("extended_real",     "sets.AskExtendedRealHandler"),
-    ("hermitian",         "sets.AskHermitianHandler"),
-    ("imaginary",         "sets.AskImaginaryHandler"),
-    ("integer",           "sets.AskIntegerHandler"),
-    ("irrational",        "sets.AskIrrationalHandler"),
-    ("rational",          "sets.AskRationalHandler"),
-    ("negative",          "order.AskNegativeHandler"),
-    ("nonzero",           "order.AskNonZeroHandler"),
-    ("nonpositive",       "order.AskNonPositiveHandler"),
-    ("nonnegative",       "order.AskNonNegativeHandler"),
-    ("zero",              "order.AskZeroHandler"),
-    ("positive",          "order.AskPositiveHandler"),
-    ("prime",             "ntheory.AskPrimeHandler"),
-    ("real",              "sets.AskRealHandler"),
-    ("odd",               "ntheory.AskOddHandler"),
-    ("algebraic",         "sets.AskAlgebraicHandler"),
-    ("is_true",           "common.TautologicalHandler"),
-    ("symmetric",         "matrices.AskSymmetricHandler"),
-    ("invertible",        "matrices.AskInvertibleHandler"),
-    ("orthogonal",        "matrices.AskOrthogonalHandler"),
-    ("unitary",           "matrices.AskUnitaryHandler"),
+    ("antihermitian", "sets.AskAntiHermitianHandler"),
+    ("finite", "calculus.AskFiniteHandler"),
+    ("commutative", "AskCommutativeHandler"),
+    ("complex", "sets.AskComplexHandler"),
+    ("composite", "ntheory.AskCompositeHandler"),
+    ("even", "ntheory.AskEvenHandler"),
+    ("extended_real", "sets.AskExtendedRealHandler"),
+    ("hermitian", "sets.AskHermitianHandler"),
+    ("imaginary", "sets.AskImaginaryHandler"),
+    ("integer", "sets.AskIntegerHandler"),
+    ("irrational", "sets.AskIrrationalHandler"),
+    ("rational", "sets.AskRationalHandler"),
+    ("negative", "order.AskNegativeHandler"),
+    ("nonzero", "order.AskNonZeroHandler"),
+    ("nonpositive", "order.AskNonPositiveHandler"),
+    ("nonnegative", "order.AskNonNegativeHandler"),
+    ("zero", "order.AskZeroHandler"),
+    ("positive", "order.AskPositiveHandler"),
+    ("prime", "ntheory.AskPrimeHandler"),
+    ("real", "sets.AskRealHandler"),
+    ("odd", "ntheory.AskOddHandler"),
+    ("algebraic", "sets.AskAlgebraicHandler"),
+    ("is_true", "common.TautologicalHandler"),
+    ("symmetric", "matrices.AskSymmetricHandler"),
+    ("invertible", "matrices.AskInvertibleHandler"),
+    ("orthogonal", "matrices.AskOrthogonalHandler"),
+    ("unitary", "matrices.AskUnitaryHandler"),
     ("positive_definite", "matrices.AskPositiveDefiniteHandler"),
-    ("upper_triangular",  "matrices.AskUpperTriangularHandler"),
-    ("lower_triangular",  "matrices.AskLowerTriangularHandler"),
-    ("diagonal",          "matrices.AskDiagonalHandler"),
-    ("fullrank",          "matrices.AskFullRankHandler"),
-    ("square",            "matrices.AskSquareHandler"),
-    ("integer_elements",  "matrices.AskIntegerElementsHandler"),
-    ("real_elements",     "matrices.AskRealElementsHandler"),
-    ("complex_elements",  "matrices.AskComplexElementsHandler"),
+    ("upper_triangular", "matrices.AskUpperTriangularHandler"),
+    ("lower_triangular", "matrices.AskLowerTriangularHandler"),
+    ("diagonal", "matrices.AskDiagonalHandler"),
+    ("fullrank", "matrices.AskFullRankHandler"),
+    ("square", "matrices.AskSquareHandler"),
+    ("integer_elements", "matrices.AskIntegerElementsHandler"),
+    ("real_elements", "matrices.AskRealElementsHandler"),
+    ("complex_elements", "matrices.AskComplexElementsHandler"),
 ]
 
 for name, value in _handlers:
     register_handler(name, _val_template % value)
 
+
 @cacheit
 def get_known_facts_keys():
     return [
-        getattr(Q, attr)
-        for attr in Q.__class__.__dict__
-        if not attr.startswith('__')]
+        getattr(Q, attr) for attr in Q.__class__.__dict__ if not attr.startswith("__")
+    ]
+
 
 @cacheit
 def get_known_facts():
@@ -1487,14 +1520,12 @@ def get_known_facts():
         Equivalent(Q.irrational | Q.rational, Q.real & Q.finite),
         Implies(Q.irrational, ~Q.rational),
         Implies(Q.zero, Q.even),
-
         Equivalent(Q.real, Q.negative | Q.zero | Q.positive),
         Implies(Q.zero, ~Q.negative & ~Q.positive),
         Implies(Q.negative, ~Q.positive),
         Equivalent(Q.nonnegative, Q.zero | Q.positive),
         Equivalent(Q.nonpositive, Q.zero | Q.negative),
         Equivalent(Q.nonzero, Q.negative | Q.positive),
-
         Implies(Q.orthogonal, Q.positive_definite),
         Implies(Q.orthogonal, Q.unitary),
         Implies(Q.unitary & Q.real, Q.orthogonal),
@@ -1520,5 +1551,5 @@ def get_known_facts():
         Implies(Q.real_elements, Q.complex_elements),
     )
 
-from sympy.assumptions.ask_generated import (
-    get_known_facts_dict, get_all_known_facts)
+
+from sympy.assumptions.ask_generated import get_known_facts_dict, get_all_known_facts

@@ -44,6 +44,7 @@ class expm1(Function):
 
     log1p
     """
+
     nargs = 1
 
     def fdiff(self, argindex=1):
@@ -107,18 +108,17 @@ class log1p(Function):
 
     expm1
     """
-    nargs = 1
 
+    nargs = 1
 
     def fdiff(self, argindex=1):
         """
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return S.One/(self.args[0] + S.One)
+            return S.One / (self.args[0] + S.One)
         else:
             raise ArgumentIndexError(self, argindex)
-
 
     def _eval_expand_func(self, **hints):
         return _log1p(*self.args)
@@ -154,10 +154,13 @@ class log1p(Function):
     def _eval_is_nonnegative(self):
         return self.args[0].is_nonnegative
 
+
 _Two = S(2)
+
 
 def _exp2(x):
     return Pow(_Two, x)
+
 
 class exp2(Function):
     """
@@ -182,15 +185,15 @@ class exp2(Function):
 
     log2
     """
-    nargs = 1
 
+    nargs = 1
 
     def fdiff(self, argindex=1):
         """
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return self*log(_Two)
+            return self * log(_Two)
         else:
             raise ArgumentIndexError(self, argindex)
 
@@ -209,7 +212,7 @@ class exp2(Function):
 
 
 def _log2(x):
-    return log(x)/log(_Two)
+    return log(x) / log(_Two)
 
 
 class log2(Function):
@@ -236,6 +239,7 @@ class log2(Function):
     exp2
     log10
     """
+
     nargs = 1
 
     def fdiff(self, argindex=1):
@@ -243,10 +247,9 @@ class log2(Function):
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return S.One/(log(_Two)*self.args[0])
+            return S.One / (log(_Two) * self.args[0])
         else:
             raise ArgumentIndexError(self, argindex)
-
 
     @classmethod
     def eval(cls, arg):
@@ -267,7 +270,7 @@ class log2(Function):
 
 
 def _fma(x, y, z):
-    return x*y + z
+    return x * y + z
 
 
 class fma(Function):
@@ -287,6 +290,7 @@ class fma(Function):
     y
 
     """
+
     nargs = 3
 
     def fdiff(self, argindex=1):
@@ -300,7 +304,6 @@ class fma(Function):
         else:
             raise ArgumentIndexError(self, argindex)
 
-
     def _eval_expand_func(self, **hints):
         return _fma(*self.args)
 
@@ -312,7 +315,7 @@ _Ten = S(10)
 
 
 def _log10(x):
-    return log(x)/log(_Ten)
+    return log(x) / log(_Ten)
 
 
 class log10(Function):
@@ -334,6 +337,7 @@ class log10(Function):
 
     log2
     """
+
     nargs = 1
 
     def fdiff(self, argindex=1):
@@ -341,10 +345,9 @@ class log10(Function):
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return S.One/(log(_Ten)*self.args[0])
+            return S.One / (log(_Ten) * self.args[0])
         else:
             raise ArgumentIndexError(self, argindex)
-
 
     @classmethod
     def eval(cls, arg):
@@ -368,7 +371,9 @@ def _Sqrt(x):
     return Pow(x, S.Half)
 
 
-class Sqrt(Function):  # 'sqrt' already defined in sympy.functions.elementary.miscellaneous
+class Sqrt(
+    Function
+):  # 'sqrt' already defined in sympy.functions.elementary.miscellaneous
     """
     Represents the square root function.
 
@@ -391,6 +396,7 @@ class Sqrt(Function):  # 'sqrt' already defined in sympy.functions.elementary.mi
 
     Cbrt
     """
+
     nargs = 1
 
     def fdiff(self, argindex=1):
@@ -398,7 +404,7 @@ class Sqrt(Function):  # 'sqrt' already defined in sympy.functions.elementary.mi
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return Pow(self.args[0], Rational(-1, 2))/_Two
+            return Pow(self.args[0], Rational(-1, 2)) / _Two
         else:
             raise ArgumentIndexError(self, argindex)
 
@@ -415,7 +421,9 @@ def _Cbrt(x):
     return Pow(x, Rational(1, 3))
 
 
-class Cbrt(Function):  # 'cbrt' already defined in sympy.functions.elementary.miscellaneous
+class Cbrt(
+    Function
+):  # 'cbrt' already defined in sympy.functions.elementary.miscellaneous
     """
     Represents the cube root function.
 
@@ -438,6 +446,7 @@ class Cbrt(Function):  # 'cbrt' already defined in sympy.functions.elementary.mi
 
     Sqrt
     """
+
     nargs = 1
 
     def fdiff(self, argindex=1):
@@ -445,10 +454,9 @@ class Cbrt(Function):  # 'cbrt' already defined in sympy.functions.elementary.mi
         Returns the first derivative of this function.
         """
         if argindex == 1:
-            return Pow(self.args[0], Rational(-_Two/3))/3
+            return Pow(self.args[0], Rational(-_Two / 3)) / 3
         else:
             raise ArgumentIndexError(self, argindex)
-
 
     def _eval_expand_func(self, **hints):
         return _Cbrt(*self.args)
@@ -484,6 +492,7 @@ class hypot(Function):
     x/hypot(x, y)
 
     """
+
     nargs = 2
 
     def fdiff(self, argindex=1):
@@ -491,10 +500,9 @@ class hypot(Function):
         Returns the first derivative of this function.
         """
         if argindex in (1, 2):
-            return 2*self.args[argindex-1]/(_Two*self.func(*self.args))
+            return 2 * self.args[argindex - 1] / (_Two * self.func(*self.args))
         else:
             raise ArgumentIndexError(self, argindex)
-
 
     def _eval_expand_func(self, **hints):
         return _hypot(*self.args)

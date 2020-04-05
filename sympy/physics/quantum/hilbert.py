@@ -15,27 +15,28 @@ from sympy.physics.quantum.qexpr import QuantumError
 from sympy.core.compatibility import reduce
 
 __all__ = [
-    'HilbertSpaceError',
-    'HilbertSpace',
-    'TensorProductHilbertSpace',
-    'TensorPowerHilbertSpace',
-    'DirectSumHilbertSpace',
-    'ComplexSpace',
-    'L2',
-    'FockSpace'
+    "HilbertSpaceError",
+    "HilbertSpace",
+    "TensorProductHilbertSpace",
+    "TensorPowerHilbertSpace",
+    "DirectSumHilbertSpace",
+    "ComplexSpace",
+    "L2",
+    "FockSpace",
 ]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Main objects
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 class HilbertSpaceError(QuantumError):
     pass
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Main objects
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 class HilbertSpace(Basic):
@@ -65,7 +66,7 @@ class HilbertSpace(Basic):
     @property
     def dimension(self):
         """Return the Hilbert dimension of the space."""
-        raise NotImplementedError('This Hilbert space has no dimension.')
+        raise NotImplementedError("This Hilbert space has no dimension.")
 
     def __add__(self, other):
         return DirectSumHilbertSpace(self, other)
@@ -81,8 +82,10 @@ class HilbertSpace(Basic):
 
     def __pow__(self, other, mod=None):
         if mod is not None:
-            raise ValueError('The third argument to __pow__ is not supported \
-            for Hilbert spaces.')
+            raise ValueError(
+                "The third argument to __pow__ is not supported \
+            for Hilbert spaces."
+            )
         return TensorPowerHilbertSpace(self, other)
 
     def __contains__(self, other):
@@ -98,14 +101,14 @@ class HilbertSpace(Basic):
             return False
 
     def _sympystr(self, printer, *args):
-        return u'H'
+        return u"H"
 
     def _pretty(self, printer, *args):
-        ustr = u'\N{LATIN CAPITAL LETTER H}'
+        ustr = u"\N{LATIN CAPITAL LETTER H}"
         return prettyForm(ustr)
 
     def _latex(self, printer, *args):
-        return r'\mathcal{H}'
+        return r"\mathcal{H}"
 
 
 class ComplexSpace(HilbertSpace):
@@ -151,37 +154,45 @@ class ComplexSpace(HilbertSpace):
     @classmethod
     def eval(cls, dimension):
         if len(dimension.atoms()) == 1:
-            if not (dimension.is_Integer and dimension > 0 or dimension is oo
-            or dimension.is_Symbol):
-                raise TypeError('The dimension of a ComplexSpace can only'
-                                'be a positive integer, oo, or a Symbol: %r'
-                                % dimension)
+            if not (
+                dimension.is_Integer
+                and dimension > 0
+                or dimension is oo
+                or dimension.is_Symbol
+            ):
+                raise TypeError(
+                    "The dimension of a ComplexSpace can only"
+                    "be a positive integer, oo, or a Symbol: %r" % dimension
+                )
         else:
             for dim in dimension.atoms():
                 if not (dim.is_Integer or dim is oo or dim.is_Symbol):
-                    raise TypeError('The dimension of a ComplexSpace can only'
-                                    ' contain integers, oo, or a Symbol: %r'
-                                    % dim)
+                    raise TypeError(
+                        "The dimension of a ComplexSpace can only"
+                        " contain integers, oo, or a Symbol: %r" % dim
+                    )
 
     @property
     def dimension(self):
         return self.args[0]
 
     def _sympyrepr(self, printer, *args):
-        return "%s(%s)" % (self.__class__.__name__,
-                           printer._print(self.dimension, *args))
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            printer._print(self.dimension, *args),
+        )
 
     def _sympystr(self, printer, *args):
         return "C(%s)" % printer._print(self.dimension, *args)
 
     def _pretty(self, printer, *args):
-        ustr = u'\N{LATIN CAPITAL LETTER C}'
+        ustr = u"\N{LATIN CAPITAL LETTER C}"
         pform_exp = printer._print(self.dimension, *args)
         pform_base = prettyForm(ustr)
-        return pform_base**pform_exp
+        return pform_base ** pform_exp
 
     def _latex(self, printer, *args):
-        return r'\mathcal{C}^{%s}' % printer._print(self.dimension, *args)
+        return r"\mathcal{C}^{%s}" % printer._print(self.dimension, *args)
 
 
 class L2(HilbertSpace):
@@ -207,8 +218,7 @@ class L2(HilbertSpace):
 
     def __new__(cls, interval):
         if not isinstance(interval, Interval):
-            raise TypeError('L2 interval must be an Interval instance: %r'
-            % interval)
+            raise TypeError("L2 interval must be an Interval instance: %r" % interval)
         obj = Basic.__new__(cls, interval)
         return obj
 
@@ -227,13 +237,13 @@ class L2(HilbertSpace):
         return "L2(%s)" % printer._print(self.interval, *args)
 
     def _pretty(self, printer, *args):
-        pform_exp = prettyForm(u'2')
-        pform_base = prettyForm(u'L')
-        return pform_base**pform_exp
+        pform_exp = prettyForm(u"2")
+        pform_base = prettyForm(u"L")
+        return pform_base ** pform_exp
 
     def _latex(self, printer, *args):
         interval = printer._print(self.interval, *args)
-        return r'{\mathcal{L}^2}\left( %s \right)' % interval
+        return r"{\mathcal{L}^2}\left( %s \right)" % interval
 
 
 class FockSpace(HilbertSpace):
@@ -274,11 +284,11 @@ class FockSpace(HilbertSpace):
         return "F"
 
     def _pretty(self, printer, *args):
-        ustr = u'\N{LATIN CAPITAL LETTER F}'
+        ustr = u"\N{LATIN CAPITAL LETTER F}"
         return prettyForm(ustr)
 
     def _latex(self, printer, *args):
-        return r'\mathcal{F}'
+        return r"\mathcal{F}"
 
 
 class TensorProductHilbertSpace(HilbertSpace):
@@ -336,7 +346,7 @@ class TensorProductHilbertSpace(HilbertSpace):
         """Evaluates the direct product."""
         new_args = []
         recall = False
-        #flatten arguments
+        # flatten arguments
         for arg in args:
             if isinstance(arg, TensorProductHilbertSpace):
                 new_args.extend(arg.args)
@@ -344,25 +354,34 @@ class TensorProductHilbertSpace(HilbertSpace):
             elif isinstance(arg, (HilbertSpace, TensorPowerHilbertSpace)):
                 new_args.append(arg)
             else:
-                raise TypeError('Hilbert spaces can only be multiplied by \
-                other Hilbert spaces: %r' % arg)
-        #combine like arguments into direct powers
+                raise TypeError(
+                    "Hilbert spaces can only be multiplied by \
+                other Hilbert spaces: %r"
+                    % arg
+                )
+        # combine like arguments into direct powers
         comb_args = []
         prev_arg = None
         for new_arg in new_args:
             if prev_arg is not None:
-                if isinstance(new_arg, TensorPowerHilbertSpace) and \
-                    isinstance(prev_arg, TensorPowerHilbertSpace) and \
-                        new_arg.base == prev_arg.base:
-                    prev_arg = new_arg.base**(new_arg.exp + prev_arg.exp)
-                elif isinstance(new_arg, TensorPowerHilbertSpace) and \
-                        new_arg.base == prev_arg:
-                    prev_arg = prev_arg**(new_arg.exp + 1)
-                elif isinstance(prev_arg, TensorPowerHilbertSpace) and \
-                        new_arg == prev_arg.base:
-                    prev_arg = new_arg**(prev_arg.exp + 1)
+                if (
+                    isinstance(new_arg, TensorPowerHilbertSpace)
+                    and isinstance(prev_arg, TensorPowerHilbertSpace)
+                    and new_arg.base == prev_arg.base
+                ):
+                    prev_arg = new_arg.base ** (new_arg.exp + prev_arg.exp)
+                elif (
+                    isinstance(new_arg, TensorPowerHilbertSpace)
+                    and new_arg.base == prev_arg
+                ):
+                    prev_arg = prev_arg ** (new_arg.exp + 1)
+                elif (
+                    isinstance(prev_arg, TensorPowerHilbertSpace)
+                    and new_arg == prev_arg.base
+                ):
+                    prev_arg = new_arg ** (prev_arg.exp + 1)
                 elif new_arg == prev_arg:
-                    prev_arg = new_arg**2
+                    prev_arg = new_arg ** 2
                 else:
                     comb_args.append(prev_arg)
                     prev_arg = new_arg
@@ -382,7 +401,7 @@ class TensorProductHilbertSpace(HilbertSpace):
         if oo in arg_list:
             return oo
         else:
-            return reduce(lambda x, y: x*y, arg_list)
+            return reduce(lambda x, y: x * y, arg_list)
 
     @property
     def spaces(self):
@@ -394,47 +413,49 @@ class TensorProductHilbertSpace(HilbertSpace):
         for arg in self.args:
             s = printer._print(arg, *args)
             if isinstance(arg, DirectSumHilbertSpace):
-                s = '(%s)' % s
+                s = "(%s)" % s
             spaces_strs.append(s)
         return spaces_strs
 
     def _sympyrepr(self, printer, *args):
         spaces_reprs = self._spaces_printer(printer, *args)
-        return "TensorProductHilbertSpace(%s)" % ','.join(spaces_reprs)
+        return "TensorProductHilbertSpace(%s)" % ",".join(spaces_reprs)
 
     def _sympystr(self, printer, *args):
         spaces_strs = self._spaces_printer(printer, *args)
-        return '*'.join(spaces_strs)
+        return "*".join(spaces_strs)
 
     def _pretty(self, printer, *args):
         length = len(self.args)
-        pform = printer._print('', *args)
+        pform = printer._print("", *args)
         for i in range(length):
             next_pform = printer._print(self.args[i], *args)
-            if isinstance(self.args[i], (DirectSumHilbertSpace,
-                          TensorProductHilbertSpace)):
-                next_pform = prettyForm(
-                    *next_pform.parens(left='(', right=')')
-                )
+            if isinstance(
+                self.args[i], (DirectSumHilbertSpace, TensorProductHilbertSpace)
+            ):
+                next_pform = prettyForm(*next_pform.parens(left="(", right=")"))
             pform = prettyForm(*pform.right(next_pform))
             if i != length - 1:
                 if printer._use_unicode:
-                    pform = prettyForm(*pform.right(u' ' + u'\N{N-ARY CIRCLED TIMES OPERATOR}' + u' '))
+                    pform = prettyForm(
+                        *pform.right(u" " + u"\N{N-ARY CIRCLED TIMES OPERATOR}" + u" ")
+                    )
                 else:
-                    pform = prettyForm(*pform.right(' x '))
+                    pform = prettyForm(*pform.right(" x "))
         return pform
 
     def _latex(self, printer, *args):
         length = len(self.args)
-        s = ''
+        s = ""
         for i in range(length):
             arg_s = printer._print(self.args[i], *args)
-            if isinstance(self.args[i], (DirectSumHilbertSpace,
-                 TensorProductHilbertSpace)):
-                arg_s = r'\left(%s\right)' % arg_s
+            if isinstance(
+                self.args[i], (DirectSumHilbertSpace, TensorProductHilbertSpace)
+            ):
+                arg_s = r"\left(%s\right)" % arg_s
             s = s + arg_s
             if i != length - 1:
-                s = s + r'\otimes '
+                s = s + r"\otimes "
         return s
 
 
@@ -469,6 +490,7 @@ class DirectSumHilbertSpace(HilbertSpace):
 
     .. [1] https://en.wikipedia.org/wiki/Hilbert_space#Direct_sums
     """
+
     def __new__(cls, *args):
         r = cls.eval(args)
         if isinstance(r, Basic):
@@ -481,7 +503,7 @@ class DirectSumHilbertSpace(HilbertSpace):
         """Evaluates the direct product."""
         new_args = []
         recall = False
-        #flatten arguments
+        # flatten arguments
         for arg in args:
             if isinstance(arg, DirectSumHilbertSpace):
                 new_args.extend(arg.args)
@@ -489,8 +511,11 @@ class DirectSumHilbertSpace(HilbertSpace):
             elif isinstance(arg, HilbertSpace):
                 new_args.append(arg)
             else:
-                raise TypeError('Hilbert spaces can only be summed with other \
-                Hilbert spaces: %r' % arg)
+                raise TypeError(
+                    "Hilbert spaces can only be summed with other \
+                Hilbert spaces: %r"
+                    % arg
+                )
         if recall:
             return DirectSumHilbertSpace(*new_args)
         else:
@@ -511,41 +536,41 @@ class DirectSumHilbertSpace(HilbertSpace):
 
     def _sympyrepr(self, printer, *args):
         spaces_reprs = [printer._print(arg, *args) for arg in self.args]
-        return "DirectSumHilbertSpace(%s)" % ','.join(spaces_reprs)
+        return "DirectSumHilbertSpace(%s)" % ",".join(spaces_reprs)
 
     def _sympystr(self, printer, *args):
         spaces_strs = [printer._print(arg, *args) for arg in self.args]
-        return '+'.join(spaces_strs)
+        return "+".join(spaces_strs)
 
     def _pretty(self, printer, *args):
         length = len(self.args)
-        pform = printer._print('', *args)
+        pform = printer._print("", *args)
         for i in range(length):
             next_pform = printer._print(self.args[i], *args)
-            if isinstance(self.args[i], (DirectSumHilbertSpace,
-                          TensorProductHilbertSpace)):
-                next_pform = prettyForm(
-                    *next_pform.parens(left='(', right=')')
-                )
+            if isinstance(
+                self.args[i], (DirectSumHilbertSpace, TensorProductHilbertSpace)
+            ):
+                next_pform = prettyForm(*next_pform.parens(left="(", right=")"))
             pform = prettyForm(*pform.right(next_pform))
             if i != length - 1:
                 if printer._use_unicode:
-                    pform = prettyForm(*pform.right(u' \N{CIRCLED PLUS} '))
+                    pform = prettyForm(*pform.right(u" \N{CIRCLED PLUS} "))
                 else:
-                    pform = prettyForm(*pform.right(' + '))
+                    pform = prettyForm(*pform.right(" + "))
         return pform
 
     def _latex(self, printer, *args):
         length = len(self.args)
-        s = ''
+        s = ""
         for i in range(length):
             arg_s = printer._print(self.args[i], *args)
-            if isinstance(self.args[i], (DirectSumHilbertSpace,
-                 TensorProductHilbertSpace)):
-                arg_s = r'\left(%s\right)' % arg_s
+            if isinstance(
+                self.args[i], (DirectSumHilbertSpace, TensorProductHilbertSpace)
+            ):
+                arg_s = r"\left(%s\right)" % arg_s
             s = s + arg_s
             if i != length - 1:
-                s = s + r'\oplus '
+                s = s + r"\oplus "
         return s
 
 
@@ -597,22 +622,28 @@ class TensorPowerHilbertSpace(HilbertSpace):
     def eval(cls, args):
         new_args = args[0], sympify(args[1])
         exp = new_args[1]
-        #simplify hs**1 -> hs
+        # simplify hs**1 -> hs
         if exp == 1:
             return args[0]
-        #simplify hs**0 -> 1
+        # simplify hs**0 -> 1
         if exp == 0:
             return sympify(1)
-        #check (and allow) for hs**(x+42+y...) case
+        # check (and allow) for hs**(x+42+y...) case
         if len(exp.atoms()) == 1:
             if not (exp.is_Integer and exp >= 0 or exp.is_Symbol):
-                raise ValueError('Hilbert spaces can only be raised to \
-                positive integers or Symbols: %r' % exp)
+                raise ValueError(
+                    "Hilbert spaces can only be raised to \
+                positive integers or Symbols: %r"
+                    % exp
+                )
         else:
             for power in exp.atoms():
                 if not (power.is_Integer or power.is_Symbol):
-                    raise ValueError('Tensor powers can only contain integers \
-                    or Symbols: %r' % power)
+                    raise ValueError(
+                        "Tensor powers can only contain integers \
+                    or Symbols: %r"
+                        % power
+                    )
         return new_args
 
     @property
@@ -628,26 +659,32 @@ class TensorPowerHilbertSpace(HilbertSpace):
         if self.base.dimension is oo:
             return oo
         else:
-            return self.base.dimension**self.exp
+            return self.base.dimension ** self.exp
 
     def _sympyrepr(self, printer, *args):
-        return "TensorPowerHilbertSpace(%s,%s)" % (printer._print(self.base,
-        *args), printer._print(self.exp, *args))
+        return "TensorPowerHilbertSpace(%s,%s)" % (
+            printer._print(self.base, *args),
+            printer._print(self.exp, *args),
+        )
 
     def _sympystr(self, printer, *args):
-        return "%s**%s" % (printer._print(self.base, *args),
-        printer._print(self.exp, *args))
+        return "%s**%s" % (
+            printer._print(self.base, *args),
+            printer._print(self.exp, *args),
+        )
 
     def _pretty(self, printer, *args):
         pform_exp = printer._print(self.exp, *args)
         if printer._use_unicode:
-            pform_exp = prettyForm(*pform_exp.left(prettyForm(u'\N{N-ARY CIRCLED TIMES OPERATOR}')))
+            pform_exp = prettyForm(
+                *pform_exp.left(prettyForm(u"\N{N-ARY CIRCLED TIMES OPERATOR}"))
+            )
         else:
-            pform_exp = prettyForm(*pform_exp.left(prettyForm('x')))
+            pform_exp = prettyForm(*pform_exp.left(prettyForm("x")))
         pform_base = printer._print(self.base, *args)
-        return pform_base**pform_exp
+        return pform_base ** pform_exp
 
     def _latex(self, printer, *args):
         base = printer._print(self.base, *args)
         exp = printer._print(self.exp, *args)
-        return r'{%s}^{\otimes %s}' % (base, exp)
+        return r"{%s}^{\otimes %s}" % (base, exp)

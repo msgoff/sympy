@@ -15,7 +15,14 @@ from sympy.assumptions.ask import Q
 @cacheit
 def get_all_known_facts():
     return {
-        frozenset((Literal(Q.algebraic, False), Literal(Q.complex, True), Literal(Q.finite, True), Literal(Q.transcendental, False))),
+        frozenset(
+            (
+                Literal(Q.algebraic, False),
+                Literal(Q.complex, True),
+                Literal(Q.finite, True),
+                Literal(Q.transcendental, False),
+            )
+        ),
         frozenset((Literal(Q.algebraic, False), Literal(Q.rational, True))),
         frozenset((Literal(Q.algebraic, True), Literal(Q.complex, False))),
         frozenset((Literal(Q.algebraic, True), Literal(Q.finite, False))),
@@ -27,25 +34,52 @@ def get_all_known_facts():
         frozenset((Literal(Q.complex, False), Literal(Q.transcendental, True))),
         frozenset((Literal(Q.complex_elements, False), Literal(Q.real_elements, True))),
         frozenset((Literal(Q.composite, True), Literal(Q.prime, True))),
-        frozenset((Literal(Q.diagonal, False), Literal(Q.lower_triangular, True), Literal(Q.upper_triangular, True))),
+        frozenset(
+            (
+                Literal(Q.diagonal, False),
+                Literal(Q.lower_triangular, True),
+                Literal(Q.upper_triangular, True),
+            )
+        ),
         frozenset((Literal(Q.diagonal, True), Literal(Q.lower_triangular, False))),
         frozenset((Literal(Q.diagonal, True), Literal(Q.normal, False))),
         frozenset((Literal(Q.diagonal, True), Literal(Q.symmetric, False))),
         frozenset((Literal(Q.diagonal, True), Literal(Q.upper_triangular, False))),
-        frozenset((Literal(Q.even, False), Literal(Q.integer, True), Literal(Q.odd, False))),
+        frozenset(
+            (Literal(Q.even, False), Literal(Q.integer, True), Literal(Q.odd, False))
+        ),
         frozenset((Literal(Q.even, False), Literal(Q.zero, True))),
         frozenset((Literal(Q.even, True), Literal(Q.integer, False))),
         frozenset((Literal(Q.even, True), Literal(Q.odd, True))),
         frozenset((Literal(Q.extended_real, False), Literal(Q.infinite, True))),
         frozenset((Literal(Q.extended_real, False), Literal(Q.real, True))),
-        frozenset((Literal(Q.extended_real, True), Literal(Q.infinite, False), Literal(Q.real, False))),
+        frozenset(
+            (
+                Literal(Q.extended_real, True),
+                Literal(Q.infinite, False),
+                Literal(Q.real, False),
+            )
+        ),
         frozenset((Literal(Q.finite, False), Literal(Q.irrational, True))),
         frozenset((Literal(Q.finite, False), Literal(Q.rational, True))),
         frozenset((Literal(Q.finite, False), Literal(Q.transcendental, True))),
         frozenset((Literal(Q.finite, True), Literal(Q.infinite, True))),
-        frozenset((Literal(Q.finite, True), Literal(Q.irrational, False), Literal(Q.rational, False), Literal(Q.real, True))),
+        frozenset(
+            (
+                Literal(Q.finite, True),
+                Literal(Q.irrational, False),
+                Literal(Q.rational, False),
+                Literal(Q.real, True),
+            )
+        ),
         frozenset((Literal(Q.fullrank, False), Literal(Q.invertible, True))),
-        frozenset((Literal(Q.fullrank, True), Literal(Q.invertible, False), Literal(Q.square, True))),
+        frozenset(
+            (
+                Literal(Q.fullrank, True),
+                Literal(Q.invertible, False),
+                Literal(Q.square, True),
+            )
+        ),
         frozenset((Literal(Q.hermitian, False), Literal(Q.real, True))),
         frozenset((Literal(Q.imaginary, True), Literal(Q.real, True))),
         frozenset((Literal(Q.integer, False), Literal(Q.odd, True))),
@@ -59,11 +93,36 @@ def get_all_known_facts():
         frozenset((Literal(Q.invertible, True), Literal(Q.square, False))),
         frozenset((Literal(Q.irrational, True), Literal(Q.rational, True))),
         frozenset((Literal(Q.irrational, True), Literal(Q.real, False))),
-        frozenset((Literal(Q.lower_triangular, False), Literal(Q.triangular, True), Literal(Q.upper_triangular, False))),
+        frozenset(
+            (
+                Literal(Q.lower_triangular, False),
+                Literal(Q.triangular, True),
+                Literal(Q.upper_triangular, False),
+            )
+        ),
         frozenset((Literal(Q.lower_triangular, True), Literal(Q.triangular, False))),
-        frozenset((Literal(Q.negative, False), Literal(Q.nonpositive, True), Literal(Q.zero, False))),
-        frozenset((Literal(Q.negative, False), Literal(Q.nonzero, True), Literal(Q.positive, False))),
-        frozenset((Literal(Q.negative, False), Literal(Q.positive, False), Literal(Q.real, True), Literal(Q.zero, False))),
+        frozenset(
+            (
+                Literal(Q.negative, False),
+                Literal(Q.nonpositive, True),
+                Literal(Q.zero, False),
+            )
+        ),
+        frozenset(
+            (
+                Literal(Q.negative, False),
+                Literal(Q.nonzero, True),
+                Literal(Q.positive, False),
+            )
+        ),
+        frozenset(
+            (
+                Literal(Q.negative, False),
+                Literal(Q.positive, False),
+                Literal(Q.real, True),
+                Literal(Q.zero, False),
+            )
+        ),
         frozenset((Literal(Q.negative, True), Literal(Q.nonpositive, False))),
         frozenset((Literal(Q.negative, True), Literal(Q.nonzero, False))),
         frozenset((Literal(Q.negative, True), Literal(Q.positive, True))),
@@ -71,12 +130,24 @@ def get_all_known_facts():
         frozenset((Literal(Q.negative, True), Literal(Q.zero, True))),
         frozenset((Literal(Q.nonnegative, False), Literal(Q.positive, True))),
         frozenset((Literal(Q.nonnegative, False), Literal(Q.zero, True))),
-        frozenset((Literal(Q.nonnegative, True), Literal(Q.positive, False), Literal(Q.zero, False))),
+        frozenset(
+            (
+                Literal(Q.nonnegative, True),
+                Literal(Q.positive, False),
+                Literal(Q.zero, False),
+            )
+        ),
         frozenset((Literal(Q.nonpositive, False), Literal(Q.zero, True))),
         frozenset((Literal(Q.nonzero, False), Literal(Q.positive, True))),
         frozenset((Literal(Q.normal, False), Literal(Q.unitary, True))),
         frozenset((Literal(Q.normal, True), Literal(Q.square, False))),
-        frozenset((Literal(Q.orthogonal, False), Literal(Q.real, True), Literal(Q.unitary, True))),
+        frozenset(
+            (
+                Literal(Q.orthogonal, False),
+                Literal(Q.real, True),
+                Literal(Q.unitary, True),
+            )
+        ),
         frozenset((Literal(Q.orthogonal, True), Literal(Q.positive_definite, False))),
         frozenset((Literal(Q.orthogonal, True), Literal(Q.unitary, False))),
         frozenset((Literal(Q.positive, False), Literal(Q.prime, True))),
@@ -86,8 +157,9 @@ def get_all_known_facts():
         frozenset((Literal(Q.real, False), Literal(Q.zero, True))),
         frozenset((Literal(Q.square, False), Literal(Q.symmetric, True))),
         frozenset((Literal(Q.triangular, False), Literal(Q.unit_triangular, True))),
-        frozenset((Literal(Q.triangular, False), Literal(Q.upper_triangular, True)))
+        frozenset((Literal(Q.triangular, False), Literal(Q.upper_triangular, True))),
     }
+
 
 # -{ Known facts in Conjunctive Normal Form }-
 @cacheit
@@ -164,8 +236,9 @@ def get_known_facts_cnf():
         Q.orthogonal | ~Q.real | ~Q.unitary,
         Q.negative | Q.positive | Q.zero | ~Q.real,
         Q.algebraic | Q.transcendental | ~Q.complex | ~Q.finite,
-        Q.irrational | Q.rational | ~Q.finite | ~Q.real
+        Q.irrational | Q.rational | ~Q.finite | ~Q.real,
     )
+
 
 # -{ Known facts in compressed sets }-
 @cacheit
@@ -177,47 +250,150 @@ def get_known_facts_dict():
         Q.complex: set([Q.complex]),
         Q.complex_elements: set([Q.complex_elements]),
         Q.composite: set([Q.composite]),
-        Q.diagonal: set([Q.diagonal, Q.lower_triangular, Q.normal, Q.square,
-        Q.symmetric, Q.triangular, Q.upper_triangular]),
-        Q.even: set([Q.algebraic, Q.complex, Q.even, Q.extended_real,
-        Q.finite, Q.hermitian, Q.integer, Q.rational, Q.real]),
+        Q.diagonal: set(
+            [
+                Q.diagonal,
+                Q.lower_triangular,
+                Q.normal,
+                Q.square,
+                Q.symmetric,
+                Q.triangular,
+                Q.upper_triangular,
+            ]
+        ),
+        Q.even: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.even,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.integer,
+                Q.rational,
+                Q.real,
+            ]
+        ),
         Q.extended_real: set([Q.extended_real]),
         Q.finite: set([Q.finite]),
         Q.fullrank: set([Q.fullrank]),
         Q.hermitian: set([Q.hermitian]),
         Q.imaginary: set([Q.antihermitian, Q.complex, Q.imaginary]),
         Q.infinite: set([Q.extended_real, Q.infinite]),
-        Q.integer: set([Q.algebraic, Q.complex, Q.extended_real, Q.finite,
-        Q.hermitian, Q.integer, Q.rational, Q.real]),
-        Q.integer_elements: set([Q.complex_elements, Q.integer_elements,
-        Q.real_elements]),
+        Q.integer: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.integer,
+                Q.rational,
+                Q.real,
+            ]
+        ),
+        Q.integer_elements: set(
+            [Q.complex_elements, Q.integer_elements, Q.real_elements]
+        ),
         Q.invertible: set([Q.fullrank, Q.invertible, Q.square]),
-        Q.irrational: set([Q.complex, Q.extended_real, Q.finite, Q.hermitian,
-        Q.irrational, Q.nonzero, Q.real]),
+        Q.irrational: set(
+            [
+                Q.complex,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.irrational,
+                Q.nonzero,
+                Q.real,
+            ]
+        ),
         Q.is_true: set([Q.is_true]),
         Q.lower_triangular: set([Q.lower_triangular, Q.triangular]),
-        Q.negative: set([Q.complex, Q.extended_real, Q.hermitian, Q.negative,
-        Q.nonpositive, Q.nonzero, Q.real]),
-        Q.nonnegative: set([Q.complex, Q.extended_real, Q.hermitian,
-        Q.nonnegative, Q.real]),
-        Q.nonpositive: set([Q.complex, Q.extended_real, Q.hermitian,
-        Q.nonpositive, Q.real]),
-        Q.nonzero: set([Q.complex, Q.extended_real, Q.hermitian, Q.nonzero,
-        Q.real]),
+        Q.negative: set(
+            [
+                Q.complex,
+                Q.extended_real,
+                Q.hermitian,
+                Q.negative,
+                Q.nonpositive,
+                Q.nonzero,
+                Q.real,
+            ]
+        ),
+        Q.nonnegative: set(
+            [Q.complex, Q.extended_real, Q.hermitian, Q.nonnegative, Q.real]
+        ),
+        Q.nonpositive: set(
+            [Q.complex, Q.extended_real, Q.hermitian, Q.nonpositive, Q.real]
+        ),
+        Q.nonzero: set([Q.complex, Q.extended_real, Q.hermitian, Q.nonzero, Q.real]),
         Q.normal: set([Q.normal, Q.square]),
-        Q.odd: set([Q.algebraic, Q.complex, Q.extended_real, Q.finite,
-        Q.hermitian, Q.integer, Q.nonzero, Q.odd, Q.rational, Q.real]),
-        Q.orthogonal: set([Q.fullrank, Q.invertible, Q.normal, Q.orthogonal,
-        Q.positive_definite, Q.square, Q.unitary]),
-        Q.positive: set([Q.complex, Q.extended_real, Q.hermitian,
-        Q.nonnegative, Q.nonzero, Q.positive, Q.real]),
-        Q.positive_definite: set([Q.fullrank, Q.invertible,
-        Q.positive_definite, Q.square]),
-        Q.prime: set([Q.algebraic, Q.complex, Q.extended_real, Q.finite,
-        Q.hermitian, Q.integer, Q.nonnegative, Q.nonzero, Q.positive,
-        Q.prime, Q.rational, Q.real]),
-        Q.rational: set([Q.algebraic, Q.complex, Q.extended_real, Q.finite,
-        Q.hermitian, Q.rational, Q.real]),
+        Q.odd: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.integer,
+                Q.nonzero,
+                Q.odd,
+                Q.rational,
+                Q.real,
+            ]
+        ),
+        Q.orthogonal: set(
+            [
+                Q.fullrank,
+                Q.invertible,
+                Q.normal,
+                Q.orthogonal,
+                Q.positive_definite,
+                Q.square,
+                Q.unitary,
+            ]
+        ),
+        Q.positive: set(
+            [
+                Q.complex,
+                Q.extended_real,
+                Q.hermitian,
+                Q.nonnegative,
+                Q.nonzero,
+                Q.positive,
+                Q.real,
+            ]
+        ),
+        Q.positive_definite: set(
+            [Q.fullrank, Q.invertible, Q.positive_definite, Q.square]
+        ),
+        Q.prime: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.integer,
+                Q.nonnegative,
+                Q.nonzero,
+                Q.positive,
+                Q.prime,
+                Q.rational,
+                Q.real,
+            ]
+        ),
+        Q.rational: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.rational,
+                Q.real,
+            ]
+        ),
         Q.real: set([Q.complex, Q.extended_real, Q.hermitian, Q.real]),
         Q.real_elements: set([Q.complex_elements, Q.real_elements]),
         Q.singular: set([Q.singular]),
@@ -226,10 +402,22 @@ def get_known_facts_dict():
         Q.transcendental: set([Q.complex, Q.finite, Q.transcendental]),
         Q.triangular: set([Q.triangular]),
         Q.unit_triangular: set([Q.triangular, Q.unit_triangular]),
-        Q.unitary: set([Q.fullrank, Q.invertible, Q.normal, Q.square,
-        Q.unitary]),
+        Q.unitary: set([Q.fullrank, Q.invertible, Q.normal, Q.square, Q.unitary]),
         Q.upper_triangular: set([Q.triangular, Q.upper_triangular]),
-        Q.zero: set([Q.algebraic, Q.complex, Q.even, Q.extended_real,
-        Q.finite, Q.hermitian, Q.integer, Q.nonnegative,
-        Q.nonpositive, Q.rational, Q.real, Q.zero]),
+        Q.zero: set(
+            [
+                Q.algebraic,
+                Q.complex,
+                Q.even,
+                Q.extended_real,
+                Q.finite,
+                Q.hermitian,
+                Q.integer,
+                Q.nonnegative,
+                Q.nonpositive,
+                Q.rational,
+                Q.real,
+                Q.zero,
+            ]
+        ),
     }

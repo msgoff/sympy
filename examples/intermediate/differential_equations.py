@@ -19,7 +19,7 @@ def main():
     eq = Eq(f(x).diff(x, 2), -f(x))
     print("Solution for ", eq, " : ", dsolve(eq, f(x)))
 
-    eq = Eq(x**2*f(x).diff(x), -3*x*f(x) + sin(x)/x)
+    eq = Eq(x ** 2 * f(x).diff(x), -3 * x * f(x) + sin(x) / x)
     print("Solution for ", eq, " : ", dsolve(eq, f(x)))
 
 

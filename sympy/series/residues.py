@@ -9,7 +9,7 @@ from sympy import sympify
 from sympy.utilities.timeutils import timethis
 
 
-@timethis('residue')
+@timethis("residue")
 def residue(expr, x, x0):
     """
     Finds the residue of ``expr`` at the point x=x0.
@@ -49,6 +49,7 @@ def residue(expr, x, x0):
     # previous sections for more review).
 
     from sympy import collect, Mul, Order, S
+
     expr = sympify(expr)
     if x0 != 0:
         expr = expr.subs(x, x + x0)
@@ -69,7 +70,7 @@ def residue(expr, x, x0):
         c, m = arg.as_coeff_mul(x)
         m = Mul(*m)
         if not (m == 1 or m == x or (m.is_Pow and m.exp.is_Integer)):
-            raise NotImplementedError('term of unexpected form: %s' % m)
-        if m == 1/x:
+            raise NotImplementedError("term of unexpected form: %s" % m)
+        if m == 1 / x:
             res += c
     return res

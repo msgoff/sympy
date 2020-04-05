@@ -26,6 +26,7 @@ class Prefix(Expr):
     - defines multiplication with prefixes (which is the case for the Unit
       class).
     """
+
     _op_priority = 13.0
     is_commutative = True
 
@@ -39,7 +40,7 @@ class Prefix(Expr):
         obj = Expr.__new__(cls, name, abbrev, exponent, base)
         obj._name = name
         obj._abbrev = abbrev
-        obj._scale_factor = base**exponent
+        obj._scale_factor = base ** exponent
         obj._exponent = exponent
         obj._base = base
         return obj
@@ -64,15 +65,23 @@ class Prefix(Expr):
         # TODO: add proper printers and tests:
         if self.base == 10:
             return "Prefix(%r, %r, %r)" % (
-                str(self.name), str(self.abbrev), self._exponent)
+                str(self.name),
+                str(self.abbrev),
+                self._exponent,
+            )
         else:
             return "Prefix(%r, %r, %r, %r)" % (
-                str(self.name), str(self.abbrev), self._exponent, self.base)
+                str(self.name),
+                str(self.abbrev),
+                self._exponent,
+                self.base,
+            )
 
     __repr__ = __str__
 
     def __mul__(self, other):
         from sympy.physics.units import Quantity
+
         if not isinstance(other, (Quantity, Prefix)):
             return super(Prefix, self).__mul__(other)
 
@@ -140,77 +149,80 @@ def prefix_unit(unit, prefixes):
 
     for prefix_abbr, prefix in prefixes.items():
         quantity = Quantity(
-                "%s%s" % (prefix.name, unit.name),
-                abbrev=("%s%s" % (prefix.abbrev, unit.abbrev))
-           )
+            "%s%s" % (prefix.name, unit.name),
+            abbrev=("%s%s" % (prefix.abbrev, unit.abbrev)),
+        )
         UnitSystem._quantity_dimensional_equivalence_map_global[quantity] = unit
-        UnitSystem._quantity_scale_factors_global[quantity] = (prefix.scale_factor, unit)
+        UnitSystem._quantity_scale_factors_global[quantity] = (
+            prefix.scale_factor,
+            unit,
+        )
         prefixed_units.append(quantity)
 
     return prefixed_units
 
 
-yotta = Prefix('yotta', 'Y', 24)
-zetta = Prefix('zetta', 'Z', 21)
-exa = Prefix('exa', 'E', 18)
-peta = Prefix('peta', 'P', 15)
-tera = Prefix('tera', 'T', 12)
-giga = Prefix('giga', 'G', 9)
-mega = Prefix('mega', 'M', 6)
-kilo = Prefix('kilo', 'k', 3)
-hecto = Prefix('hecto', 'h', 2)
-deca = Prefix('deca', 'da', 1)
-deci = Prefix('deci', 'd', -1)
-centi = Prefix('centi', 'c', -2)
-milli = Prefix('milli', 'm', -3)
-micro = Prefix('micro', 'mu', -6)
-nano = Prefix('nano', 'n', -9)
-pico = Prefix('pico', 'p', -12)
-femto = Prefix('femto', 'f', -15)
-atto = Prefix('atto', 'a', -18)
-zepto = Prefix('zepto', 'z', -21)
-yocto = Prefix('yocto', 'y', -24)
+yotta = Prefix("yotta", "Y", 24)
+zetta = Prefix("zetta", "Z", 21)
+exa = Prefix("exa", "E", 18)
+peta = Prefix("peta", "P", 15)
+tera = Prefix("tera", "T", 12)
+giga = Prefix("giga", "G", 9)
+mega = Prefix("mega", "M", 6)
+kilo = Prefix("kilo", "k", 3)
+hecto = Prefix("hecto", "h", 2)
+deca = Prefix("deca", "da", 1)
+deci = Prefix("deci", "d", -1)
+centi = Prefix("centi", "c", -2)
+milli = Prefix("milli", "m", -3)
+micro = Prefix("micro", "mu", -6)
+nano = Prefix("nano", "n", -9)
+pico = Prefix("pico", "p", -12)
+femto = Prefix("femto", "f", -15)
+atto = Prefix("atto", "a", -18)
+zepto = Prefix("zepto", "z", -21)
+yocto = Prefix("yocto", "y", -24)
 
 
 # http://physics.nist.gov/cuu/Units/prefixes.html
 PREFIXES = {
-    'Y': yotta,
-    'Z': zetta,
-    'E': exa,
-    'P': peta,
-    'T': tera,
-    'G': giga,
-    'M': mega,
-    'k': kilo,
-    'h': hecto,
-    'da': deca,
-    'd': deci,
-    'c': centi,
-    'm': milli,
-    'mu': micro,
-    'n': nano,
-    'p': pico,
-    'f': femto,
-    'a': atto,
-    'z': zepto,
-    'y': yocto,
+    "Y": yotta,
+    "Z": zetta,
+    "E": exa,
+    "P": peta,
+    "T": tera,
+    "G": giga,
+    "M": mega,
+    "k": kilo,
+    "h": hecto,
+    "da": deca,
+    "d": deci,
+    "c": centi,
+    "m": milli,
+    "mu": micro,
+    "n": nano,
+    "p": pico,
+    "f": femto,
+    "a": atto,
+    "z": zepto,
+    "y": yocto,
 }
 
 
-kibi = Prefix('kibi', 'Y', 10, 2)
-mebi = Prefix('mebi', 'Y', 20, 2)
-gibi = Prefix('gibi', 'Y', 30, 2)
-tebi = Prefix('tebi', 'Y', 40, 2)
-pebi = Prefix('pebi', 'Y', 50, 2)
-exbi = Prefix('exbi', 'Y', 60, 2)
+kibi = Prefix("kibi", "Y", 10, 2)
+mebi = Prefix("mebi", "Y", 20, 2)
+gibi = Prefix("gibi", "Y", 30, 2)
+tebi = Prefix("tebi", "Y", 40, 2)
+pebi = Prefix("pebi", "Y", 50, 2)
+exbi = Prefix("exbi", "Y", 60, 2)
 
 
 # http://physics.nist.gov/cuu/Units/binary.html
 BIN_PREFIXES = {
-    'Ki': kibi,
-    'Mi': mebi,
-    'Gi': gibi,
-    'Ti': tebi,
-    'Pi': pebi,
-    'Ei': exbi,
+    "Ki": kibi,
+    "Mi": mebi,
+    "Gi": gibi,
+    "Ti": tebi,
+    "Pi": pebi,
+    "Ei": exbi,
 }

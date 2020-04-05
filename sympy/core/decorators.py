@@ -19,26 +19,32 @@ def deprecated(**decorator_kwargs):
     from sympy.utilities.exceptions import SymPyDeprecationWarning
 
     def _warn_deprecation(wrapped, stacklevel):
-        decorator_kwargs.setdefault('feature', wrapped.__name__)
+        decorator_kwargs.setdefault("feature", wrapped.__name__)
         SymPyDeprecationWarning(**decorator_kwargs).warn(stacklevel=stacklevel)
 
     def deprecated_decorator(wrapped):
-        if hasattr(wrapped, '__mro__'):  # wrapped is actually a class
+        if hasattr(wrapped, "__mro__"):  # wrapped is actually a class
+
             class wrapper(wrapped):
                 __doc__ = wrapped.__doc__
                 __name__ = wrapped.__name__
                 __module__ = wrapped.__module__
                 _sympy_deprecated_func = wrapped
+
                 def __init__(self, *args, **kwargs):
                     _warn_deprecation(wrapped, 4)
                     super(wrapper, self).__init__(*args, **kwargs)
+
         else:
+
             @wraps(wrapped)
             def wrapper(*args, **kwargs):
                 _warn_deprecation(wrapped, 3)
                 return wrapped(*args, **kwargs)
+
             wrapper._sympy_deprecated_func = wrapped
         return wrapper
+
     return deprecated_decorator
 
 
@@ -58,6 +64,7 @@ def _sympifyit(arg, retval=None):
 
        see: __sympifyit
     """
+
     def deco(func):
         return __sympifyit(func, arg, retval)
 
@@ -76,17 +83,19 @@ def __sympifyit(func, arg, retval=None):
     # only b is _sympified
     assert get_function_code(func).co_varnames[1] == arg
     if retval is None:
+
         @wraps(func)
         def __sympifyit_wrapper(a, b):
             return func(a, sympify(b, strict=True))
 
     else:
+
         @wraps(func)
         def __sympifyit_wrapper(a, b):
             try:
                 # If an external class has _op_priority, it knows how to deal
                 # with sympy objects. Otherwise, it must be converted.
-                if not hasattr(b, '_op_priority'):
+                if not hasattr(b, "_op_priority"):
                     b = sympify(b, strict=True)
                 return func(a, b)
             except SympifyError:
@@ -118,21 +127,24 @@ def call_highest_priority(method_name):
         def __rmul__(self, other):
         ...
     """
+
     def priority_decorator(func):
         @wraps(func)
         def binary_op_wrapper(self, other):
-            if hasattr(other, '_op_priority'):
+            if hasattr(other, "_op_priority"):
                 if other._op_priority > self._op_priority:
                     f = getattr(other, method_name, None)
                     if f is not None:
                         return f(self)
             return func(self, other)
+
         return binary_op_wrapper
+
     return priority_decorator
 
 
 def sympify_method_args(cls):
-    '''Decorator for a class with methods that sympify arguments.
+    """Decorator for a class with methods that sympify arguments.
 
     The sympify_method_args decorator is to be used with the sympify_return
     decorator for automatic sympification of method arguments. This is
@@ -188,7 +200,7 @@ def sympify_method_args(cls):
     Notes: Currently sympify_return only works for methods that take a single
     argument (not including self). Specifying an expected_type as a string
     only works for the class in which the method is defined.
-    '''
+    """
     # Extract the wrapped methods from each of the wrapper objects created by
     # the sympify_return decorator. Doing this here allows us to provide the
     # cls argument which is used for forward string referencing.
@@ -199,18 +211,19 @@ def sympify_method_args(cls):
 
 
 def sympify_return(*args):
-    '''Function/method decorator to sympify arguments automatically
+    """Function/method decorator to sympify arguments automatically
 
     See the docstring of sympify_method_args for explanation.
-    '''
+    """
     # Store a wrapper object for the decorated method
     def wrapper(func):
         return _SympifyWrapper(func, args)
+
     return wrapper
 
 
 class _SympifyWrapper(object):
-    '''Internal class used by sympify_return and sympify_method_args'''
+    """Internal class used by sympify_return and sympify_method_args"""
 
     def __init__(self, func, args):
         self.func = func
@@ -232,18 +245,21 @@ class _SympifyWrapper(object):
         nargs = get_function_code(func).co_argcount
         # we support f(a, b) only
         if nargs != 2:
-            raise RuntimeError('sympify_return can only be used with 2 argument functions')
+            raise RuntimeError(
+                "sympify_return can only be used with 2 argument functions"
+            )
         # only b is _sympified
         if get_function_code(func).co_varnames[1] != parameter:
-            raise RuntimeError('parameter name mismatch "%s" in %s' %
-                    (parameter, func.__name__))
+            raise RuntimeError(
+                'parameter name mismatch "%s" in %s' % (parameter, func.__name__)
+            )
 
         @wraps(func)
         def _func(self, other):
             # XXX: The check for _op_priority here should be removed. It is
             # needed to stop mutable matrices from being sympified to
             # immutable matrices which breaks things in quantum...
-            if not hasattr(other, '_op_priority'):
+            if not hasattr(other, "_op_priority"):
                 try:
                     other = sympify(other, strict=True)
                 except SympifyError:

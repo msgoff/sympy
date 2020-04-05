@@ -1,13 +1,19 @@
 from sympy import Mul, Basic, Q, Expr, And, symbols, Equivalent, Or
 from sympy.assumptions.cnf import to_NNF
 
-from sympy.assumptions.sathandlers import (ClassFactRegistry, AllArgs,
-    UnevaluatedOnFree, AnyArgs, CheckOldAssump, ExactlyOneArg)
+from sympy.assumptions.sathandlers import (
+    ClassFactRegistry,
+    AllArgs,
+    UnevaluatedOnFree,
+    AnyArgs,
+    CheckOldAssump,
+    ExactlyOneArg,
+)
 
 from sympy.testing.pytest import raises
 
 
-x, y, z = symbols('x y z')
+x, y, z = symbols("x y z")
 
 
 def test_class_handler_registry():
@@ -28,7 +34,7 @@ def test_class_handler_registry():
 def test_UnevaluatedOnFree():
     a = UnevaluatedOnFree(Q.positive)
     b = UnevaluatedOnFree(Q.positive | Q.negative)
-    c = UnevaluatedOnFree(Q.positive & ~Q.positive) # It shouldn't do any deduction
+    c = UnevaluatedOnFree(Q.positive & ~Q.positive)  # It shouldn't do any deduction
     assert a.rcall(x) == UnevaluatedOnFree(Q.positive(x))
     assert b.rcall(x) == UnevaluatedOnFree(Q.positive(x) | Q.negative(x))
     assert c.rcall(x) == UnevaluatedOnFree(Q.positive(x) & ~Q.positive(x))
@@ -36,8 +42,7 @@ def test_UnevaluatedOnFree():
     assert a.rcall(x).pred == Q.positive
     assert b.rcall(x).pred == Q.positive | Q.negative
     raises(ValueError, lambda: UnevaluatedOnFree(Q.positive(x) | Q.negative))
-    raises(ValueError, lambda: UnevaluatedOnFree(Q.positive(x) |
-        Q.negative(y)))
+    raises(ValueError, lambda: UnevaluatedOnFree(Q.positive(x) | Q.negative(y)))
 
     class MyUnevaluatedOnFree(UnevaluatedOnFree):
         def apply(self, expr=None):
@@ -57,15 +62,19 @@ def test_UnevaluatedOnFree():
 def test_AllArgs():
     a = AllArgs(Q.zero)
     b = AllArgs(Q.positive | Q.negative)
-    assert a.rcall(x*y) == to_NNF(And(Q.zero(x), Q.zero(y)))
-    assert b.rcall(x*y) == to_NNF(And(Q.positive(x) | Q.negative(x), Q.positive(y) | Q.negative(y)))
+    assert a.rcall(x * y) == to_NNF(And(Q.zero(x), Q.zero(y)))
+    assert b.rcall(x * y) == to_NNF(
+        And(Q.positive(x) | Q.negative(x), Q.positive(y) | Q.negative(y))
+    )
 
 
 def test_AnyArgs():
     a = AnyArgs(Q.zero)
     b = AnyArgs(Q.positive & Q.negative)
-    assert a.rcall(x*y) == to_NNF(Or(Q.zero(x), Q.zero(y)))
-    assert b.rcall(x*y) == to_NNF(Or(Q.positive(x) & Q.negative(x), Q.positive(y) & Q.negative(y)))
+    assert a.rcall(x * y) == to_NNF(Or(Q.zero(x), Q.zero(y)))
+    assert b.rcall(x * y) == to_NNF(
+        Or(Q.positive(x) & Q.negative(x), Q.positive(y) & Q.negative(y))
+    )
 
 
 def test_CheckOldAssump():
@@ -74,14 +83,17 @@ def test_CheckOldAssump():
     class Test1(Expr):
         def _eval_is_extended_positive(self):
             return True
+
         def _eval_is_extended_negative(self):
             return False
 
     class Test2(Expr):
         def _eval_is_finite(self):
             return True
+
         def _eval_is_extended_positive(self):
             return True
+
         def _eval_is_extended_negative(self):
             return False
 
@@ -101,9 +113,17 @@ def test_CheckOldAssump():
 def test_ExactlyOneArg():
     a = ExactlyOneArg(Q.zero)
     b = ExactlyOneArg(Q.positive | Q.negative)
-    assert a.rcall(x*y) == to_NNF(Or(Q.zero(x) & ~Q.zero(y), Q.zero(y) & ~Q.zero(x)))
-    assert a.rcall(x*y*z) == to_NNF(Or(Q.zero(x) & ~Q.zero(y) & ~Q.zero(z), Q.zero(y)
-        & ~Q.zero(x) & ~Q.zero(z), Q.zero(z) & ~Q.zero(x) & ~Q.zero(y)))
-    assert b.rcall(x*y) == to_NNF(Or((Q.positive(x) | Q.negative(x)) &
-        ~(Q.positive(y) | Q.negative(y)), (Q.positive(y) | Q.negative(y)) &
-        ~(Q.positive(x) | Q.negative(x))))
+    assert a.rcall(x * y) == to_NNF(Or(Q.zero(x) & ~Q.zero(y), Q.zero(y) & ~Q.zero(x)))
+    assert a.rcall(x * y * z) == to_NNF(
+        Or(
+            Q.zero(x) & ~Q.zero(y) & ~Q.zero(z),
+            Q.zero(y) & ~Q.zero(x) & ~Q.zero(z),
+            Q.zero(z) & ~Q.zero(x) & ~Q.zero(y),
+        )
+    )
+    assert b.rcall(x * y) == to_NNF(
+        Or(
+            (Q.positive(x) | Q.negative(x)) & ~(Q.positive(y) | Q.negative(y)),
+            (Q.positive(y) | Q.negative(y)) & ~(Q.positive(x) | Q.negative(x)),
+        )
+    )

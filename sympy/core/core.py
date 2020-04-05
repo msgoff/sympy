@@ -6,40 +6,86 @@ from __future__ import print_function, division
 # FIXME this is *so* irrelevant and outdated!
 ordering_of_classes = [
     # singleton numbers
-    'Zero', 'One', 'Half', 'Infinity', 'NaN', 'NegativeOne', 'NegativeInfinity',
+    "Zero",
+    "One",
+    "Half",
+    "Infinity",
+    "NaN",
+    "NegativeOne",
+    "NegativeInfinity",
     # numbers
-    'Integer', 'Rational', 'Float',
+    "Integer",
+    "Rational",
+    "Float",
     # singleton symbols
-    'Exp1', 'Pi', 'ImaginaryUnit',
+    "Exp1",
+    "Pi",
+    "ImaginaryUnit",
     # symbols
-    'Symbol', 'Wild', 'Temporary',
+    "Symbol",
+    "Wild",
+    "Temporary",
     # arithmetic operations
-    'Pow', 'Mul', 'Add',
+    "Pow",
+    "Mul",
+    "Add",
     # function values
-    'Derivative', 'Integral',
+    "Derivative",
+    "Integral",
     # defined singleton functions
-    'Abs', 'Sign', 'Sqrt',
-    'Floor', 'Ceiling',
-    'Re', 'Im', 'Arg',
-    'Conjugate',
-    'Exp', 'Log',
-    'Sin', 'Cos', 'Tan', 'Cot', 'ASin', 'ACos', 'ATan', 'ACot',
-    'Sinh', 'Cosh', 'Tanh', 'Coth', 'ASinh', 'ACosh', 'ATanh', 'ACoth',
-    'RisingFactorial', 'FallingFactorial',
-    'factorial', 'binomial',
-    'Gamma', 'LowerGamma', 'UpperGamma', 'PolyGamma',
-    'Erf',
+    "Abs",
+    "Sign",
+    "Sqrt",
+    "Floor",
+    "Ceiling",
+    "Re",
+    "Im",
+    "Arg",
+    "Conjugate",
+    "Exp",
+    "Log",
+    "Sin",
+    "Cos",
+    "Tan",
+    "Cot",
+    "ASin",
+    "ACos",
+    "ATan",
+    "ACot",
+    "Sinh",
+    "Cosh",
+    "Tanh",
+    "Coth",
+    "ASinh",
+    "ACosh",
+    "ATanh",
+    "ACoth",
+    "RisingFactorial",
+    "FallingFactorial",
+    "factorial",
+    "binomial",
+    "Gamma",
+    "LowerGamma",
+    "UpperGamma",
+    "PolyGamma",
+    "Erf",
     # special polynomials
-    'Chebyshev', 'Chebyshev2',
+    "Chebyshev",
+    "Chebyshev2",
     # undefined functions
-    'Function', 'WildFunction',
+    "Function",
+    "WildFunction",
     # anonymous functions
-    'Lambda',
+    "Lambda",
     # Landau O symbol
-    'Order',
+    "Order",
     # relational operations
-    'Equality', 'Unequality', 'StrictGreaterThan', 'StrictLessThan',
-    'GreaterThan', 'LessThan',
+    "Equality",
+    "Unequality",
+    "StrictGreaterThan",
+    "StrictLessThan",
+    "GreaterThan",
+    "LessThan",
 ]
 
 
@@ -53,6 +99,7 @@ class Registry(object):
 
     All subclasses should set `__slots__ = ()`.
     """
+
     __slots__ = ()
 
     def __setattr__(self, name, obj):
@@ -61,12 +108,12 @@ class Registry(object):
     def __delattr__(self, name):
         delattr(self.__class__, name)
 
-#A set containing all sympy class objects
+
+# A set containing all sympy class objects
 all_classes = set()
 
 
 class BasicMeta(type):
-
     def __init__(cls, *args, **kws):
         all_classes.add(cls)
         cls.__sympy__ = property(lambda self: True)

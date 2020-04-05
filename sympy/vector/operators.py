@@ -166,12 +166,15 @@ def curl(vect, coord_sys=None, doit=True):
         vecty = vect.dot(j)
         vectz = vect.dot(k)
         outvec = Vector.zero
-        outvec += (Derivative(vectz * h3, y) -
-                   Derivative(vecty * h2, z)) * i / (h2 * h3)
-        outvec += (Derivative(vectx * h1, z) -
-                   Derivative(vectz * h3, x)) * j / (h1 * h3)
-        outvec += (Derivative(vecty * h2, x) -
-                   Derivative(vectx * h1, y)) * k / (h2 * h1)
+        outvec += (
+            (Derivative(vectz * h3, y) - Derivative(vecty * h2, z)) * i / (h2 * h3)
+        )
+        outvec += (
+            (Derivative(vectx * h1, z) - Derivative(vectz * h3, x)) * j / (h1 * h3)
+        )
+        outvec += (
+            (Derivative(vecty * h2, x) - Derivative(vectx * h1, y)) * k / (h2 * h1)
+        )
 
         if doit:
             return outvec.doit()
@@ -179,6 +182,7 @@ def curl(vect, coord_sys=None, doit=True):
     else:
         if isinstance(vect, (Add, VectorAdd)):
             from sympy.vector import express
+
             try:
                 cs = next(iter(coord_sys))
                 args = [express(i, cs, variables=True) for i in vect.args]
@@ -186,9 +190,15 @@ def curl(vect, coord_sys=None, doit=True):
                 args = vect.args
             return VectorAdd.fromiter(curl(i, doit=doit) for i in args)
         elif isinstance(vect, (Mul, VectorMul)):
-            vector = [i for i in vect.args if isinstance(i, (Vector, Cross, Gradient))][0]
-            scalar = Mul.fromiter(i for i in vect.args if not isinstance(i, (Vector, Cross, Gradient)))
-            res = Cross(gradient(scalar), vector).doit() + scalar*curl(vector, doit=doit)
+            vector = [i for i in vect.args if isinstance(i, (Vector, Cross, Gradient))][
+                0
+            ]
+            scalar = Mul.fromiter(
+                i for i in vect.args if not isinstance(i, (Vector, Cross, Gradient))
+            )
+            res = Cross(gradient(scalar), vector).doit() + scalar * curl(
+                vector, doit=doit
+            )
             if doit:
                 return res.doit()
             return res
@@ -243,12 +253,9 @@ def divergence(vect, coord_sys=None, doit=True):
         i, j, k = coord_sys.base_vectors()
         x, y, z = coord_sys.base_scalars()
         h1, h2, h3 = coord_sys.lame_coefficients()
-        vx = _diff_conditional(vect.dot(i), x, h2, h3) \
-             / (h1 * h2 * h3)
-        vy = _diff_conditional(vect.dot(j), y, h3, h1) \
-             / (h1 * h2 * h3)
-        vz = _diff_conditional(vect.dot(k), z, h1, h2) \
-             / (h1 * h2 * h3)
+        vx = _diff_conditional(vect.dot(i), x, h2, h3) / (h1 * h2 * h3)
+        vy = _diff_conditional(vect.dot(j), y, h3, h1) / (h1 * h2 * h3)
+        vz = _diff_conditional(vect.dot(k), z, h1, h2) / (h1 * h2 * h3)
         res = vx + vy + vz
         if doit:
             return res.doit()
@@ -257,9 +264,13 @@ def divergence(vect, coord_sys=None, doit=True):
         if isinstance(vect, (Add, VectorAdd)):
             return Add.fromiter(divergence(i, doit=doit) for i in vect.args)
         elif isinstance(vect, (Mul, VectorMul)):
-            vector = [i for i in vect.args if isinstance(i, (Vector, Cross, Gradient))][0]
-            scalar = Mul.fromiter(i for i in vect.args if not isinstance(i, (Vector, Cross, Gradient)))
-            res = Dot(vector, gradient(scalar)) + scalar*divergence(vector, doit=doit)
+            vector = [i for i in vect.args if isinstance(i, (Vector, Cross, Gradient))][
+                0
+            ]
+            scalar = Mul.fromiter(
+                i for i in vect.args if not isinstance(i, (Vector, Cross, Gradient))
+            )
+            res = Dot(vector, gradient(scalar)) + scalar * divergence(vector, doit=doit)
             if doit:
                 return res.doit()
             return res
@@ -350,6 +361,7 @@ class Laplacian(Expr):
 
     def doit(self, **kwargs):
         from sympy.vector.functions import laplacian
+
         return laplacian(self._expr)
 
 
@@ -361,6 +373,7 @@ def _diff_conditional(expr, base_scalar, coeff_1, coeff_2):
     Else, returns 0
     """
     from sympy.vector.functions import express
+
     new_expr = express(expr, base_scalar.system, variables=True)
     if base_scalar in new_expr.atoms(BaseScalar):
         return Derivative(coeff_1 * coeff_2 * new_expr, base_scalar)

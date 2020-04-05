@@ -6,6 +6,7 @@ from sympy.polys.domains.ring import Ring
 from sympy.polys.polyerrors import NotReversible, DomainError
 from sympy.utilities import public
 
+
 @public
 class Field(Ring):
     """Represents a field domain. """
@@ -15,7 +16,7 @@ class Field(Ring):
 
     def get_ring(self):
         """Returns a ring associated with ``self``. """
-        raise DomainError('there is no ring associated with %s' % self)
+        raise DomainError("there is no ring associated with %s" % self)
 
     def get_field(self):
         """Returns a field associated with ``self``. """
@@ -67,7 +68,7 @@ class Field(Ring):
         p = ring.gcd(self.numer(a), self.numer(b))
         q = ring.lcm(self.denom(a), self.denom(b))
 
-        return self.convert(p, ring)/q
+        return self.convert(p, ring) / q
 
     def lcm(self, a, b):
         """
@@ -86,16 +87,16 @@ class Field(Ring):
         try:
             ring = self.get_ring()
         except DomainError:
-            return a*b
+            return a * b
 
         p = ring.lcm(self.numer(a), self.numer(b))
         q = ring.gcd(self.denom(a), self.denom(b))
 
-        return self.convert(p, ring)/q
+        return self.convert(p, ring) / q
 
     def revert(self, a):
         """Returns ``a**(-1)`` if possible. """
         if a:
-            return 1/a
+            return 1 / a
         else:
-            raise NotReversible('zero is not reversible')
+            raise NotReversible("zero is not reversible")

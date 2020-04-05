@@ -136,7 +136,7 @@ class DiracDelta(Function):
 
         """
         if argindex == 1:
-            #I didn't know if there is a better way to handle default arguments
+            # I didn't know if there is a better way to handle default arguments
             k = 0
             if len(self.args) > 1:
                 k = self.args[1]
@@ -198,18 +198,25 @@ class DiracDelta(Function):
         """
         k = sympify(k)
         if not k.is_Integer or k.is_negative:
-            raise ValueError("Error: the second argument of DiracDelta must be \
-            a non-negative integer, %s given instead." % (k,))
+            raise ValueError(
+                "Error: the second argument of DiracDelta must be \
+            a non-negative integer, %s given instead."
+                % (k,)
+            )
         arg = sympify(arg)
         if arg is S.NaN:
             return S.NaN
         if arg.is_nonzero:
             return S.Zero
         if fuzzy_not(im(arg).is_zero):
-            raise ValueError(filldedent('''
+            raise ValueError(
+                filldedent(
+                    """
                 Function defined only for Real Values.
-                Complex part: %s  found in %s .''' % (
-                repr(im(arg)), repr(arg))))
+                Complex part: %s  found in %s ."""
+                    % (repr(im(arg)), repr(arg))
+                )
+            )
         c, nc = arg.args_cnc()
         if c and c[0] is S.NegativeOne:
             # keep this fast and simple instead of using
@@ -219,7 +226,11 @@ class DiracDelta(Function):
             elif k.is_even:
                 return cls(-arg, k) if k else cls(-arg)
 
-    @deprecated(useinstead="expand(diracdelta=True, wrt=x)", issue=12859, deprecated_since_version="1.1")
+    @deprecated(
+        useinstead="expand(diracdelta=True, wrt=x)",
+        issue=12859,
+        deprecated_since_version="1.1",
+    )
     def simplify(self, x, **kwargs):
         return self.expand(diracdelta=True, wrt=x)
 
@@ -259,18 +270,22 @@ class DiracDelta(Function):
         """
         from sympy.polys.polyroots import roots
 
-        wrt = hints.get('wrt', None)
+        wrt = hints.get("wrt", None)
         if wrt is None:
             free = self.free_symbols
             if len(free) == 1:
                 wrt = free.pop()
             else:
-                raise TypeError(filldedent('''
+                raise TypeError(
+                    filldedent(
+                        """
             When there is more than 1 free symbol or variable in the expression,
             the 'wrt' keyword is required as a hint to expand when using the
-            DiracDelta hint.'''))
+            DiracDelta hint."""
+                    )
+                )
 
-        if not self.args[0].has(wrt) or (len(self.args) > 1 and self.args[1] != 0 ):
+        if not self.args[0].has(wrt) or (len(self.args) > 1 and self.args[1] != 0):
             return self
         try:
             argroots = roots(self.args[0], wrt)
@@ -279,7 +294,7 @@ class DiracDelta(Function):
             darg = abs(diff(self.args[0], wrt))
             for r, m in argroots.items():
                 if r.is_real is not False and m == 1:
-                    result += self.func(wrt - r)/darg.subs(wrt, r)
+                    result += self.func(wrt - r) / darg.subs(wrt, r)
                 else:
                     # don't handle non-real and if m != 1 then
                     # a polynomial will have a zero in the derivative (darg)
@@ -364,25 +379,31 @@ class DiracDelta(Function):
         """
         from sympy.solvers import solve
         from sympy.functions import SingularityFunction
+
         if self == DiracDelta(0):
             return SingularityFunction(0, 0, -1)
         if self == DiracDelta(0, 1):
             return SingularityFunction(0, 0, -2)
         free = self.free_symbols
         if len(free) == 1:
-            x = (free.pop())
+            x = free.pop()
             if len(args) == 1:
                 return SingularityFunction(x, solve(args[0], x)[0], -1)
             return SingularityFunction(x, solve(args[0], x)[0], -args[1] - 1)
         else:
             # I don't know how to handle the case for DiracDelta expressions
             # having arguments with more than one variable.
-            raise TypeError(filldedent('''
+            raise TypeError(
+                filldedent(
+                    """
                 rewrite(SingularityFunction) doesn't support
-                arguments with more that 1 variable.'''))
+                arguments with more that 1 variable."""
+                )
+            )
 
     def _sage_(self):
         import sage.all as sage
+
         return sage.dirac_delta(self.args[0]._sage_())
 
 
@@ -542,7 +563,10 @@ class Heaviside(Function):
         elif arg is S.NaN:
             return S.NaN
         elif fuzzy_not(im(arg).is_zero):
-            raise ValueError("Function defined only for Real Values. Complex part: %s  found in %s ." % (repr(im(arg)), repr(arg)) )
+            raise ValueError(
+                "Function defined only for Real Values. Complex part: %s  found in %s ."
+                % (repr(im(arg)), repr(arg))
+            )
 
     def _eval_rewrite_as_Piecewise(self, arg, H0=None, **kwargs):
         """
@@ -617,11 +641,11 @@ class Heaviside(Function):
         """
         if arg.is_extended_real:
             pw1 = Piecewise(
-                ((sign(arg) + 1)/2, Ne(arg, 0)),
-                (Heaviside(0, H0=H0), True))
+                ((sign(arg) + 1) / 2, Ne(arg, 0)), (Heaviside(0, H0=H0), True)
+            )
             pw2 = Piecewise(
-                ((sign(arg) + 1)/2, Eq(Heaviside(0, H0=H0), S(1)/2)),
-                (pw1, True))
+                ((sign(arg) + 1) / 2, Eq(Heaviside(0, H0=H0), S(1) / 2)), (pw1, True)
+            )
             return pw2
 
     def _eval_rewrite_as_SingularityFunction(self, args, **kwargs):
@@ -632,11 +656,12 @@ class Heaviside(Function):
         """
         from sympy.solvers import solve
         from sympy.functions import SingularityFunction
+
         if self == Heaviside(0):
             return SingularityFunction(0, 0, 0)
         free = self.free_symbols
         if len(free) == 1:
-            x = (free.pop())
+            x = free.pop()
             return SingularityFunction(x, solve(args, x)[0], 0)
             # TODO
             # ((x - 5)**3*Heaviside(x - 5)).rewrite(SingularityFunction) should output
@@ -644,10 +669,15 @@ class Heaviside(Function):
         else:
             # I don't know how to handle the case for Heaviside expressions
             # having arguments with more than one variable.
-            raise TypeError(filldedent('''
+            raise TypeError(
+                filldedent(
+                    """
                 rewrite(SingularityFunction) doesn't
-                support arguments with more that 1 variable.'''))
+                support arguments with more that 1 variable."""
+                )
+            )
 
     def _sage_(self):
         import sage.all as sage
+
         return sage.heaviside(self.args[0]._sage_())

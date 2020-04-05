@@ -9,14 +9,40 @@ from typing import Tuple
 import math
 
 import mpmath.libmp as libmp
-from mpmath import (
-    make_mpc, make_mpf, mp, mpc, mpf, nsum, quadts, quadosc, workprec)
+from mpmath import make_mpc, make_mpf, mp, mpc, mpf, nsum, quadts, quadosc, workprec
 from mpmath import inf as mpmath_inf
-from mpmath.libmp import (from_int, from_man_exp, from_rational, fhalf,
-        fnan, fnone, fone, fzero, mpf_abs, mpf_add,
-        mpf_atan, mpf_atan2, mpf_cmp, mpf_cos, mpf_e, mpf_exp, mpf_log, mpf_lt,
-        mpf_mul, mpf_neg, mpf_pi, mpf_pow, mpf_pow_int, mpf_shift, mpf_sin,
-        mpf_sqrt, normalize, round_nearest, to_int, to_str)
+from mpmath.libmp import (
+    from_int,
+    from_man_exp,
+    from_rational,
+    fhalf,
+    fnan,
+    fnone,
+    fone,
+    fzero,
+    mpf_abs,
+    mpf_add,
+    mpf_atan,
+    mpf_atan2,
+    mpf_cmp,
+    mpf_cos,
+    mpf_e,
+    mpf_exp,
+    mpf_log,
+    mpf_lt,
+    mpf_mul,
+    mpf_neg,
+    mpf_pi,
+    mpf_pow,
+    mpf_pow_int,
+    mpf_shift,
+    mpf_sin,
+    mpf_sqrt,
+    normalize,
+    round_nearest,
+    to_int,
+    to_str,
+)
 from mpmath.libmp import bitcount as mpmath_bitcount
 from mpmath.libmp.backend import MPZ
 from mpmath.libmp.libmpc import _infs_nan
@@ -38,6 +64,7 @@ def bitcount(n):
     """
     return mpmath_bitcount(abs(int(n)))
 
+
 # Used in a few places as placeholder values to denote exponents and
 # precision levels, e.g. of exact numbers. Must be careful to avoid
 # passing these to mpmath functions or returning them in final results.
@@ -51,11 +78,12 @@ DEFAULT_MAXPREC = 333
 class PrecisionExhausted(ArithmeticError):
     pass
 
-#----------------------------------------------------------------------------#
+
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #              Helper functions for arithmetic and complex parts             #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 """
 An mpf value tuple is a tuple of integers (sign, man, exp, bc)
@@ -169,13 +197,13 @@ def scaled_zero(mag, sign=1):
         return (mag[0][0],) + mag[1:]
     elif isinstance(mag, SYMPY_INTS):
         if sign not in [-1, 1]:
-            raise ValueError('sign must be +/-1')
+            raise ValueError("sign must be +/-1")
         rv, p = mpf_shift(fone, mag), -1
         s = 0 if sign == 1 else 1
         rv = ([s],) + rv[1:]
         return rv, p
     else:
-        raise ValueError('scaled zero expects int or scaled_zero tuple.')
+        raise ValueError("scaled zero expects int or scaled_zero tuple.")
 
 
 def iszero(mpf, scaled=False):
@@ -218,11 +246,10 @@ def get_abs(expr, prec, options):
         re, re_acc, im, im_acc = im, im_acc, re, re_acc
     if im:
         if expr.is_number:
-            abs_expr, _, acc, _ = evalf(abs(N(expr, prec + 2)),
-                                        prec + 2, options)
+            abs_expr, _, acc, _ = evalf(abs(N(expr, prec + 2)), prec + 2, options)
             return abs_expr, None, acc, None
         else:
-            if 'subs' in options:
+            if "subs" in options:
                 return libmp.mpc_abs((re, im), prec), None, re_acc, None
             return abs(expr), None, prec, None
     elif re:
@@ -241,7 +268,7 @@ def get_complex_part(expr, no, prec, options):
         # XXX is the last one correct? Consider re((1+I)**2).n()
         if (not value) or accuracy >= prec or -value[2] > prec:
             return value, None, accuracy, None
-        workprec += max(30, 2**i)
+        workprec += max(30, 2 ** i)
         i += 1
 
 
@@ -299,9 +326,11 @@ def chop_parts(value, prec):
 def check_target(expr, result, prec):
     a = complex_accuracy(result)
     if a < prec:
-        raise PrecisionExhausted("Failed to distinguish the expression: \n\n%s\n\n"
+        raise PrecisionExhausted(
+            "Failed to distinguish the expression: \n\n%s\n\n"
             "from zero. Try simplifying the input, using chop=True, or providing "
-            "a higher maxn for evalf" % (expr))
+            "a higher maxn for evalf" % (expr)
+        )
 
 
 def get_integer_part(expr, no, options, return_ints=False):
@@ -312,6 +341,7 @@ def get_integer_part(expr, no, options, return_ints=False):
     Note: this function either gives the exact result or signals failure.
     """
     from sympy.functions.elementary.complexes import re, im
+
     # The expression is likely less than 2^30 or so
     assumed_size = 30
     ire, iim, ire_acc, iim_acc = evalf(expr, assumed_size, options)
@@ -335,8 +365,7 @@ def get_integer_part(expr, no, options, return_ints=False):
 
     if gap >= -margin:
         prec = margin + assumed_size + gap
-        ire, iim, ire_acc, iim_acc = evalf(
-            expr, prec, options)
+        ire, iim, ire_acc, iim_acc = evalf(expr, prec, options)
     else:
         prec = assumed_size
 
@@ -345,33 +374,35 @@ def get_integer_part(expr, no, options, return_ints=False):
     # positive or negative (which may fail if very close).
     def calc_part(re_im, nexpr):
         from sympy.core.add import Add
+
         n, c, p, b = nexpr
-        is_int = (p == 0)
+        is_int = p == 0
         nint = int(to_int(nexpr, rnd))
         if is_int:
             # make sure that we had enough precision to distinguish
             # between nint and the re or im part (re_im) of expr that
             # was passed to calc_part
             ire, iim, ire_acc, iim_acc = evalf(
-                re_im - nint, 10, options)  # don't need much precision
+                re_im - nint, 10, options
+            )  # don't need much precision
             assert not iim
             size = -fastlog(ire) + 2  # -ve b/c ire is less than 1
             if size > prec:
-                ire, iim, ire_acc, iim_acc = evalf(
-                    re_im, size, options)
+                ire, iim, ire_acc, iim_acc = evalf(re_im, size, options)
                 assert not iim
                 nexpr = ire
                 n, c, p, b = nexpr
-                is_int = (p == 0)
+                is_int = p == 0
                 nint = int(to_int(nexpr, rnd))
         if not is_int:
             # if there are subs and they all contain integer re/im parts
             # then we can (hopefully) safely substitute them into the
             # expression
-            s = options.get('subs', False)
+            s = options.get("subs", False)
             if s:
                 doit = True
                 from sympy.core.compatibility import as_int
+
                 # use strict=False with as_int because we take
                 # 2.0 == 2
                 for v in s.values():
@@ -395,7 +426,7 @@ def get_integer_part(expr, no, options, return_ints=False):
                 if not re_im.equals(0):
                     raise PrecisionExhausted
                 x = fzero
-            nint += int(no*(mpf_cmp(x or fzero, fzero) == no))
+            nint += int(no * (mpf_cmp(x or fzero, fzero) == no))
         nint = from_int(nint)
         return nint, INF
 
@@ -418,11 +449,12 @@ def evalf_ceiling(expr, prec, options):
 def evalf_floor(expr, prec, options):
     return get_integer_part(expr.args[0], -1, options)
 
-#----------------------------------------------------------------------------#
+
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            Arithmetic operations                           #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 def add_terms(terms, prec, target_prec):
@@ -457,16 +489,18 @@ def add_terms(terms, prec, target_prec):
     # see if any argument is NaN or oo and thus warrants a special return
     special = []
     from sympy.core.numbers import Float
+
     for t in terms:
         arg = Float._new(t[0], 1)
         if arg is S.NaN or arg.is_infinite:
             special.append(arg)
     if special:
         from sympy.core.add import Add
+
         rv = evalf(Add(*special), prec + 4, {})
         return rv[0], rv[2]
 
-    working_prec = 2*prec
+    working_prec = 2 * prec
     sum_man, sum_exp, absolute_error = 0, 0, MINUS_INF
 
     for x, accuracy in terms:
@@ -478,13 +512,13 @@ def add_terms(terms, prec, target_prec):
         if exp >= sum_exp:
             # x much larger than existing sum?
             # first: quick test
-            if ((delta > working_prec) and
-                ((not sum_man) or
-                 delta - bitcount(abs(sum_man)) > working_prec)):
+            if (delta > working_prec) and (
+                (not sum_man) or delta - bitcount(abs(sum_man)) > working_prec
+            ):
                 sum_man = man
                 sum_exp = exp
             else:
-                sum_man += (man << delta)
+                sum_man += man << delta
         else:
             delta = -delta
             # x much smaller than existing sum?
@@ -503,8 +537,7 @@ def add_terms(terms, prec, target_prec):
         sum_sign = 0
     sum_bc = bitcount(sum_man)
     sum_accuracy = sum_exp + sum_bc - absolute_error
-    r = normalize(sum_sign, sum_man, sum_exp, sum_bc, target_prec,
-        rnd), sum_accuracy
+    r = normalize(sum_sign, sum_man, sum_exp, sum_bc, target_prec, rnd), sum_accuracy
     return r
 
 
@@ -516,33 +549,31 @@ def evalf_add(v, prec, options):
         im, _, im_acc, _ = evalf(c, prec, options)
         return re, im, re_acc, im_acc
 
-    oldmaxprec = options.get('maxprec', DEFAULT_MAXPREC)
+    oldmaxprec = options.get("maxprec", DEFAULT_MAXPREC)
 
     i = 0
     target_prec = prec
     while 1:
-        options['maxprec'] = min(oldmaxprec, 2*prec)
+        options["maxprec"] = min(oldmaxprec, 2 * prec)
 
         terms = [evalf(arg, prec + 10, options) for arg in v.args]
-        re, re_acc = add_terms(
-            [a[0::2] for a in terms if a[0]], prec, target_prec)
-        im, im_acc = add_terms(
-            [a[1::2] for a in terms if a[1]], prec, target_prec)
+        re, re_acc = add_terms([a[0::2] for a in terms if a[0]], prec, target_prec)
+        im, im_acc = add_terms([a[1::2] for a in terms if a[1]], prec, target_prec)
         acc = complex_accuracy((re, im, re_acc, im_acc))
         if acc >= target_prec:
-            if options.get('verbose'):
+            if options.get("verbose"):
                 print("ADD: wanted", target_prec, "accurate bits, got", re_acc, im_acc)
             break
         else:
-            if (prec - target_prec) > options['maxprec']:
+            if (prec - target_prec) > options["maxprec"]:
                 break
 
-            prec = prec + max(10 + 2**i, target_prec - acc)
+            prec = prec + max(10 + 2 ** i, target_prec - acc)
             i += 1
-            if options.get('verbose'):
+            if options.get("verbose"):
                 print("ADD: restarting with prec", prec)
 
-    options['maxprec'] = oldmaxprec
+    options["maxprec"] = oldmaxprec
     if iszero(re, scaled=True):
         re = scaled_zero(re)
     if iszero(im, scaled=True):
@@ -562,6 +593,7 @@ def evalf_mul(v, prec, options):
     # see if any argument is NaN or oo and thus warrants a special return
     special = []
     from sympy.core.numbers import Float
+
     for arg in args:
         arg = evalf(arg, prec, options)
         if arg[0] is None:
@@ -571,6 +603,7 @@ def evalf_mul(v, prec, options):
             special.append(arg)
     if special:
         from sympy.core.mul import Mul
+
         special = Mul(*special)
         return evalf(special, prec + 4, {})
 
@@ -597,7 +630,7 @@ def evalf_mul(v, prec, options):
 
     for i, arg in enumerate(args):
         if i != last and pure_complex(arg):
-            args[-1] = (args[-1]*arg).expand()
+            args[-1] = (args[-1] * arg).expand()
             continue
         elif i == last and arg is S.One:
             continue
@@ -612,11 +645,11 @@ def evalf_mul(v, prec, options):
             direction += 1
         else:
             return None, None, None, None
-        direction += 2*s
+        direction += 2 * s
         man *= m
         exp += e
         bc += b
-        if bc > 3*working_prec:
+        if bc > 3 * working_prec:
             man >>= working_prec
             exp += working_prec
         acc = min(acc, w_acc)
@@ -637,8 +670,7 @@ def evalf_mul(v, prec, options):
         else:
             # there is no real part to start (other than the starting 1)
             wre, wim, wre_acc, wim_acc = complex_factors[0]
-            acc = min(acc,
-                      complex_accuracy((wre, wim, wre_acc, wim_acc)))
+            acc = min(acc, complex_accuracy((wre, wim, wre_acc, wim_acc)))
             re = wre
             im = wim
             i0 = 1
@@ -646,8 +678,7 @@ def evalf_mul(v, prec, options):
         for wre, wim, wre_acc, wim_acc in complex_factors[i0:]:
             # acc is the overall accuracy of the product; we aren't
             # computing exact accuracies of the product.
-            acc = min(acc,
-                      complex_accuracy((wre, wim, wre_acc, wim_acc)))
+            acc = min(acc, complex_accuracy((wre, wim, wre_acc, wim_acc)))
 
             use_prec = working_prec
             A = mpf_mul(re, wre, use_prec)
@@ -656,7 +687,7 @@ def evalf_mul(v, prec, options):
             D = mpf_mul(im, wre, use_prec)
             re = mpf_add(A, B, use_prec)
             im = mpf_add(C, D, use_prec)
-        if options.get('verbose'):
+        if options.get("verbose"):
             print("MUL: wanted", prec, "accurate bits, got", acc)
         # multiply by I
         if direction & 1:
@@ -749,8 +780,8 @@ def evalf_pow(v, prec, options):
     # (real ** complex) or (complex ** complex)
     if yim:
         re, im = libmp.mpc_pow(
-            (xre or fzero, xim or fzero), (yre or fzero, yim),
-            target_prec)
+            (xre or fzero, xim or fzero), (yre or fzero, yim), target_prec
+        )
         return finalize_complex(re, im, target_prec)
     # complex ** real
     if xim:
@@ -765,11 +796,11 @@ def evalf_pow(v, prec, options):
         return mpf_pow(xre, yre, target_prec), None, target_prec, None
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            Special functions                               #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 def evalf_trig(v, prec, options):
     """
     This function handles sin and cos of complex arguments.
@@ -777,6 +808,7 @@ def evalf_trig(v, prec, options):
     TODO: should also handle tan of complex arguments.
     """
     from sympy import cos, sin
+
     if isinstance(v, cos):
         func = mpf_cos
     elif isinstance(v, sin):
@@ -789,8 +821,8 @@ def evalf_trig(v, prec, options):
     xprec = prec + 20
     re, im, re_acc, im_acc = evalf(arg, xprec, options)
     if im:
-        if 'subs' in options:
-            v = v.subs(options['subs'])
+        if "subs" in options:
+            v = v.subs(options["subs"])
         return evalf(v._eval_evalf(prec), prec, options)
     if not re:
         if isinstance(v, cos):
@@ -819,10 +851,10 @@ def evalf_trig(v, prec, options):
         gap = -ysize
         accuracy = (xprec - xsize) - gap
         if accuracy < prec:
-            if options.get('verbose'):
+            if options.get("verbose"):
                 print("SIN/COS", accuracy, "wanted", prec, "gap", gap)
                 print(to_str(y, 10))
-            if xprec > options.get('maxprec', DEFAULT_MAXPREC):
+            if xprec > options.get("maxprec", DEFAULT_MAXPREC):
                 return y, None, accuracy, None
             xprec += gap
             re, im, re_acc, im_acc = evalf(arg, xprec, options)
@@ -833,7 +865,8 @@ def evalf_trig(v, prec, options):
 
 def evalf_log(expr, prec, options):
     from sympy import Abs, Add, log
-    if len(expr.args)>1:
+
+    if len(expr.args) > 1:
         expr = expr.doit()
         return evalf(expr, prec, options)
     arg = expr.args[0]
@@ -842,12 +875,11 @@ def evalf_log(expr, prec, options):
 
     if xim:
         # XXX: use get_abs etc instead
-        re = evalf_log(
-            log(Abs(arg, evaluate=False), evaluate=False), prec, options)
+        re = evalf_log(log(Abs(arg, evaluate=False), evaluate=False), prec, options)
         im = mpf_atan2(xim, xre or fzero, prec)
         return re[0], im, re[2], prec
 
-    imaginary_term = (mpf_cmp(xre, fzero) < 0)
+    imaginary_term = mpf_cmp(xre, fzero) < 0
 
     re = mpf_log(mpf_abs(xre), prec, rnd)
     size = fastlog(re)
@@ -871,7 +903,7 @@ def evalf_atan(v, prec, options):
     arg = v.args[0]
     xre, xim, reacc, imacc = evalf(arg, prec + 5, options)
     if xre is xim is None:
-        return (None,)*4
+        return (None,) * 4
     if xim:
         raise NotImplementedError
     return mpf_atan(xre, prec, rnd), None, prec, None
@@ -890,11 +922,12 @@ def evalf_subs(prec, subs):
 
 def evalf_piecewise(expr, prec, options):
     from sympy import Float, Integer
-    if 'subs' in options:
-        expr = expr.subs(evalf_subs(prec, options['subs']))
+
+    if "subs" in options:
+        expr = expr.subs(evalf_subs(prec, options["subs"]))
         newopts = options.copy()
-        del newopts['subs']
-        if hasattr(expr, 'func'):
+        del newopts["subs"]
+        if hasattr(expr, "func"):
             return evalf(expr, prec, newopts)
         if type(expr) == float:
             return evalf(Float(expr), prec, newopts)
@@ -915,22 +948,24 @@ def evalf_bernoulli(expr, prec, options):
         return None, None, None, None
     return b, None, prec, None
 
-#----------------------------------------------------------------------------#
+
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            High-level operations                           #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 
 def as_mpmath(x, prec, options):
     from sympy.core.numbers import Infinity, NegativeInfinity, Zero
+
     x = sympify(x)
     if isinstance(x, Zero) or x == 0:
         return mpf(0)
     if isinstance(x, Infinity):
-        return mpf('inf')
+        return mpf("inf")
     if isinstance(x, NegativeInfinity):
-        return mpf('-inf')
+        return mpf("-inf")
     # XXX
     re, im, _, _ = evalf(x, prec, options)
     if im:
@@ -953,8 +988,8 @@ def do_integral(expr, prec, options):
             if diff.is_number:
                 xlow, xhigh = 0, diff
 
-    oldmaxprec = options.get('maxprec', DEFAULT_MAXPREC)
-    options['maxprec'] = min(oldmaxprec, 2*prec)
+    oldmaxprec = options.get("maxprec", DEFAULT_MAXPREC)
+    options["maxprec"] = min(oldmaxprec, 2 * prec)
 
     with workprec(prec + 5):
         xlow = as_mpmath(xlow, prec + 15, options)
@@ -973,7 +1008,7 @@ def do_integral(expr, prec, options):
         max_imag_term = [MINUS_INF]
 
         def f(t):
-            re, im, re_acc, im_acc = evalf(func, mp.prec, {'subs': {x: t}})
+            re, im, re_acc, im_acc = evalf(func, mp.prec, {"subs": {x: t}})
 
             have_part[0] = re or have_part[0]
             have_part[1] = im or have_part[1]
@@ -985,17 +1020,19 @@ def do_integral(expr, prec, options):
                 return mpc(re or fzero, im)
             return mpf(re or fzero)
 
-        if options.get('quad') == 'osc':
-            A = Wild('A', exclude=[x])
-            B = Wild('B', exclude=[x])
-            D = Wild('D')
-            m = func.match(cos(A*x + B)*D)
+        if options.get("quad") == "osc":
+            A = Wild("A", exclude=[x])
+            B = Wild("B", exclude=[x])
+            D = Wild("D")
+            m = func.match(cos(A * x + B) * D)
             if not m:
-                m = func.match(sin(A*x + B)*D)
+                m = func.match(sin(A * x + B) * D)
             if not m:
-                raise ValueError("An integrand of the form sin(A*x+B)*f(x) "
-                  "or cos(A*x+B)*f(x) is required for oscillatory quadrature")
-            period = as_mpmath(2*S.Pi/m[A], prec + 15, options)
+                raise ValueError(
+                    "An integrand of the form sin(A*x+B)*f(x) "
+                    "or cos(A*x+B)*f(x) is required for oscillatory quadrature"
+                )
+            period = as_mpmath(2 * S.Pi / m[A], prec + 15, options)
             result = quadosc(f, [xlow, xhigh], period=period)
             # XXX: quadosc does not do error detection yet
             quadrature_error = MINUS_INF
@@ -1003,29 +1040,25 @@ def do_integral(expr, prec, options):
             result, quadrature_error = quadts(f, [xlow, xhigh], error=1)
             quadrature_error = fastlog(quadrature_error._mpf_)
 
-    options['maxprec'] = oldmaxprec
+    options["maxprec"] = oldmaxprec
 
     if have_part[0]:
         re = result.real._mpf_
         if re == fzero:
-            re, re_acc = scaled_zero(
-                min(-prec, -max_real_term[0], -quadrature_error))
+            re, re_acc = scaled_zero(min(-prec, -max_real_term[0], -quadrature_error))
             re = scaled_zero(re)  # handled ok in evalf_integral
         else:
-            re_acc = -max(max_real_term[0] - fastlog(re) -
-                          prec, quadrature_error)
+            re_acc = -max(max_real_term[0] - fastlog(re) - prec, quadrature_error)
     else:
         re, re_acc = None, None
 
     if have_part[1]:
         im = result.imag._mpf_
         if im == fzero:
-            im, im_acc = scaled_zero(
-                min(-prec, -max_imag_term[0], -quadrature_error))
+            im, im_acc = scaled_zero(min(-prec, -max_imag_term[0], -quadrature_error))
             im = scaled_zero(im)  # handled ok in evalf_integral
         else:
-            im_acc = -max(max_imag_term[0] - fastlog(im) -
-                          prec, quadrature_error)
+            im_acc = -max(max_imag_term[0] - fastlog(im) - prec, quadrature_error)
     else:
         im, im_acc = None, None
 
@@ -1039,7 +1072,7 @@ def evalf_integral(expr, prec, options):
         raise NotImplementedError
     workprec = prec
     i = 0
-    maxprec = options.get('maxprec', INF)
+    maxprec = options.get("maxprec", INF)
     while 1:
         result = do_integral(expr, workprec, options)
         accuracy = complex_accuracy(result)
@@ -1053,7 +1086,7 @@ def evalf_integral(expr, prec, options):
             # to get to maxprec.
             workprec *= 2
         else:
-            workprec += max(prec, 2**i)
+            workprec += max(prec, 2 ** i)
         workprec = min(workprec, maxprec)
         i += 1
     return result
@@ -1080,6 +1113,7 @@ def check_convergence(numer, denom, n):
 
     """
     from sympy import Poly
+
     npol = Poly(numer, n)
     dpol = Poly(denom, n)
     p = npol.degree()
@@ -1094,7 +1128,7 @@ def check_convergence(numer, denom, n):
         return rate, constant, 0
     pc = npol.all_coeffs()[1]
     qc = dpol.all_coeffs()[1]
-    return rate, constant, (qc - pc)/dpol.LC()
+    return rate, constant, (qc - pc) / dpol.LC()
 
 
 def hypsum(expr, n, start, prec):
@@ -1106,8 +1140,8 @@ def hypsum(expr, n, start, prec):
     """
     from sympy import Float, hypersimp, lambdify
 
-    if prec == float('inf'):
-        raise NotImplementedError('does not support inf prec')
+    if prec == float("inf"):
+        raise NotImplementedError("does not support inf prec")
 
     if start:
         expr = expr.subs(n, n + start)
@@ -1142,7 +1176,7 @@ def hypsum(expr, n, start, prec):
     else:
         alt = g < 0
         if abs(g) < 1:
-            raise ValueError("Sum diverges like (%i)^n" % abs(1/g))
+            raise ValueError("Sum diverges like (%i)^n" % abs(1 / g))
         if p < 1 or (p == 1 and not alt):
             raise ValueError("Sum diverges like n^%i" % (-p))
         # We have polynomial convergence: use Richardson extrapolation
@@ -1152,7 +1186,7 @@ def hypsum(expr, n, start, prec):
             # Need to use at least quad precision because a lot of cancellation
             # might occur in the extrapolation process; we check the answer to
             # make sure that the desired precision has been reached, too.
-            prec2 = 4*prec
+            prec2 = 4 * prec
             term0 = (MPZ(term.p) << prec2) // term.q
 
             def summand(k, _term=[term0]):
@@ -1163,7 +1197,7 @@ def hypsum(expr, n, start, prec):
                 return make_mpf(from_man_exp(_term[0], -prec2))
 
             with workprec(prec):
-                v = nsum(summand, [0, mpmath_inf], method='richardson')
+                v = nsum(summand, [0, mpmath_inf], method="richardson")
             vf = Float(v, ndig)
             if vold is not None and vold == vf:
                 break
@@ -1175,6 +1209,7 @@ def hypsum(expr, n, start, prec):
 
 def evalf_prod(expr, prec, options):
     from sympy import Sum
+
     if all((l[1] - l[2]).is_Integer for l in expr.limits):
         re, im, re_acc, im_acc = evalf(expr.doit(), prec=prec, options=options)
     else:
@@ -1184,8 +1219,9 @@ def evalf_prod(expr, prec, options):
 
 def evalf_sum(expr, prec, options):
     from sympy import Float
-    if 'subs' in options:
-        expr = expr.subs(options['subs'])
+
+    if "subs" in options:
+        expr = expr.subs(options["subs"])
     func = expr.function
     limits = expr.limits
     if len(limits) != 1 or len(limits[0]) != 3:
@@ -1205,11 +1241,10 @@ def evalf_sum(expr, prec, options):
         return v, None, min(prec, delta), None
     except NotImplementedError:
         # Euler-Maclaurin summation for general series
-        eps = Float(2.0)**(-prec)
+        eps = Float(2.0) ** (-prec)
         for i in range(1, 5):
-            m = n = 2**i * prec
-            s, err = expr.euler_maclaurin(m=m, n=n, eps=eps,
-                eval_integral=False)
+            m = n = 2 ** i * prec
+            s, err = expr.euler_maclaurin(m=m, n=n, eps=eps, eval_integral=False)
             err = err.evalf()
             if err <= eps:
                 break
@@ -1222,28 +1257,30 @@ def evalf_sum(expr, prec, options):
         return re, im, re_acc, im_acc
 
 
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 #                                                                            #
 #                            Symbolic interface                              #
 #                                                                            #
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
+
 
 def evalf_symbol(x, prec, options):
-    val = options['subs'][x]
+    val = options["subs"][x]
     if isinstance(val, mpf):
         if not val:
             return None, None, None, None
         return val._mpf_, None, prec, None
     else:
-        if not '_cache' in options:
-            options['_cache'] = {}
-        cache = options['_cache']
+        if not "_cache" in options:
+            options["_cache"] = {}
+        cache = options["_cache"]
         cached, cached_prec = cache.get(x, (None, MINUS_INF))
         if cached_prec >= prec:
             return cached
         v = evalf(sympify(val), prec, options)
         cache[x] = (v, prec)
         return v
+
 
 evalf_table = None
 
@@ -1255,7 +1292,19 @@ def _create_evalf_table():
     from sympy.concrete.summations import Sum
     from sympy.core.add import Add
     from sympy.core.mul import Mul
-    from sympy.core.numbers import Exp1, Float, Half, ImaginaryUnit, Integer, NaN, NegativeOne, One, Pi, Rational, Zero
+    from sympy.core.numbers import (
+        Exp1,
+        Float,
+        Half,
+        ImaginaryUnit,
+        Integer,
+        NaN,
+        NegativeOne,
+        One,
+        Pi,
+        Rational,
+        Zero,
+    )
     from sympy.core.power import Pow
     from sympy.core.symbol import Dummy, Symbol
     from sympy.functions.elementary.complexes import Abs, im, re
@@ -1264,11 +1313,17 @@ def _create_evalf_table():
     from sympy.functions.elementary.piecewise import Piecewise
     from sympy.functions.elementary.trigonometric import atan, cos, sin
     from sympy.integrals.integrals import Integral
+
     evalf_table = {
         Symbol: evalf_symbol,
         Dummy: evalf_symbol,
         Float: lambda x, prec, options: (x._mpf_, None, prec, None),
-        Rational: lambda x, prec, options: (from_rational(x.p, x.q, prec), None, prec, None),
+        Rational: lambda x, prec, options: (
+            from_rational(x.p, x.q, prec),
+            None,
+            prec,
+            None,
+        ),
         Integer: lambda x, prec, options: (from_int(x.p, prec), None, prec, None),
         Zero: lambda x, prec, options: (None, None, prec, None),
         One: lambda x, prec, options: (fone, None, prec, None),
@@ -1278,50 +1333,45 @@ def _create_evalf_table():
         ImaginaryUnit: lambda x, prec, options: (None, fone, None, prec),
         NegativeOne: lambda x, prec, options: (fnone, None, prec, None),
         NaN: lambda x, prec, options: (fnan, None, prec, None),
-
         exp: lambda x, prec, options: evalf_pow(
-            Pow(S.Exp1, x.args[0], evaluate=False), prec, options),
-
+            Pow(S.Exp1, x.args[0], evaluate=False), prec, options
+        ),
         cos: evalf_trig,
         sin: evalf_trig,
-
         Add: evalf_add,
         Mul: evalf_mul,
         Pow: evalf_pow,
-
         log: evalf_log,
         atan: evalf_atan,
         Abs: evalf_abs,
-
         re: evalf_re,
         im: evalf_im,
         floor: evalf_floor,
         ceiling: evalf_ceiling,
-
         Integral: evalf_integral,
         Sum: evalf_sum,
         Product: evalf_prod,
         Piecewise: evalf_piecewise,
-
         bernoulli: evalf_bernoulli,
     }
 
 
 def evalf(x, prec, options):
     from sympy import re as re_, im as im_
+
     try:
         rf = evalf_table[x.func]
         r = rf(x, prec, options)
     except KeyError:
         # Fall back to ordinary evalf if possible
-        if 'subs' in options:
-            x = x.subs(evalf_subs(prec, options['subs']))
+        if "subs" in options:
+            x = x.subs(evalf_subs(prec, options["subs"]))
         xe = x._eval_evalf(prec)
         if xe is None:
             raise NotImplementedError
         as_real_imag = getattr(xe, "as_real_imag", None)
         if as_real_imag is None:
-            raise NotImplementedError # e.g. FiniteSet(-1.0, 1.0).evalf()
+            raise NotImplementedError  # e.g. FiniteSet(-1.0, 1.0).evalf()
         re, im = as_real_imag()
         if re.has(re_) or im.has(im_):
             raise NotImplementedError
@@ -1346,9 +1396,9 @@ def evalf(x, prec, options):
     if options.get("verbose"):
         print("### input", x)
         print("### output", to_str(r[0] or fzero, 50))
-        print("### raw", r) # r[0], r[2]
+        print("### raw", r)  # r[0], r[2]
         print()
-    chop = options.get('chop', False)
+    chop = options.get("chop", False)
     if chop:
         if chop is True:
             chop_prec = prec
@@ -1356,7 +1406,7 @@ def evalf(x, prec, options):
             # convert (approximately) from given tolerance;
             # the formula here will will make 1e-i rounds to 0 for
             # i in the range +/-27 while 2e-i will not be chopped
-            chop_prec = int(round(-3.321*math.log10(chop) + 2.5))
+            chop_prec = int(round(-3.321 * math.log10(chop) + 2.5))
             if chop_prec == 3:
                 chop_prec -= 1
         r = chop_parts(r, chop_prec)
@@ -1370,7 +1420,16 @@ class EvalfMixin(object):
 
     __slots__ = ()  # type: Tuple[str, ...]
 
-    def evalf(self, n=15, subs=None, maxn=100, chop=False, strict=False, quad=None, verbose=False):
+    def evalf(
+        self,
+        n=15,
+        subs=None,
+        maxn=100,
+        chop=False,
+        strict=False,
+        quad=None,
+        verbose=False,
+    ):
         """
         Evaluate the given formula to an accuracy of n digits.
         Optional keyword arguments:
@@ -1421,14 +1480,16 @@ class EvalfMixin(object):
         1.00000000000000
         """
         from sympy import Float, Number
+
         n = n if n is not None else 15
 
         if subs and is_sequence(subs):
-            raise TypeError('subs must be given as a dictionary')
+            raise TypeError("subs must be given as a dictionary")
 
         # for sake of sage that doesn't like evalf(1)
         if n == 1 and isinstance(self, Number):
             from sympy.core.expr import _mag
+
             rv = self.evalf(2, subs, maxn, chop, strict, quad, verbose)
             m = _mag(rv)
             rv = rv.round(1 - m)
@@ -1437,12 +1498,16 @@ class EvalfMixin(object):
         if not evalf_table:
             _create_evalf_table()
         prec = dps_to_prec(n)
-        options = {'maxprec': max(prec, int(maxn*LG10)), 'chop': chop,
-               'strict': strict, 'verbose': verbose}
+        options = {
+            "maxprec": max(prec, int(maxn * LG10)),
+            "chop": chop,
+            "strict": strict,
+            "verbose": verbose,
+        }
         if subs is not None:
-            options['subs'] = subs
+            options["subs"] = subs
         if quad is not None:
-            options['quad'] = quad
+            options["quad"] = quad
         try:
             result = evalf(self, prec + 4, options)
         except NotImplementedError:
@@ -1467,7 +1532,7 @@ class EvalfMixin(object):
         if im:
             p = max(min(prec, im_acc), 1)
             im = Float._new(im, p)
-            return re + im*S.ImaginaryUnit
+            return re + im * S.ImaginaryUnit
         else:
             return re
 
@@ -1488,7 +1553,7 @@ class EvalfMixin(object):
         errmsg = "cannot convert to mpmath number"
         if allow_ints and self.is_Integer:
             return self.p
-        if hasattr(self, '_as_mpf_val'):
+        if hasattr(self, "_as_mpf_val"):
             return make_mpf(self._as_mpf_val(prec))
         try:
             re, im, _, _ = evalf(self, prec, {})

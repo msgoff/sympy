@@ -7,11 +7,11 @@ from sympy.functions.special.tensor_functions import KroneckerDelta
 
 
 __all__ = [
-    'BosonOp',
-    'BosonFockKet',
-    'BosonFockBra',
-    'BosonCoherentKet',
-    'BosonCoherentBra'
+    "BosonOp",
+    "BosonFockKet",
+    "BosonFockBra",
+    "BosonCoherentKet",
+    "BosonCoherentBra",
 ]
 
 
@@ -52,7 +52,7 @@ class BosonOp(Operator):
 
     def __new__(cls, *args, **hints):
         if not len(args) in [1, 2]:
-            raise ValueError('1 or 2 parameters expected, got %s' % args)
+            raise ValueError("1 or 2 parameters expected, got %s" % args)
 
         if len(args) == 1:
             args = (args[0], Integer(1))
@@ -68,7 +68,7 @@ class BosonOp(Operator):
             if not self.is_annihilation and other.is_annihilation:
                 return Integer(-1)
 
-        elif 'independent' in hints and hints['independent']:
+        elif "independent" in hints and hints["independent"]:
             # [a, b] = 0
             return Integer(0)
 
@@ -78,7 +78,7 @@ class BosonOp(Operator):
         return Integer(0)
 
     def _eval_anticommutator_BosonOp(self, other, **hints):
-        if 'independent' in hints and hints['independent']:
+        if "independent" in hints and hints["independent"]:
             # {a, b} = 2 * a * b, because [a, b] = 0
             return 2 * self * other
 
@@ -104,23 +104,24 @@ class BosonOp(Operator):
 
     def _print_contents_latex(self, printer, *args):
         if self.is_annihilation:
-            return r'{%s}' % str(self.name)
+            return r"{%s}" % str(self.name)
         else:
-            return r'{{%s}^\dagger}' % str(self.name)
+            return r"{{%s}^\dagger}" % str(self.name)
 
     def _print_contents(self, printer, *args):
         if self.is_annihilation:
-            return r'%s' % str(self.name)
+            return r"%s" % str(self.name)
         else:
-            return r'Dagger(%s)' % str(self.name)
+            return r"Dagger(%s)" % str(self.name)
 
     def _print_contents_pretty(self, printer, *args):
         from sympy.printing.pretty.stringpict import prettyForm
+
         pform = printer._print(self.args[0], *args)
         if self.is_annihilation:
             return pform
         else:
-            return pform**prettyForm(u'\N{DAGGER}')
+            return pform ** prettyForm(u"\N{DAGGER}")
 
 
 class BosonFockKet(Ket):
@@ -216,7 +217,14 @@ class BosonCoherentKet(Ket):
         if self.alpha == bra.alpha:
             return Integer(1)
         else:
-            return exp(-(abs(self.alpha)**2 + abs(bra.alpha)**2 - 2 * conjugate(bra.alpha) * self.alpha)/2)
+            return exp(
+                -(
+                    abs(self.alpha) ** 2
+                    + abs(bra.alpha) ** 2
+                    - 2 * conjugate(bra.alpha) * self.alpha
+                )
+                / 2
+            )
 
     def _apply_operator_BosonOp(self, op, **options):
         if op.is_annihilation:

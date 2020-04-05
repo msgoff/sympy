@@ -51,11 +51,10 @@ class UnitSystem(_QuantityMapper):
         if self.name != "":
             return self.name
         else:
-            return "UnitSystem((%s))" % ", ".join(
-                str(d) for d in self._base_units)
+            return "UnitSystem((%s))" % ", ".join(str(d) for d in self._base_units)
 
     def __repr__(self):
-        return '<UnitSystem: %s>' % repr(self._base_units)
+        return "<UnitSystem: %s>" % repr(self._base_units)
 
     def extend(self, base, units=(), name="", description="", dimension_system=None):
         """Extend the current system into a new one.
@@ -87,6 +86,7 @@ class UnitSystem(_QuantityMapper):
             useinstead="convert_to",
         ).warn()
         from sympy.physics.units import convert_to
+
         return convert_to(unit, self._base_units)
 
     def get_dimension_system(self):
@@ -144,6 +144,7 @@ class UnitSystem(_QuantityMapper):
         from sympy import Mul, Add, Pow, Derivative
         from sympy import Function
         from sympy.physics.units import Quantity
+
         if isinstance(expr, Mul):
             return Mul(*[self.get_dimensional_expr(i) for i in expr.args])
         elif isinstance(expr, Pow):
@@ -153,7 +154,7 @@ class UnitSystem(_QuantityMapper):
         elif isinstance(expr, Derivative):
             dim = self.get_dimensional_expr(expr.expr)
             for independent, count in expr.variable_count:
-                dim /= self.get_dimensional_expr(independent)**count
+                dim /= self.get_dimensional_expr(independent) ** count
             return dim
         elif isinstance(expr, Function):
             args = [self.get_dimensional_expr(arg) for arg in expr.args]
@@ -169,6 +170,7 @@ class UnitSystem(_QuantityMapper):
         Return tuple with scale factor expression and dimension expression.
         """
         from sympy.physics.units import Quantity
+
         if isinstance(expr, Quantity):
             return expr.scale_factor, expr.dimension
         elif isinstance(expr, Mul):
@@ -188,27 +190,24 @@ class UnitSystem(_QuantityMapper):
         elif isinstance(expr, Add):
             factor, dim = self._collect_factor_and_dimension(expr.args[0])
             for addend in expr.args[1:]:
-                addend_factor, addend_dim = \
-                    self._collect_factor_and_dimension(addend)
+                addend_factor, addend_dim = self._collect_factor_and_dimension(addend)
                 if dim != addend_dim:
                     raise ValueError(
                         'Dimension of "{0}" is {1}, '
-                        'but it should be {2}'.format(
-                            addend, addend_dim, dim))
+                        "but it should be {2}".format(addend, addend_dim, dim)
+                    )
                 factor += addend_factor
             return factor, dim
         elif isinstance(expr, Derivative):
             factor, dim = self._collect_factor_and_dimension(expr.args[0])
             for independent, count in expr.variable_count:
                 ifactor, idim = self._collect_factor_and_dimension(independent)
-                factor /= ifactor**count
-                dim /= idim**count
+                factor /= ifactor ** count
+                dim /= idim ** count
             return factor, dim
         elif isinstance(expr, Function):
-            fds = [self._collect_factor_and_dimension(
-                arg) for arg in expr.args]
-            return (expr.func(*(f[0] for f in fds)),
-                    expr.func(*(d[1] for d in fds)))
+            fds = [self._collect_factor_and_dimension(arg) for arg in expr.args]
+            return (expr.func(*(f[0] for f in fds)), expr.func(*(d[1] for d in fds)))
         elif isinstance(expr, Dimension):
             return 1, expr
         else:

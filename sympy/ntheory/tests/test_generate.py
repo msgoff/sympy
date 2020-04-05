@@ -1,10 +1,24 @@
 from sympy import Sieve, sieve, Symbol, S, limit, I, zoo, nan, Rational
 
-from sympy.ntheory import isprime, totient, mobius, randprime, nextprime, prevprime, \
-    primerange, primepi, prime, primorial, composite, compositepi, reduced_totient
+from sympy.ntheory import (
+    isprime,
+    totient,
+    mobius,
+    randprime,
+    nextprime,
+    prevprime,
+    primerange,
+    primepi,
+    prime,
+    primorial,
+    composite,
+    compositepi,
+    reduced_totient,
+)
 from sympy.ntheory.generate import cycle_length
 from sympy.ntheory.primetest import mr
 from sympy.testing.pytest import raises
+
 
 def test_prime():
     assert prime(1) == 2
@@ -38,16 +52,16 @@ def test_primepi():
     assert primepi(4096) == 564
     assert primepi(9096) == 1128
     assert primepi(25023) == 2763
-    assert primepi(10**8) == 5761455
+    assert primepi(10 ** 8) == 5761455
     assert primepi(253425253) == 13856396
     assert primepi(8769575643) == 401464322
     sieve.extend(3000)
     assert primepi(2000) == 303
 
-    n = Symbol('n')
+    n = Symbol("n")
     assert primepi(n).subs(n, 2) == 1
 
-    r = Symbol('r', real=True)
+    r = Symbol("r", real=True)
     assert primepi(r).subs(r, 2) == 1
 
     assert primepi(S.Infinity) is S.Infinity
@@ -63,6 +77,7 @@ def test_primepi():
 
 def test_composite():
     from sympy.ntheory.generate import sieve
+
     sieve._reset()
     assert composite(1) == 4
     assert composite(2) == 6
@@ -94,7 +109,7 @@ def test_compositepi():
     assert compositepi(4096) == 3531
     assert compositepi(9096) == 7967
     assert compositepi(25023) == 22259
-    assert compositepi(10**8) == 94238544
+    assert compositepi(10 ** 8) == 94238544
     assert compositepi(253425253) == 239568856
     assert compositepi(8769575643) == 8368111320
     sieve.extend(3000)
@@ -103,6 +118,7 @@ def test_compositepi():
 
 def test_generate():
     from sympy.ntheory.generate import sieve
+
     sieve._reset()
     assert nextprime(-4) == 2
     assert nextprime(2) == 3
@@ -121,9 +137,9 @@ def test_generate():
     assert 31 in sieve
 
     assert nextprime(90) == 97
-    assert nextprime(10**40) == (10**40 + 121)
+    assert nextprime(10 ** 40) == (10 ** 40 + 121)
     assert prevprime(97) == 89
-    assert prevprime(10**40) == (10**40 - 17)
+    assert prevprime(10 ** 40) == (10 ** 40 - 17)
 
     assert list(sieve.primerange(10, 1)) == []
     assert list(sieve.primerange(5, 9)) == [5, 7]
@@ -147,8 +163,16 @@ def test_generate():
     assert list(primerange(10, 1)) == []
     assert list(primerange(2, 7)) == [2, 3, 5]
     assert list(primerange(2, 10)) == [2, 3, 5, 7]
-    assert list(primerange(1050, 1100)) == [1051, 1061,
-        1063, 1069, 1087, 1091, 1093, 1097]
+    assert list(primerange(1050, 1100)) == [
+        1051,
+        1061,
+        1063,
+        1069,
+        1087,
+        1091,
+        1093,
+        1097,
+    ]
     s = Sieve()
     for i in range(30, 2350, 376):
         for j in range(2, 5096, 1139):
@@ -168,13 +192,24 @@ def test_generate():
 
     assert mr(1, [2]) is False
 
-    func = lambda i: (i**2 + 1) % 51
+    func = lambda i: (i ** 2 + 1) % 51
     assert next(cycle_length(func, 4)) == (6, 2)
-    assert list(cycle_length(func, 4, values=True)) == \
-        [17, 35, 2, 5, 26, 14, 44, 50, 2, 5, 26, 14]
+    assert list(cycle_length(func, 4, values=True)) == [
+        17,
+        35,
+        2,
+        5,
+        26,
+        14,
+        44,
+        50,
+        2,
+        5,
+        26,
+        14,
+    ]
     assert next(cycle_length(func, 4, nmax=5)) == (5, None)
-    assert list(cycle_length(func, 4, nmax=5, values=True)) == \
-        [17, 35, 2, 5, 26]
+    assert list(cycle_length(func, 4, nmax=5, values=True)) == [17, 35, 2, 5, 26]
     sieve.extend(3000)
     assert nextprime(2968) == 2969
     assert prevprime(2930) == 2927
@@ -205,7 +240,7 @@ def test_search():
     assert 2 in sieve
     assert 2.1 not in sieve
     assert 1 not in sieve
-    assert 2**1000 not in sieve
+    assert 2 ** 1000 not in sieve
     raises(ValueError, lambda: sieve.search(1))
 
 
@@ -217,6 +252,7 @@ def test_sieve_slice():
     raises(IndexError, lambda: sieve[:5])
     raises(IndexError, lambda: sieve[0])
     raises(IndexError, lambda: sieve[0:5])
+
 
 def test_sieve_iter():
     values = []

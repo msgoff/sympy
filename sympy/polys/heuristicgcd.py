@@ -5,6 +5,7 @@ from .polyerrors import HeuristicGCDFailed
 
 HEU_GCD_MAX = 6
 
+
 def heugcd(f, g):
     """
     Heuristic polynomial GCD in ``Z[X]``.
@@ -64,11 +65,12 @@ def heugcd(f, g):
     f_norm = f.max_norm()
     g_norm = g.max_norm()
 
-    B = domain(2*min(f_norm, g_norm) + 29)
+    B = domain(2 * min(f_norm, g_norm) + 29)
 
-    x = max(min(B, 99*domain.sqrt(B)),
-            2*min(f_norm // abs(f.LC),
-                  g_norm // abs(g.LC)) + 4)
+    x = max(
+        min(B, 99 * domain.sqrt(B)),
+        2 * min(f_norm // abs(f.LC), g_norm // abs(g.LC)) + 4,
+    )
 
     for i in range(0, HEU_GCD_MAX):
         ff = f.evaluate(x0, x)
@@ -114,9 +116,10 @@ def heugcd(f, g):
                     h = h.mul_ground(gcd)
                     return h, cff_, cfg
 
-        x = 73794*x * domain.sqrt(domain.sqrt(x)) // 27011
+        x = 73794 * x * domain.sqrt(domain.sqrt(x)) // 27011
 
-    raise HeuristicGCDFailed('no luck')
+    raise HeuristicGCDFailed("no luck")
+
 
 def _gcd_interpolate(h, x, ring):
     """Interpolate polynomial GCD from integer GCD. """
@@ -126,7 +129,8 @@ def _gcd_interpolate(h, x, ring):
     if ring.ngens == 1:
         while h:
             g = h % x
-            if g > x // 2: g -= x
+            if g > x // 2:
+                g -= x
             h = (h - g) // x
 
             # f += X**i*g
@@ -147,4 +151,4 @@ def _gcd_interpolate(h, x, ring):
     if f.LC < 0:
         return -f
     else:
-        return  f
+        return f

@@ -13,6 +13,7 @@ from sympy.simplify.ratsimp import ratsimp
 from sympy.simplify.simplify import together
 from .gruntz import gruntz
 
+
 def limit(e, z, z0, dir="+"):
     """Computes the limit of ``e(z)`` at the point ``z0``.
 
@@ -79,9 +80,10 @@ def heuristics(e, z, z0, dir):
     """
 
     from sympy.calculus.util import AccumBounds
+
     rv = None
     if abs(z0) is S.Infinity:
-        rv = limit(e.subs(z, 1/z), z, S.Zero, "+" if z0 is S.Infinity else "-")
+        rv = limit(e.subs(z, 1 / z), z, S.Zero, "+" if z0 is S.Infinity else "-")
         if isinstance(rv, Limit):
             return
     elif e.is_Mul or e.is_Add or e.is_Pow or e.is_Function:
@@ -91,9 +93,11 @@ def heuristics(e, z, z0, dir):
             if l.has(S.Infinity) and l.is_finite is None:
                 if isinstance(e, Add):
                     m = factor_terms(e)
-                    if not isinstance(m, Mul): # try together
+                    if not isinstance(m, Mul):  # try together
                         m = together(m)
-                    if not isinstance(m, Mul): # try factor if the previous methods failed
+                    if not isinstance(
+                        m, Mul
+                    ):  # try factor if the previous methods failed
                         m = factor(e)
                     if isinstance(m, Mul):
                         return heuristics(m, z, z0, dir)
@@ -107,7 +111,11 @@ def heuristics(e, z, z0, dir):
                 r.append(l)
         if r:
             rv = e.func(*r)
-            if rv is S.NaN and e.is_Mul and any(isinstance(rr, AccumBounds) for rr in r):
+            if (
+                rv is S.NaN
+                and e.is_Mul
+                and any(isinstance(rr, AccumBounds) for rr in r)
+            ):
                 r2 = []
                 e2 = []
                 for ii in range(len(r)):
@@ -160,16 +168,17 @@ class Limit(Expr):
         if isinstance(dir, str):
             dir = Symbol(dir)
         elif not isinstance(dir, Symbol):
-            raise TypeError("direction must be of type basestring or "
-                    "Symbol, not %s" % type(dir))
-        if str(dir) not in ('+', '-', '+-'):
-            raise ValueError("direction must be one of '+', '-' "
-                    "or '+-', not %s" % dir)
+            raise TypeError(
+                "direction must be of type basestring or " "Symbol, not %s" % type(dir)
+            )
+        if str(dir) not in ("+", "-", "+-"):
+            raise ValueError(
+                "direction must be one of '+', '-' " "or '+-', not %s" % dir
+            )
 
         obj = Expr.__new__(cls)
         obj._args = (e, z, z0, dir)
         return obj
-
 
     @property
     def free_symbols(self):
@@ -178,7 +187,6 @@ class Limit(Expr):
         isyms.difference_update(self.args[1].free_symbols)
         isyms.update(self.args[2].free_symbols)
         return isyms
-
 
     def doit(self, **hints):
         """Evaluates the limit.
@@ -198,10 +206,11 @@ class Limit(Expr):
         e, z, z0, dir = self.args
 
         if z0 is S.ComplexInfinity:
-            raise NotImplementedError("Limits at complex "
-                                    "infinity are not implemented")
+            raise NotImplementedError(
+                "Limits at complex " "infinity are not implemented"
+            )
 
-        if hints.get('deep', True):
+        if hints.get("deep", True):
             e = e.doit(**hints)
             z = z.doit(**hints)
             z0 = z0.doit(**hints)
@@ -223,17 +232,23 @@ class Limit(Expr):
             if abs(z0) is S.Infinity:
                 e = factor_terms(e)
                 e = e.rewrite(fibonacci, GoldenRatio)
-                ok = lambda w: (z in w.free_symbols and
-                                any(a.is_polynomial(z) or
-                                    any(z in m.free_symbols and m.is_polynomial(z)
-                                        for m in Mul.make_args(a))
-                                    for a in Add.make_args(w)))
+                ok = lambda w: (
+                    z in w.free_symbols
+                    and any(
+                        a.is_polynomial(z)
+                        or any(
+                            z in m.free_symbols and m.is_polynomial(z)
+                            for m in Mul.make_args(a)
+                        )
+                        for a in Add.make_args(w)
+                    )
+                )
                 if all(ok(w) for w in e.as_numer_denom()):
                     u = Dummy(positive=True)
                     if z0 is S.NegativeInfinity:
-                        inve = e.subs(z, -1/u)
+                        inve = e.subs(z, -1 / u)
                     else:
-                        inve = e.subs(z, 1/u)
+                        inve = e.subs(z, 1 / u)
                     try:
                         r = limit(inve.as_leading_term(u), u, S.Zero, "+")
                         if isinstance(r, Limit):
@@ -249,13 +264,14 @@ class Limit(Expr):
         l = None
 
         try:
-            if str(dir) == '+-':
-                r = gruntz(e, z, z0, '+')
-                l = gruntz(e, z, z0, '-')
+            if str(dir) == "+-":
+                r = gruntz(e, z, z0, "+")
+                l = gruntz(e, z, z0, "-")
                 if l != r:
-                    raise ValueError("The limit does not exist since "
-                            "left hand limit = %s and right hand limit = %s"
-                            % (l, r))
+                    raise ValueError(
+                        "The limit does not exist since "
+                        "left hand limit = %s and right hand limit = %s" % (l, r)
+                    )
             else:
                 r = gruntz(e, z, z0, dir)
             if r is S.NaN or l is S.NaN:

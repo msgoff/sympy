@@ -61,11 +61,10 @@ class RecurrenceOperatorAlgebra(object):
         # the base ring for the algebra
         self.base = base
         # the operator representing shift i.e. `Sn`
-        self.shift_operator = RecurrenceOperator(
-            [base.zero, base.one], self)
+        self.shift_operator = RecurrenceOperator([base.zero, base.one], self)
 
         if generator is None:
-            self.gen_symbol = symbols('Sn', commutative=False)
+            self.gen_symbol = symbols("Sn", commutative=False)
         else:
             if isinstance(generator, str):
                 self.gen_symbol = symbols(generator, commutative=False)
@@ -73,9 +72,12 @@ class RecurrenceOperatorAlgebra(object):
                 self.gen_symbol = generator
 
     def __str__(self):
-        string = 'Univariate Recurrence Operator Algebra in intermediate '\
-            + sstr(self.gen_symbol) + ' over the base ring ' + \
-            (self.base).__str__()
+        string = (
+            "Univariate Recurrence Operator Algebra in intermediate "
+            + sstr(self.gen_symbol)
+            + " over the base ring "
+            + (self.base).__str__()
+        )
 
         return string
 
@@ -90,9 +92,9 @@ class RecurrenceOperatorAlgebra(object):
 
 def _add_lists(list1, list2):
     if len(list1) <= len(list2):
-        sol = [a + b for a, b in zip(list1, list2)] + list2[len(list1):]
+        sol = [a + b for a, b in zip(list1, list2)] + list2[len(list1) :]
     else:
-        sol = [a + b for a, b in zip(list1, list2)] + list1[len(list2):]
+        sol = [a + b for a, b in zip(list1, list2)] + list1[len(list2) :]
     return sol
 
 
@@ -264,32 +266,32 @@ class RecurrenceOperator(object):
 
         else:
             if n % 2 == 1:
-                powreduce = self**(n - 1)
+                powreduce = self ** (n - 1)
                 return powreduce * self
             elif n % 2 == 0:
-                powreduce = self**(n / 2)
+                powreduce = self ** (n / 2)
                 return powreduce * powreduce
 
     def __str__(self):
         listofpoly = self.listofpoly
-        print_str = ''
+        print_str = ""
 
         for i, j in enumerate(listofpoly):
             if j == self.parent.base.zero:
                 continue
 
             if i == 0:
-                print_str += '(' + sstr(j) + ')'
+                print_str += "(" + sstr(j) + ")"
                 continue
 
             if print_str:
-                print_str += ' + '
+                print_str += " + "
 
             if i == 1:
-                print_str += '(' + sstr(j) + ')Sn'
+                print_str += "(" + sstr(j) + ")Sn"
                 continue
 
-            print_str += '(' + sstr(j) + ')' + 'Sn**' + sstr(i)
+            print_str += "(" + sstr(j) + ")" + "Sn**" + sstr(i)
 
         return print_str
 
@@ -332,14 +334,17 @@ class HolonomicSequence(object):
         self.n = recurrence.parent.base.gens[0]
 
     def __repr__(self):
-        str_sol = 'HolonomicSequence(%s, %s)' % ((self.recurrence).__repr__(), sstr(self.n))
+        str_sol = "HolonomicSequence(%s, %s)" % (
+            (self.recurrence).__repr__(),
+            sstr(self.n),
+        )
         if not self._have_init_cond:
             return str_sol
         else:
-            cond_str = ''
+            cond_str = ""
             seq_str = 0
             for i in self.u0:
-                cond_str += ', u(%s) = %s' % (sstr(seq_str), sstr(i))
+                cond_str += ", u(%s) = %s" % (sstr(seq_str), sstr(i))
                 seq_str += 1
 
             sol = str_sol + cond_str

@@ -6,13 +6,15 @@ from sympy.core.numbers import Float, Integer
 from sympy.core.singleton import S
 from sympy.core.symbol import _uniquely_named_symbol
 from sympy.polys import PurePoly, cancel
-from sympy.simplify.simplify import (simplify as _simplify,
-    dotprodsimp as _dotprodsimp)
+from sympy.simplify.simplify import simplify as _simplify, dotprodsimp as _dotprodsimp
 
 from .common import MatrixError, NonSquareMatrixError
 from .utilities import (
-    _get_intermediate_simp, _get_intermediate_simp_bool,
-    _iszero, _is_zero_after_expand_mul)
+    _get_intermediate_simp,
+    _get_intermediate_simp_bool,
+    _iszero,
+    _is_zero_after_expand_mul,
+)
 
 
 def _find_reasonable_pivot(col, iszerofunc=_iszero, simpfunc=_simplify):
@@ -39,7 +41,8 @@ def _find_reasonable_pivot(col, iszerofunc=_iszero, simpfunc=_simplify):
     # but at least one float is considered a numerical
     # column, and so we do partial pivoting
     if all(isinstance(x, (Float, Integer)) for x in col) and any(
-            isinstance(x, Float) for x in col):
+        isinstance(x, Float) for x in col
+    ):
         col_abs = [abs(x) for x in col]
         max_value = max(col_abs)
         if iszerofunc(max_value):
@@ -208,15 +211,15 @@ def _berkowitz_toeplitz_matrix(M):
 
     # the 0 x 0 case is trivial
     if M.rows == 0 and M.cols == 0:
-        return M._new(1,1, [M.one])
+        return M._new(1, 1, [M.one])
 
     #
     # Partition M = [ a_11  R ]
     #                  [ C     A ]
     #
 
-    a, R = M[0,0],   M[0, 1:]
-    C, A = M[1:, 0], M[1:,1:]
+    a, R = M[0, 0], M[0, 1:]
+    C, A = M[1:, 0], M[1:, 1:]
 
     #
     # The Toeplitz matrix looks like
@@ -238,7 +241,7 @@ def _berkowitz_toeplitz_matrix(M):
     diags = [(-R).multiply(d, dotprodsimp=True)[0, 0] for d in diags]
     diags = [M.one, -a] + diags
 
-    def entry(i,j):
+    def entry(i, j):
         if j > i:
             return M.zero
         return diags[i - j]
@@ -287,7 +290,7 @@ def _berkowitz_vector(M):
     if M.rows == 0 and M.cols == 0:
         return M._new(1, 1, [M.one])
     elif M.rows == 1 and M.cols == 1:
-        return M._new(2, 1, [M.one, -M[0,0]])
+        return M._new(2, 1, [M.one, -M[0, 0]])
 
     submat, toeplitz = _berkowitz_toeplitz_matrix(M)
 
@@ -328,7 +331,7 @@ def _adjugate(M, method="berkowitz"):
 
 
 # This functions is a candidate for caching if it gets implemented for matrices.
-def _charpoly(M, x='lambda', simplify=_simplify):
+def _charpoly(M, x="lambda", simplify=_simplify):
     """Computes characteristic polynomial det(x*I - M) where I is
     the identity matrix.
 
@@ -432,7 +435,7 @@ def _cofactor(M, i, j, method="berkowitz"):
     if not M.is_square or M.rows < 1:
         raise NonSquareMatrixError()
 
-    return (-1)**((i + j) % 2) * M.minor(i, j, method)
+    return (-1) ** ((i + j) % 2) * M.minor(i, j, method)
 
 
 def _cofactor_matrix(M, method="berkowitz"):
@@ -466,8 +469,7 @@ def _cofactor_matrix(M, method="berkowitz"):
     if not M.is_square or M.rows < 1:
         raise NonSquareMatrixError()
 
-    return M._new(M.rows, M.cols,
-            lambda i, j: M.cofactor(i, j, method))
+    return M._new(M.rows, M.cols, lambda i, j: M.cofactor(i, j, method))
 
 
 # This functions is a candidate for caching if it gets implemented for matrices.
@@ -556,21 +558,23 @@ def _det(M, method="bareiss", iszerofunc=None):
 
     n = M.rows
 
-    if n == M.cols: # square check is done in individual method functions
+    if n == M.cols:  # square check is done in individual method functions
         if n == 0:
             return M.one
         elif n == 1:
-            return M[0,0]
+            return M[0, 0]
         elif n == 2:
             m = M[0, 0] * M[1, 1] - M[0, 1] * M[1, 0]
             return _get_intermediate_simp(_dotprodsimp)(m)
         elif n == 3:
-            m =  (M[0, 0] * M[1, 1] * M[2, 2]
+            m = (
+                M[0, 0] * M[1, 1] * M[2, 2]
                 + M[0, 1] * M[1, 2] * M[2, 0]
                 + M[0, 2] * M[1, 0] * M[2, 1]
                 - M[0, 2] * M[1, 1] * M[2, 0]
                 - M[0, 0] * M[1, 2] * M[2, 1]
-                - M[0, 1] * M[1, 0] * M[2, 2])
+                - M[0, 1] * M[1, 0] * M[2, 2]
+            )
             return _get_intermediate_simp(_dotprodsimp)(m)
 
     if method == "bareiss":
@@ -580,7 +584,7 @@ def _det(M, method="bareiss", iszerofunc=None):
     elif method == "lu":
         return M._eval_det_lu(iszerofunc=iszerofunc)
     else:
-        raise MatrixError('unknown method for calculating determinant')
+        raise MatrixError("unknown method for calculating determinant")
 
 
 # This functions is a candidate for caching if it gets implemented for matrices.
@@ -615,7 +619,9 @@ def _det_bareiss(M, iszerofunc=_is_zero_after_expand_mul):
         # With the default iszerofunc, _find_reasonable_pivot slows down
         # the computation by the factor of 2.5 in one test.
         # Relevant issues: #10279 and #13877.
-        pivot_pos, pivot_val, _, _ = _find_reasonable_pivot(mat[:, 0], iszerofunc=iszerofunc)
+        pivot_pos, pivot_val, _, _ = _find_reasonable_pivot(
+            mat[:, 0], iszerofunc=iszerofunc
+        )
         if pivot_pos is None:
             return mat.zero
 
@@ -629,14 +635,16 @@ def _det_bareiss(M, iszerofunc=_is_zero_after_expand_mul):
         tmp_mat = mat.extract(rows, cols)
 
         def entry(i, j):
-            ret = (pivot_val*tmp_mat[i, j + 1] - mat[pivot_pos, j + 1]*tmp_mat[i, 0]) / cumm
+            ret = (
+                pivot_val * tmp_mat[i, j + 1] - mat[pivot_pos, j + 1] * tmp_mat[i, 0]
+            ) / cumm
             if _get_intermediate_simp_bool(True):
                 return _dotprodsimp(ret)
             elif not ret.is_Atom:
                 return cancel(ret)
             return ret
 
-        return sign*bareiss(M._new(mat.rows - 1, mat.cols - 1, entry), pivot_val)
+        return sign * bareiss(M._new(mat.rows - 1, mat.cols - 1, entry), pivot_val)
 
     if not M.is_square:
         raise NonSquareMatrixError()
@@ -663,7 +671,7 @@ def _det_berkowitz(M):
         # convention.
 
     berk_vector = _berkowitz_vector(M)
-    return (-1)**(len(berk_vector) - 1) * berk_vector[-1]
+    return (-1) ** (len(berk_vector) - 1) * berk_vector[-1]
 
 
 # This functions is a candidate for caching if it gets implemented for matrices.
@@ -702,8 +710,7 @@ def _det_LU(M, iszerofunc=_iszero, simpfunc=None):
         # suggests that the determinant of a 0 x 0 matrix is one, by
         # convention.
 
-    lu, row_swaps = M.LUdecomposition_Simple(iszerofunc=iszerofunc,
-            simpfunc=simpfunc)
+    lu, row_swaps = M.LUdecomposition_Simple(iszerofunc=iszerofunc, simpfunc=simpfunc)
     # P*A = L*U => det(A) = det(L)*det(U)/det(P) = det(P)*det(U).
     # Lower triangular factor L encoded in lu has unit diagonal => det(L) = 1.
     # P is a permutation matrix => det(P) in {-1, 1} => 1/det(P) = det(P).
@@ -714,11 +721,11 @@ def _det_LU(M, iszerofunc=_iszero, simpfunc=None):
     # if the product is zero.
     # Bottom right entry of U is 0 => det(A) = 0.
     # It may be impossible to determine if this entry of U is zero when it is symbolic.
-    if iszerofunc(lu[lu.rows-1, lu.rows-1]):
+    if iszerofunc(lu[lu.rows - 1, lu.rows - 1]):
         return M.zero
 
     # Compute det(P)
-    det = -M.one if len(row_swaps)%2 else M.one
+    det = -M.one if len(row_swaps) % 2 else M.one
 
     # Compute det(U) by calculating the product of U's diagonal entries.
     # The upper triangular portion of lu is the upper triangular portion of the
@@ -800,8 +807,10 @@ def _minor_submatrix(M, i, j):
         j += M.cols
 
     if not 0 <= i < M.rows or not 0 <= j < M.cols:
-        raise ValueError("`i` and `j` must satisfy 0 <= i < ``M.rows`` "
-                            "(%d)" % M.rows + "and 0 <= j < ``M.cols`` (%d)." % M.cols)
+        raise ValueError(
+            "`i` and `j` must satisfy 0 <= i < ``M.rows`` "
+            "(%d)" % M.rows + "and 0 <= j < ``M.cols`` (%d)." % M.cols
+        )
 
     rows = [a for a in range(M.rows) if a != i]
     cols = [a for a in range(M.cols) if a != j]

@@ -3,13 +3,18 @@
 from __future__ import print_function, division
 
 from sympy.polys.domains.groundtypes import (
-    GMPYInteger, SymPyInteger,
+    GMPYInteger,
+    SymPyInteger,
     gmpy_factorial,
-    gmpy_gcdex, gmpy_gcd, gmpy_lcm, gmpy_sqrt,
+    gmpy_gcdex,
+    gmpy_gcd,
+    gmpy_lcm,
+    gmpy_sqrt,
 )
 from sympy.polys.domains.integerring import IntegerRing
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
+
 
 @public
 class GMPYIntegerRing(IntegerRing):
@@ -19,7 +24,7 @@ class GMPYIntegerRing(IntegerRing):
     zero = dtype(0)
     one = dtype(1)
     tp = type(one)
-    alias = 'ZZ_gmpy'
+    alias = "ZZ_gmpy"
 
     def __init__(self):
         """Allow instantiation of this domain. """

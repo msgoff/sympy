@@ -1,4 +1,4 @@
-#TODO:
+# TODO:
 # -Implement Clebsch-Gordan symmetries
 # -Improve simplification method
 # -Implement new simpifications
@@ -6,24 +6,30 @@
 
 from __future__ import print_function, division
 
-from sympy import (Add, expand, Eq, Expr, Mul, Piecewise, Pow, sqrt, Sum,
-                   symbols, sympify, Wild)
+from sympy import (
+    Add,
+    expand,
+    Eq,
+    Expr,
+    Mul,
+    Piecewise,
+    Pow,
+    sqrt,
+    Sum,
+    symbols,
+    sympify,
+    Wild,
+)
 from sympy.printing.pretty.stringpict import prettyForm, stringPict
 
 from sympy.functions.special.tensor_functions import KroneckerDelta
 from sympy.physics.wigner import clebsch_gordan, wigner_3j, wigner_6j, wigner_9j
 
-__all__ = [
-    'CG',
-    'Wigner3j',
-    'Wigner6j',
-    'Wigner9j',
-    'cg_simp'
-]
+__all__ = ["CG", "Wigner3j", "Wigner6j", "Wigner9j", "cg_simp"]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # CG Coefficients
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 class Wigner3j(Expr):
@@ -100,45 +106,50 @@ class Wigner3j(Expr):
 
     # This is modified from the _print_Matrix method
     def _pretty(self, printer, *args):
-        m = ((printer._print(self.j1), printer._print(self.m1)),
+        m = (
+            (printer._print(self.j1), printer._print(self.m1)),
             (printer._print(self.j2), printer._print(self.m2)),
-            (printer._print(self.j3), printer._print(self.m3)))
+            (printer._print(self.j3), printer._print(self.m3)),
+        )
         hsep = 2
         vsep = 1
-        maxw = [-1]*3
+        maxw = [-1] * 3
         for j in range(3):
-            maxw[j] = max([ m[j][i].width() for i in range(2) ])
+            maxw[j] = max([m[j][i].width() for i in range(2)])
         D = None
         for i in range(2):
             D_row = None
             for j in range(3):
                 s = m[j][i]
                 wdelta = maxw[j] - s.width()
-                wleft = wdelta //2
+                wleft = wdelta // 2
                 wright = wdelta - wleft
 
-                s = prettyForm(*s.right(' '*wright))
-                s = prettyForm(*s.left(' '*wleft))
+                s = prettyForm(*s.right(" " * wright))
+                s = prettyForm(*s.left(" " * wleft))
 
                 if D_row is None:
                     D_row = s
                     continue
-                D_row = prettyForm(*D_row.right(' '*hsep))
+                D_row = prettyForm(*D_row.right(" " * hsep))
                 D_row = prettyForm(*D_row.right(s))
             if D is None:
                 D = D_row
                 continue
             for _ in range(vsep):
-                D = prettyForm(*D.below(' '))
+                D = prettyForm(*D.below(" "))
             D = prettyForm(*D.below(D_row))
         D = prettyForm(*D.parens())
         return D
 
     def _latex(self, printer, *args):
-        label = map(printer._print, (self.j1, self.j2, self.j3,
-                    self.m1, self.m2, self.m3))
-        return r'\left(\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \end{array}\right)' % \
-            tuple(label)
+        label = map(
+            printer._print, (self.j1, self.j2, self.j3, self.m1, self.m2, self.m3)
+        )
+        return (
+            r"\left(\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \end{array}\right)"
+            % tuple(label)
+        )
 
     def doit(self, **hints):
         if self.is_symbolic:
@@ -194,27 +205,27 @@ class CG(Wigner3j):
         return clebsch_gordan(self.j1, self.j2, self.j3, self.m1, self.m2, self.m3)
 
     def _pretty(self, printer, *args):
-        bot = printer._print_seq(
-            (self.j1, self.m1, self.j2, self.m2), delimiter=',')
-        top = printer._print_seq((self.j3, self.m3), delimiter=',')
+        bot = printer._print_seq((self.j1, self.m1, self.j2, self.m2), delimiter=",")
+        top = printer._print_seq((self.j3, self.m3), delimiter=",")
 
         pad = max(top.width(), bot.width())
-        bot = prettyForm(*bot.left(' '))
-        top = prettyForm(*top.left(' '))
+        bot = prettyForm(*bot.left(" "))
+        top = prettyForm(*top.left(" "))
 
         if not pad == bot.width():
-            bot = prettyForm(*bot.right(' '*(pad - bot.width())))
+            bot = prettyForm(*bot.right(" " * (pad - bot.width())))
         if not pad == top.width():
-            top = prettyForm(*top.right(' '*(pad - top.width())))
-        s = stringPict('C' + ' '*pad)
+            top = prettyForm(*top.right(" " * (pad - top.width())))
+        s = stringPict("C" + " " * pad)
         s = prettyForm(*s.below(bot))
         s = prettyForm(*s.above(top))
         return s
 
     def _latex(self, printer, *args):
-        label = map(printer._print, (self.j3, self.m3, self.j1,
-                    self.m1, self.j2, self.m2))
-        return r'C^{%s,%s}_{%s,%s,%s,%s}' % tuple(label)
+        label = map(
+            printer._print, (self.j3, self.m3, self.j1, self.m1, self.j2, self.m2)
+        )
+        return r"C^{%s,%s}_{%s,%s,%s,%s}" % tuple(label)
 
 
 class Wigner6j(Expr):
@@ -226,6 +237,7 @@ class Wigner6j(Expr):
     Wigner3j: Wigner-3j symbols
 
     """
+
     def __new__(cls, j1, j2, j12, j3, j, j23):
         args = map(sympify, (j1, j2, j12, j3, j, j23))
         return Expr.__new__(cls, *args)
@@ -260,45 +272,50 @@ class Wigner6j(Expr):
 
     # This is modified from the _print_Matrix method
     def _pretty(self, printer, *args):
-        m = ((printer._print(self.j1), printer._print(self.j3)),
+        m = (
+            (printer._print(self.j1), printer._print(self.j3)),
             (printer._print(self.j2), printer._print(self.j)),
-            (printer._print(self.j12), printer._print(self.j23)))
+            (printer._print(self.j12), printer._print(self.j23)),
+        )
         hsep = 2
         vsep = 1
-        maxw = [-1]*3
+        maxw = [-1] * 3
         for j in range(3):
-            maxw[j] = max([ m[j][i].width() for i in range(2) ])
+            maxw[j] = max([m[j][i].width() for i in range(2)])
         D = None
         for i in range(2):
             D_row = None
             for j in range(3):
                 s = m[j][i]
                 wdelta = maxw[j] - s.width()
-                wleft = wdelta //2
+                wleft = wdelta // 2
                 wright = wdelta - wleft
 
-                s = prettyForm(*s.right(' '*wright))
-                s = prettyForm(*s.left(' '*wleft))
+                s = prettyForm(*s.right(" " * wright))
+                s = prettyForm(*s.left(" " * wleft))
 
                 if D_row is None:
                     D_row = s
                     continue
-                D_row = prettyForm(*D_row.right(' '*hsep))
+                D_row = prettyForm(*D_row.right(" " * hsep))
                 D_row = prettyForm(*D_row.right(s))
             if D is None:
                 D = D_row
                 continue
             for _ in range(vsep):
-                D = prettyForm(*D.below(' '))
+                D = prettyForm(*D.below(" "))
             D = prettyForm(*D.below(D_row))
-        D = prettyForm(*D.parens(left='{', right='}'))
+        D = prettyForm(*D.parens(left="{", right="}"))
         return D
 
     def _latex(self, printer, *args):
-        label = map(printer._print, (self.j1, self.j2, self.j12,
-                    self.j3, self.j, self.j23))
-        return r'\left\{\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \end{array}\right\}' % \
-            tuple(label)
+        label = map(
+            printer._print, (self.j1, self.j2, self.j12, self.j3, self.j, self.j23)
+        )
+        return (
+            r"\left\{\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \end{array}\right\}"
+            % tuple(label)
+        )
 
     def doit(self, **hints):
         if self.is_symbolic:
@@ -315,6 +332,7 @@ class Wigner9j(Expr):
     Wigner3j: Wigner-3j symbols
 
     """
+
     def __new__(cls, j1, j2, j12, j3, j4, j34, j13, j24, j):
         args = map(sympify, (j1, j2, j12, j3, j4, j34, j13, j24, j))
         return Expr.__new__(cls, *args)
@@ -362,52 +380,87 @@ class Wigner9j(Expr):
     # This is modified from the _print_Matrix method
     def _pretty(self, printer, *args):
         m = (
-            (printer._print(
-                self.j1), printer._print(self.j3), printer._print(self.j13)),
-            (printer._print(
-                self.j2), printer._print(self.j4), printer._print(self.j24)),
-            (printer._print(self.j12), printer._print(self.j34), printer._print(self.j)))
+            (
+                printer._print(self.j1),
+                printer._print(self.j3),
+                printer._print(self.j13),
+            ),
+            (
+                printer._print(self.j2),
+                printer._print(self.j4),
+                printer._print(self.j24),
+            ),
+            (
+                printer._print(self.j12),
+                printer._print(self.j34),
+                printer._print(self.j),
+            ),
+        )
         hsep = 2
         vsep = 1
-        maxw = [-1]*3
+        maxw = [-1] * 3
         for j in range(3):
-            maxw[j] = max([ m[j][i].width() for i in range(3) ])
+            maxw[j] = max([m[j][i].width() for i in range(3)])
         D = None
         for i in range(3):
             D_row = None
             for j in range(3):
                 s = m[j][i]
                 wdelta = maxw[j] - s.width()
-                wleft = wdelta //2
+                wleft = wdelta // 2
                 wright = wdelta - wleft
 
-                s = prettyForm(*s.right(' '*wright))
-                s = prettyForm(*s.left(' '*wleft))
+                s = prettyForm(*s.right(" " * wright))
+                s = prettyForm(*s.left(" " * wleft))
 
                 if D_row is None:
                     D_row = s
                     continue
-                D_row = prettyForm(*D_row.right(' '*hsep))
+                D_row = prettyForm(*D_row.right(" " * hsep))
                 D_row = prettyForm(*D_row.right(s))
             if D is None:
                 D = D_row
                 continue
             for _ in range(vsep):
-                D = prettyForm(*D.below(' '))
+                D = prettyForm(*D.below(" "))
             D = prettyForm(*D.below(D_row))
-        D = prettyForm(*D.parens(left='{', right='}'))
+        D = prettyForm(*D.parens(left="{", right="}"))
         return D
 
     def _latex(self, printer, *args):
-        label = map(printer._print, (self.j1, self.j2, self.j12, self.j3,
-                self.j4, self.j34, self.j13, self.j24, self.j))
-        return r'\left\{\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \\ %s & %s & %s \end{array}\right\}' % \
-            tuple(label)
+        label = map(
+            printer._print,
+            (
+                self.j1,
+                self.j2,
+                self.j12,
+                self.j3,
+                self.j4,
+                self.j34,
+                self.j13,
+                self.j24,
+                self.j,
+            ),
+        )
+        return (
+            r"\left\{\begin{array}{ccc} %s & %s & %s \\ %s & %s & %s \\ %s & %s & %s \end{array}\right\}"
+            % tuple(label)
+        )
 
     def doit(self, **hints):
         if self.is_symbolic:
             raise ValueError("Coefficients must be numerical")
-        return wigner_9j(self.j1, self.j2, self.j12, self.j3, self.j4, self.j34, self.j13, self.j24, self.j)
+        return wigner_9j(
+            self.j1,
+            self.j2,
+            self.j12,
+            self.j3,
+            self.j4,
+            self.j34,
+            self.j13,
+            self.j24,
+            self.j,
+        )
 
 
 def cg_simp(e):
@@ -453,7 +506,7 @@ def cg_simp(e):
 
 
 def _cg_simp_add(e):
-    #TODO: Improve simplification method
+    # TODO: Improve simplification method
     """Takes a sum of terms involving Clebsch-Gordan coefficients and
     simplifies the terms.
 
@@ -497,72 +550,143 @@ def _cg_simp_add(e):
 
 def _check_varsh_871_1(term_list):
     # Sum( CG(a,alpha,b,0,a,alpha), (alpha, -a, a)) == KroneckerDelta(b,0)
-    a, alpha, b, lt = map(Wild, ('a', 'alpha', 'b', 'lt'))
-    expr = lt*CG(a, alpha, b, 0, a, alpha)
-    simp = (2*a + 1)*KroneckerDelta(b, 0)
-    sign = lt/abs(lt)
-    build_expr = 2*a + 1
+    a, alpha, b, lt = map(Wild, ("a", "alpha", "b", "lt"))
+    expr = lt * CG(a, alpha, b, 0, a, alpha)
+    simp = (2 * a + 1) * KroneckerDelta(b, 0)
+    sign = lt / abs(lt)
+    build_expr = 2 * a + 1
     index_expr = a + alpha
-    return _check_cg_simp(expr, simp, sign, lt, term_list, (a, alpha, b, lt), (a, b), build_expr, index_expr)
+    return _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        lt,
+        term_list,
+        (a, alpha, b, lt),
+        (a, b),
+        build_expr,
+        index_expr,
+    )
 
 
 def _check_varsh_871_2(term_list):
     # Sum((-1)**(a-alpha)*CG(a,alpha,a,-alpha,c,0),(alpha,-a,a))
-    a, alpha, c, lt = map(Wild, ('a', 'alpha', 'c', 'lt'))
-    expr = lt*CG(a, alpha, a, -alpha, c, 0)
-    simp = sqrt(2*a + 1)*KroneckerDelta(c, 0)
-    sign = (-1)**(a - alpha)*lt/abs(lt)
-    build_expr = 2*a + 1
+    a, alpha, c, lt = map(Wild, ("a", "alpha", "c", "lt"))
+    expr = lt * CG(a, alpha, a, -alpha, c, 0)
+    simp = sqrt(2 * a + 1) * KroneckerDelta(c, 0)
+    sign = (-1) ** (a - alpha) * lt / abs(lt)
+    build_expr = 2 * a + 1
     index_expr = a + alpha
-    return _check_cg_simp(expr, simp, sign, lt, term_list, (a, alpha, c, lt), (a, c), build_expr, index_expr)
+    return _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        lt,
+        term_list,
+        (a, alpha, c, lt),
+        (a, c),
+        build_expr,
+        index_expr,
+    )
 
 
 def _check_varsh_872_9(term_list):
     # Sum( CG(a,alpha,b,beta,c,gamma)*CG(a,alpha',b,beta',c,gamma), (gamma, -c, c), (c, abs(a-b), a+b))
-    a, alpha, alphap, b, beta, betap, c, gamma, lt = map(Wild, (
-        'a', 'alpha', 'alphap', 'b', 'beta', 'betap', 'c', 'gamma', 'lt'))
+    a, alpha, alphap, b, beta, betap, c, gamma, lt = map(
+        Wild, ("a", "alpha", "alphap", "b", "beta", "betap", "c", "gamma", "lt")
+    )
     # Case alpha==alphap, beta==betap
 
     # For numerical alpha,beta
-    expr = lt*CG(a, alpha, b, beta, c, gamma)**2
+    expr = lt * CG(a, alpha, b, beta, c, gamma) ** 2
     simp = 1
-    sign = lt/abs(lt)
+    sign = lt / abs(lt)
     x = abs(a - b)
     y = abs(alpha + beta)
     build_expr = a + b + 1 - Piecewise((x, x > y), (0, Eq(x, y)), (y, y > x))
     index_expr = a + b - c
-    term_list, other1 = _check_cg_simp(expr, simp, sign, lt, term_list, (a, alpha, b, beta, c, gamma, lt), (a, alpha, b, beta), build_expr, index_expr)
+    term_list, other1 = _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        lt,
+        term_list,
+        (a, alpha, b, beta, c, gamma, lt),
+        (a, alpha, b, beta),
+        build_expr,
+        index_expr,
+    )
 
     # For symbolic alpha,beta
     x = abs(a - b)
     y = a + b
-    build_expr = (y + 1 - x)*(x + y + 1)
-    index_expr = (c - x)*(x + c) + c + gamma
-    term_list, other2 = _check_cg_simp(expr, simp, sign, lt, term_list, (a, alpha, b, beta, c, gamma, lt), (a, alpha, b, beta), build_expr, index_expr)
+    build_expr = (y + 1 - x) * (x + y + 1)
+    index_expr = (c - x) * (x + c) + c + gamma
+    term_list, other2 = _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        lt,
+        term_list,
+        (a, alpha, b, beta, c, gamma, lt),
+        (a, alpha, b, beta),
+        build_expr,
+        index_expr,
+    )
 
     # Case alpha!=alphap or beta!=betap
     # Note: this only works with leading term of 1, pattern matching is unable to match when there is a Wild leading term
     # For numerical alpha,alphap,beta,betap
-    expr = CG(a, alpha, b, beta, c, gamma)*CG(a, alphap, b, betap, c, gamma)
-    simp = KroneckerDelta(alpha, alphap)*KroneckerDelta(beta, betap)
+    expr = CG(a, alpha, b, beta, c, gamma) * CG(a, alphap, b, betap, c, gamma)
+    simp = KroneckerDelta(alpha, alphap) * KroneckerDelta(beta, betap)
     sign = sympify(1)
     x = abs(a - b)
     y = abs(alpha + beta)
     build_expr = a + b + 1 - Piecewise((x, x > y), (0, Eq(x, y)), (y, y > x))
     index_expr = a + b - c
-    term_list, other3 = _check_cg_simp(expr, simp, sign, sympify(1), term_list, (a, alpha, alphap, b, beta, betap, c, gamma), (a, alpha, alphap, b, beta, betap), build_expr, index_expr)
+    term_list, other3 = _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        sympify(1),
+        term_list,
+        (a, alpha, alphap, b, beta, betap, c, gamma),
+        (a, alpha, alphap, b, beta, betap),
+        build_expr,
+        index_expr,
+    )
 
     # For symbolic alpha,alphap,beta,betap
     x = abs(a - b)
     y = a + b
-    build_expr = (y + 1 - x)*(x + y + 1)
-    index_expr = (c - x)*(x + c) + c + gamma
-    term_list, other4 = _check_cg_simp(expr, simp, sign, sympify(1), term_list, (a, alpha, alphap, b, beta, betap, c, gamma), (a, alpha, alphap, b, beta, betap), build_expr, index_expr)
+    build_expr = (y + 1 - x) * (x + y + 1)
+    index_expr = (c - x) * (x + c) + c + gamma
+    term_list, other4 = _check_cg_simp(
+        expr,
+        simp,
+        sign,
+        sympify(1),
+        term_list,
+        (a, alpha, alphap, b, beta, betap, c, gamma),
+        (a, alpha, alphap, b, beta, betap),
+        build_expr,
+        index_expr,
+    )
 
     return term_list, other1 + other2 + other4
 
 
-def _check_cg_simp(expr, simp, sign, lt, term_list, variables, dep_variables, build_index_expr, index_expr):
+def _check_cg_simp(
+    expr,
+    simp,
+    sign,
+    lt,
+    term_list,
+    variables,
+    dep_variables,
+    build_index_expr,
+    index_expr,
+):
     """ Checks for simplifications that can be made, returning a tuple of the
     simplified list of terms and any terms generated by simplification.
 
@@ -614,24 +738,34 @@ def _check_cg_simp(expr, simp, sign, lt, term_list, variables, dep_variables, bu
             i += 1
             continue
         sub_dep = [(x, sub_1[x]) for x in dep_variables]
-        cg_index = [None]*build_index_expr.subs(sub_1)
+        cg_index = [None] * build_index_expr.subs(sub_1)
         for j in range(i, len(term_list)):
-            sub_2 = _check_cg(term_list[j], expr.subs(sub_dep), len(variables) - len(dep_variables), sign=(sign.subs(sub_1), sign.subs(sub_dep)))
+            sub_2 = _check_cg(
+                term_list[j],
+                expr.subs(sub_dep),
+                len(variables) - len(dep_variables),
+                sign=(sign.subs(sub_1), sign.subs(sub_dep)),
+            )
             if sub_2 is None:
                 continue
             if not sympify(index_expr.subs(sub_dep).subs(sub_2)).is_number:
                 continue
-            cg_index[index_expr.subs(sub_dep).subs(sub_2)] = j, expr.subs(lt, 1).subs(sub_dep).subs(sub_2), lt.subs(sub_2), sign.subs(sub_dep).subs(sub_2)
+            cg_index[index_expr.subs(sub_dep).subs(sub_2)] = (
+                j,
+                expr.subs(lt, 1).subs(sub_dep).subs(sub_2),
+                lt.subs(sub_2),
+                sign.subs(sub_dep).subs(sub_2),
+            )
         if all(i is not None for i in cg_index):
-            min_lt = min(*[ abs(term[2]) for term in cg_index ])
-            indices = [ term[0] for term in cg_index]
+            min_lt = min(*[abs(term[2]) for term in cg_index])
+            indices = [term[0] for term in cg_index]
             indices.sort()
             indices.reverse()
-            [ term_list.pop(j) for j in indices ]
+            [term_list.pop(j) for j in indices]
             for term in cg_index:
                 if abs(term[2]) > min_lt:
-                    term_list.append( (term[2] - min_lt*term[3])*term[1] )
-            other_part += min_lt*(sign*simp).subs(sub_1)
+                    term_list.append((term[2] - min_lt * term[3]) * term[1])
+            other_part += min_lt * (sign * simp).subs(sub_1)
         else:
             i += 1
     return term_list, other_part
@@ -645,7 +779,7 @@ def _check_cg(cg_term, expr, length, sign=None):
         return
     if sign is not None:
         if not isinstance(sign, tuple):
-            raise TypeError('sign must be a tuple')
+            raise TypeError("sign must be a tuple")
         if not sign[0] == (sign[1]).subs(matches):
             return
     if len(matches) == length:
@@ -660,41 +794,48 @@ def _cg_simp_sum(e):
 
 
 def _check_varsh_sum_871_1(e):
-    a = Wild('a')
-    alpha = symbols('alpha')
-    b = Wild('b')
+    a = Wild("a")
+    alpha = symbols("alpha")
+    b = Wild("b")
     match = e.match(Sum(CG(a, alpha, b, 0, a, alpha), (alpha, -a, a)))
     if match is not None and len(match) == 2:
-        return ((2*a + 1)*KroneckerDelta(b, 0)).subs(match)
+        return ((2 * a + 1) * KroneckerDelta(b, 0)).subs(match)
     return e
 
 
 def _check_varsh_sum_871_2(e):
-    a = Wild('a')
-    alpha = symbols('alpha')
-    c = Wild('c')
+    a = Wild("a")
+    alpha = symbols("alpha")
+    c = Wild("c")
     match = e.match(
-        Sum((-1)**(a - alpha)*CG(a, alpha, a, -alpha, c, 0), (alpha, -a, a)))
+        Sum((-1) ** (a - alpha) * CG(a, alpha, a, -alpha, c, 0), (alpha, -a, a))
+    )
     if match is not None and len(match) == 2:
-        return (sqrt(2*a + 1)*KroneckerDelta(c, 0)).subs(match)
+        return (sqrt(2 * a + 1) * KroneckerDelta(c, 0)).subs(match)
     return e
 
 
 def _check_varsh_sum_872_4(e):
-    a = Wild('a')
-    alpha = Wild('alpha')
-    b = Wild('b')
-    beta = Wild('beta')
-    c = Wild('c')
-    cp = Wild('cp')
-    gamma = Wild('gamma')
-    gammap = Wild('gammap')
-    match1 = e.match(Sum(CG(a, alpha, b, beta, c, gamma)*CG(
-        a, alpha, b, beta, cp, gammap), (alpha, -a, a), (beta, -b, b)))
+    a = Wild("a")
+    alpha = Wild("alpha")
+    b = Wild("b")
+    beta = Wild("beta")
+    c = Wild("c")
+    cp = Wild("cp")
+    gamma = Wild("gamma")
+    gammap = Wild("gammap")
+    match1 = e.match(
+        Sum(
+            CG(a, alpha, b, beta, c, gamma) * CG(a, alpha, b, beta, cp, gammap),
+            (alpha, -a, a),
+            (beta, -b, b),
+        )
+    )
     if match1 is not None and len(match1) == 8:
-        return (KroneckerDelta(c, cp)*KroneckerDelta(gamma, gammap)).subs(match1)
-    match2 = e.match(Sum(
-        CG(a, alpha, b, beta, c, gamma)**2, (alpha, -a, a), (beta, -b, b)))
+        return (KroneckerDelta(c, cp) * KroneckerDelta(gamma, gammap)).subs(match1)
+    match2 = e.match(
+        Sum(CG(a, alpha, b, beta, c, gamma) ** 2, (alpha, -a, a), (beta, -b, b))
+    )
     if match2 is not None and len(match2) == 6:
         return 1
     return e
@@ -706,10 +847,10 @@ def _cg_list(term):
     cg = []
     coeff = 1
     if not (isinstance(term, Mul) or isinstance(term, Pow)):
-        raise NotImplementedError('term must be CG, Add, Mul or Pow')
+        raise NotImplementedError("term must be CG, Add, Mul or Pow")
     if isinstance(term, Pow) and sympify(term.exp).is_number:
         if sympify(term.exp).is_number:
-            [ cg.append(term.base) for _ in range(term.exp) ]
+            [cg.append(term.base) for _ in range(term.exp)]
         else:
             return (term,), 1, 1
     if isinstance(term, Mul):
@@ -718,4 +859,4 @@ def _cg_list(term):
                 cg.append(arg)
             else:
                 coeff *= arg
-        return cg, coeff, coeff/abs(coeff)
+        return cg, coeff, coeff / abs(coeff)

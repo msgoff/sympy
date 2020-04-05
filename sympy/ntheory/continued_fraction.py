@@ -27,11 +27,16 @@ def continued_fraction(a):
             return continued_fraction_periodic(e.p, e.q, 0)
         elif e.is_Pow and e.exp is S.Half and e.base.is_Integer:
             return continued_fraction_periodic(0, 1, e.base)
-        elif e.is_Mul and len(e.args) == 2 and (
-                e.args[0].is_Rational and
-                e.args[1].is_Pow and
-                e.args[1].base.is_Integer and
-                e.args[1].exp is S.Half):
+        elif (
+            e.is_Mul
+            and len(e.args) == 2
+            and (
+                e.args[0].is_Rational
+                and e.args[1].is_Pow
+                and e.args[1].base.is_Integer
+                and e.args[1].exp is S.Half
+            )
+        ):
             a, b = e.args
             return continued_fraction_periodic(0, a.q, b.base, a.p)
         else:
@@ -59,13 +64,12 @@ def continued_fraction(a):
                         b = Integer(1)
                         c = bc
                     if b.is_Integer and (
-                            c.is_Pow and c.exp is S.Half and
-                            c.base.is_Integer):
+                        c.is_Pow and c.exp is S.Half and c.base.is_Integer
+                    ):
                         # (a + b*sqrt(c))/d
                         c = c.base
                         return continued_fraction_periodic(a, d, c, b)
-    raise ValueError(
-        'expecting a rational or quadratic irrational, not %s' % e)
+    raise ValueError("expecting a rational or quadratic irrational, not %s" % e)
 
 
 def continued_fraction_periodic(p, q, d=0, s=1):
@@ -142,13 +146,13 @@ def continued_fraction_periodic(p, q, d=0, s=1):
     # check for rational case
     sd = sqrt(d)
     if sd.is_Integer:
-        return list(continued_fraction_iterator(Rational(p + s*sd, q)))
+        return list(continued_fraction_iterator(Rational(p + s * sd, q)))
 
     # irrational case with sd != Integer
     if q < 0:
         p, q, s = -p, -q, -s
 
-    n = (p + s*sd)/q
+    n = (p + s * sd) / q
     if n < 0:
         w = floor(-n)
         f = -n - w
@@ -156,11 +160,11 @@ def continued_fraction_periodic(p, q, d=0, s=1):
         one_f[0] -= w + 1
         return one_f
 
-    d *= s**2
+    d *= s ** 2
     sd *= s
 
-    if (d - p**2)%q:
-        d *= q**2
+    if (d - p ** 2) % q:
+        d *= q ** 2
         sd *= q
         p *= q
         q *= q
@@ -170,9 +174,9 @@ def continued_fraction_periodic(p, q, d=0, s=1):
 
     while (p, q) not in pq:
         pq[(p, q)] = len(terms)
-        terms.append((p + sd)//q)
-        p = terms[-1]*q - p
-        q = (d - p**2)//q
+        terms.append((p + sd) // q)
+        p = terms[-1] * q - p
+        q = (d - p ** 2) // q
 
     i = pq[(p, q)]
     return terms[:i] + [terms[i:]]
@@ -226,7 +230,7 @@ def continued_fraction_reduce(cf):
     from sympy.solvers import solve
 
     period = []
-    x = Dummy('x')
+    x = Dummy("x")
 
     def untillist(cf):
         for nxt in cf:
@@ -241,7 +245,7 @@ def continued_fraction_reduce(cf):
         pass
 
     if period:
-        y = Dummy('y')
+        y = Dummy("y")
         solns = solve(continued_fraction_reduce(period + [y]) - y, y)
         solns.sort()
         pure = solns[-1]
@@ -297,7 +301,7 @@ def continued_fraction_iterator(x):
         x -= i
         if not x:
             break
-        x = 1/x
+        x = 1 / x
 
 
 def continued_fraction_convergents(cf):
@@ -345,7 +349,7 @@ def continued_fraction_convergents(cf):
     p_2, q_2 = Integer(0), Integer(1)
     p_1, q_1 = Integer(1), Integer(0)
     for a in cf:
-        p, q = a*p_1 + p_2, a*q_1 + q_2
+        p, q = a * p_1 + p_2, a * q_1 + q_2
         p_2, q_2 = p_1, q_1
         p_1, q_1 = p, q
-        yield p/q
+        yield p / q

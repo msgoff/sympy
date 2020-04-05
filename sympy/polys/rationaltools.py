@@ -7,6 +7,7 @@ from sympy.core.compatibility import iterable
 from sympy.core.exprtools import gcd_terms
 from sympy.utilities import public
 
+
 @public
 def together(expr, deep=False, fraction=True):
     """
@@ -60,12 +61,15 @@ def together(expr, deep=False, fraction=True):
     (x*exp(x) + 1)*exp(-3*x)/x
 
     """
+
     def _together(expr):
         if isinstance(expr, Basic):
             if expr.is_Atom or (expr.is_Function and not deep):
                 return expr
             elif expr.is_Add:
-                return gcd_terms(list(map(_together, Add.make_args(expr))), fraction=fraction)
+                return gcd_terms(
+                    list(map(_together, Add.make_args(expr))), fraction=fraction
+                )
             elif expr.is_Pow:
                 base = _together(expr.base)
 
@@ -76,9 +80,9 @@ def together(expr, deep=False, fraction=True):
 
                 return expr.__class__(base, exp)
             else:
-                return expr.__class__(*[ _together(arg) for arg in expr.args ])
+                return expr.__class__(*[_together(arg) for arg in expr.args])
         elif iterable(expr):
-            return expr.__class__([ _together(ex) for ex in expr ])
+            return expr.__class__([_together(ex) for ex in expr])
 
         return expr
 

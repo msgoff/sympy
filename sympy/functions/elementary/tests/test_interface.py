@@ -8,7 +8,6 @@ def test_function_series1():
     """Create our new "sin" function."""
 
     class my_function(Function):
-
         def fdiff(self, argindex=1):
             return cos(self.args[0])
 
@@ -18,16 +17,15 @@ def test_function_series1():
             if arg == 0:
                 return sympify(0)
 
-    #Test that the taylor series is correct
+    # Test that the taylor series is correct
     assert my_function(x).series(x, 0, 10) == sin(x).series(x, 0, 10)
-    assert limit(my_function(x)/x, x, 0) == 1
+    assert limit(my_function(x) / x, x, 0) == 1
 
 
 def test_function_series2():
     """Create our new "cos" function."""
 
     class my_function2(Function):
-
         def fdiff(self, argindex=1):
             return -sin(self.args[0])
 
@@ -37,7 +35,7 @@ def test_function_series2():
             if arg == 0:
                 return sympify(1)
 
-    #Test that the taylor series is correct
+    # Test that the taylor series is correct
     assert my_function2(x).series(x, 0, 10) == cos(x).series(x, 0, 10)
 
 
@@ -53,9 +51,8 @@ def test_function_series3():
     """
 
     class mytanh(Function):
-
         def fdiff(self, argindex=1):
-            return 1 - mytanh(self.args[0])**2
+            return 1 - mytanh(self.args[0]) ** 2
 
         @classmethod
         def eval(cls, arg):

@@ -9,7 +9,6 @@ from .permutation import PermutationMatrix
 
 
 class MatPow(MatrixExpr):
-
     def __new__(cls, base, exp):
         base = _sympify(base)
         if not base.is_Matrix:
@@ -31,6 +30,7 @@ class MatPow(MatrixExpr):
 
     def _entry(self, i, j, **kwargs):
         from sympy.matrices.expressions import MatMul
+
         A = self.doit()
         if isinstance(A, MatPow):
             # We still have a MatPow, make an explicit MatMul out of it.
@@ -38,7 +38,7 @@ class MatPow(MatrixExpr):
                 raise ShapeError("Power of non-square matrix %s" % A.base)
             elif A.exp.is_Integer and A.exp.is_positive:
                 A = MatMul(*[A.base for k in range(A.exp)])
-            #elif A.exp.is_Integer and self.exp.is_negative:
+            # elif A.exp.is_Integer and self.exp.is_negative:
             # Note: possible future improvement: in principle we can take
             # positive powers of the inverse, but carefully avoid recursion,
             # perhaps by adding `_entry` to Inverse (as it is our subclass).
@@ -47,12 +47,14 @@ class MatPow(MatrixExpr):
             else:
                 # Leave the expression unevaluated:
                 from sympy.matrices.expressions.matexpr import MatrixElement
+
                 return MatrixElement(self, i, j)
         return A._entry(i, j)
 
     def doit(self, **kwargs):
         from sympy.matrices.expressions import Inverse
-        deep = kwargs.get('deep', True)
+
+        deep = kwargs.get("deep", True)
         if deep:
             args = [arg.doit(**kwargs) for arg in self.args]
         else:
@@ -61,7 +63,7 @@ class MatPow(MatrixExpr):
         base, exp = args
         # combine all powers, e.g. (A**2)**3 = A**6
         while isinstance(base, MatPow):
-            exp = exp*base.args[1]
+            exp = exp * base.args[1]
             base = base.args[0]
 
         if exp.is_zero and base.is_square:
@@ -77,7 +79,7 @@ class MatPow(MatrixExpr):
         elif isinstance(base, MatrixBase):
             if exp is S.One:
                 return base
-            return base**exp
+            return base ** exp
         # Note: just evaluate cases we know, return unevaluated on others.
         # E.g., MatrixSymbol('x', n, m) to power 0 is not an error.
         elif exp is S.NegativeOne and base.is_square:
@@ -92,13 +94,18 @@ class MatPow(MatrixExpr):
 
     def _eval_derivative(self, x):
         from sympy import Pow
+
         return Pow._eval_derivative(self, x)
 
     def _eval_derivative_matrix_lines(self, x):
         from sympy.core.expr import ExprBuilder
-        from sympy.codegen.array_utils import CodegenArrayContraction, CodegenArrayTensorProduct
+        from sympy.codegen.array_utils import (
+            CodegenArrayContraction,
+            CodegenArrayTensorProduct,
+        )
         from .matmul import MatMul
         from .inverse import Inverse
+
         exp = self.exp
         if self.base.shape == (1, 1) and not exp.has(x):
             lr = self.base._eval_derivative_matrix_lines(x)
@@ -111,14 +118,15 @@ class MatPow(MatrixExpr):
                             [
                                 Identity(1),
                                 i._lines[0],
-                                exp*self.base**(exp-1),
+                                exp * self.base ** (exp - 1),
                                 i._lines[1],
                                 Identity(1),
-                            ]
+                            ],
                         ),
-                        (0, 3, 4), (5, 7, 8)
+                        (0, 3, 4),
+                        (5, 7, 8),
                     ],
-                    validator=CodegenArrayContraction._validate
+                    validator=CodegenArrayContraction._validate,
                 )
                 i._first_pointer_parent = subexpr.args[0].args
                 i._first_pointer_index = 0

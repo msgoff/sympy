@@ -9,8 +9,7 @@ from sympy.core.relational import Equality, Relational
 from sympy.core.singleton import S
 from sympy.core.symbol import Symbol, Dummy
 from sympy.core.sympify import sympify
-from sympy.functions.elementary.piecewise import (piecewise_fold,
-    Piecewise)
+from sympy.functions.elementary.piecewise import piecewise_fold, Piecewise
 from sympy.logic.boolalg import BooleanFunction
 from sympy.tensor.indexed import Idx
 from sympy.sets.sets import Interval
@@ -32,16 +31,17 @@ def _common_new(cls, function, *symbols, **assumptions):
         limits, orientation = _process_limits(*symbols)
         if not (limits and all(len(limit) == 3 for limit in limits)):
             SymPyDeprecationWarning(
-                feature='Integral(Eq(x, y))',
-                useinstead='Eq(Integral(x, z), Integral(y, z))',
+                feature="Integral(Eq(x, y))",
+                useinstead="Eq(Integral(x, z), Integral(y, z))",
                 issue=18053,
                 deprecated_since_version=1.6,
             ).warn()
 
         lhs = function.lhs
         rhs = function.rhs
-        return Equality(cls(lhs, *symbols, **assumptions), \
-                        cls(rhs, *symbols, **assumptions))
+        return Equality(
+            cls(lhs, *symbols, **assumptions), cls(rhs, *symbols, **assumptions)
+        )
 
     if function is S.NaN:
         return S.NaN
@@ -56,8 +56,7 @@ def _common_new(cls, function, *symbols, **assumptions):
         # symbol not provided -- we can still try to compute a general form
         free = function.free_symbols
         if len(free) != 1:
-            raise ValueError(
-                "specify dummy variables for %s" % function)
+            raise ValueError("specify dummy variables for %s" % function)
         limits, orientation = [Tuple(s) for s in free], 1
 
     # denest any nested calls
@@ -96,7 +95,7 @@ def _process_limits(*symbols):
             variable = V.atoms(Symbol).pop()
             V = (variable, V.as_set())
 
-        if isinstance(V, Symbol) or getattr(V, '_diff_wrt', False):
+        if isinstance(V, Symbol) or getattr(V, "_diff_wrt", False):
             if isinstance(V, Idx):
                 if V.lower is None or V.upper is None:
                     limits.append(Tuple(V))
@@ -110,9 +109,9 @@ def _process_limits(*symbols):
                 lo = V[1].inf
                 hi = V[1].sup
                 dx = abs(V[1].step)
-                V = [V[0]] + [0, (hi - lo)//dx, dx*V[0] + lo]
+                V = [V[0]] + [0, (hi - lo) // dx, dx * V[0] + lo]
             V = sympify(flatten(V))  # a list of sympified elements
-            if isinstance(V[0], (Symbol, Idx)) or getattr(V[0], '_diff_wrt', False):
+            if isinstance(V[0], (Symbol, Idx)) or getattr(V[0], "_diff_wrt", False):
                 newsymbol = V[0]
                 if len(V) == 2 and isinstance(V[1], Interval):  # 2 -> 3
                     # Interval
@@ -138,12 +137,16 @@ def _process_limits(*symbols):
                             lo, hi = newsymbol.lower, newsymbol.upper
                             try:
                                 if lo is not None and not bool(V[1] >= lo):
-                                    raise ValueError("Summation will set Idx value too low.")
+                                    raise ValueError(
+                                        "Summation will set Idx value too low."
+                                    )
                             except TypeError:
                                 pass
                             try:
                                 if hi is not None and not bool(V[2] <= hi):
-                                    raise ValueError("Summation will set Idx value too high.")
+                                    raise ValueError(
+                                        "Summation will set Idx value too high."
+                                    )
                             except TypeError:
                                 pass
                         limits.append(Tuple(*V))
@@ -155,13 +158,13 @@ def _process_limits(*symbols):
                         limits.append(Tuple(newsymbol, V[1]))
                         continue
 
-        raise ValueError('Invalid limits given: %s' % str(symbols))
+        raise ValueError("Invalid limits given: %s" % str(symbols))
 
     return limits, orientation
 
 
 class ExprWithLimits(Expr):
-    __slots__ = ('is_commutative',)
+    __slots__ = ("is_commutative",)
 
     def __new__(cls, function, *symbols, **assumptions):
         pre = _common_new(cls, function, *symbols, **assumptions)
@@ -173,7 +176,9 @@ class ExprWithLimits(Expr):
         # limits must have upper and lower bounds; the indefinite form
         # is not supported. This restriction does not apply to AddWithLimits
         if any(len(l) != 3 or None in l for l in limits):
-            raise ValueError('ExprWithLimits requires values for lower and upper bounds.')
+            raise ValueError(
+                "ExprWithLimits requires values for lower and upper bounds."
+            )
 
         obj = Expr.__new__(cls, **assumptions)
         arglist = [function]
@@ -329,6 +334,7 @@ class ExprWithLimits(Expr):
 
         """
         from sympy.core.function import AppliedUndef, UndefinedFunction
+
         func, limits = self.function, list(self.limits)
 
         # If one of the expressions we are replacing is used as a func index
@@ -342,8 +348,9 @@ class ExprWithLimits(Expr):
         # Reorder limits to match standard mathematical practice for scoping
         limits.reverse()
 
-        if not isinstance(old, Symbol) or \
-                old.free_symbols.intersection(self.free_symbols):
+        if not isinstance(old, Symbol) or old.free_symbols.intersection(
+            self.free_symbols
+        ):
             sub_into_func = True
             for i, xab in enumerate(limits):
                 if 1 == len(xab) and old == xab[0]:
@@ -359,8 +366,7 @@ class ExprWithLimits(Expr):
                 sy2 = set(self.variables).intersection(set(new.atoms(Symbol)))
                 sy1 = set(self.variables).intersection(set(old.args))
                 if not sy2.issubset(sy1):
-                    raise ValueError(
-                        "substitution can not create dummy dependencies")
+                    raise ValueError("substitution can not create dummy dependencies")
                 sub_into_func = True
             if sub_into_func:
                 func = func.subs(old, new)
@@ -374,7 +380,7 @@ class ExprWithLimits(Expr):
         # simplify redundant limits (x, x)  to (x, )
         for i, xab in enumerate(limits):
             if len(xab) == 2 and (xab[0] - xab[1]).is_zero:
-                limits[i] = Tuple(xab[0], )
+                limits[i] = Tuple(xab[0],)
 
         # Reorder limits back to representation-form
         limits.reverse()
@@ -500,7 +506,7 @@ class AddWithLimits(ExprWithLimits):
             return pre
 
         obj = Expr.__new__(cls, **assumptions)
-        arglist = [orientation*function]  # orientation not used in ExprWithLimits
+        arglist = [orientation * function]  # orientation not used in ExprWithLimits
         arglist.extend(limits)
         obj._args = tuple(arglist)
         obj.is_commutative = function.is_commutative  # limits already checked
@@ -526,14 +532,16 @@ class AddWithLimits(ExprWithLimits):
         if 1 == len(self.limits):
             summand = self.function.factor(**hints)
             if summand.is_Mul:
-                out = sift(summand.args, lambda w: w.is_commutative \
-                    and not set(self.variables) & w.free_symbols)
-                return Mul(*out[True])*self.func(Mul(*out[False]), \
-                    *self.limits)
+                out = sift(
+                    summand.args,
+                    lambda w: w.is_commutative
+                    and not set(self.variables) & w.free_symbols,
+                )
+                return Mul(*out[True]) * self.func(Mul(*out[False]), *self.limits)
         else:
             summand = self.func(self.function, *self.limits[0:-1]).factor()
             if not summand.has(self.variables[-1]):
-                return self.func(1, [self.limits[-1]]).doit()*summand
+                return self.func(1, [self.limits[-1]]).doit() * summand
             elif isinstance(summand, Mul):
                 return self.func(summand, self.limits[-1]).factor()
         return self

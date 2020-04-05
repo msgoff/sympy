@@ -111,8 +111,7 @@ class Ideal(object):
     def _check_ideal(self, J):
         """Helper to check ``J`` is an ideal of our ring."""
         if not isinstance(J, Ideal) or J.ring != self.ring:
-            raise ValueError(
-                'J must be an ideal of %s, got %s' % (self.ring, J))
+            raise ValueError("J must be an ideal of %s, got %s" % (self.ring, J))
 
     def contains(self, elem):
         """
@@ -268,7 +267,7 @@ class Ideal(object):
         if exp < 0:
             raise NotImplementedError
         # TODO exponentiate by squaring
-        return reduce(lambda x, y: x*y, [self]*exp, self.ring.ideal(1))
+        return reduce(lambda x, y: x * y, [self] * exp, self.ring.ideal(1))
 
     def __eq__(self, e):
         if not isinstance(e, Ideal) or e.ring != self.ring:
@@ -366,14 +365,19 @@ class ModuleImplementedIdeal(Ideal):
 
     def __repr__(self):
         from sympy import sstr
-        return '<' + ','.join(sstr(x) for [x] in self._module.gens) + '>'
+
+        return "<" + ",".join(sstr(x) for [x] in self._module.gens) + ">"
 
     # NOTE this is the only method using the fact that the module is a SubModule
     def _product(self, J):
         if not isinstance(J, ModuleImplementedIdeal):
             raise NotImplementedError
-        return self.__class__(self.ring, self._module.submodule(
-            *[[x*y] for [x] in self._module.gens for [y] in J._module.gens]))
+        return self.__class__(
+            self.ring,
+            self._module.submodule(
+                *[[x * y] for [x] in self._module.gens for [y] in J._module.gens]
+            ),
+        )
 
     def in_terms_of_generators(self, e):
         """

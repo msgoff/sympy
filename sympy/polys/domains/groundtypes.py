@@ -49,6 +49,7 @@ elif HAS_GMPY == 2:
         qdiv as gmpy_qdiv,
     )
 else:
+
     class _GMPYInteger(object):
         def __init__(self, obj):
             pass
@@ -81,21 +82,29 @@ def python_factorial(n):
 
 
 __all__ = [
-    'PythonInteger', 'PythonReal', 'PythonComplex',
-
-    'PythonRational',
-
-    'python_gcdex', 'python_gcd', 'python_lcm',
-
-    'SymPyReal', 'SymPyInteger', 'SymPyRational',
-
-    'GMPYInteger', 'GMPYRational', 'gmpy_factorial', 'gmpy_numer',
-    'gmpy_denom', 'gmpy_gcdex', 'gmpy_gcd', 'gmpy_lcm', 'gmpy_sqrt',
-    'gmpy_qdiv',
-
-    'GMPYInteger', 'GMPYRational',
-
-    'mlib',
-
-    'python_sqrt', 'python_factorial'
+    "PythonInteger",
+    "PythonReal",
+    "PythonComplex",
+    "PythonRational",
+    "python_gcdex",
+    "python_gcd",
+    "python_lcm",
+    "SymPyReal",
+    "SymPyInteger",
+    "SymPyRational",
+    "GMPYInteger",
+    "GMPYRational",
+    "gmpy_factorial",
+    "gmpy_numer",
+    "gmpy_denom",
+    "gmpy_gcdex",
+    "gmpy_gcd",
+    "gmpy_lcm",
+    "gmpy_sqrt",
+    "gmpy_qdiv",
+    "GMPYInteger",
+    "GMPYRational",
+    "mlib",
+    "python_sqrt",
+    "python_factorial",
 ]

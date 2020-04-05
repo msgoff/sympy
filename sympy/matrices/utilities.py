@@ -45,11 +45,16 @@ from sympy.simplify.simplify import dotprodsimp as _dotprodsimp
 # A.multiply(B) -> A.multiply(B, dotprodsimp=True)
 
 # True, False or None
-_DOTPRODSIMP_MODE = False if os.environ.get('SYMPY_DOTPRODSIMP', '').lower() in \
-        ('false', 'off', '0') else None
+_DOTPRODSIMP_MODE = (
+    False
+    if os.environ.get("SYMPY_DOTPRODSIMP", "").lower() in ("false", "off", "0")
+    else None
+)
 
-def _get_intermediate_simp(deffunc=lambda x: x, offfunc=lambda x: x,
-        onfunc=_dotprodsimp, dotprodsimp=None):
+
+def _get_intermediate_simp(
+    deffunc=lambda x: x, offfunc=lambda x: x, onfunc=_dotprodsimp, dotprodsimp=None
+):
     """Support function for controlling intermediate simplification. Returns a
     simplification function according to the global setting of dotprodsimp
     operation.
@@ -66,7 +71,8 @@ def _get_intermediate_simp(deffunc=lambda x: x, offfunc=lambda x: x,
     if dotprodsimp is True or _DOTPRODSIMP_MODE is True:
         return onfunc
 
-    return deffunc # None, None
+    return deffunc  # None, None
+
 
 def _get_intermediate_simp_bool(default=False, dotprodsimp=None):
     """Same as ``_get_intermediate_simp`` but returns bools instead of functions
@@ -77,7 +83,7 @@ def _get_intermediate_simp_bool(default=False, dotprodsimp=None):
 
 def _iszero(x):
     """Returns True if x is zero."""
-    return getattr(x, 'is_zero', None)
+    return getattr(x, "is_zero", None)
 
 
 def _is_zero_after_expand_mul(x):

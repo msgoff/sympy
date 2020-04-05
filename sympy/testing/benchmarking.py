@@ -25,40 +25,38 @@ precision = 3
 
 # like py.test Directory but scan for 'bench_<smth>.py'
 class Directory(py.test.collect.Directory):
-
     def filefilter(self, path):
         b = path.purebasename
         ext = path.ext
-        return b.startswith('bench_') and ext == '.py'
+        return b.startswith("bench_") and ext == ".py"
 
 
 # like py.test Module but scane for 'bench_<smth>' and 'timeit_<smth>'
 class Module(py.test.collect.Module):
-
     def funcnamefilter(self, name):
-        return name.startswith('bench_') or name.startswith('timeit_')
+        return name.startswith("bench_") or name.startswith("timeit_")
 
 
 # Function level benchmarking driver
 class Timer(timeit.Timer):
-
-    def __init__(self, stmt, setup='pass', timer=timeit.default_timer, globals=globals()):
+    def __init__(
+        self, stmt, setup="pass", timer=timeit.default_timer, globals=globals()
+    ):
         # copy of timeit.Timer.__init__
         # similarity index 95%
         self.timer = timer
         stmt = timeit.reindent(stmt, 8)
         setup = timeit.reindent(setup, 4)
-        src = timeit.template % {'stmt': stmt, 'setup': setup}
+        src = timeit.template % {"stmt": stmt, "setup": setup}
         self.src = src  # Save for traceback display
         code = compile(src, timeit.dummy_src_name, "exec")
         ns = {}
-        #exec code in globals(), ns      -- original timeit code
+        # exec code in globals(), ns      -- original timeit code
         exec_(code, globals, ns)  # -- we use caller-provided globals instead
         self.inner = ns["inner"]
 
 
 class Function(py.__.test.item.Function):
-
     def __init__(self, *args, **kw):
         super(Function, self).__init__(*args, **kw)
         self.benchtime = None
@@ -67,7 +65,7 @@ class Function(py.__.test.item.Function):
     def execute(self, target, *args):
         # get func source without first 'def func(...):' line
         src = getsource(target)
-        src = '\n'.join( src.splitlines()[1:] )
+        src = "\n".join(src.splitlines()[1:])
 
         # extract benchmark title
         if target.func_doc is not None:
@@ -78,7 +76,7 @@ class Function(py.__.test.item.Function):
         # XXX we ignore args
         timer = Timer(src, globals=target.func_globals)
 
-        if self.name.startswith('timeit_'):
+        if self.name.startswith("timeit_"):
             # from IPython.Magic.magic_timeit
             repeat = 3
             number = 1
@@ -86,7 +84,7 @@ class Function(py.__.test.item.Function):
                 t = timer.timeit(number)
 
                 if t >= 0.2:
-                    number *= (0.2 / t)
+                    number *= 0.2 / t
                     number = int(_ceil(number))
                     break
 
@@ -97,7 +95,7 @@ class Function(py.__.test.item.Function):
                 else:
                     # since we are very close to be > 0.2s we'd better adjust number
                     # so that timing time is not too high
-                    number *= (0.2 / t)
+                    number *= 0.2 / t
                     number = int(_ceil(number))
                     break
 
@@ -109,21 +107,20 @@ class Function(py.__.test.item.Function):
 
 
 class BenchSession(TerminalSession):
-
     def header(self, colitems):
         super(BenchSession, self).header(colitems)
 
     def footer(self, colitems):
         super(BenchSession, self).footer(colitems)
 
-        self.out.write('\n')
+        self.out.write("\n")
         self.print_bench_results()
 
     def print_bench_results(self):
-        self.out.write('==============================\n')
-        self.out.write(' *** BENCHMARKING RESULTS *** \n')
-        self.out.write('==============================\n')
-        self.out.write('\n')
+        self.out.write("==============================\n")
+        self.out.write(" *** BENCHMARKING RESULTS *** \n")
+        self.out.write("==============================\n")
+        self.out.write("\n")
 
         # benchname, time, benchtitle
         results = []
@@ -135,7 +132,7 @@ class BenchSession(TerminalSession):
 
                 if best is None:
                     # skipped or failed benchmarks
-                    tstr = '---'
+                    tstr = "---"
 
                 else:
                     # from IPython.Magic.magic_timeit
@@ -144,15 +141,14 @@ class BenchSession(TerminalSession):
                     else:
                         order = 3
 
-                    tstr = "%.*g %s" % (
-                        precision, best * scaling[order], units[order])
+                    tstr = "%.*g %s" % (precision, best * scaling[order], units[order])
 
-                results.append( [item.name, tstr, item.benchtitle] )
+                results.append([item.name, tstr, item.benchtitle])
 
         # dot/unit align second column
         # FIXME simpler? this is crappy -- shame on me...
-        wm = [0]*len(units)
-        we = [0]*len(units)
+        wm = [0] * len(units)
+        we = [0] * len(units)
 
         for s in results:
             tstr = s[1]
@@ -162,9 +158,9 @@ class BenchSession(TerminalSession):
             un = unitn[u]
 
             try:
-                m, e = n.split('.')
+                m, e = n.split(".")
             except ValueError:
-                m, e = n, ''
+                m, e = n, ""
 
             wm[un] = max(len(m), wm[un])
             we[un] = max(len(e), we[un])
@@ -176,27 +172,27 @@ class BenchSession(TerminalSession):
             un = unitn[u]
 
             try:
-                m, e = n.split('.')
+                m, e = n.split(".")
             except ValueError:
-                m, e = n, ''
+                m, e = n, ""
 
             m = m.rjust(wm[un])
             e = e.ljust(we[un])
 
             if e.strip():
-                n = '.'.join((m, e))
+                n = ".".join((m, e))
             else:
-                n = ' '.join((m, e))
+                n = " ".join((m, e))
 
             # let's put the number into the right place
-            txt = ''
+            txt = ""
             for i in range(len(units)):
                 if i == un:
                     txt += n
                 else:
-                    txt += ' '*(wm[i] + we[i] + 1)
+                    txt += " " * (wm[i] + we[i] + 1)
 
-            s[1] = '%s %s' % (txt, u)
+            s[1] = "%s %s" % (txt, u)
 
         # align all columns besides the last one
         for i in range(2):
@@ -207,7 +203,7 @@ class BenchSession(TerminalSession):
 
         # show results
         for s in results:
-            self.out.write('%s  |  %s  |  %s\n' % tuple(s))
+            self.out.write("%s  |  %s  |  %s\n" % tuple(s))
 
 
 def main(args=None):

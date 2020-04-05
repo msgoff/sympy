@@ -9,8 +9,16 @@ from sympy.polys.domains.simpledomain import SimpleDomain
 from sympy.polys.polyutils import PicklableWithSlots
 from sympy.utilities import public
 
-eflags = dict(deep=False, mul=True, power_exp=False, power_base=False,
-              basic=False, multinomial=False, log=False)
+eflags = dict(
+    deep=False,
+    mul=True,
+    power_exp=False,
+    power_base=False,
+    basic=False,
+    multinomial=False,
+    log=False,
+)
+
 
 @public
 class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
@@ -21,7 +29,7 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
     class Expression(PicklableWithSlots):
         """An arbitrary expression. """
 
-        __slots__ = ('ex',)
+        __slots__ = ("ex",)
 
         def __init__(self, ex):
             if not isinstance(ex, self.__class__):
@@ -30,10 +38,10 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
                 self.ex = ex.ex
 
         def __repr__(f):
-            return 'EX(%s)' % repr(f.ex)
+            return "EX(%s)" % repr(f.ex)
 
         def __str__(f):
-            return 'EX(%s)' % str(f.ex)
+            return "EX(%s)" % str(f.ex)
 
         def __hash__(self):
             return hash((self.__class__.__name__, self.ex))
@@ -88,18 +96,18 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
             g = f._to_ex(g)
 
             if g is not None:
-                return f.simplify(f.ex*g.ex)
+                return f.simplify(f.ex * g.ex)
             else:
                 return NotImplemented
 
         def __rmul__(f, g):
-            return f.simplify(f.__class__(g).ex*f.ex)
+            return f.simplify(f.__class__(g).ex * f.ex)
 
         def __pow__(f, n):
             n = f._to_ex(n)
 
             if n is not None:
-                return f.simplify(f.ex**n.ex)
+                return f.simplify(f.ex ** n.ex)
             else:
                 return NotImplemented
 
@@ -107,12 +115,12 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
             g = f._to_ex(g)
 
             if g is not None:
-                return f.simplify(f.ex/g.ex)
+                return f.simplify(f.ex / g.ex)
             else:
                 return NotImplemented
 
         def __rtruediv__(f, g):
-            return f.simplify(f.__class__(g).ex/f.ex)
+            return f.simplify(f.__class__(g).ex / f.ex)
 
         __div__ = __truediv__
         __rdiv__ = __rtruediv__
@@ -130,10 +138,12 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
 
         def gcd(f, g):
             from sympy.polys import gcd
+
             return f.__class__(gcd(f.ex, f.__class__(g).ex))
 
         def lcm(f, g):
             from sympy.polys import lcm
+
             return f.__class__(lcm(f.ex, f.__class__(g).ex))
 
     dtype = Expression
@@ -141,7 +151,7 @@ class ExpressionDomain(Field, CharacteristicZero, SimpleDomain):
     zero = Expression(0)
     one = Expression(1)
 
-    rep = 'EX'
+    rep = "EX"
 
     has_assoc_Ring = False
     has_assoc_Field = True

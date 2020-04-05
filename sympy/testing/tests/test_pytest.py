@@ -1,9 +1,13 @@
 import warnings
 
-from sympy.testing.pytest import (raises, warns, ignore_warnings,
-                                    warns_deprecated_sympy, Failed)
+from sympy.testing.pytest import (
+    raises,
+    warns,
+    ignore_warnings,
+    warns_deprecated_sympy,
+    Failed,
+)
 from sympy.utilities.exceptions import SymPyDeprecationWarning
-
 
 
 # Test callables
@@ -12,6 +16,7 @@ from sympy.utilities.exceptions import SymPyDeprecationWarning
 def test_expected_exception_is_silent_callable():
     def f():
         raise ValueError()
+
     raises(ValueError, f)
 
 
@@ -27,13 +32,16 @@ def test_lack_of_exception_triggers_AssertionError_callable():
 def test_unexpected_exception_is_passed_through_callable():
     def f():
         raise ValueError("some error message")
+
     try:
         raises(TypeError, f)
         assert False
     except ValueError as e:
         assert str(e) == "some error message"
 
+
 # Test with statement
+
 
 def test_expected_exception_is_silent_with():
     with raises(ValueError):
@@ -57,6 +65,7 @@ def test_unexpected_exception_is_passed_through_with():
     except ValueError as e:
         assert str(e) == "some error message"
 
+
 # Now we can use raises() instead of try/catch
 # to test that a specific exception class is raised
 
@@ -68,7 +77,7 @@ def test_second_argument_should_be_callable_or_string():
 def test_warns_catches_warning():
     with warnings.catch_warnings(record=True) as w:
         with warns(UserWarning):
-            warnings.warn('this is the warning message')
+            warnings.warn("this is the warning message")
         assert len(w) == 0
 
 
@@ -82,8 +91,8 @@ def test_warns_hides_other_warnings():
     # This isn't ideal but it's what pytest's warns does:
     with warnings.catch_warnings(record=True) as w:
         with warns(UserWarning):
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
         assert len(w) == 0
 
 
@@ -91,7 +100,7 @@ def test_warns_continues_after_warning():
     with warnings.catch_warnings(record=True) as w:
         finished = False
         with warns(UserWarning):
-            warnings.warn('this is the warning message')
+            warnings.warn("this is the warning message")
             finished = True
         assert finished
         assert len(w) == 0
@@ -102,11 +111,11 @@ def test_warns_many_warnings():
     with warnings.catch_warnings(record=True) as w:
         finished = False
         with warns(UserWarning):
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
             finished = True
         assert finished
         assert len(w) == 0
@@ -114,24 +123,24 @@ def test_warns_many_warnings():
 
 def test_warns_match_matching():
     with warnings.catch_warnings(record=True) as w:
-        with warns(UserWarning, match='this is the warning message'):
-            warnings.warn('this is the warning message', UserWarning)
+        with warns(UserWarning, match="this is the warning message"):
+            warnings.warn("this is the warning message", UserWarning)
         assert len(w) == 0
 
 
 def test_warns_match_non_matching():
     with warnings.catch_warnings(record=True) as w:
         with raises(Failed):
-            with warns(UserWarning, match='this is the warning message'):
-                warnings.warn('this is not the expected warning message', UserWarning)
+            with warns(UserWarning, match="this is the warning message"):
+                warnings.warn("this is not the expected warning message", UserWarning)
         assert len(w) == 0
+
 
 def _warn_sympy_deprecation():
     SymPyDeprecationWarning(
-            feature="foo",
-            useinstead="bar",
-            issue=1,
-            deprecated_since_version="0.0.0").warn()
+        feature="foo", useinstead="bar", issue=1, deprecated_since_version="0.0.0"
+    ).warn()
+
 
 def test_warns_deprecated_sympy_catches_warning():
     with warnings.catch_warnings(record=True) as w:
@@ -151,7 +160,7 @@ def test_warns_deprecated_sympy_hides_other_warnings():
     with warnings.catch_warnings(record=True) as w:
         with warns_deprecated_sympy():
             _warn_sympy_deprecation()
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
         assert len(w) == 0
 
 
@@ -171,10 +180,10 @@ def test_warns_deprecated_sympy_many_warnings():
         finished = False
         with warns_deprecated_sympy():
             _warn_sympy_deprecation()
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
             _warn_sympy_deprecation()
-            warnings.warn('this is the other message', RuntimeWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
             finished = True
         assert finished
         assert len(w) == 0
@@ -183,7 +192,7 @@ def test_warns_deprecated_sympy_many_warnings():
 def test_ignore_ignores_warning():
     with warnings.catch_warnings(record=True) as w:
         with ignore_warnings(UserWarning):
-            warnings.warn('this is the warning message')
+            warnings.warn("this is the warning message")
         assert len(w) == 0
 
 
@@ -200,18 +209,18 @@ def test_ignore_allows_other_warnings():
         # the setting is reverted at the end of the catch_Warnings block.
         warnings.simplefilter("always")
         with ignore_warnings(UserWarning):
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
         assert len(w) == 1
         assert isinstance(w[0].message, RuntimeWarning)
-        assert str(w[0].message) == 'this is the other message'
+        assert str(w[0].message) == "this is the other message"
 
 
 def test_ignore_continues_after_warning():
     with warnings.catch_warnings(record=True) as w:
         finished = False
         with ignore_warnings(UserWarning):
-            warnings.warn('this is the warning message')
+            warnings.warn("this is the warning message")
             finished = True
         assert finished
         assert len(w) == 0
@@ -223,12 +232,12 @@ def test_ignore_many_warnings():
         # the setting is reverted at the end of the catch_Warnings block.
         warnings.simplefilter("always")
         with ignore_warnings(UserWarning):
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
-            warnings.warn('this is the warning message', UserWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
-            warnings.warn('this is the other message', RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
+            warnings.warn("this is the warning message", UserWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
+            warnings.warn("this is the other message", RuntimeWarning)
         assert len(w) == 3
         for wi in w:
             assert isinstance(wi.message, RuntimeWarning)
-            assert str(wi.message) == 'this is the other message'
+            assert str(wi.message) == "this is the other message"

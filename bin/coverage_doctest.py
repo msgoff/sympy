@@ -57,8 +57,8 @@ colors = {}
 
 for name, value in color_templates:
     colors[name] = value
-c_normal = '\033[0m'
-c_color = '\033[%sm'
+c_normal = "\033[0m"
+c_color = "\033[%sm"
 
 
 def print_header(name, underline=None, color=None):
@@ -69,13 +69,30 @@ def print_header(name, underline=None, color=None):
     else:
         print(name)
     if underline and not color:
-        print(underline*len(name))
+        print(underline * len(name))
 
 
-def print_coverage(module_path, c, c_md, c_mdt, c_idt, c_sph, f, f_md, f_mdt,
-                   f_idt, f_sph, score, total_doctests, total_members,
-                   sphinx_score, total_sphinx, verbose=False, no_color=False,
-                   sphinx=True):
+def print_coverage(
+    module_path,
+    c,
+    c_md,
+    c_mdt,
+    c_idt,
+    c_sph,
+    f,
+    f_md,
+    f_mdt,
+    f_idt,
+    f_sph,
+    score,
+    total_doctests,
+    total_members,
+    sphinx_score,
+    total_sphinx,
+    verbose=False,
+    no_color=False,
+    sphinx=True,
+):
     """ Prints details (depending on verbose) of a module """
 
     doctest_color = "Brown"
@@ -87,44 +104,86 @@ def print_coverage(module_path, c, c_md, c_mdt, c_idt, c_sph, f, f_md, f_mdt,
     small_header_color = "Purple"
 
     if no_color:
-        score_string = "Doctests: %s%% (%s of %s)" % (score, total_doctests,
-            total_members)
+        score_string = "Doctests: %s%% (%s of %s)" % (
+            score,
+            total_doctests,
+            total_members,
+        )
 
     elif score < 100:
         if score < 50:
-            score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % \
-                (c_color % colors[doctest_color], c_normal, c_color % colors[less_50_color], score, total_doctests, total_members, c_normal)
+            score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % (
+                c_color % colors[doctest_color],
+                c_normal,
+                c_color % colors[less_50_color],
+                score,
+                total_doctests,
+                total_members,
+                c_normal,
+            )
         else:
-            score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % \
-                (c_color % colors[doctest_color], c_normal, c_color % colors[less_100_color], score, total_doctests, total_members, c_normal)
+            score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % (
+                c_color % colors[doctest_color],
+                c_normal,
+                c_color % colors[less_100_color],
+                score,
+                total_doctests,
+                total_members,
+                c_normal,
+            )
     else:
-        score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % \
-            (c_color % colors[doctest_color], c_normal, c_color % colors[equal_100_color], score, total_doctests, total_members, c_normal)
+        score_string = "%sDoctests:%s %s%s%% (%s of %s)%s" % (
+            c_color % colors[doctest_color],
+            c_normal,
+            c_color % colors[equal_100_color],
+            score,
+            total_doctests,
+            total_members,
+            c_normal,
+        )
 
     if sphinx:
         if no_color:
-            sphinx_score_string = "Sphinx: %s%% (%s of %s)" % (sphinx_score,
-                total_members - total_sphinx, total_members)
+            sphinx_score_string = "Sphinx: %s%% (%s of %s)" % (
+                sphinx_score,
+                total_members - total_sphinx,
+                total_members,
+            )
         elif sphinx_score < 100:
             if sphinx_score < 50:
-                sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % \
-                    (c_color % colors[sphinx_color], c_normal, c_color %
-                     colors[less_50_color], sphinx_score, total_members - total_sphinx,
-                     total_members, c_normal)
+                sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % (
+                    c_color % colors[sphinx_color],
+                    c_normal,
+                    c_color % colors[less_50_color],
+                    sphinx_score,
+                    total_members - total_sphinx,
+                    total_members,
+                    c_normal,
+                )
             else:
-                sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % \
-                    (c_color % colors[sphinx_color], c_normal, c_color %
-                     colors[less_100_color], sphinx_score, total_members -
-                     total_sphinx, total_members, c_normal)
+                sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % (
+                    c_color % colors[sphinx_color],
+                    c_normal,
+                    c_color % colors[less_100_color],
+                    sphinx_score,
+                    total_members - total_sphinx,
+                    total_members,
+                    c_normal,
+                )
         else:
-            sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % \
-                (c_color % colors[sphinx_color], c_normal, c_color %
-                 colors[equal_100_color], sphinx_score, total_members -
-                 total_sphinx, total_members, c_normal)
+            sphinx_score_string = "%sSphinx:%s %s%s%% (%s of %s)%s" % (
+                c_color % colors[sphinx_color],
+                c_normal,
+                c_color % colors[equal_100_color],
+                sphinx_score,
+                total_members - total_sphinx,
+                total_members,
+                c_normal,
+            )
     if verbose:
-        print('\n' + '-'*70)
+        print("\n" + "-" * 70)
         print(module_path)
-        print('-'*70)
+        print("-" * 70)
     else:
         if sphinx:
             print("%s: %s %s" % (module_path, score_string, sphinx_score_string))
@@ -132,59 +191,79 @@ def print_coverage(module_path, c, c_md, c_mdt, c_idt, c_sph, f, f_md, f_mdt,
             print("%s: %s" % (module_path, score_string))
 
     if verbose:
-        print_header('CLASSES', '*', not no_color and big_header_color)
+        print_header("CLASSES", "*", not no_color and big_header_color)
         if not c:
-            print_header('No classes found!')
+            print_header("No classes found!")
 
         else:
             if c_md:
-                print_header('Missing docstrings', '-', not no_color and small_header_color)
+                print_header(
+                    "Missing docstrings", "-", not no_color and small_header_color
+                )
                 for md in c_md:
-                    print('  * ' + md)
+                    print("  * " + md)
             if c_mdt:
-                print_header('Missing doctests', '-', not no_color and small_header_color)
+                print_header(
+                    "Missing doctests", "-", not no_color and small_header_color
+                )
                 for md in c_mdt:
-                    print('  * ' + md)
+                    print("  * " + md)
             if c_idt:
                 # Use "# indirect doctest" in the docstring to
                 # suppress this warning.
-                print_header('Indirect doctests', '-', not no_color and small_header_color)
+                print_header(
+                    "Indirect doctests", "-", not no_color and small_header_color
+                )
                 for md in c_idt:
-                    print('  * ' + md)
-                print('\n    Use \"# indirect doctest\" in the docstring to suppress this warning')
+                    print("  * " + md)
+                print(
+                    '\n    Use "# indirect doctest" in the docstring to suppress this warning'
+                )
             if c_sph:
-                print_header('Not imported into Sphinx', '-', not no_color and small_header_color)
+                print_header(
+                    "Not imported into Sphinx", "-", not no_color and small_header_color
+                )
                 for md in c_sph:
-                    print('  * ' + md)
+                    print("  * " + md)
 
-        print_header('FUNCTIONS', '*', not no_color and big_header_color)
+        print_header("FUNCTIONS", "*", not no_color and big_header_color)
         if not f:
-            print_header('No functions found!')
+            print_header("No functions found!")
         else:
             if f_md:
-                print_header('Missing docstrings', '-', not no_color and small_header_color)
+                print_header(
+                    "Missing docstrings", "-", not no_color and small_header_color
+                )
                 for md in f_md:
-                    print('  * ' + md)
+                    print("  * " + md)
             if f_mdt:
-                print_header('Missing doctests', '-', not no_color and small_header_color)
+                print_header(
+                    "Missing doctests", "-", not no_color and small_header_color
+                )
                 for md in f_mdt:
-                    print('  * ' + md)
+                    print("  * " + md)
             if f_idt:
-                print_header('Indirect doctests', '-', not no_color and small_header_color)
+                print_header(
+                    "Indirect doctests", "-", not no_color and small_header_color
+                )
                 for md in f_idt:
-                    print('  * ' + md)
-                print('\n    Use \"# indirect doctest\" in the docstring to suppress this warning')
+                    print("  * " + md)
+                print(
+                    '\n    Use "# indirect doctest" in the docstring to suppress this warning'
+                )
             if f_sph:
-                print_header('Not imported into Sphinx', '-', not no_color and small_header_color)
+                print_header(
+                    "Not imported into Sphinx", "-", not no_color and small_header_color
+                )
                 for md in f_sph:
-                    print('  * ' + md)
+                    print("  * " + md)
 
     if verbose:
-        print('\n' + '-'*70)
+        print("\n" + "-" * 70)
         print(score_string)
         if sphinx:
             print(sphinx_score_string)
-        print('-'*70)
+        print("-" * 70)
 
 
 def _is_indirect(member, doc):
@@ -193,7 +272,7 @@ def _is_indirect(member, doc):
     contains indirect documentation """
 
     d = member in doc
-    e = 'indirect doctest' in doc
+    e = "indirect doctest" in doc
     if not d and not e:
         return True
     else:
@@ -220,7 +299,7 @@ def _get_arg_list(name, fobj):
     # Now add the defaults
     if argspec.defaults:
         for i in range(len(argspec.defaults)):
-            arg_list[i] = str(arg_list[i]) + '=' + str(argspec.defaults[-i])
+            arg_list[i] = str(arg_list[i]) + "=" + str(argspec.defaults[-i])
 
     # Get the list in right order
     arg_list.reverse()
@@ -235,7 +314,7 @@ def _get_arg_list(name, fobj):
     arg_list = [x[:trunc] for x in arg_list]
 
     # Construct the parameter string (enclosed in brackets)
-    str_param = "%s(%s)" % (name, ', '.join(arg_list))
+    str_param = "%s(%s)" % (name, ", ".join(arg_list))
 
     return str_param
 
@@ -255,25 +334,30 @@ def get_mod_name(path, base):
     h, t = os.path.split(rel_path)
     while h or t:
         if t:
-            file_module = t + '.' + file_module
+            file_module = t + "." + file_module
         h, t = os.path.split(h)
 
     return file_module[:-1]
 
+
 class FindInSphinx(HTMLParser):
     is_imported = []
+
     def handle_starttag(self, tag, attr):
         a = dict(attr)
-        if tag == "div" and a.get('class', None) == "viewcode-block":
-            self.is_imported.append(a['id'])
+        if tag == "div" and a.get("class", None) == "viewcode-block":
+            self.is_imported.append(a["id"])
+
 
 def find_sphinx(name, mod_path, found={}):
-    if mod_path in found: # Cache results
+    if mod_path in found:  # Cache results
         return name in found[mod_path]
 
-    doc_path = mod_path.split('.')
-    doc_path[-1] += '.html'
-    sphinx_path = os.path.join(sympy_top, 'doc', '_build', 'html', '_modules', *doc_path)
+    doc_path = mod_path.split(".")
+    doc_path[-1] += ".html"
+    sphinx_path = os.path.join(
+        sympy_top, "doc", "_build", "html", "_modules", *doc_path
+    )
     if not os.path.exists(sphinx_path):
         return False
     with open(sphinx_path) as f:
@@ -283,8 +367,21 @@ def find_sphinx(name, mod_path, found={}):
     found[mod_path] = p.is_imported
     return name in p.is_imported
 
-def process_function(name, c_name, b_obj, mod_path, f_sk, f_md, f_mdt, f_idt,
-                     f_has_doctest, sk_list, sph, sphinx=True):
+
+def process_function(
+    name,
+    c_name,
+    b_obj,
+    mod_path,
+    f_sk,
+    f_md,
+    f_mdt,
+    f_idt,
+    f_has_doctest,
+    sk_list,
+    sph,
+    sphinx=True,
+):
     """
     Processes a function to get information regarding documentation.
     It is assume that the function calling this subrouting has already
@@ -303,21 +400,21 @@ def process_function(name, c_name, b_obj, mod_path, f_sk, f_md, f_mdt, f_idt,
 
     if inspect.isclass(b_obj):
         obj = getattr(b_obj, name)
-        obj_name = c_name + '.' + name
+        obj_name = c_name + "." + name
     else:
         obj = b_obj
         obj_name = name
 
     full_name = _get_arg_list(name, obj)
 
-    if name.startswith('_'):
+    if name.startswith("_"):
         f_sk.append(full_name)
     else:
         doc = obj.__doc__
         if type(doc) is str:
             if not doc:
                 add_md = True
-            elif not '>>>' in doc:
+            elif not ">>>" in doc:
                 add_mdt = True
             elif _is_indirect(name, doc):
                 add_idt = True
@@ -355,8 +452,9 @@ def process_function(name, c_name, b_obj, mod_path, f_sk, f_md, f_mdt, f_idt,
     return f_doctest, function
 
 
-def process_class(c_name, obj, c_sk, c_md, c_mdt, c_idt, c_has_doctest,
-                  mod_path, sph, sphinx=True):
+def process_class(
+    c_name, obj, c_sk, c_md, c_mdt, c_idt, c_has_doctest, mod_path, sph, sphinx=True
+):
     """
     Extracts information about the class regarding documentation.
     It is assumed that the function calling this subroutine has already
@@ -364,7 +462,7 @@ def process_class(c_name, obj, c_sk, c_md, c_mdt, c_idt, c_has_doctest,
     """
 
     # Skip class case
-    if c_name.startswith('_'):
+    if c_name.startswith("_"):
         c_sk.append(c_name)
         return False, False, None
 
@@ -384,7 +482,7 @@ def process_class(c_name, obj, c_sk, c_md, c_mdt, c_idt, c_has_doctest,
     if type(doc) is str:
         if not doc:
             c_md.append(full_name)
-        elif not '>>>' in doc:
+        elif not ">>>" in doc:
             c_mdt.append(full_name)
         elif _is_indirect(c_name, doc):
             c_idt.append(full_name)
@@ -442,7 +540,7 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
     f_doctests = 0
     f_sph = []
 
-    skip_members = ['__abstractmethods__']
+    skip_members = ["__abstractmethods__"]
 
     # Get the list of members
     m_members = dir(m)
@@ -464,9 +562,20 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
         # If it's a function
         if inspect.isfunction(obj) or inspect.ismethod(obj):
 
-            f_dt, f = process_function(member, '', obj, module_path,
-                f_skipped, f_md, f_mdt, f_idt, f_has_doctest, skip_members,
-                f_sph, sphinx=sphinx)
+            f_dt, f = process_function(
+                member,
+                "",
+                obj,
+                module_path,
+                f_skipped,
+                f_md,
+                f_mdt,
+                f_idt,
+                f_has_doctest,
+                skip_members,
+                f_sph,
+                sphinx=sphinx,
+            )
             if f:
                 functions += 1
             if f_dt:
@@ -476,8 +585,18 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
         elif inspect.isclass(obj):
 
             # Process the class first
-            c_dt, c, source = process_class(member, obj, c_skipped, c_md,
-                c_mdt, c_idt, c_has_doctest, module_path, c_sph, sphinx=sphinx)
+            c_dt, c, source = process_class(
+                member,
+                obj,
+                c_skipped,
+                c_md,
+                c_mdt,
+                c_idt,
+                c_has_doctest,
+                module_path,
+                c_sph,
+                sphinx=sphinx,
+            )
             if not c:
                 continue
             else:
@@ -488,11 +607,11 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
             # Iterate through it's members
             for f_name in obj.__dict__:
 
-                if f_name in skip_members or f_name.startswith('_'):
+                if f_name in skip_members or f_name.startswith("_"):
                     continue
 
                 # Check if def funcname appears in source
-                if not ("def " + f_name) in ' '.join(source):
+                if not ("def " + f_name) in " ".join(source):
                     continue
 
                 # Identify the module of the current class member
@@ -506,9 +625,20 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
                 # If it's a function
                 if inspect.isfunction(f_obj) or inspect.ismethod(f_obj):
 
-                    f_dt, f = process_function(f_name, member, obj,
-                        module_path, f_skipped, f_md, f_mdt, f_idt, f_has_doctest,
-                        skip_members, f_sph, sphinx=sphinx)
+                    f_dt, f = process_function(
+                        f_name,
+                        member,
+                        obj,
+                        module_path,
+                        f_skipped,
+                        f_md,
+                        f_mdt,
+                        f_idt,
+                        f_has_doctest,
+                        skip_members,
+                        f_sph,
+                        sphinx=sphinx,
+                    )
                     if f:
                         functions += 1
                     if f_dt:
@@ -543,10 +673,27 @@ def coverage(module_path, verbose=False, no_color=False, sphinx=True):
     f_mdt = sorted(f_mdt, key=lambda x: int(x.split()[1][:-1]))
     f_idt = sorted(f_idt, key=lambda x: int(x.split()[1][:-1]))
 
-    print_coverage(module_path, classes, c_md, c_mdt, c_idt, c_sph, functions, f_md,
-                   f_mdt, f_idt, f_sph, score, total_doctests, total_members,
-                   sphinx_score, total_sphinx, verbose=verbose,
-                   no_color=no_color, sphinx=sphinx)
+    print_coverage(
+        module_path,
+        classes,
+        c_md,
+        c_mdt,
+        c_idt,
+        c_sph,
+        functions,
+        f_md,
+        f_mdt,
+        f_idt,
+        f_sph,
+        score,
+        total_doctests,
+        total_members,
+        sphinx_score,
+        total_sphinx,
+        verbose=verbose,
+        no_color=no_color,
+        sphinx=sphinx,
+    )
 
     return total_doctests, total_sphinx, total_members
 
@@ -559,16 +706,28 @@ def go(sympy_top, file, verbose=False, no_color=False, exact=True, sphinx=True):
     if os.path.isdir(file):
         doctests, total_sphinx, num_functions = 0, 0, 0
         for F in os.listdir(file):
-            _doctests, _total_sphinx,  _num_functions = go(sympy_top, '%s/%s' % (file, F),
-                verbose=verbose, no_color=no_color, exact=False, sphinx=sphinx)
+            _doctests, _total_sphinx, _num_functions = go(
+                sympy_top,
+                "%s/%s" % (file, F),
+                verbose=verbose,
+                no_color=no_color,
+                exact=False,
+                sphinx=sphinx,
+            )
             doctests += _doctests
             total_sphinx += _total_sphinx
             num_functions += _num_functions
         return doctests, total_sphinx, num_functions
-    if (not (file.endswith('.py') or file.endswith('.pyx')) or
-        file.endswith('__init__.py') or
-        not exact and ('test_' in file or 'bench_' in file or
-        any(name in file for name in skip_paths))):
+    if (
+        not (file.endswith(".py") or file.endswith(".pyx"))
+        or file.endswith("__init__.py")
+        or not exact
+        and (
+            "test_" in file
+            or "bench_" in file
+            or any(name in file for name in skip_paths)
+        )
+    ):
 
         return 0, 0, 0
     if not os.path.exists(file):
@@ -576,52 +735,74 @@ def go(sympy_top, file, verbose=False, no_color=False, exact=True, sphinx=True):
         sys.exit(1)
 
     # Relpath for constructing the module name
-    return coverage(get_mod_name(file, sympy_top), verbose=verbose,
-        no_color=no_color, sphinx=sphinx)
+    return coverage(
+        get_mod_name(file, sympy_top), verbose=verbose, no_color=no_color, sphinx=sphinx
+    )
+
 
 if __name__ == "__main__":
 
-    bintest_dir = os.path.abspath(os.path.dirname(__file__))   # bin/cover...
-    sympy_top = os.path.split(bintest_dir)[0]      # ../
-    sympy_dir = os.path.join(sympy_top, 'sympy')  # ../sympy/
+    bintest_dir = os.path.abspath(os.path.dirname(__file__))  # bin/cover...
+    sympy_top = os.path.split(bintest_dir)[0]  # ../
+    sympy_dir = os.path.join(sympy_top, "sympy")  # ../sympy/
     if os.path.isdir(sympy_dir):
         sys.path.insert(0, sympy_top)
 
     usage = "usage: ./bin/doctest_coverage.py PATHS"
 
     parser = ArgumentParser(
-        description=__doc__,
-        usage=usage,
-        formatter_class=RawDescriptionHelpFormatter,
+        description=__doc__, usage=usage, formatter_class=RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("path", nargs='*', default=[os.path.join(sympy_top, 'sympy')])
-    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose",
-            default=False)
-    parser.add_argument("--no-colors", action="store_true", dest="no_color",
-            help="use no colors", default=False)
-    parser.add_argument("--no-sphinx", action="store_false", dest="sphinx",
-            help="don't report Sphinx coverage", default=True)
+    parser.add_argument("path", nargs="*", default=[os.path.join(sympy_top, "sympy")])
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", dest="verbose", default=False
+    )
+    parser.add_argument(
+        "--no-colors",
+        action="store_true",
+        dest="no_color",
+        help="use no colors",
+        default=False,
+    )
+    parser.add_argument(
+        "--no-sphinx",
+        action="store_false",
+        dest="sphinx",
+        help="don't report Sphinx coverage",
+        default=True,
+    )
 
     args = parser.parse_args()
 
-    if args.sphinx and not os.path.exists(os.path.join(sympy_top, 'doc', '_build', 'html')):
-        print(filldedent("""
+    if args.sphinx and not os.path.exists(
+        os.path.join(sympy_top, "doc", "_build", "html")
+    ):
+        print(
+            filldedent(
+                """
             Cannot check Sphinx coverage without a documentation build.
             To build the docs, run "cd doc; make html".  To skip
             checking Sphinx coverage, pass --no-sphinx.
-            """))
+            """
+            )
+        )
         sys.exit(1)
 
     full_coverage = True
 
     for file in args.path:
         file = os.path.normpath(file)
-        print('DOCTEST COVERAGE for %s' % (file))
-        print('='*70)
+        print("DOCTEST COVERAGE for %s" % (file))
+        print("=" * 70)
         print()
-        doctests, total_sphinx, num_functions = go(sympy_top, file, verbose=args.verbose,
-            no_color=args.no_color, sphinx=args.sphinx)
+        doctests, total_sphinx, num_functions = go(
+            sympy_top,
+            file,
+            verbose=args.verbose,
+            no_color=args.no_color,
+            sphinx=args.sphinx,
+        )
         if num_functions == 0:
             score = 100
             sphinx_score = 100
@@ -637,37 +818,77 @@ if __name__ == "__main__":
                 if total_sphinx > 0:
                     full_coverage = False
         print()
-        print('='*70)
+        print("=" * 70)
 
         if args.no_color:
-            print("TOTAL DOCTEST SCORE for %s: %s%% (%s of %s)" % \
-                (get_mod_name(file, sympy_top), score, doctests, num_functions))
+            print(
+                "TOTAL DOCTEST SCORE for %s: %s%% (%s of %s)"
+                % (get_mod_name(file, sympy_top), score, doctests, num_functions)
+            )
 
         elif score < 100:
-            print("TOTAL DOCTEST SCORE for %s: %s%s%% (%s of %s)%s" % \
-                (get_mod_name(file, sympy_top), c_color % (colors["Red"]),
-                score, doctests, num_functions, c_normal))
+            print(
+                "TOTAL DOCTEST SCORE for %s: %s%s%% (%s of %s)%s"
+                % (
+                    get_mod_name(file, sympy_top),
+                    c_color % (colors["Red"]),
+                    score,
+                    doctests,
+                    num_functions,
+                    c_normal,
+                )
+            )
 
         else:
-            print("TOTAL DOCTEST SCORE for %s: %s%s%% (%s of %s)%s" % \
-                (get_mod_name(file, sympy_top), c_color % (colors["Green"]),
-                score, doctests, num_functions, c_normal))
+            print(
+                "TOTAL DOCTEST SCORE for %s: %s%s%% (%s of %s)%s"
+                % (
+                    get_mod_name(file, sympy_top),
+                    c_color % (colors["Green"]),
+                    score,
+                    doctests,
+                    num_functions,
+                    c_normal,
+                )
+            )
 
         if args.sphinx:
             if args.no_color:
-                print("TOTAL SPHINX SCORE for %s: %s%% (%s of %s)" % \
-                    (get_mod_name(file, sympy_top), sphinx_score,
-                     num_functions - total_sphinx, num_functions))
+                print(
+                    "TOTAL SPHINX SCORE for %s: %s%% (%s of %s)"
+                    % (
+                        get_mod_name(file, sympy_top),
+                        sphinx_score,
+                        num_functions - total_sphinx,
+                        num_functions,
+                    )
+                )
 
             elif sphinx_score < 100:
-                print("TOTAL SPHINX SCORE for %s: %s%s%% (%s of %s)%s" % \
-                    (get_mod_name(file, sympy_top), c_color % (colors["Red"]),
-                    sphinx_score, num_functions - total_sphinx, num_functions, c_normal))
+                print(
+                    "TOTAL SPHINX SCORE for %s: %s%s%% (%s of %s)%s"
+                    % (
+                        get_mod_name(file, sympy_top),
+                        c_color % (colors["Red"]),
+                        sphinx_score,
+                        num_functions - total_sphinx,
+                        num_functions,
+                        c_normal,
+                    )
+                )
 
             else:
-                print("TOTAL SPHINX SCORE for %s: %s%s%% (%s of %s)%s" % \
-                    (get_mod_name(file, sympy_top), c_color % (colors["Green"]),
-                    sphinx_score, num_functions - total_sphinx, num_functions, c_normal))
+                print(
+                    "TOTAL SPHINX SCORE for %s: %s%s%% (%s of %s)%s"
+                    % (
+                        get_mod_name(file, sympy_top),
+                        c_color % (colors["Green"]),
+                        sphinx_score,
+                        num_functions - total_sphinx,
+                        num_functions,
+                        c_normal,
+                    )
+                )
 
         print()
         sys.exit(not full_coverage)

@@ -2,10 +2,22 @@
 
 from __future__ import print_function, division
 
-from sympy import S, Symbol, symbols, I, log, atan, \
-    roots, RootSum, Lambda, cancel, Dummy
+from sympy import (
+    S,
+    Symbol,
+    symbols,
+    I,
+    log,
+    atan,
+    roots,
+    RootSum,
+    Lambda,
+    cancel,
+    Dummy,
+)
 
 from sympy.polys import Poly, resultant, ZZ
+
 
 def ratint(f, x, **flags):
     """
@@ -40,7 +52,10 @@ def ratint(f, x, **flags):
     else:
         p, q = f
 
-    p, q = Poly(p, x, composite=False, field=True), Poly(q, x, composite=False, field=True)
+    p, q = (
+        Poly(p, x, composite=False, field=True),
+        Poly(q, x, composite=False, field=True),
+    )
 
     coeff, p, q = p.cancel(q)
     poly, p = p.div(q)
@@ -48,7 +63,7 @@ def ratint(f, x, **flags):
     result = poly.integrate(x).as_expr()
 
     if p.is_zero:
-        return coeff*result
+        return coeff * result
 
     g, h = ratint_ratpart(p, q, x)
 
@@ -62,7 +77,7 @@ def ratint(f, x, **flags):
     result += g + q.integrate(x).as_expr()
 
     if not r.is_zero:
-        symbol = flags.get('symbol', 't')
+        symbol = flags.get("symbol", "t")
 
         if not isinstance(symbol, Symbol):
             t = Dummy(symbol)
@@ -71,7 +86,7 @@ def ratint(f, x, **flags):
 
         L = ratint_logpart(r, Q, x, t)
 
-        real = flags.get('real')
+        real = flags.get("real")
 
         if real is None:
             if type(f) is not tuple:
@@ -93,8 +108,7 @@ def ratint(f, x, **flags):
         if not real:
             for h, q in L:
                 _, h = h.primitive()
-                eps += RootSum(
-                    q, Lambda(t, t*log(h.as_expr())), quadratic=True)
+                eps += RootSum(q, Lambda(t, t * log(h.as_expr())), quadratic=True)
         else:
             for h, q in L:
                 _, h = h.primitive()
@@ -103,12 +117,11 @@ def ratint(f, x, **flags):
                 if R is not None:
                     eps += R
                 else:
-                    eps += RootSum(
-                        q, Lambda(t, t*log(h.as_expr())), quadratic=True)
+                    eps += RootSum(q, Lambda(t, t * log(h.as_expr())), quadratic=True)
 
         result += eps
 
-    return coeff*result
+    return coeff * result
 
 
 def ratint_ratpart(f, g, x):
@@ -150,23 +163,23 @@ def ratint_ratpart(f, g, x):
     n = u.degree()
     m = v.degree()
 
-    A_coeffs = [ Dummy('a' + str(n - i)) for i in range(0, n) ]
-    B_coeffs = [ Dummy('b' + str(m - i)) for i in range(0, m) ]
+    A_coeffs = [Dummy("a" + str(n - i)) for i in range(0, n)]
+    B_coeffs = [Dummy("b" + str(m - i)) for i in range(0, m)]
 
     C_coeffs = A_coeffs + B_coeffs
 
     A = Poly(A_coeffs, x, domain=ZZ[C_coeffs])
     B = Poly(B_coeffs, x, domain=ZZ[C_coeffs])
 
-    H = f - A.diff()*v + A*(u.diff()*v).quo(u) - B*u
+    H = f - A.diff() * v + A * (u.diff() * v).quo(u) - B * u
 
     result = solve(H.coeffs(), C_coeffs)
 
     A = A.as_expr().subs(result)
     B = B.as_expr().subs(result)
 
-    rat_part = cancel(A/u.as_expr(), x)
-    log_part = cancel(B/v.as_expr(), x)
+    rat_part = cancel(A / u.as_expr(), x)
+    log_part = cancel(B / v.as_expr(), x)
 
     return rat_part, log_part
 
@@ -208,8 +221,8 @@ def ratint_logpart(f, g, x, t=None):
     """
     f, g = Poly(f, x), Poly(g, x)
 
-    t = t or Dummy('t')
-    a, b = g, f - g.diff()*Poly(t, x)
+    t = t or Dummy("t")
+    a, b = g, f - g.diff() * Poly(t, x)
 
     res, R = resultant(a, b, includePRS=True)
     res = Poly(res, t, composite=False)
@@ -224,7 +237,7 @@ def ratint_logpart(f, g, x, t=None):
     def _include_sign(c, sqf):
         if c.is_extended_real and (c < 0) == True:
             h, k = sqf[0]
-            sqf[0] = h*c, k
+            sqf[0] = h * c, k
 
     C, res_sqf = res.sqf_list()
     _include_sign(C, res_sqf)
@@ -242,12 +255,12 @@ def ratint_logpart(f, g, x, t=None):
             _include_sign(c, h_lc_sqf)
 
             for a, j in h_lc_sqf:
-                h = h.quo(Poly(a.gcd(q)**j, x))
+                h = h.quo(Poly(a.gcd(q) ** j, x))
 
             inv, coeffs = h_lc.invert(q), [S.One]
 
             for coeff in h.coeffs()[1:]:
-                T = (inv*coeff).rem(q)
+                T = (inv * coeff).rem(q)
                 coeffs.append(T.as_expr())
 
             h = Poly(dict(list(zip(h.monoms(), coeffs))), x)
@@ -294,11 +307,11 @@ def log_to_atan(f, g):
     p, q = f.div(g)
 
     if q.is_zero:
-        return 2*atan(p.as_expr())
+        return 2 * atan(p.as_expr())
     else:
         s, t, h = g.gcdex(-f)
-        u = (f*s + g*t).quo(h)
-        A = 2*atan(u.as_expr())
+        u = (f * s + g * t).quo(h)
+        A = 2 * atan(u.as_expr())
 
         return A + log_to_atan(s, t)
 
@@ -334,10 +347,11 @@ def log_to_real(h, q, x, t):
     log_to_atan
     """
     from sympy import collect
-    u, v = symbols('u,v', cls=Dummy)
 
-    H = h.as_expr().subs({t: u + I*v}).expand()
-    Q = q.as_expr().subs({t: u + I*v}).expand()
+    u, v = symbols("u,v", cls=Dummy)
+
+    H = h.as_expr().subs({t: u + I * v}).expand()
+    Q = q.as_expr().subs({t: u + I * v}).expand()
 
     H_map = collect(H, I, evaluate=False)
     Q_map = collect(Q, I, evaluate=False)
@@ -347,7 +361,7 @@ def log_to_real(h, q, x, t):
 
     R = Poly(resultant(c, d, v), u)
 
-    R_u = roots(R, filter='R')
+    R_u = roots(R, filter="R")
 
     if len(R_u) != R.count_roots():
         return None
@@ -356,12 +370,12 @@ def log_to_real(h, q, x, t):
 
     for r_u in R_u.keys():
         C = Poly(c.subs({u: r_u}), v)
-        R_v = roots(C, filter='R')
+        R_v = roots(C, filter="R")
 
         if len(R_v) != C.count_roots():
             return None
 
-        R_v_paired = [] # take one from each pair of conjugate roots
+        R_v_paired = []  # take one from each pair of conjugate roots
         for r_v in R_v:
             if r_v not in R_v_paired and -r_v not in R_v_paired:
                 if r_v.is_negative or r_v.could_extract_minus_sign():
@@ -379,16 +393,16 @@ def log_to_real(h, q, x, t):
             A = Poly(a.subs({u: r_u, v: r_v}), x)
             B = Poly(b.subs({u: r_u, v: r_v}), x)
 
-            AB = (A**2 + B**2).as_expr()
+            AB = (A ** 2 + B ** 2).as_expr()
 
-            result += r_u*log(AB) + r_v*log_to_atan(A, B)
+            result += r_u * log(AB) + r_v * log_to_atan(A, B)
 
-    R_q = roots(q, filter='R')
+    R_q = roots(q, filter="R")
 
     if len(R_q) != q.count_roots():
         return None
 
     for r in R_q.keys():
-        result += r*log(h.as_expr().subs(t, r))
+        result += r * log(h.as_expr().subs(t, r))
 
     return result

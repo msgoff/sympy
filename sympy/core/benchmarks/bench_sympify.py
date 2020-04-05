@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 from sympy.core import sympify, Symbol
 
-x = Symbol('x')
+x = Symbol("x")
 
 
 def timeit_sympify_1():

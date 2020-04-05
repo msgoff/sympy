@@ -23,14 +23,63 @@ from .generate import sieve, primerange, nextprime
 
 # Note: This list should be updated whenever new Mersenne primes are found.
 # Refer: https://www.mersenne.org/
-MERSENNE_PRIME_EXPONENTS = (2, 3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203,
- 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049,
- 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583,
- 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933)
+MERSENNE_PRIME_EXPONENTS = (
+    2,
+    3,
+    5,
+    7,
+    13,
+    17,
+    19,
+    31,
+    61,
+    89,
+    107,
+    127,
+    521,
+    607,
+    1279,
+    2203,
+    2281,
+    3217,
+    4253,
+    4423,
+    9689,
+    9941,
+    11213,
+    19937,
+    21701,
+    23209,
+    44497,
+    86243,
+    110503,
+    132049,
+    216091,
+    756839,
+    859433,
+    1257787,
+    1398269,
+    2976221,
+    3021377,
+    6972593,
+    13466917,
+    20996011,
+    24036583,
+    25964951,
+    30402457,
+    32582657,
+    37156667,
+    42643801,
+    43112609,
+    57885161,
+    74207281,
+    77232917,
+    82589933,
+)
 
 small_trailing = [0] * 256
-for j in range(1,8):
-    small_trailing[1<<j::1<<(j+1)] = [j] * (1<<(7-j))
+for j in range(1, 8):
+    small_trailing[1 << j :: 1 << (j + 1)] = [j] * (1 << (7 - j))
 
 
 def smoothness(n):
@@ -60,7 +109,7 @@ def smoothness(n):
     if n == 1:
         return (1, 1)  # not prime, but otherwise this causes headaches
     facs = factorint(n)
-    return max(facs), max(m**facs[m] for m in facs)
+    return max(facs), max(m ** facs[m] for m in facs)
 
 
 def smoothness_p(n, m=-1, power=0, visual=None):
@@ -135,8 +184,7 @@ def smoothness_p(n, m=-1, power=0, visual=None):
             return n
         d = {}
         for li in n.splitlines():
-            k, v = [int(i) for i in
-                    li.split('has')[0].split('=')[1].split('**')]
+            k, v = [int(i) for i in li.split("has")[0].split("=")[1].split("**")]
             d[k] = v
         if visual is not True and visual is not False:
             return d
@@ -149,10 +197,16 @@ def smoothness_p(n, m=-1, power=0, visual=None):
     else:
         k = 1
     if type(n) is not tuple:
-        rv = (m, sorted([(f,
-                          tuple([M] + list(smoothness(f + m))))
-                         for f, M in [i for i in facs.items()]],
-                        key=lambda x: (x[1][k], x[0])))
+        rv = (
+            m,
+            sorted(
+                [
+                    (f, tuple([M] + list(smoothness(f + m))))
+                    for f, M in [i for i in facs.items()]
+                ],
+                key=lambda x: (x[1][k], x[0]),
+            ),
+        )
     else:
         rv = n
 
@@ -162,8 +216,8 @@ def smoothness_p(n, m=-1, power=0, visual=None):
     for dat in rv[1]:
         dat = flatten(dat)
         dat.insert(2, m)
-        lines.append('p**i=%i**%i has p%+i B=%i, B-pow=%i' % tuple(dat))
-    return '\n'.join(lines)
+        lines.append("p**i=%i**%i has p%+i B=%i, B-pow=%i" % tuple(dat))
+    return "\n".join(lines)
 
 
 def trailing(n):
@@ -183,7 +237,7 @@ def trailing(n):
     n = abs(int(n))
     if not n:
         return 0
-    low_byte = n & 0xff
+    low_byte = n & 0xFF
     if low_byte:
         return small_trailing[low_byte]
 
@@ -197,10 +251,10 @@ def trailing(n):
         # fixed 8-byte reduction
         t = 8
         n >>= 8
-        while not n & 0xff:
+        while not n & 0xFF:
             n >>= 8
             t += 8
-        return t + small_trailing[n & 0xff]
+        return t + small_trailing[n & 0xFF]
 
     # binary reduction important when there might be a large
     # number of trailing 0s
@@ -243,21 +297,19 @@ def multiplicity(p, n):
             elif p.p == 1:
                 return multiplicity(p.q, n.q)
             else:
-                like = min(
-                    multiplicity(p.p, n.p),
-                    multiplicity(p.q, n.q))
-                cross = min(
-                    multiplicity(p.q, n.p),
-                    multiplicity(p.p, n.q))
+                like = min(multiplicity(p.p, n.p), multiplicity(p.q, n.q))
+                cross = min(multiplicity(p.q, n.p), multiplicity(p.p, n.q))
                 return like - cross
-        raise ValueError('expecting ints or fractions, got %s and %s' % (p, n))
+        raise ValueError("expecting ints or fractions, got %s and %s" % (p, n))
 
     if n == 0:
-        raise ValueError('no such integer exists: multiplicity of %s is not-defined' %(n))
+        raise ValueError(
+            "no such integer exists: multiplicity of %s is not-defined" % (n)
+        )
     if p == 2:
         return trailing(n)
     if p < 2:
-        raise ValueError('p must be an integer, 2 or larger, but got %s' % p)
+        raise ValueError("p must be an integer, 2 or larger, but got %s" % p)
     if p == n:
         return 1
 
@@ -270,7 +322,7 @@ def multiplicity(p, n):
             # to increment in powers of two
             e = 2
             while 1:
-                ppow = p**e
+                ppow = p ** e
                 if ppow < n:
                     nnew, rem = divmod(n, ppow)
                     if not rem:
@@ -339,10 +391,11 @@ def perfect_power(n, candidates=None, big=True, factor=True):
     sympy.ntheory.primetest.is_square
     """
     from sympy.core.power import integer_nthroot
+
     n = as_int(n)
     if n < 3:
         if n < 1:
-            raise ValueError('expecting positive n')
+            raise ValueError("expecting positive n")
         return False
     logn = math.log(n, 2)
     max_possible = int(logn) + 2  # only check values less than this
@@ -351,11 +404,10 @@ def perfect_power(n, candidates=None, big=True, factor=True):
     if not candidates:
         candidates = primerange(min_possible, max_possible)
     else:
-        candidates = sorted([i for i in candidates
-            if min_possible <= i < max_possible])
-        if n%2 == 0:
+        candidates = sorted([i for i in candidates if min_possible <= i < max_possible])
+        if n % 2 == 0:
             e = trailing(n)
-            candidates = [i for i in candidates if e%i == 0]
+            candidates = [i for i in candidates if e % i == 0]
         if big:
             candidates = reversed(candidates)
         for e in candidates:
@@ -390,22 +442,22 @@ def perfect_power(n, candidates=None, big=True, factor=True):
                 # If n = fac**e*m can be written as a perfect
                 # power then see if m can be written as r**E where
                 # gcd(e, E) != 1 so n = (fac**(e//E)*r)**E
-                m = n//fac**e
+                m = n // fac ** e
                 rE = perfect_power(m, candidates=divisors(e, generator=True))
                 if not rE:
                     return False
                 else:
                     r, E = rE
-                    r, e = fac**(e//E)*r, E
+                    r, e = fac ** (e // E) * r, E
             if not big:
                 e0 = primefactors(e)
                 if e0[0] != e:
-                    r, e = r**(e//e0[0]), e0[0]
+                    r, e = r ** (e // e0[0]), e0[0]
             return r, e
 
         # Weed out downright impossible candidates
-        if logn/e < 40:
-            b = 2.0**(logn/e)
+        if logn / e < 40:
+            b = 2.0 ** (logn / e)
             if abs(int(b + 0.5) - b) > 0.01:
                 continue
 
@@ -415,7 +467,7 @@ def perfect_power(n, candidates=None, big=True, factor=True):
             if big:
                 m = perfect_power(r, big=big, factor=factor)
                 if m:
-                    r, e = m[0], e*m[1]
+                    r, e = m[0], e * m[1]
             return int(r), e
 
     return False
@@ -510,7 +562,7 @@ def pollard_rho(n, s=2, a=1, retries=5, seed=1234, max_steps=None, F=None):
     """
     n = int(n)
     if n < 5:
-        raise ValueError('pollard_rho should receive n > 4')
+        raise ValueError("pollard_rho should receive n > 4")
     prng = random.Random(seed + retries)
     V = s
     for i in range(retries + 1):
@@ -669,7 +721,7 @@ def pollard_pm1(n, B=10, a=2, retries=0, seed=1234):
 
     n = int(n)
     if n < 4 or B < 3:
-        raise ValueError('pollard_pm1 should receive n > 3 and B > 2')
+        raise ValueError("pollard_pm1 should receive n > 3 and B > 2")
     prng = random.Random(seed + B)
 
     # computing a**lcm(1,2,3,..B) % n for B > 2
@@ -705,7 +757,7 @@ def _trial(factors, n, candidates, verbose=False):
     for d in candidates:
         if n % d == 0:
             m = multiplicity(d, n)
-            n //= d**m
+            n //= d ** m
             factors[d] = m
     if verbose:
         for k in sorted(set(factors).difference(set(factors0))):
@@ -713,8 +765,7 @@ def _trial(factors, n, candidates, verbose=False):
     return int(n), len(factors) != nfactors
 
 
-def _check_termination(factors, n, limitp1, use_trial, use_rho, use_pm1,
-                       verbose):
+def _check_termination(factors, n, limitp1, use_trial, use_rho, use_pm1, verbose):
     """
     Helper function for integer factorization. Checks if ``n``
     is a prime or a perfect power, and in those cases updates
@@ -722,7 +773,7 @@ def _check_termination(factors, n, limitp1, use_trial, use_rho, use_pm1,
     """
 
     if verbose:
-        print('Check for termination')
+        print("Check for termination")
 
     # since we've already been factoring there is no need to do
     # simultaneous factoring with the power check
@@ -733,12 +784,11 @@ def _check_termination(factors, n, limitp1, use_trial, use_rho, use_pm1,
             limit = limitp1 - 1
         else:
             limit = limitp1
-        facs = factorint(base, limit, use_trial, use_rho, use_pm1,
-                         verbose=False)
+        facs = factorint(base, limit, use_trial, use_rho, use_pm1, verbose=False)
         for b, e in facs.items():
             if verbose:
                 print(factor_msg % (b, e))
-            factors[b] = exp*e
+            factors[b] = exp * e
         raise StopIteration
 
     if isprime(n):
@@ -748,13 +798,14 @@ def _check_termination(factors, n, limitp1, use_trial, use_rho, use_pm1,
     if n == 1:
         raise StopIteration
 
+
 trial_int_msg = "Trial division with ints [%i ... %i] and fail_max=%i"
 trial_msg = "Trial division with primes [%i ... %i]"
 rho_msg = "Pollard's rho with retries %i, max_steps %i and seed %i"
 pm1_msg = "Pollard's p-1 with smoothness bound %i and seed %i"
-factor_msg = '\t%i ** %i'
-fermat_msg = 'Close factors satisying Fermat condition found.'
-complete_msg = 'Factorization is complete.'
+factor_msg = "\t%i ** %i"
+fermat_msg = "Close factors satisying Fermat condition found."
+complete_msg = "Factorization is complete."
 
 
 def _factorint_small(factors, n, limit, fail_max):
@@ -775,7 +826,7 @@ def _factorint_small(factors, n, limit, fail_max):
         """return n, d if the sqrt(n) wasn't reached yet, else
            n, 0 indicating that factoring is done.
         """
-        if d*d <= n:
+        if d * d <= n:
             return n, d
         return n, 0
 
@@ -797,23 +848,23 @@ def _factorint_small(factors, n, limit, fail_max):
         if m == 20:
             mm = multiplicity(d, n)
             m += mm
-            n //= d**mm
+            n //= d ** mm
             break
     if m:
         factors[d] = m
 
     # when d*d exceeds maxx or n we are done; if limit**2 is greater
     # than n then maxx is set to zero so the value of n will flag the finish
-    if limit*limit > n:
+    if limit * limit > n:
         maxx = 0
     else:
-        maxx = limit*limit
+        maxx = limit * limit
 
     dd = maxx or n
     d = 5
     fails = 0
     while fails < fail_max:
-        if d*d > dd:
+        if d * d > dd:
             break
         # d = 6*i - 1
         # reduce
@@ -824,7 +875,7 @@ def _factorint_small(factors, n, limit, fail_max):
             if m == 20:
                 mm = multiplicity(d, n)
                 m += mm
-                n //= d**mm
+                n //= d ** mm
                 break
         if m:
             factors[d] = m
@@ -833,7 +884,7 @@ def _factorint_small(factors, n, limit, fail_max):
         else:
             fails += 1
         d += 2
-        if d*d > dd:
+        if d * d > dd:
             break
         # d = 6*i - 1
         # reduce
@@ -844,7 +895,7 @@ def _factorint_small(factors, n, limit, fail_max):
             if m == 20:
                 mm = multiplicity(d, n)
                 m += mm
-                n //= d**mm
+                n //= d ** mm
                 break
         if m:
             factors[d] = m
@@ -858,8 +909,16 @@ def _factorint_small(factors, n, limit, fail_max):
     return done(n, d)
 
 
-def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
-              verbose=False, visual=None, multiple=False):
+def factorint(
+    n,
+    limit=None,
+    use_trial=True,
+    use_rho=True,
+    use_pm1=True,
+    verbose=False,
+    visual=None,
+    multiple=False,
+):
     r"""
     Given a positive integer ``n``, ``factorint(n)`` returns a dict containing
     the prime factors of ``n`` as keys and their respective multiplicities
@@ -1011,21 +1070,38 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     if isinstance(n, Dict):
         n = dict(n)
     if multiple:
-        fac = factorint(n, limit=limit, use_trial=use_trial,
-                           use_rho=use_rho, use_pm1=use_pm1,
-                           verbose=verbose, visual=False, multiple=False)
-        factorlist = sum(([p] * fac[p] if fac[p] > 0 else [S.One/p]*(-fac[p])
-                               for p in sorted(fac)), [])
+        fac = factorint(
+            n,
+            limit=limit,
+            use_trial=use_trial,
+            use_rho=use_rho,
+            use_pm1=use_pm1,
+            verbose=verbose,
+            visual=False,
+            multiple=False,
+        )
+        factorlist = sum(
+            (
+                [p] * fac[p] if fac[p] > 0 else [S.One / p] * (-fac[p])
+                for p in sorted(fac)
+            ),
+            [],
+        )
         return factorlist
 
     factordict = {}
     if visual and not isinstance(n, Mul) and not isinstance(n, dict):
-        factordict = factorint(n, limit=limit, use_trial=use_trial,
-                               use_rho=use_rho, use_pm1=use_pm1,
-                               verbose=verbose, visual=False)
+        factordict = factorint(
+            n,
+            limit=limit,
+            use_trial=use_trial,
+            use_rho=use_rho,
+            use_pm1=use_pm1,
+            verbose=verbose,
+            visual=False,
+        )
     elif isinstance(n, Mul):
-        factordict = {int(k): int(v) for k, v in
-            n.as_powers_dict().items()}
+        factordict = {int(k): int(v) for k, v in n.as_powers_dict().items()}
     elif isinstance(n, dict):
         factordict = n
     if factordict and (isinstance(n, Mul) or isinstance(n, dict)):
@@ -1034,16 +1110,21 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
             if isprime(key):
                 continue
             e = factordict.pop(key)
-            d = factorint(key, limit=limit, use_trial=use_trial, use_rho=use_rho,
-                          use_pm1=use_pm1, verbose=verbose, visual=False)
+            d = factorint(
+                key,
+                limit=limit,
+                use_trial=use_trial,
+                use_rho=use_rho,
+                use_pm1=use_pm1,
+                verbose=verbose,
+                visual=False,
+            )
             for k, v in d.items():
                 if k in factordict:
-                    factordict[k] += v*e
+                    factordict[k] += v * e
                 else:
-                    factordict[k] = v*e
-    if visual or (type(n) is dict and
-                  visual is not True and
-                  visual is not False):
+                    factordict[k] = v * e
+    if visual or (type(n) is dict and visual is not True and visual is not False):
         if factordict == {}:
             return S.One
         if -1 in factordict:
@@ -1051,8 +1132,7 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
             args = [S.NegativeOne]
         else:
             args = []
-        args.extend([Pow(*i, evaluate=False)
-                     for i in sorted(factordict.items())])
+        args.extend([Pow(*i, evaluate=False) for i in sorted(factordict.items())])
         return Mul(*args, evaluate=False)
     elif isinstance(n, dict) or isinstance(n, Mul):
         return factordict
@@ -1060,11 +1140,12 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     assert use_trial or use_rho or use_pm1
 
     from sympy.functions.combinatorial.factorials import factorial
+
     if isinstance(n, factorial):
         x = as_int(n.args[0])
         if x >= 20:
             factors = {}
-            m = 2 # to initialize the if condition below
+            m = 2  # to initialize the if condition below
             for p in sieve.primerange(2, x + 1):
                 if m > 1:
                     m, q = 0, x // p
@@ -1090,8 +1171,14 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     # special cases
     if n < 0:
         factors = factorint(
-            -n, limit=limit, use_trial=use_trial, use_rho=use_rho,
-            use_pm1=use_pm1, verbose=verbose, visual=False)
+            -n,
+            limit=limit,
+            use_trial=use_trial,
+            use_rho=use_rho,
+            use_pm1=use_pm1,
+            verbose=verbose,
+            visual=False,
+        )
         factors[-1] = 1
         return factors
 
@@ -1102,8 +1189,18 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     elif n < 10:
         # doing this we are assured of getting a limit > 2
         # when we have to compute it later
-        return [{0: 1}, {}, {2: 1}, {3: 1}, {2: 2}, {5: 1},
-                {2: 1, 3: 1}, {7: 1}, {2: 3}, {3: 2}][n]
+        return [
+            {0: 1},
+            {},
+            {2: 1},
+            {3: 1},
+            {2: 2},
+            {5: 1},
+            {2: 1, 3: 1},
+            {7: 1},
+            {2: 3},
+            {3: 2},
+        ][n]
 
     factors = {}
 
@@ -1111,14 +1208,17 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     if verbose:
         sn = str(n)
         if len(sn) > 50:
-            print('Factoring %s' % sn[:5] + \
-                  '..(%i other digits)..' % (len(sn) - 10) + sn[-5:])
+            print(
+                "Factoring %s" % sn[:5]
+                + "..(%i other digits).." % (len(sn) - 10)
+                + sn[-5:]
+            )
         else:
-            print('Factoring', n)
+            print("Factoring", n)
 
     if use_trial:
         # this is the preliminary factorization for small factors
-        small = 2**15
+        small = 2 ** 15
         fail_max = 600
         small = min(small, limit or small)
         if verbose:
@@ -1144,10 +1244,9 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
     try:
         if limit and next_p > limit:
             if verbose:
-                print('Exceeded limit:', limit)
+                print("Exceeded limit:", limit)
 
-            _check_termination(factors, n, limit, use_trial, use_rho, use_pm1,
-                               verbose)
+            _check_termination(factors, n, limit, use_trial, use_rho, use_pm1, verbose)
 
             if n > 1:
                 factors[int(n)] = 1
@@ -1161,13 +1260,13 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
             # 2, 3, 5.
             sqrt_n = integer_nthroot(n, 2)[0]
             a = sqrt_n + 1
-            a2 = a**2
+            a2 = a ** 2
             b2 = a2 - n
             for i in range(3):
                 b, fermat = integer_nthroot(b2, 2)
                 if fermat:
                     break
-                b2 += 2*a + 1  # equiv to (a + 1)**2 - n
+                b2 += 2 * a + 1  # equiv to (a + 1)**2 - n
                 a += 1
             if fermat:
                 if verbose:
@@ -1175,16 +1274,20 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
                 if limit:
                     limit -= 1
                 for r in [a - b, a + b]:
-                    facs = factorint(r, limit=limit, use_trial=use_trial,
-                                     use_rho=use_rho, use_pm1=use_pm1,
-                                     verbose=verbose)
+                    facs = factorint(
+                        r,
+                        limit=limit,
+                        use_trial=use_trial,
+                        use_rho=use_rho,
+                        use_pm1=use_pm1,
+                        verbose=verbose,
+                    )
                     for k, v in facs.items():
                         factors[k] = factors.get(k, 0) + v
                 raise StopIteration
 
             # ...see if factorization can be terminated
-            _check_termination(factors, n, limit, use_trial, use_rho, use_pm1,
-                               verbose)
+            _check_termination(factors, n, limit, use_trial, use_rho, use_pm1, verbose)
 
     except StopIteration:
         if verbose:
@@ -1193,7 +1296,7 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
 
     # these are the limits for trial division which will
     # be attempted in parallel with pollard methods
-    low, high = next_p, 2*next_p
+    low, high = next_p, 2 * next_p
 
     limit = limit or sqrt_n
     # add 1 to make sure limit is reached in primerange calls
@@ -1213,22 +1316,23 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
                 ps = sieve.primerange(low, high_)
                 n, found_trial = _trial(factors, n, ps, verbose)
                 if found_trial:
-                    _check_termination(factors, n, limit, use_trial, use_rho,
-                                       use_pm1, verbose)
+                    _check_termination(
+                        factors, n, limit, use_trial, use_rho, use_pm1, verbose
+                    )
             else:
                 found_trial = False
 
             if high > limit:
                 if verbose:
-                    print('Exceeded limit:', limit)
+                    print("Exceeded limit:", limit)
                 if n > 1:
                     factors[int(n)] = 1
                 raise StopIteration
 
             # Only used advanced methods when no small factors were found
             if not found_trial:
-                if (use_pm1 or use_rho):
-                    high_root = max(int(math.log(high_**0.7)), low, 3)
+                if use_pm1 or use_rho:
+                    high_root = max(int(math.log(high_ ** 0.7)), low, 3)
 
                     # Pollard p-1
                     if use_pm1:
@@ -1237,43 +1341,58 @@ def factorint(n, limit=None, use_trial=True, use_rho=True, use_pm1=True,
                         c = pollard_pm1(n, B=high_root, seed=high_)
                         if c:
                             # factor it and let _trial do the update
-                            ps = factorint(c, limit=limit - 1,
-                                           use_trial=use_trial,
-                                           use_rho=use_rho,
-                                           use_pm1=use_pm1,
-                                           verbose=verbose)
+                            ps = factorint(
+                                c,
+                                limit=limit - 1,
+                                use_trial=use_trial,
+                                use_rho=use_rho,
+                                use_pm1=use_pm1,
+                                verbose=verbose,
+                            )
                             n, _ = _trial(factors, n, ps, verbose=False)
-                            _check_termination(factors, n, limit, use_trial,
-                                               use_rho, use_pm1, verbose)
+                            _check_termination(
+                                factors, n, limit, use_trial, use_rho, use_pm1, verbose
+                            )
 
                     # Pollard rho
                     if use_rho:
                         max_steps = high_root
                         if verbose:
                             print(rho_msg % (1, max_steps, high_))
-                        c = pollard_rho(n, retries=1, max_steps=max_steps,
-                                        seed=high_)
+                        c = pollard_rho(n, retries=1, max_steps=max_steps, seed=high_)
                         if c:
                             # factor it and let _trial do the update
-                            ps = factorint(c, limit=limit - 1,
-                                           use_trial=use_trial,
-                                           use_rho=use_rho,
-                                           use_pm1=use_pm1,
-                                           verbose=verbose)
+                            ps = factorint(
+                                c,
+                                limit=limit - 1,
+                                use_trial=use_trial,
+                                use_rho=use_rho,
+                                use_pm1=use_pm1,
+                                verbose=verbose,
+                            )
                             n, _ = _trial(factors, n, ps, verbose=False)
-                            _check_termination(factors, n, limit, use_trial,
-                                               use_rho, use_pm1, verbose)
+                            _check_termination(
+                                factors, n, limit, use_trial, use_rho, use_pm1, verbose
+                            )
 
         except StopIteration:
             if verbose:
                 print(complete_msg)
             return factors
 
-        low, high = high, high*2
+        low, high = high, high * 2
 
 
-def factorrat(rat, limit=None, use_trial=True, use_rho=True, use_pm1=True,
-              verbose=False, visual=None, multiple=False):
+def factorrat(
+    rat,
+    limit=None,
+    use_trial=True,
+    use_rho=True,
+    use_pm1=True,
+    verbose=False,
+    visual=None,
+    multiple=False,
+):
     r"""
     Given a Rational ``r``, ``factorrat(r)`` returns a dict containing
     the prime factors of ``r`` as keys and their respective multiplicities
@@ -1298,26 +1417,47 @@ def factorrat(rat, limit=None, use_trial=True, use_rho=True, use_pm1=True,
         - ``visual``: Toggle product form of output
     """
     from collections import defaultdict
+
     if multiple:
-        fac = factorrat(rat, limit=limit, use_trial=use_trial,
-                  use_rho=use_rho, use_pm1=use_pm1,
-                  verbose=verbose, visual=False, multiple=False)
-        factorlist = sum(([p] * fac[p] if fac[p] > 0 else [S.One/p]*(-fac[p])
-                               for p, _ in sorted(fac.items(),
-                                                        key=lambda elem: elem[0]
-                                                        if elem[1] > 0
-                                                        else 1/elem[0])), [])
+        fac = factorrat(
+            rat,
+            limit=limit,
+            use_trial=use_trial,
+            use_rho=use_rho,
+            use_pm1=use_pm1,
+            verbose=verbose,
+            visual=False,
+            multiple=False,
+        )
+        factorlist = sum(
+            (
+                [p] * fac[p] if fac[p] > 0 else [S.One / p] * (-fac[p])
+                for p, _ in sorted(
+                    fac.items(),
+                    key=lambda elem: elem[0] if elem[1] > 0 else 1 / elem[0],
+                )
+            ),
+            [],
+        )
         return factorlist
 
-    f = factorint(rat.p, limit=limit, use_trial=use_trial,
-                  use_rho=use_rho, use_pm1=use_pm1,
-                  verbose=verbose).copy()
+    f = factorint(
+        rat.p,
+        limit=limit,
+        use_trial=use_trial,
+        use_rho=use_rho,
+        use_pm1=use_pm1,
+        verbose=verbose,
+    ).copy()
     f = defaultdict(int, f)
-    for p, e in factorint(rat.q, limit=limit,
-                          use_trial=use_trial,
-                          use_rho=use_rho,
-                          use_pm1=use_pm1,
-                          verbose=verbose).items():
+    for p, e in factorint(
+        rat.q,
+        limit=limit,
+        use_trial=use_trial,
+        use_rho=use_rho,
+        use_pm1=use_pm1,
+        verbose=verbose,
+    ).items():
         f[p] += -e
 
     if len(f) > 1 and 1 in f:
@@ -1330,10 +1470,8 @@ def factorrat(rat, limit=None, use_trial=True, use_rho=True, use_pm1=True,
             args = [S.NegativeOne]
         else:
             args = []
-        args.extend([Pow(*i, evaluate=False)
-                     for i in sorted(f.items())])
+        args.extend([Pow(*i, evaluate=False) for i in sorted(f.items())])
         return Mul(*args, evaluate=False)
-
 
 
 def primefactors(n, limit=None, verbose=False):
@@ -1540,11 +1678,11 @@ def proper_divisor_count(n, modulus=1):
 def _udivisors(n):
     """Helper function for udivisors which generates the unitary divisors."""
 
-    factorpows = [p**e for p, e in factorint(n).items()]
-    for i in range(2**len(factorpows)):
+    factorpows = [p ** e for p, e in factorint(n).items()]
+    for i in range(2 ** len(factorpows)):
         d, j, k = 1, i, 0
         while j:
-            if (j & 1):
+            if j & 1:
                 d *= factorpows[k]
             j >>= 1
             k += 1
@@ -1628,20 +1766,20 @@ def udivisor_count(n):
 
     if n == 0:
         return 0
-    return 2**len([p for p in factorint(n) if p > 1])
+    return 2 ** len([p for p in factorint(n) if p > 1])
 
 
 def _antidivisors(n):
     """Helper function for antidivisors which generates the antidivisors."""
 
     for d in _divisors(n):
-        y = 2*d
+        y = 2 * d
         if n > y and n % y:
             yield y
-    for d in _divisors(2*n-1):
+    for d in _divisors(2 * n - 1):
         if n > d >= 2 and n % d:
             yield d
-    for d in _divisors(2*n+1):
+    for d in _divisors(2 * n + 1):
         if n > d >= 2 and n % d:
             yield d
 
@@ -1717,8 +1855,13 @@ def antidivisor_count(n):
     n = as_int(abs(n))
     if n <= 2:
         return 0
-    return divisor_count(2*n - 1) + divisor_count(2*n + 1) + \
-        divisor_count(n) - divisor_count(n, 2) - 5
+    return (
+        divisor_count(2 * n - 1)
+        + divisor_count(2 * n + 1)
+        + divisor_count(n)
+        - divisor_count(n, 2)
+        - 5
+    )
 
 
 class totient(Function):
@@ -1756,6 +1899,7 @@ class totient(Function):
     .. [2] http://mathworld.wolfram.com/TotientFunction.html
 
     """
+
     @classmethod
     def eval(cls, n):
         n = sympify(n)
@@ -1764,7 +1908,11 @@ class totient(Function):
                 raise ValueError("n must be a positive integer")
             factors = factorint(n)
             return cls._from_factors(factors)
-        elif not isinstance(n, Expr) or (n.is_integer is False) or (n.is_positive is False):
+        elif (
+            not isinstance(n, Expr)
+            or (n.is_integer is False)
+            or (n.is_positive is False)
+        ):
             raise ValueError("n must be a positive integer")
 
     def _eval_is_integer(self):
@@ -1783,7 +1931,8 @@ class totient(Function):
         24
         """
         from functools import reduce
-        return reduce(lambda i, j: i * (j-1), args, 1)
+
+        return reduce(lambda i, j: i * (j - 1), args, 1)
 
     @classmethod
     def _from_factors(self, factors):
@@ -1798,7 +1947,7 @@ class totient(Function):
         """
         t = 1
         for p, k in factors.items():
-            t *= (p - 1) * p**(k - 1)
+            t *= (p - 1) * p ** (k - 1)
         return t
 
 
@@ -1832,6 +1981,7 @@ class reduced_totient(Function):
     .. [2] http://mathworld.wolfram.com/CarmichaelFunction.html
 
     """
+
     @classmethod
     def eval(cls, n):
         n = sympify(n)
@@ -1848,9 +1998,9 @@ class reduced_totient(Function):
         t = 1
         for p, k in factors.items():
             if p == 2 and k > 2:
-                t = ilcm(t, 2**(k - 2))
+                t = ilcm(t, 2 ** (k - 2))
             else:
-                t = ilcm(t, (p - 1) * p**(k - 1))
+                t = ilcm(t, (p - 1) * p ** (k - 1))
         return t
 
     @classmethod
@@ -1926,13 +2076,17 @@ class divisor_sigma(Function):
         n = sympify(n)
         k = sympify(k)
         if n.is_prime:
-            return 1 + n**k
+            return 1 + n ** k
         if n.is_Integer:
             if n <= 0:
                 raise ValueError("n must be a positive integer")
             else:
-                return Mul(*[(p**(k*(e + 1)) - 1)/(p**k - 1) if k != 0
-                           else e + 1 for p, e in factorint(n).items()])
+                return Mul(
+                    *[
+                        (p ** (k * (e + 1)) - 1) / (p ** k - 1) if k != 0 else e + 1
+                        for p, e in factorint(n).items()
+                    ]
+                )
 
 
 def core(n, t=2):
@@ -1998,7 +2152,7 @@ def core(n, t=2):
     else:
         y = 1
         for p, e in factorint(n).items():
-            y *= p**(e % t)
+            y *= p ** (e % t)
         return y
 
 
@@ -2094,12 +2248,12 @@ class udivisor_sigma(Function):
         n = sympify(n)
         k = sympify(k)
         if n.is_prime:
-            return 1 + n**k
+            return 1 + n ** k
         if n.is_Integer:
             if n <= 0:
                 raise ValueError("n must be a positive integer")
             else:
-                return Mul(*[1+p**(k*e) for p, e in factorint(n).items()])
+                return Mul(*[1 + p ** (k * e) for p, e in factorint(n).items()])
 
 
 class primenu(Function):
@@ -2208,9 +2362,13 @@ def mersenne_prime_exponent(nth):
     """
     n = as_int(nth)
     if n < 1:
-        raise ValueError("nth must be a positive integer; mersenne_prime_exponent(1) == 2")
+        raise ValueError(
+            "nth must be a positive integer; mersenne_prime_exponent(1) == 2"
+        )
     if n > 51:
-        raise ValueError("There are only 51 perfect numbers; nth must be less than or equal to 51")
+        raise ValueError(
+            "There are only 51 perfect numbers; nth must be less than or equal to 51"
+        )
     return MERSENNE_PRIME_EXPONENTS[n - 1]
 
 
@@ -2238,7 +2396,7 @@ def is_perfect(n):
     """
     from sympy.core.power import integer_log
 
-    r, b = integer_nthroot(1 + 8*n, 2)
+    r, b = integer_nthroot(1 + 8 * n, 2)
     if not b:
         return False
     n, x = divmod(1 + r, 4)
@@ -2402,7 +2560,7 @@ def dra(n, b):
     if num == 0:
         return 0
 
-    return (1 + (num - 1) % (b - 1))
+    return 1 + (num - 1) % (b - 1)
 
 
 def drm(n, b):

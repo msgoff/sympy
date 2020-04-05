@@ -2,7 +2,7 @@ from __future__ import print_function, division
 from .vector import Vector, _check_vector
 from .frame import _check_frame
 
-__all__ = ['Point']
+__all__ = ["Point"]
 
 
 class Point(object):
@@ -61,7 +61,7 @@ class Point(object):
 
     def _check_point(self, other):
         if not isinstance(other, Point):
-            raise TypeError('A Point must be supplied')
+            raise TypeError("A Point must be supplied")
 
     def _pdict_list(self, other, num):
         """Creates a list from self to other using _dcm_dict. """
@@ -82,8 +82,9 @@ class Point(object):
         outlist.sort(key=len)
         if len(outlist) != 0:
             return outlist[0]
-        raise ValueError('No Connecting Path found between ' + other.name +
-                         ' and ' + self.name)
+        raise ValueError(
+            "No Connecting Path found between " + other.name + " and " + self.name
+        )
 
     def a1pt_theory(self, otherpoint, outframe, interframe):
         """Sets the acceleration of this point with the 1-point theory.
@@ -136,8 +137,10 @@ class Point(object):
         a2 = self.acc(interframe)
         omega = interframe.ang_vel_in(outframe)
         alpha = interframe.ang_acc_in(outframe)
-        self.set_acc(outframe, a2 + 2 * (omega ^ v) + a1 + (alpha ^ dist) +
-                (omega ^ (omega ^ dist)))
+        self.set_acc(
+            outframe,
+            a2 + 2 * (omega ^ v) + a1 + (alpha ^ dist) + (omega ^ (omega ^ dist)),
+        )
         return self.acc(outframe)
 
     def a2pt_theory(self, otherpoint, outframe, fixedframe):
@@ -237,7 +240,7 @@ class Point(object):
         """
 
         if not isinstance(name, str):
-            raise TypeError('Must supply a valid name')
+            raise TypeError("Must supply a valid name")
         if value == 0:
             value = Vector(0)
         value = _check_vector(value)
@@ -482,8 +485,10 @@ class Point(object):
 
         _check_frame(frame)
         if not (frame in self._vel_dict):
-            raise ValueError('Velocity of point ' + self.name + ' has not been'
-                             ' defined in ReferenceFrame ' + frame.name)
+            raise ValueError(
+                "Velocity of point " + self.name + " has not been"
+                " defined in ReferenceFrame " + frame.name
+            )
         return self._vel_dict[frame]
 
     def partial_velocity(self, frame, *gen_speeds):
@@ -520,8 +525,9 @@ class Point(object):
         (N.x, A.y)
 
         """
-        partials = [self.vel(frame).diff(speed, frame, var_in_dcm=False) for
-                    speed in gen_speeds]
+        partials = [
+            self.vel(frame).diff(speed, frame, var_in_dcm=False) for speed in gen_speeds
+        ]
 
         if len(partials) == 1:
             return partials[0]

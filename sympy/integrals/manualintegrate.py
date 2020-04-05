@@ -39,15 +39,18 @@ from sympy.utilities.misc import debug
 
 ZERO = sympy.S.Zero
 
+
 def Rule(name, props=""):
     # GOTCHA: namedtuple class name not considered!
     def __eq__(self, other):
         return self.__class__ == other.__class__ and tuple.__eq__(self, other)
+
     __neq__ = lambda self, other: not __eq__(self, other)
     cls = namedtuple(name, props + " context symbol")
     cls.__eq__ = __eq__
     cls.__ne__ = __neq__
     return cls
+
 
 ConstantRule = Rule("ConstantRule", "constant")
 ConstantTimesRule = Rule("ConstantTimesRule", "constant other substep")
@@ -67,8 +70,9 @@ DerivativeRule = Rule("DerivativeRule")
 RewriteRule = Rule("RewriteRule", "rewritten substep")
 PiecewiseRule = Rule("PiecewiseRule", "subfunctions")
 HeavisideRule = Rule("HeavisideRule", "harg ibnd substep")
-TrigSubstitutionRule = Rule("TrigSubstitutionRule",
-                            "theta func rewritten substep restriction")
+TrigSubstitutionRule = Rule(
+    "TrigSubstitutionRule", "theta func rewritten substep restriction"
+)
 ArctanRule = Rule("ArctanRule", "a b c")
 ArccothRule = Rule("ArccothRule", "a b c")
 ArctanhRule = Rule("ArctanhRule", "a b c")
@@ -94,15 +98,19 @@ UpperGammaRule = Rule("UpperGammaRule", "a e")
 EllipticFRule = Rule("EllipticFRule", "a d")
 EllipticERule = Rule("EllipticERule", "a d")
 
-IntegralInfo = namedtuple('IntegralInfo', 'integrand symbol')
+IntegralInfo = namedtuple("IntegralInfo", "integrand symbol")
 
 evaluators = {}
+
+
 def evaluates(rule):
     def _evaluates(func):
         func.rule = rule
         evaluators[rule] = func
         return func
+
     return _evaluates
+
 
 def contains_dont_know(rule):
     if isinstance(rule, DontKnowRule):
@@ -117,6 +125,7 @@ def contains_dont_know(rule):
                     return True
     return False
 
+
 def manual_diff(f, symbol):
     """Derivative of f in form expected by find_substitutions
 
@@ -128,9 +137,9 @@ def manual_diff(f, symbol):
     if f.args:
         arg = f.args[0]
         if isinstance(f, sympy.tan):
-            return arg.diff(symbol) * sympy.sec(arg)**2
+            return arg.diff(symbol) * sympy.sec(arg) ** 2
         elif isinstance(f, sympy.cot):
-            return -arg.diff(symbol) * sympy.csc(arg)**2
+            return -arg.diff(symbol) * sympy.csc(arg) ** 2
         elif isinstance(f, sympy.sec):
             return arg.diff(symbol) * sympy.sec(arg) * sympy.tan(arg)
         elif isinstance(f, sympy.csc):
@@ -141,6 +150,7 @@ def manual_diff(f, symbol):
             if len(f.args) == 2 and isinstance(f.args[0], sympy.Number):
                 return f.args[0] * manual_diff(f.args[1], symbol)
     return f.diff(symbol)
+
 
 def manual_subs(expr, *args):
     """
@@ -166,14 +176,17 @@ def manual_subs(expr, *args):
             # before subs turns them into `exp(y)**a`, but
             # do not replace x itself yet, to avoid `log(exp(y))`.
             x0 = old.args[0]
-            expr = expr.replace(lambda x: x.is_Pow and x.base == x0,
-                lambda x: sympy.exp(x.exp*new))
+            expr = expr.replace(
+                lambda x: x.is_Pow and x.base == x0, lambda x: sympy.exp(x.exp * new)
+            )
             new_subs.append((x0, sympy.exp(new)))
 
     return expr.subs(list(sequence) + new_subs)
 
+
 # Method based on that on SIN, described in "Symbolic Integration: The
 # Stormy Decade"
+
 
 def find_substitutions(integrand, symbol, u_var):
     results = []
@@ -190,35 +203,58 @@ def find_substitutions(integrand, symbol, u_var):
 
         if symbol not in substituted.free_symbols:
             # avoid increasing the degree of a rational function
-            if integrand.is_rational_function(symbol) and substituted.is_rational_function(u_var):
-                deg_before = max([degree(t, symbol) for t in integrand.as_numer_denom()])
-                deg_after = max([degree(t, u_var) for t in substituted.as_numer_denom()])
+            if integrand.is_rational_function(
+                symbol
+            ) and substituted.is_rational_function(u_var):
+                deg_before = max(
+                    [degree(t, symbol) for t in integrand.as_numer_denom()]
+                )
+                deg_after = max(
+                    [degree(t, u_var) for t in substituted.as_numer_denom()]
+                )
                 if deg_after > deg_before:
                     return False
             return substituted.as_independent(u_var, as_Add=False)
 
         # special treatment for substitutions u = (a*x+b)**(1/n)
-        if (isinstance(u, sympy.Pow) and (1/u.exp).is_Integer and
-            sympy.Abs(u.exp) < 1):
-                a = sympy.Wild('a', exclude=[symbol])
-                b = sympy.Wild('b', exclude=[symbol])
-                match = u.base.match(a*symbol + b)
-                if match:
-                    a, b = [match.get(i, ZERO) for i in (a, b)]
-                    if a != 0 and b != 0:
-                        substituted = substituted.subs(symbol,
-                            (u_var**(1/u.exp) - b)/a)
-                        return substituted.as_independent(u_var, as_Add=False)
+        if isinstance(u, sympy.Pow) and (1 / u.exp).is_Integer and sympy.Abs(u.exp) < 1:
+            a = sympy.Wild("a", exclude=[symbol])
+            b = sympy.Wild("b", exclude=[symbol])
+            match = u.base.match(a * symbol + b)
+            if match:
+                a, b = [match.get(i, ZERO) for i in (a, b)]
+                if a != 0 and b != 0:
+                    substituted = substituted.subs(
+                        symbol, (u_var ** (1 / u.exp) - b) / a
+                    )
+                    return substituted.as_independent(u_var, as_Add=False)
 
         return False
 
     def possible_subterms(term):
-        if isinstance(term, (TrigonometricFunction,
-                             sympy.asin, sympy.acos, sympy.atan,
-                             sympy.exp, sympy.log, sympy.Heaviside)):
+        if isinstance(
+            term,
+            (
+                TrigonometricFunction,
+                sympy.asin,
+                sympy.acos,
+                sympy.atan,
+                sympy.exp,
+                sympy.log,
+                sympy.Heaviside,
+            ),
+        ):
             return [term.args[0]]
-        elif isinstance(term, (sympy.chebyshevt, sympy.chebyshevu,
-                        sympy.legendre, sympy.hermite, sympy.laguerre)):
+        elif isinstance(
+            term,
+            (
+                sympy.chebyshevt,
+                sympy.chebyshevu,
+                sympy.legendre,
+                sympy.hermite,
+                sympy.laguerre,
+            ),
+        ):
             return [term.args[1]]
         elif isinstance(term, (sympy.gegenbauer, sympy.assoc_laguerre)):
             return [term.args[2]]
@@ -237,11 +273,15 @@ def find_substitutions(integrand, symbol, u_var):
             elif term.args[0].is_constant(symbol):
                 r.append(term.args[1])
             if term.args[1].is_Integer:
-                r.extend([term.args[0]**d for d in divisors(term.args[1])
-                    if 1 < d < abs(term.args[1])])
+                r.extend(
+                    [
+                        term.args[0] ** d
+                        for d in divisors(term.args[1])
+                        if 1 < d < abs(term.args[1])
+                    ]
+                )
                 if term.args[0].is_Add:
-                    r.extend([t for t in possible_subterms(term.args[0])
-                        if t.is_Pow])
+                    r.extend([t for t in possible_subterms(term.args[0]) if t.is_Pow])
             return r
         elif isinstance(term, sympy.Add):
             r = []
@@ -266,48 +306,63 @@ def find_substitutions(integrand, symbol, u_var):
 
     return results
 
+
 def rewriter(condition, rewrite):
     """Strategy that rewrites an integrand."""
+
     def _rewriter(integral):
         integrand, symbol = integral
-        debug("Integral: {} is rewritten with {} on symbol: {}".format(integrand, rewrite, symbol))
+        debug(
+            "Integral: {} is rewritten with {} on symbol: {}".format(
+                integrand, rewrite, symbol
+            )
+        )
         if condition(*integral):
             rewritten = rewrite(*integral)
             if rewritten != integrand:
                 substep = integral_steps(rewritten, symbol)
                 if not isinstance(substep, DontKnowRule) and substep:
-                    return RewriteRule(
-                        rewritten,
-                        substep,
-                        integrand, symbol)
+                    return RewriteRule(rewritten, substep, integrand, symbol)
+
     return _rewriter
+
 
 def proxy_rewriter(condition, rewrite):
     """Strategy that rewrites an integrand based on some other criteria."""
+
     def _proxy_rewriter(criteria):
         criteria, integral = criteria
         integrand, symbol = integral
-        debug("Integral: {} is rewritten with {} on symbol: {} and criteria: {}".format(integrand, rewrite, symbol, criteria))
+        debug(
+            "Integral: {} is rewritten with {} on symbol: {} and criteria: {}".format(
+                integrand, rewrite, symbol, criteria
+            )
+        )
         args = criteria + list(integral)
         if condition(*args):
             rewritten = rewrite(*args)
             if rewritten != integrand:
                 return RewriteRule(
-                    rewritten,
-                    integral_steps(rewritten, symbol),
-                    integrand, symbol)
+                    rewritten, integral_steps(rewritten, symbol), integrand, symbol
+                )
+
     return _proxy_rewriter
+
 
 def multiplexer(conditions):
     """Apply the rule that matches the condition, else None"""
+
     def multiplexer_rl(expr):
         for key, rule in conditions.items():
             if key(expr):
                 return rule(expr)
+
     return multiplexer_rl
+
 
 def alternatives(*rules):
     """Strategy that makes an AlternativeRule out of multiple possible results."""
+
     def _alternatives(integral):
         alts = []
         count = 0
@@ -317,8 +372,12 @@ def alternatives(*rules):
             debug("Rule {}: {}".format(count, rule))
 
             result = rule(integral)
-            if (result and not isinstance(result, DontKnowRule) and
-                result != integral and result not in alts):
+            if (
+                result
+                and not isinstance(result, DontKnowRule)
+                and result != integral
+                and result not in alts
+            ):
                 alts.append(result)
         if len(alts) == 1:
             return alts[0]
@@ -328,11 +387,14 @@ def alternatives(*rules):
                 return AlternativeRule(doable, *integral)
             else:
                 return AlternativeRule(alts, *integral)
+
     return _alternatives
+
 
 def constant_rule(integral):
     integrand, symbol = integral
     return ConstantRule(integral.integrand, *integral)
+
 
 def power_rule(integral):
     integrand, symbol = integral
@@ -350,10 +412,12 @@ def power_rule(integral):
         elif sympy.log(base).is_zero:
             return ConstantRule(1, 1, symbol)
 
-        return PiecewiseRule([
-            (rule, sympy.Ne(sympy.log(base), 0)),
-            (ConstantRule(1, 1, symbol), True)
-        ], integrand, symbol)
+        return PiecewiseRule(
+            [(rule, sympy.Ne(sympy.log(base), 0)), (ConstantRule(1, 1, symbol), True)],
+            integrand,
+            symbol,
+        )
+
 
 def exp_rule(integral):
     integrand, symbol = integral
@@ -370,58 +434,71 @@ def orthogonal_poly_rule(integral):
         sympy.legendre: LegendreRule,
         sympy.hermite: HermiteRule,
         sympy.laguerre: LaguerreRule,
-        sympy.assoc_laguerre: AssocLaguerreRule
-        }
+        sympy.assoc_laguerre: AssocLaguerreRule,
+    }
     orthogonal_poly_var_index = {
         sympy.jacobi: 3,
         sympy.gegenbauer: 2,
-        sympy.assoc_laguerre: 2
-        }
+        sympy.assoc_laguerre: 2,
+    }
     integrand, symbol = integral
     for klass in orthogonal_poly_classes:
         if isinstance(integrand, klass):
             var_index = orthogonal_poly_var_index.get(klass, 1)
-            if (integrand.args[var_index] is symbol and not
-                any(v.has(symbol) for v in integrand.args[:var_index])):
-                    args = integrand.args[:var_index] + (integrand, symbol)
-                    return orthogonal_poly_classes[klass](*args)
+            if integrand.args[var_index] is symbol and not any(
+                v.has(symbol) for v in integrand.args[:var_index]
+            ):
+                args = integrand.args[:var_index] + (integrand, symbol)
+                return orthogonal_poly_classes[klass](*args)
 
 
 def special_function_rule(integral):
     integrand, symbol = integral
-    a = sympy.Wild('a', exclude=[symbol], properties=[lambda x: not x.is_zero])
-    b = sympy.Wild('b', exclude=[symbol])
-    c = sympy.Wild('c', exclude=[symbol])
-    d = sympy.Wild('d', exclude=[symbol], properties=[lambda x: not x.is_zero])
-    e = sympy.Wild('e', exclude=[symbol], properties=[
-        lambda x: not (x.is_nonnegative and x.is_integer)])
+    a = sympy.Wild("a", exclude=[symbol], properties=[lambda x: not x.is_zero])
+    b = sympy.Wild("b", exclude=[symbol])
+    c = sympy.Wild("c", exclude=[symbol])
+    d = sympy.Wild("d", exclude=[symbol], properties=[lambda x: not x.is_zero])
+    e = sympy.Wild(
+        "e",
+        exclude=[symbol],
+        properties=[lambda x: not (x.is_nonnegative and x.is_integer)],
+    )
     wilds = (a, b, c, d, e)
     # patterns consist of a SymPy class, a wildcard expr, an optional
     # condition coded as a lambda (when Wild properties are not enough),
     # followed by an applicable rule
     patterns = (
-        (sympy.Mul, sympy.exp(a*symbol + b)/symbol, None, EiRule),
-        (sympy.Mul, sympy.cos(a*symbol + b)/symbol, None, CiRule),
-        (sympy.Mul, sympy.cosh(a*symbol + b)/symbol, None, ChiRule),
-        (sympy.Mul, sympy.sin(a*symbol + b)/symbol, None, SiRule),
-        (sympy.Mul, sympy.sinh(a*symbol + b)/symbol, None, ShiRule),
-        (sympy.Pow, 1/sympy.log(a*symbol + b), None, LiRule),
-        (sympy.exp, sympy.exp(a*symbol**2 + b*symbol + c), None, ErfRule),
-        (sympy.sin, sympy.sin(a*symbol**2 + b*symbol + c), None, FresnelSRule),
-        (sympy.cos, sympy.cos(a*symbol**2 + b*symbol + c), None, FresnelCRule),
-        (sympy.Mul, symbol**e*sympy.exp(a*symbol), None, UpperGammaRule),
-        (sympy.Mul, sympy.polylog(b, a*symbol)/symbol, None, PolylogRule),
-        (sympy.Pow, 1/sympy.sqrt(a - d*sympy.sin(symbol)**2),
-            lambda a, d: a != d, EllipticFRule),
-        (sympy.Pow, sympy.sqrt(a - d*sympy.sin(symbol)**2),
-            lambda a, d: a != d, EllipticERule),
+        (sympy.Mul, sympy.exp(a * symbol + b) / symbol, None, EiRule),
+        (sympy.Mul, sympy.cos(a * symbol + b) / symbol, None, CiRule),
+        (sympy.Mul, sympy.cosh(a * symbol + b) / symbol, None, ChiRule),
+        (sympy.Mul, sympy.sin(a * symbol + b) / symbol, None, SiRule),
+        (sympy.Mul, sympy.sinh(a * symbol + b) / symbol, None, ShiRule),
+        (sympy.Pow, 1 / sympy.log(a * symbol + b), None, LiRule),
+        (sympy.exp, sympy.exp(a * symbol ** 2 + b * symbol + c), None, ErfRule),
+        (sympy.sin, sympy.sin(a * symbol ** 2 + b * symbol + c), None, FresnelSRule),
+        (sympy.cos, sympy.cos(a * symbol ** 2 + b * symbol + c), None, FresnelCRule),
+        (sympy.Mul, symbol ** e * sympy.exp(a * symbol), None, UpperGammaRule),
+        (sympy.Mul, sympy.polylog(b, a * symbol) / symbol, None, PolylogRule),
+        (
+            sympy.Pow,
+            1 / sympy.sqrt(a - d * sympy.sin(symbol) ** 2),
+            lambda a, d: a != d,
+            EllipticFRule,
+        ),
+        (
+            sympy.Pow,
+            sympy.sqrt(a - d * sympy.sin(symbol) ** 2),
+            lambda a, d: a != d,
+            EllipticERule,
+        ),
     )
     for p in patterns:
         if isinstance(integrand, p[0]):
             match = integrand.match(p[1])
             if match:
-                wild_vals = tuple(match.get(w) for w in wilds
-                                  if match.get(w) is not None)
+                wild_vals = tuple(
+                    match.get(w) for w in wilds if match.get(w) is not None
+                )
                 if p[2] is None or p[2](*wild_vals):
                     args = wild_vals + (integrand, symbol)
                     return p[3](*args)
@@ -430,9 +507,9 @@ def special_function_rule(integral):
 def inverse_trig_rule(integral):
     integrand, symbol = integral
     base, exp = integrand.as_base_exp()
-    a = sympy.Wild('a', exclude=[symbol])
-    b = sympy.Wild('b', exclude=[symbol])
-    match = base.match(a + b*symbol**2)
+    a = sympy.Wild("a", exclude=[symbol])
+    b = sympy.Wild("b", exclude=[symbol])
+    match = base.match(a + b * symbol ** 2)
 
     if not match:
         return
@@ -453,21 +530,25 @@ def inverse_trig_rule(integral):
         constant = u_func = u_constant = substep = None
         factored = integrand
         if a != 1:
-            constant = a**base_exp
-            current_base = sign_a + sign_b * (b/a) * current_symbol**2
+            constant = a ** base_exp
+            current_base = sign_a + sign_b * (b / a) * current_symbol ** 2
             factored = current_base ** base_exp
-        if (b/a) != 1:
-            u_func = sympy.sqrt(b/a) * symbol
-            u_constant = sympy.sqrt(a/b)
+        if (b / a) != 1:
+            u_func = sympy.sqrt(b / a) * symbol
+            u_constant = sympy.sqrt(a / b)
             current_symbol = u_var
-            current_base = sign_a + sign_b * current_symbol**2
+            current_base = sign_a + sign_b * current_symbol ** 2
 
         substep = RuleClass(current_base ** base_exp, current_symbol)
         if u_func is not None:
             if u_constant != 1 and substep is not None:
                 substep = ConstantTimesRule(
-                    u_constant, current_base ** base_exp, substep,
-                    u_constant * current_base ** base_exp, symbol)
+                    u_constant,
+                    current_base ** base_exp,
+                    substep,
+                    u_constant * current_base ** base_exp,
+                    symbol,
+                )
             substep = URule(u_var, u_func, u_constant, substep, factored, symbol)
         if constant is not None and substep is not None:
             substep = ConstantTimesRule(constant, factored, substep, integrand, symbol)
@@ -477,7 +558,7 @@ def inverse_trig_rule(integral):
     # list of (rule, base_exp, a, sign_a, b, sign_b, condition)
     possibilities = []
 
-    if sympy.simplify(2*exp + 1) == 0:
+    if sympy.simplify(2 * exp + 1) == 0:
         possibilities.append((ArcsinRule, exp, a, 1, -b, -1, sympy.And(a > 0, b < 0)))
         possibilities.append((ArcsinhRule, exp, a, 1, b, 1, sympy.And(a > 0, b > 0)))
         possibilities.append((ArccoshRule, exp, -a, -1, b, 1, sympy.And(a < 0, b > 0)))
@@ -490,13 +571,16 @@ def inverse_trig_rule(integral):
     elif possibilities:
         return PiecewiseRule(
             [(make_inverse_trig(*p[:-1]), p[-1]) for p in possibilities],
-            integrand, symbol)
+            integrand,
+            symbol,
+        )
+
 
 def add_rule(integral):
     integrand, symbol = integral
-    results = [integral_steps(g, symbol)
-              for g in integrand.as_ordered_terms()]
+    results = [integral_steps(g, symbol) for g in integrand.as_ordered_terms()]
     return None if None in results else AddRule(results, integrand, symbol)
+
 
 def mul_rule(integral):
     integrand, symbol = integral
@@ -506,10 +590,8 @@ def mul_rule(integral):
     next_step = integral_steps(f, symbol)
 
     if coeff != 1 and next_step is not None:
-        return ConstantTimesRule(
-            coeff, f,
-            next_step,
-            integrand, symbol)
+        return ConstantTimesRule(coeff, f, next_step, integrand, symbol)
+
 
 def _parts_rule(integrand, symbol):
     # LIATE rule:
@@ -517,8 +599,11 @@ def _parts_rule(integrand, symbol):
     def pull_out_algebraic(integrand):
         integrand = integrand.cancel().together()
         # iterating over Piecewise args would not work here
-        algebraic = ([] if isinstance(integrand, sympy.Piecewise)
-            else [arg for arg in integrand.args if arg.is_algebraic_expr(symbol)])
+        algebraic = (
+            []
+            if isinstance(integrand, sympy.Piecewise)
+            else [arg for arg in integrand.args if arg.is_algebraic_expr(symbol)]
+        )
         if algebraic:
             u = sympy.Mul(*algebraic)
             dv = (integrand / u).cancel()
@@ -527,19 +612,25 @@ def _parts_rule(integrand, symbol):
     def pull_out_u(*functions):
         def pull_out_u_rl(integrand):
             if any([integrand.has(f) for f in functions]):
-                args = [arg for arg in integrand.args
-                        if any(isinstance(arg, cls) for cls in functions)]
+                args = [
+                    arg
+                    for arg in integrand.args
+                    if any(isinstance(arg, cls) for cls in functions)
+                ]
                 if args:
-                    u = reduce(lambda a,b: a*b, args)
+                    u = reduce(lambda a, b: a * b, args)
                     dv = integrand / u
                     return u, dv
 
         return pull_out_u_rl
 
-    liate_rules = [pull_out_u(sympy.log), pull_out_u(sympy.atan, sympy.asin, sympy.acos),
-                   pull_out_algebraic, pull_out_u(sympy.sin, sympy.cos),
-                   pull_out_u(sympy.exp)]
-
+    liate_rules = [
+        pull_out_u(sympy.log),
+        pull_out_u(sympy.atan, sympy.asin, sympy.acos),
+        pull_out_algebraic,
+        pull_out_u(sympy.sin, sympy.cos),
+        pull_out_u(sympy.exp),
+    ]
 
     dummy = sympy.Dummy("temporary")
     # we can integrate log(x) and atan(x) by setting dv = 1
@@ -564,31 +655,34 @@ def _parts_rule(integrand, symbol):
                 return
             # Don't trade one logarithm for another
             if isinstance(u, sympy.log):
-                rec_dv = 1/dv
-                if (rec_dv.is_polynomial(symbol) and
-                    degree(rec_dv, symbol) == 1):
-                        return
+                rec_dv = 1 / dv
+                if rec_dv.is_polynomial(symbol) and degree(rec_dv, symbol) == 1:
+                    return
 
             # Can integrate a polynomial times OrthogonalPolynomial
             if rule == pull_out_algebraic and isinstance(dv, OrthogonalPolynomial):
-                    v_step = integral_steps(dv, symbol)
-                    if contains_dont_know(v_step):
-                        return
-                    else:
-                        du = u.diff(symbol)
-                        v = _manualintegrate(v_step)
-                        return u, dv, v, du, v_step
+                v_step = integral_steps(dv, symbol)
+                if contains_dont_know(v_step):
+                    return
+                else:
+                    du = u.diff(symbol)
+                    v = _manualintegrate(v_step)
+                    return u, dv, v, du, v_step
 
             # make sure dv is amenable to integration
             accept = False
             if index < 2:  # log and inverse trig are usually worth trying
                 accept = True
-            elif (rule == pull_out_algebraic and dv.args and
-                all(isinstance(a, (sympy.sin, sympy.cos, sympy.exp))
-                for a in dv.args)):
-                    accept = True
+            elif (
+                rule == pull_out_algebraic
+                and dv.args
+                and all(
+                    isinstance(a, (sympy.sin, sympy.cos, sympy.exp)) for a in dv.args
+                )
+            ):
+                accept = True
             else:
-                for rule in liate_rules[index + 1:]:
+                for rule in liate_rules[index + 1 :]:
                     r = rule(integrand)
                     if r and r[0].subs(dummy, 1).equals(dv):
                         accept = True
@@ -611,7 +705,9 @@ def parts_rule(integral):
     steps = []
     if result:
         u, dv, v, du, v_step = result
-        debug("u : {}, dv : {}, v : {}, du : {}, v_step: {}".format(u, dv, v, du, v_step))
+        debug(
+            "u : {}, dv : {}, v : {}, du : {}, v_step: {}".format(u, dv, v, du, v_step)
+        )
         steps.append(result)
 
         if isinstance(v, sympy.Integral):
@@ -626,20 +722,28 @@ def parts_rule(integral):
 
         # Try cyclic integration by parts a few times
         for _ in range(4):
-            debug("Cyclic integration {} with v: {}, du: {}, integrand: {}".format(_, v, du, integrand))
+            debug(
+                "Cyclic integration {} with v: {}, du: {}, integrand: {}".format(
+                    _, v, du, integrand
+                )
+            )
             coefficient = ((v * du) / integrand).cancel()
             if coefficient == 1:
                 break
             if symbol not in coefficient.free_symbols:
                 rule = CyclicPartsRule(
-                    [PartsRule(u, dv, v_step, None, None, None)
-                     for (u, dv, v, du, v_step) in steps],
+                    [
+                        PartsRule(u, dv, v_step, None, None, None)
+                        for (u, dv, v, du, v_step) in steps
+                    ],
                     (-1) ** len(steps) * coefficient,
-                    integrand, symbol
+                    integrand,
+                    symbol,
                 )
                 if (constant != 1) and rule:
-                    rule = ConstantTimesRule(constant, integrand, rule,
-                                             constant * integrand, symbol)
+                    rule = ConstantTimesRule(
+                        constant, integrand, rule, constant * integrand, symbol
+                    )
                 return rule
 
             # _parts_rule is sensitive to constants, factor it out
@@ -657,9 +761,9 @@ def parts_rule(integral):
     def make_second_step(steps, integrand):
         if steps:
             u, dv, v, du, v_step = steps[0]
-            return PartsRule(u, dv, v_step,
-                             make_second_step(steps[1:], v * du),
-                             integrand, symbol)
+            return PartsRule(
+                u, dv, v_step, make_second_step(steps[1:], v * du), integrand, symbol
+            )
         else:
             steps = integral_steps(integrand, symbol)
             if steps:
@@ -669,12 +773,13 @@ def parts_rule(integral):
 
     if steps:
         u, dv, v, du, v_step = steps[0]
-        rule = PartsRule(u, dv, v_step,
-                         make_second_step(steps[1:], v * du),
-                         integrand, symbol)
+        rule = PartsRule(
+            u, dv, v_step, make_second_step(steps[1:], v * du), integrand, symbol
+        )
         if (constant != 1) and rule:
-            rule = ConstantTimesRule(constant, integrand, rule,
-                                     constant * integrand, symbol)
+            rule = ConstantTimesRule(
+                constant, integrand, rule, constant * integrand, symbol
+            )
         return rule
 
 
@@ -687,16 +792,16 @@ def trig_rule(integral):
             return  # perhaps a substitution can deal with it
 
         if isinstance(integrand, sympy.sin):
-            func = 'sin'
+            func = "sin"
         else:
-            func = 'cos'
+            func = "cos"
 
         return TrigRule(func, arg, integrand, symbol)
 
-    if integrand == sympy.sec(symbol)**2:
-        return TrigRule('sec**2', symbol, integrand, symbol)
-    elif integrand == sympy.csc(symbol)**2:
-        return TrigRule('csc**2', symbol, integrand, symbol)
+    if integrand == sympy.sec(symbol) ** 2:
+        return TrigRule("sec**2", symbol, integrand, symbol)
+    elif integrand == sympy.csc(symbol) ** 2:
+        return TrigRule("csc**2", symbol, integrand, symbol)
 
     if isinstance(integrand, sympy.tan):
         rewritten = sympy.sin(*integrand.args) / sympy.cos(*integrand.args)
@@ -704,20 +809,19 @@ def trig_rule(integral):
         rewritten = sympy.cos(*integrand.args) / sympy.sin(*integrand.args)
     elif isinstance(integrand, sympy.sec):
         arg = integrand.args[0]
-        rewritten = ((sympy.sec(arg)**2 + sympy.tan(arg) * sympy.sec(arg)) /
-                     (sympy.sec(arg) + sympy.tan(arg)))
+        rewritten = (sympy.sec(arg) ** 2 + sympy.tan(arg) * sympy.sec(arg)) / (
+            sympy.sec(arg) + sympy.tan(arg)
+        )
     elif isinstance(integrand, sympy.csc):
         arg = integrand.args[0]
-        rewritten = ((sympy.csc(arg)**2 + sympy.cot(arg) * sympy.csc(arg)) /
-                     (sympy.csc(arg) + sympy.cot(arg)))
+        rewritten = (sympy.csc(arg) ** 2 + sympy.cot(arg) * sympy.csc(arg)) / (
+            sympy.csc(arg) + sympy.cot(arg)
+        )
     else:
         return
 
-    return RewriteRule(
-        rewritten,
-        integral_steps(rewritten, symbol),
-        integrand, symbol
-    )
+    return RewriteRule(rewritten, integral_steps(rewritten, symbol), integrand, symbol)
+
 
 def trig_product_rule(integral):
     integrand, symbol = integral
@@ -726,7 +830,7 @@ def trig_product_rule(integral):
     q = integrand / sectan
 
     if symbol not in q.free_symbols:
-        rule = TrigRule('sec*tan', symbol, sectan, symbol)
+        rule = TrigRule("sec*tan", symbol, sectan, symbol)
         if q != 1 and rule:
             rule = ConstantTimesRule(q, sectan, rule, integrand, symbol)
 
@@ -736,146 +840,166 @@ def trig_product_rule(integral):
     q = integrand / csccot
 
     if symbol not in q.free_symbols:
-        rule = TrigRule('csc*cot', symbol, csccot, symbol)
+        rule = TrigRule("csc*cot", symbol, csccot, symbol)
         if q != 1 and rule:
             rule = ConstantTimesRule(q, csccot, rule, integrand, symbol)
 
         return rule
 
+
 def quadratic_denom_rule(integral):
     integrand, symbol = integral
-    a = sympy.Wild('a', exclude=[symbol])
-    b = sympy.Wild('b', exclude=[symbol])
-    c = sympy.Wild('c', exclude=[symbol])
+    a = sympy.Wild("a", exclude=[symbol])
+    b = sympy.Wild("b", exclude=[symbol])
+    c = sympy.Wild("c", exclude=[symbol])
 
     match = integrand.match(a / (b * symbol ** 2 + c))
 
     if match:
         a, b, c = match[a], match[b], match[c]
         if b.is_extended_real and c.is_extended_real:
-            return PiecewiseRule([(ArctanRule(a, b, c, integrand, symbol), sympy.Gt(c / b, 0)),
-                                (ArccothRule(a, b, c, integrand, symbol), sympy.And(sympy.Gt(symbol ** 2, -c / b), sympy.Lt(c / b, 0))),
-                                (ArctanhRule(a, b, c, integrand, symbol), sympy.And(sympy.Lt(symbol ** 2, -c / b), sympy.Lt(c / b, 0))),
-            ], integrand, symbol)
+            return PiecewiseRule(
+                [
+                    (ArctanRule(a, b, c, integrand, symbol), sympy.Gt(c / b, 0)),
+                    (
+                        ArccothRule(a, b, c, integrand, symbol),
+                        sympy.And(sympy.Gt(symbol ** 2, -c / b), sympy.Lt(c / b, 0)),
+                    ),
+                    (
+                        ArctanhRule(a, b, c, integrand, symbol),
+                        sympy.And(sympy.Lt(symbol ** 2, -c / b), sympy.Lt(c / b, 0)),
+                    ),
+                ],
+                integrand,
+                symbol,
+            )
         else:
             return ArctanRule(a, b, c, integrand, symbol)
 
-    d = sympy.Wild('d', exclude=[symbol])
+    d = sympy.Wild("d", exclude=[symbol])
     match2 = integrand.match(a / (b * symbol ** 2 + c * symbol + d))
     if match2:
-        b, c =  match2[b], match2[c]
+        b, c = match2[b], match2[c]
         if b.is_zero:
             return
-        u = sympy.Dummy('u')
-        u_func = symbol + c/(2*b)
-        integrand2 = integrand.subs(symbol, u - c / (2*b))
+        u = sympy.Dummy("u")
+        u_func = symbol + c / (2 * b)
+        integrand2 = integrand.subs(symbol, u - c / (2 * b))
         next_step = integral_steps(integrand2, u)
         if next_step:
             return URule(u, u_func, None, next_step, integrand2, symbol)
         else:
             return
-    e = sympy.Wild('e', exclude=[symbol])
-    match3 = integrand.match((a* symbol + b) / (c * symbol ** 2 + d * symbol + e))
+    e = sympy.Wild("e", exclude=[symbol])
+    match3 = integrand.match((a * symbol + b) / (c * symbol ** 2 + d * symbol + e))
     if match3:
         a, b, c, d, e = match3[a], match3[b], match3[c], match3[d], match3[e]
         if c.is_zero:
             return
-        denominator = c * symbol**2 + d * symbol + e
-        const =  a/(2*c)
-        numer1 =  (2*c*symbol+d)
-        numer2 = - const*d + b
-        u = sympy.Dummy('u')
-        step1 = URule(u,
-                      denominator,
-                      const,
-                      integral_steps(u**(-1), u),
-                      integrand,
-                      symbol)
+        denominator = c * symbol ** 2 + d * symbol + e
+        const = a / (2 * c)
+        numer1 = 2 * c * symbol + d
+        numer2 = -const * d + b
+        u = sympy.Dummy("u")
+        step1 = URule(
+            u, denominator, const, integral_steps(u ** (-1), u), integrand, symbol
+        )
         if const != 1:
-            step1 = ConstantTimesRule(const,
-                                      numer1/denominator,
-                                      step1,
-                                      const*numer1/denominator,
-                                      symbol)
+            step1 = ConstantTimesRule(
+                const, numer1 / denominator, step1, const * numer1 / denominator, symbol
+            )
         if numer2.is_zero:
             return step1
-        step2 = integral_steps(numer2/denominator, symbol)
+        step2 = integral_steps(numer2 / denominator, symbol)
         substeps = AddRule([step1, step2], integrand, symbol)
-        rewriten = const*numer1/denominator+numer2/denominator
+        rewriten = const * numer1 / denominator + numer2 / denominator
         return RewriteRule(rewriten, substeps, integrand, symbol)
 
     return
 
+
 def root_mul_rule(integral):
     integrand, symbol = integral
-    a = sympy.Wild('a', exclude=[symbol])
-    b = sympy.Wild('b', exclude=[symbol])
-    c = sympy.Wild('c')
+    a = sympy.Wild("a", exclude=[symbol])
+    b = sympy.Wild("b", exclude=[symbol])
+    c = sympy.Wild("c")
     match = integrand.match(sympy.sqrt(a * symbol + b) * c)
 
     if not match:
         return
 
     a, b, c = match[a], match[b], match[c]
-    d = sympy.Wild('d', exclude=[symbol])
-    e = sympy.Wild('e', exclude=[symbol])
-    f = sympy.Wild('f')
+    d = sympy.Wild("d", exclude=[symbol])
+    e = sympy.Wild("e", exclude=[symbol])
+    f = sympy.Wild("f")
     recursion_test = c.match(sympy.sqrt(d * symbol + e) * f)
     if recursion_test:
         return
 
-    u = sympy.Dummy('u')
+    u = sympy.Dummy("u")
     u_func = sympy.sqrt(a * symbol + b)
     integrand = integrand.subs(u_func, u)
-    integrand = integrand.subs(symbol, (u**2 - b) / a)
+    integrand = integrand.subs(symbol, (u ** 2 - b) / a)
     integrand = integrand * 2 * u / a
     next_step = integral_steps(integrand, u)
     if next_step:
         return URule(u, u_func, None, next_step, integrand, symbol)
 
+
 @sympy.cacheit
 def make_wilds(symbol):
-    a = sympy.Wild('a', exclude=[symbol])
-    b = sympy.Wild('b', exclude=[symbol])
-    m = sympy.Wild('m', exclude=[symbol], properties=[lambda n: isinstance(n, sympy.Integer)])
-    n = sympy.Wild('n', exclude=[symbol], properties=[lambda n: isinstance(n, sympy.Integer)])
+    a = sympy.Wild("a", exclude=[symbol])
+    b = sympy.Wild("b", exclude=[symbol])
+    m = sympy.Wild(
+        "m", exclude=[symbol], properties=[lambda n: isinstance(n, sympy.Integer)]
+    )
+    n = sympy.Wild(
+        "n", exclude=[symbol], properties=[lambda n: isinstance(n, sympy.Integer)]
+    )
 
     return a, b, m, n
+
 
 @sympy.cacheit
 def sincos_pattern(symbol):
     a, b, m, n = make_wilds(symbol)
-    pattern = sympy.sin(a*symbol)**m * sympy.cos(b*symbol)**n
+    pattern = sympy.sin(a * symbol) ** m * sympy.cos(b * symbol) ** n
 
     return pattern, a, b, m, n
+
 
 @sympy.cacheit
 def tansec_pattern(symbol):
     a, b, m, n = make_wilds(symbol)
-    pattern = sympy.tan(a*symbol)**m * sympy.sec(b*symbol)**n
+    pattern = sympy.tan(a * symbol) ** m * sympy.sec(b * symbol) ** n
 
     return pattern, a, b, m, n
+
 
 @sympy.cacheit
 def cotcsc_pattern(symbol):
     a, b, m, n = make_wilds(symbol)
-    pattern = sympy.cot(a*symbol)**m * sympy.csc(b*symbol)**n
+    pattern = sympy.cot(a * symbol) ** m * sympy.csc(b * symbol) ** n
 
     return pattern, a, b, m, n
 
+
 @sympy.cacheit
 def heaviside_pattern(symbol):
-    m = sympy.Wild('m', exclude=[symbol])
-    b = sympy.Wild('b', exclude=[symbol])
-    g = sympy.Wild('g')
-    pattern = sympy.Heaviside(m*symbol + b) * g
+    m = sympy.Wild("m", exclude=[symbol])
+    b = sympy.Wild("b", exclude=[symbol])
+    g = sympy.Wild("g")
+    pattern = sympy.Heaviside(m * symbol + b) * g
 
     return pattern, m, b, g
+
 
 def uncurry(func):
     def uncurry_rl(args):
         return func(*args)
+
     return uncurry_rl
+
 
 def trig_rewriter(rewrite):
     def trig_rewriter_rl(args):
@@ -883,60 +1007,87 @@ def trig_rewriter(rewrite):
         rewritten = rewrite(a, b, m, n, integrand, symbol)
         if rewritten != integrand:
             return RewriteRule(
-                rewritten,
-                integral_steps(rewritten, symbol),
-                integrand, symbol)
+                rewritten, integral_steps(rewritten, symbol), integrand, symbol
+            )
+
     return trig_rewriter_rl
 
+
 sincos_botheven_condition = uncurry(
-    lambda a, b, m, n, i, s: m.is_even and n.is_even and
-    m.is_nonnegative and n.is_nonnegative)
+    lambda a, b, m, n, i, s: m.is_even
+    and n.is_even
+    and m.is_nonnegative
+    and n.is_nonnegative
+)
 
 sincos_botheven = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (((1 - sympy.cos(2*a*symbol)) / 2) ** (m / 2)) *
-                                    (((1 + sympy.cos(2*b*symbol)) / 2) ** (n / 2)) ))
+    lambda a, b, m, n, i, symbol: (
+        (((1 - sympy.cos(2 * a * symbol)) / 2) ** (m / 2))
+        * (((1 + sympy.cos(2 * b * symbol)) / 2) ** (n / 2))
+    )
+)
 
 sincos_sinodd_condition = uncurry(lambda a, b, m, n, i, s: m.is_odd and m >= 3)
 
 sincos_sinodd = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (1 - sympy.cos(a*symbol)**2)**((m - 1) / 2) *
-                                    sympy.sin(a*symbol) *
-                                    sympy.cos(b*symbol) ** n))
+    lambda a, b, m, n, i, symbol: (
+        (1 - sympy.cos(a * symbol) ** 2) ** ((m - 1) / 2)
+        * sympy.sin(a * symbol)
+        * sympy.cos(b * symbol) ** n
+    )
+)
 
 sincos_cosodd_condition = uncurry(lambda a, b, m, n, i, s: n.is_odd and n >= 3)
 
 sincos_cosodd = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (1 - sympy.sin(b*symbol)**2)**((n - 1) / 2) *
-                                    sympy.cos(b*symbol) *
-                                    sympy.sin(a*symbol) ** m))
+    lambda a, b, m, n, i, symbol: (
+        (1 - sympy.sin(b * symbol) ** 2) ** ((n - 1) / 2)
+        * sympy.cos(b * symbol)
+        * sympy.sin(a * symbol) ** m
+    )
+)
 
 tansec_seceven_condition = uncurry(lambda a, b, m, n, i, s: n.is_even and n >= 4)
 tansec_seceven = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (1 + sympy.tan(b*symbol)**2) ** (n/2 - 1) *
-                                    sympy.sec(b*symbol)**2 *
-                                    sympy.tan(a*symbol) ** m ))
+    lambda a, b, m, n, i, symbol: (
+        (1 + sympy.tan(b * symbol) ** 2) ** (n / 2 - 1)
+        * sympy.sec(b * symbol) ** 2
+        * sympy.tan(a * symbol) ** m
+    )
+)
 
 tansec_tanodd_condition = uncurry(lambda a, b, m, n, i, s: m.is_odd)
 tansec_tanodd = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (sympy.sec(a*symbol)**2 - 1) ** ((m - 1) / 2) *
-                                     sympy.tan(a*symbol) *
-                                     sympy.sec(b*symbol) ** n ))
+    lambda a, b, m, n, i, symbol: (
+        (sympy.sec(a * symbol) ** 2 - 1) ** ((m - 1) / 2)
+        * sympy.tan(a * symbol)
+        * sympy.sec(b * symbol) ** n
+    )
+)
 
 tan_tansquared_condition = uncurry(lambda a, b, m, n, i, s: m == 2 and n == 0)
 tan_tansquared = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( sympy.sec(a*symbol)**2 - 1))
+    lambda a, b, m, n, i, symbol: (sympy.sec(a * symbol) ** 2 - 1)
+)
 
 cotcsc_csceven_condition = uncurry(lambda a, b, m, n, i, s: n.is_even and n >= 4)
 cotcsc_csceven = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (1 + sympy.cot(b*symbol)**2) ** (n/2 - 1) *
-                                    sympy.csc(b*symbol)**2 *
-                                    sympy.cot(a*symbol) ** m ))
+    lambda a, b, m, n, i, symbol: (
+        (1 + sympy.cot(b * symbol) ** 2) ** (n / 2 - 1)
+        * sympy.csc(b * symbol) ** 2
+        * sympy.cot(a * symbol) ** m
+    )
+)
 
 cotcsc_cotodd_condition = uncurry(lambda a, b, m, n, i, s: m.is_odd)
 cotcsc_cotodd = trig_rewriter(
-    lambda a, b, m, n, i, symbol: ( (sympy.csc(a*symbol)**2 - 1) ** ((m - 1) / 2) *
-                                    sympy.cot(a*symbol) *
-                                    sympy.csc(b*symbol) ** n ))
+    lambda a, b, m, n, i, symbol: (
+        (sympy.csc(a * symbol) ** 2 - 1) ** ((m - 1) / 2)
+        * sympy.cot(a * symbol)
+        * sympy.csc(b * symbol) ** n
+    )
+)
+
 
 def trig_sincos_rule(integral):
     integrand, symbol = integral
@@ -947,20 +1098,19 @@ def trig_sincos_rule(integral):
         if not match:
             return
 
-        return multiplexer({
-            sincos_botheven_condition: sincos_botheven,
-            sincos_sinodd_condition: sincos_sinodd,
-            sincos_cosodd_condition: sincos_cosodd
-        })(tuple(
-            [match.get(i, ZERO) for i in (a, b, m, n)] +
-            [integrand, symbol]))
+        return multiplexer(
+            {
+                sincos_botheven_condition: sincos_botheven,
+                sincos_sinodd_condition: sincos_sinodd,
+                sincos_cosodd_condition: sincos_cosodd,
+            }
+        )(tuple([match.get(i, ZERO) for i in (a, b, m, n)] + [integrand, symbol]))
+
 
 def trig_tansec_rule(integral):
     integrand, symbol = integral
 
-    integrand = integrand.subs({
-        1 / sympy.cos(symbol): sympy.sec(symbol)
-    })
+    integrand = integrand.subs({1 / sympy.cos(symbol): sympy.sec(symbol)})
 
     if any(integrand.has(f) for f in (sympy.tan, sympy.sec)):
         pattern, a, b, m, n = tansec_pattern(symbol)
@@ -968,21 +1118,24 @@ def trig_tansec_rule(integral):
         if not match:
             return
 
-        return multiplexer({
-            tansec_tanodd_condition: tansec_tanodd,
-            tansec_seceven_condition: tansec_seceven,
-            tan_tansquared_condition: tan_tansquared
-        })(tuple(
-            [match.get(i, ZERO) for i in (a, b, m, n)] +
-            [integrand, symbol]))
+        return multiplexer(
+            {
+                tansec_tanodd_condition: tansec_tanodd,
+                tansec_seceven_condition: tansec_seceven,
+                tan_tansquared_condition: tan_tansquared,
+            }
+        )(tuple([match.get(i, ZERO) for i in (a, b, m, n)] + [integrand, symbol]))
+
 
 def trig_cotcsc_rule(integral):
     integrand, symbol = integral
-    integrand = integrand.subs({
-        1 / sympy.sin(symbol): sympy.csc(symbol),
-        1 / sympy.tan(symbol): sympy.cot(symbol),
-        sympy.cos(symbol) / sympy.tan(symbol): sympy.cot(symbol)
-    })
+    integrand = integrand.subs(
+        {
+            1 / sympy.sin(symbol): sympy.csc(symbol),
+            1 / sympy.tan(symbol): sympy.cot(symbol),
+            sympy.cos(symbol) / sympy.tan(symbol): sympy.cot(symbol),
+        }
+    )
 
     if any(integrand.has(f) for f in (sympy.cot, sympy.csc)):
         pattern, a, b, m, n = cotcsc_pattern(symbol)
@@ -990,33 +1143,38 @@ def trig_cotcsc_rule(integral):
         if not match:
             return
 
-        return multiplexer({
-            cotcsc_cotodd_condition: cotcsc_cotodd,
-            cotcsc_csceven_condition: cotcsc_csceven
-        })(tuple(
-            [match.get(i, ZERO) for i in (a, b, m, n)] +
-            [integrand, symbol]))
+        return multiplexer(
+            {
+                cotcsc_cotodd_condition: cotcsc_cotodd,
+                cotcsc_csceven_condition: cotcsc_csceven,
+            }
+        )(tuple([match.get(i, ZERO) for i in (a, b, m, n)] + [integrand, symbol]))
+
 
 def trig_sindouble_rule(integral):
     integrand, symbol = integral
-    a = sympy.Wild('a', exclude=[sympy.sin(2*symbol)])
-    match = integrand.match(sympy.sin(2*symbol)*a)
+    a = sympy.Wild("a", exclude=[sympy.sin(2 * symbol)])
+    match = integrand.match(sympy.sin(2 * symbol) * a)
     if match:
-        sin_double = 2*sympy.sin(symbol)*sympy.cos(symbol)/sympy.sin(2*symbol)
+        sin_double = 2 * sympy.sin(symbol) * sympy.cos(symbol) / sympy.sin(2 * symbol)
         return integral_steps(integrand * sin_double, symbol)
 
+
 def trig_powers_products_rule(integral):
-    return do_one(null_safe(trig_sincos_rule),
-                  null_safe(trig_tansec_rule),
-                  null_safe(trig_cotcsc_rule),
-                  null_safe(trig_sindouble_rule))(integral)
+    return do_one(
+        null_safe(trig_sincos_rule),
+        null_safe(trig_tansec_rule),
+        null_safe(trig_cotcsc_rule),
+        null_safe(trig_sindouble_rule),
+    )(integral)
+
 
 def trig_substitution_rule(integral):
     integrand, symbol = integral
-    A = sympy.Wild('a', exclude=[0, symbol])
-    B = sympy.Wild('b', exclude=[0, symbol])
+    A = sympy.Wild("a", exclude=[0, symbol])
+    B = sympy.Wild("b", exclude=[0, symbol])
     theta = sympy.Dummy("theta")
-    target_pattern = A + B*symbol**2
+    target_pattern = A + B * symbol ** 2
 
     matches = integrand.find(target_pattern)
     for expr in matches:
@@ -1024,53 +1182,53 @@ def trig_substitution_rule(integral):
         a = match.get(A, ZERO)
         b = match.get(B, ZERO)
 
-        a_positive = ((a.is_number and a > 0) or a.is_positive)
-        b_positive = ((b.is_number and b > 0) or b.is_positive)
-        a_negative = ((a.is_number and a < 0) or a.is_negative)
-        b_negative = ((b.is_number and b < 0) or b.is_negative)
+        a_positive = (a.is_number and a > 0) or a.is_positive
+        b_positive = (b.is_number and b > 0) or b.is_positive
+        a_negative = (a.is_number and a < 0) or a.is_negative
+        b_negative = (b.is_number and b < 0) or b.is_negative
         x_func = None
         if a_positive and b_positive:
             # a**2 + b*x**2. Assume sec(theta) > 0, -pi/2 < theta < pi/2
-            x_func = (sympy.sqrt(a)/sympy.sqrt(b)) * sympy.tan(theta)
+            x_func = (sympy.sqrt(a) / sympy.sqrt(b)) * sympy.tan(theta)
             # Do not restrict the domain: tan(theta) takes on any real
             # value on the interval -pi/2 < theta < pi/2 so x takes on
             # any value
             restriction = True
         elif a_positive and b_negative:
             # a**2 - b*x**2. Assume cos(theta) > 0, -pi/2 < theta < pi/2
-            constant = sympy.sqrt(a)/sympy.sqrt(-b)
+            constant = sympy.sqrt(a) / sympy.sqrt(-b)
             x_func = constant * sympy.sin(theta)
             restriction = sympy.And(symbol > -constant, symbol < constant)
         elif a_negative and b_positive:
             # b*x**2 - a**2. Assume sin(theta) > 0, 0 < theta < pi
-            constant = sympy.sqrt(-a)/sympy.sqrt(b)
+            constant = sympy.sqrt(-a) / sympy.sqrt(b)
             x_func = constant * sympy.sec(theta)
             restriction = sympy.And(symbol > -constant, symbol < constant)
         if x_func:
             # Manually simplify sqrt(trig(theta)**2) to trig(theta)
             # Valid due to assumed domain restriction
             substitutions = {}
-            for f in [sympy.sin, sympy.cos, sympy.tan,
-                      sympy.sec, sympy.csc, sympy.cot]:
-                substitutions[sympy.sqrt(f(theta)**2)] = f(theta)
-                substitutions[sympy.sqrt(f(theta)**(-2))] = 1/f(theta)
+            for f in [sympy.sin, sympy.cos, sympy.tan, sympy.sec, sympy.csc, sympy.cot]:
+                substitutions[sympy.sqrt(f(theta) ** 2)] = f(theta)
+                substitutions[sympy.sqrt(f(theta) ** (-2))] = 1 / f(theta)
 
             replaced = integrand.subs(symbol, x_func).trigsimp()
             replaced = manual_subs(replaced, substitutions)
             if not replaced.has(symbol):
                 replaced *= manual_diff(x_func, theta)
                 replaced = replaced.trigsimp()
-                secants = replaced.find(1/sympy.cos(theta))
+                secants = replaced.find(1 / sympy.cos(theta))
                 if secants:
-                    replaced = replaced.xreplace({
-                        1/sympy.cos(theta): sympy.sec(theta)
-                    })
+                    replaced = replaced.xreplace(
+                        {1 / sympy.cos(theta): sympy.sec(theta)}
+                    )
 
                 substep = integral_steps(replaced, theta)
                 if not contains_dont_know(substep):
                     return TrigSubstitutionRule(
-                        theta, x_func, replaced, substep, restriction,
-                        integrand, symbol)
+                        theta, x_func, replaced, substep, restriction, integrand, symbol
+                    )
+
 
 def heaviside_rule(integral):
     integrand, symbol = integral
@@ -1081,7 +1239,8 @@ def heaviside_rule(integral):
         v_step = integral_steps(match[g], symbol)
         result = _manualintegrate(v_step)
         m, b = match[m], match[b]
-        return HeavisideRule(m*symbol + b, -b/m, result, integrand, symbol)
+        return HeavisideRule(m * symbol + b, -b / m, result, integrand, symbol)
+
 
 def substitution_rule(integral):
     integrand, symbol = integral
@@ -1103,7 +1262,9 @@ def substitution_rule(integral):
             if sympy.simplify(c - 1) != 0:
                 _, denom = c.as_numer_denom()
                 if subrule:
-                    subrule = ConstantTimesRule(c, substituted, subrule, substituted, u_var)
+                    subrule = ConstantTimesRule(
+                        c, substituted, subrule, substituted, u_var
+                    )
 
                 if denom.free_symbols:
                     piecewise = []
@@ -1116,19 +1277,16 @@ def substitution_rule(integral):
 
                     for expr in could_be_zero:
                         if not fuzzy_not(expr.is_zero):
-                            substep = integral_steps(manual_subs(integrand, expr, 0), symbol)
+                            substep = integral_steps(
+                                manual_subs(integrand, expr, 0), symbol
+                            )
 
                             if substep:
-                                piecewise.append((
-                                    substep,
-                                    sympy.Eq(expr, 0)
-                                ))
+                                piecewise.append((substep, sympy.Eq(expr, 0)))
                     piecewise.append((subrule, True))
                     subrule = PiecewiseRule(piecewise, substituted, symbol)
 
-            ways.append(URule(u_var, u_func, c,
-                              subrule,
-                              integrand, symbol))
+            ways.append(URule(u_var, u_func, c, subrule, integrand, symbol))
 
         if len(ways) > 1:
             return AlternativeRule(ways, integrand, symbol)
@@ -1142,32 +1300,40 @@ def substitution_rule(integral):
         substituted = substituted.subs(u_func, u_var)
 
         if symbol not in substituted.free_symbols:
-            return URule(u_var, u_func, c,
-                         integral_steps(substituted, u_var),
-                         integrand, symbol)
+            return URule(
+                u_var, u_func, c, integral_steps(substituted, u_var), integrand, symbol
+            )
+
 
 partial_fractions_rule = rewriter(
     lambda integrand, symbol: integrand.is_rational_function(),
-    lambda integrand, symbol: integrand.apart(symbol))
+    lambda integrand, symbol: integrand.apart(symbol),
+)
 
 cancel_rule = rewriter(
     # lambda integrand, symbol: integrand.is_algebraic_expr(),
     # lambda integrand, symbol: isinstance(integrand, sympy.Mul),
     lambda integrand, symbol: True,
-    lambda integrand, symbol: integrand.cancel())
+    lambda integrand, symbol: integrand.cancel(),
+)
 
 distribute_expand_rule = rewriter(
     lambda integrand, symbol: (
         all(arg.is_Pow or arg.is_polynomial(symbol) for arg in integrand.args)
         or isinstance(integrand, sympy.Pow)
-        or isinstance(integrand, sympy.Mul)),
-    lambda integrand, symbol: integrand.expand())
+        or isinstance(integrand, sympy.Mul)
+    ),
+    lambda integrand, symbol: integrand.expand(),
+)
 
 trig_expand_rule = rewriter(
     # If there are trig functions with different arguments, expand them
     lambda integrand, symbol: (
-        len(set(a.args[0] for a in integrand.atoms(TrigonometricFunction))) > 1),
-    lambda integrand, symbol: integrand.expand(trig=True))
+        len(set(a.args[0] for a in integrand.atoms(TrigonometricFunction))) > 1
+    ),
+    lambda integrand, symbol: integrand.expand(trig=True),
+)
+
 
 def derivative_rule(integral):
     integrand = integral[0]
@@ -1183,15 +1349,20 @@ def derivative_rule(integral):
     else:
         return ConstantRule(integral.integrand, *integral)
 
+
 def rewrites_rule(integral):
     integrand, symbol = integral
 
-    if integrand.match(1/sympy.cos(symbol)):
-        rewritten = integrand.subs(1/sympy.cos(symbol), sympy.sec(symbol))
-        return RewriteRule(rewritten, integral_steps(rewritten, symbol), integrand, symbol)
+    if integrand.match(1 / sympy.cos(symbol)):
+        rewritten = integrand.subs(1 / sympy.cos(symbol), sympy.sec(symbol))
+        return RewriteRule(
+            rewritten, integral_steps(rewritten, symbol), integrand, symbol
+        )
+
 
 def fallback_rule(integral):
     return DontKnowRule(*integral)
+
 
 # Cache is used to break cyclic integrals.
 # Need to use the same dummy variable in cached expressions for them to match.
@@ -1199,6 +1370,7 @@ def fallback_rule(integral):
 _integral_cache = {}  # type: tDict[Expr, Optional[Expr]]
 _parts_u_cache = defaultdict(int)  # type: tDict[Expr, int]
 _cache_dummy = sympy.Dummy("z")
+
 
 def integral_steps(integrand, symbol, **options):
     """Returns the steps needed to compute an integral.
@@ -1254,8 +1426,7 @@ def integral_steps(integrand, symbol, **options):
         else:
             # TODO: This is for future development, as currently
             # _integral_cache gets no values other than None
-            return (_integral_cache[cachekey].xreplace(_cache_dummy, symbol),
-                symbol)
+            return (_integral_cache[cachekey].xreplace(_cache_dummy, symbol), symbol)
     else:
         _integral_cache[cachekey] = None
 
@@ -1271,84 +1442,117 @@ def integral_steps(integrand, symbol, **options):
         elif symbol not in integrand.free_symbols:
             return sympy.Number
         else:
-            for cls in (sympy.Pow, sympy.Symbol, sympy.exp, sympy.log,
-                        sympy.Add, sympy.Mul, sympy.atan, sympy.asin,
-                        sympy.acos, sympy.Heaviside, OrthogonalPolynomial):
+            for cls in (
+                sympy.Pow,
+                sympy.Symbol,
+                sympy.exp,
+                sympy.log,
+                sympy.Add,
+                sympy.Mul,
+                sympy.atan,
+                sympy.asin,
+                sympy.acos,
+                sympy.Heaviside,
+                OrthogonalPolynomial,
+            ):
                 if isinstance(integrand, cls):
                     return cls
-
 
     def integral_is_subclass(*klasses):
         def _integral_is_subclass(integral):
             k = key(integral)
             return k and issubclass(k, klasses)
+
         return _integral_is_subclass
 
     result = do_one(
         null_safe(special_function_rule),
-        null_safe(switch(key, {
-            sympy.Pow: do_one(null_safe(power_rule), null_safe(inverse_trig_rule), \
-                              null_safe(quadratic_denom_rule)),
-            sympy.Symbol: power_rule,
-            sympy.exp: exp_rule,
-            sympy.Add: add_rule,
-            sympy.Mul: do_one(null_safe(mul_rule), null_safe(trig_product_rule), \
-                              null_safe(heaviside_rule), null_safe(quadratic_denom_rule), \
-                              null_safe(root_mul_rule)),
-            sympy.Derivative: derivative_rule,
-            TrigonometricFunction: trig_rule,
-            sympy.Heaviside: heaviside_rule,
-            OrthogonalPolynomial: orthogonal_poly_rule,
-            sympy.Number: constant_rule
-        })),
+        null_safe(
+            switch(
+                key,
+                {
+                    sympy.Pow: do_one(
+                        null_safe(power_rule),
+                        null_safe(inverse_trig_rule),
+                        null_safe(quadratic_denom_rule),
+                    ),
+                    sympy.Symbol: power_rule,
+                    sympy.exp: exp_rule,
+                    sympy.Add: add_rule,
+                    sympy.Mul: do_one(
+                        null_safe(mul_rule),
+                        null_safe(trig_product_rule),
+                        null_safe(heaviside_rule),
+                        null_safe(quadratic_denom_rule),
+                        null_safe(root_mul_rule),
+                    ),
+                    sympy.Derivative: derivative_rule,
+                    TrigonometricFunction: trig_rule,
+                    sympy.Heaviside: heaviside_rule,
+                    OrthogonalPolynomial: orthogonal_poly_rule,
+                    sympy.Number: constant_rule,
+                },
+            )
+        ),
         do_one(
             null_safe(trig_rule),
-            null_safe(alternatives(
-                rewrites_rule,
-                substitution_rule,
-                condition(
-                    integral_is_subclass(sympy.Mul, sympy.Pow),
-                    partial_fractions_rule),
-                condition(
-                    integral_is_subclass(sympy.Mul, sympy.Pow),
-                    cancel_rule),
-                condition(
-                    integral_is_subclass(sympy.Mul, sympy.log, sympy.atan, sympy.asin, sympy.acos),
-                    parts_rule),
-                condition(
-                    integral_is_subclass(sympy.Mul, sympy.Pow),
-                    distribute_expand_rule),
-                trig_powers_products_rule,
-                trig_expand_rule
-            )),
-            null_safe(trig_substitution_rule)
+            null_safe(
+                alternatives(
+                    rewrites_rule,
+                    substitution_rule,
+                    condition(
+                        integral_is_subclass(sympy.Mul, sympy.Pow),
+                        partial_fractions_rule,
+                    ),
+                    condition(integral_is_subclass(sympy.Mul, sympy.Pow), cancel_rule),
+                    condition(
+                        integral_is_subclass(
+                            sympy.Mul, sympy.log, sympy.atan, sympy.asin, sympy.acos
+                        ),
+                        parts_rule,
+                    ),
+                    condition(
+                        integral_is_subclass(sympy.Mul, sympy.Pow),
+                        distribute_expand_rule,
+                    ),
+                    trig_powers_products_rule,
+                    trig_expand_rule,
+                )
+            ),
+            null_safe(trig_substitution_rule),
         ),
-        fallback_rule)(integral)
+        fallback_rule,
+    )(integral)
     del _integral_cache[cachekey]
     return result
+
 
 @evaluates(ConstantRule)
 def eval_constant(constant, integrand, symbol):
     return constant * symbol
 
+
 @evaluates(ConstantTimesRule)
 def eval_constanttimes(constant, other, substep, integrand, symbol):
     return constant * _manualintegrate(substep)
 
+
 @evaluates(PowerRule)
 def eval_power(base, exp, integrand, symbol):
     return sympy.Piecewise(
-        ((base**(exp + 1))/(exp + 1), sympy.Ne(exp, -1)),
-        (sympy.log(base), True),
-        )
+        ((base ** (exp + 1)) / (exp + 1), sympy.Ne(exp, -1)), (sympy.log(base), True),
+    )
+
 
 @evaluates(ExpRule)
 def eval_exp(base, exp, integrand, symbol):
     return integrand / sympy.ln(base)
 
+
 @evaluates(AddRule)
 def eval_add(substeps, integrand, symbol):
     return sum(map(_manualintegrate, substeps))
+
 
 @evaluates(URule)
 def eval_u(u_var, u_func, constant, substep, integrand, symbol):
@@ -1358,11 +1562,13 @@ def eval_u(u_var, u_func, constant, substep, integrand, symbol):
         result = result.subs(sympy.log(u_var), -sympy.log(u_func.base))
     return result.subs(u_var, u_func)
 
+
 @evaluates(PartsRule)
 def eval_parts(u, dv, v_step, second_step, integrand, symbol):
     v = _manualintegrate(v_step)
 
     return u * v - _manualintegrate(second_step)
+
 
 @evaluates(CyclicPartsRule)
 def eval_cyclicparts(parts_rules, coefficient, integrand, symbol):
@@ -1376,61 +1582,75 @@ def eval_cyclicparts(parts_rules, coefficient, integrand, symbol):
 
     return sympy.Add(*result) / coefficient
 
+
 @evaluates(TrigRule)
 def eval_trig(func, arg, integrand, symbol):
-    if func == 'sin':
+    if func == "sin":
         return -sympy.cos(arg)
-    elif func == 'cos':
+    elif func == "cos":
         return sympy.sin(arg)
-    elif func == 'sec*tan':
+    elif func == "sec*tan":
         return sympy.sec(arg)
-    elif func == 'csc*cot':
+    elif func == "csc*cot":
         return sympy.csc(arg)
-    elif func == 'sec**2':
+    elif func == "sec**2":
         return sympy.tan(arg)
-    elif func == 'csc**2':
+    elif func == "csc**2":
         return -sympy.cot(arg)
+
 
 @evaluates(ArctanRule)
 def eval_arctan(a, b, c, integrand, symbol):
     return a / b * 1 / sympy.sqrt(c / b) * sympy.atan(symbol / sympy.sqrt(c / b))
 
+
 @evaluates(ArccothRule)
 def eval_arccoth(a, b, c, integrand, symbol):
-    return - a / b * 1 / sympy.sqrt(-c / b) * sympy.acoth(symbol / sympy.sqrt(-c / b))
+    return -a / b * 1 / sympy.sqrt(-c / b) * sympy.acoth(symbol / sympy.sqrt(-c / b))
+
 
 @evaluates(ArctanhRule)
 def eval_arctanh(a, b, c, integrand, symbol):
-    return - a / b * 1 / sympy.sqrt(-c / b) * sympy.atanh(symbol / sympy.sqrt(-c / b))
+    return -a / b * 1 / sympy.sqrt(-c / b) * sympy.atanh(symbol / sympy.sqrt(-c / b))
+
 
 @evaluates(ReciprocalRule)
 def eval_reciprocal(func, integrand, symbol):
     return sympy.ln(func)
 
+
 @evaluates(ArcsinRule)
 def eval_arcsin(integrand, symbol):
     return sympy.asin(symbol)
+
 
 @evaluates(InverseHyperbolicRule)
 def eval_inversehyperbolic(func, integrand, symbol):
     return func(symbol)
 
+
 @evaluates(AlternativeRule)
 def eval_alternative(alternatives, integrand, symbol):
     return _manualintegrate(alternatives[0])
+
 
 @evaluates(RewriteRule)
 def eval_rewrite(rewritten, substep, integrand, symbol):
     return _manualintegrate(substep)
 
+
 @evaluates(PiecewiseRule)
 def eval_piecewise(substeps, integrand, symbol):
-    return sympy.Piecewise(*[(_manualintegrate(substep), cond)
-                             for substep, cond in substeps])
+    return sympy.Piecewise(
+        *[(_manualintegrate(substep), cond) for substep, cond in substeps]
+    )
+
 
 @evaluates(TrigSubstitutionRule)
-def eval_trigsubstitution(theta, func, rewritten, substep, restriction, integrand, symbol):
-    func = func.subs(sympy.sec(theta), 1/sympy.cos(theta))
+def eval_trigsubstitution(
+    theta, func, rewritten, substep, restriction, integrand, symbol
+):
+    func = func.subs(sympy.sec(theta), 1 / sympy.cos(theta))
 
     trig_function = list(func.find(TrigonometricFunction))
     assert len(trig_function) == 1
@@ -1442,28 +1662,29 @@ def eval_trigsubstitution(theta, func, rewritten, substep, restriction, integran
     if isinstance(trig_function, sympy.sin):
         opposite = numer
         hypotenuse = denom
-        adjacent = sympy.sqrt(denom**2 - numer**2)
+        adjacent = sympy.sqrt(denom ** 2 - numer ** 2)
         inverse = sympy.asin(relation[0])
     elif isinstance(trig_function, sympy.cos):
         adjacent = numer
         hypotenuse = denom
-        opposite = sympy.sqrt(denom**2 - numer**2)
+        opposite = sympy.sqrt(denom ** 2 - numer ** 2)
         inverse = sympy.acos(relation[0])
     elif isinstance(trig_function, sympy.tan):
         opposite = numer
         adjacent = denom
-        hypotenuse = sympy.sqrt(denom**2 + numer**2)
+        hypotenuse = sympy.sqrt(denom ** 2 + numer ** 2)
         inverse = sympy.atan(relation[0])
 
     substitution = [
-        (sympy.sin(theta), opposite/hypotenuse),
-        (sympy.cos(theta), adjacent/hypotenuse),
-        (sympy.tan(theta), opposite/adjacent),
-        (theta, inverse)
+        (sympy.sin(theta), opposite / hypotenuse),
+        (sympy.cos(theta), adjacent / hypotenuse),
+        (sympy.tan(theta), opposite / adjacent),
+        (theta, inverse),
     ]
     return sympy.Piecewise(
         (_manualintegrate(substep).subs(substitution).trigsimp(), restriction)
     )
+
 
 @evaluates(DerivativeRule)
 def eval_derivativerule(integrand, symbol):
@@ -1471,9 +1692,10 @@ def eval_derivativerule(integrand, symbol):
     variable_count = list(integrand.variable_count)
     for i, (var, count) in enumerate(variable_count):
         if var == symbol:
-            variable_count[i] = (var, count-1)
+            variable_count[i] = (var, count - 1)
             break
     return sympy.Derivative(integrand.expr, *variable_count)
+
 
 @evaluates(HeavisideRule)
 def eval_heaviside(harg, ibnd, substep, integrand, symbol):
@@ -1481,117 +1703,173 @@ def eval_heaviside(harg, ibnd, substep, integrand, symbol):
     #       Heaviside(m*x+b)*g(x) == Heaviside(harg)*g(symbol)
     # then there needs to be continuity at -b/m == ibnd,
     # so we subtract the appropriate term.
-    return sympy.Heaviside(harg)*(substep - substep.subs(symbol, ibnd))
+    return sympy.Heaviside(harg) * (substep - substep.subs(symbol, ibnd))
+
 
 @evaluates(JacobiRule)
 def eval_jacobi(n, a, b, integrand, symbol):
     return Piecewise(
-        (2*sympy.jacobi(n + 1, a - 1, b - 1, symbol)/(n + a + b), Ne(n + a + b, 0)),
+        (2 * sympy.jacobi(n + 1, a - 1, b - 1, symbol) / (n + a + b), Ne(n + a + b, 0)),
         (symbol, Eq(n, 0)),
-        ((a + b + 2)*symbol**2/4 + (a - b)*symbol/2, Eq(n, 1)))
+        ((a + b + 2) * symbol ** 2 / 4 + (a - b) * symbol / 2, Eq(n, 1)),
+    )
+
 
 @evaluates(GegenbauerRule)
 def eval_gegenbauer(n, a, integrand, symbol):
     return Piecewise(
-        (sympy.gegenbauer(n + 1, a - 1, symbol)/(2*(a - 1)), Ne(a, 1)),
-        (sympy.chebyshevt(n + 1, symbol)/(n + 1), Ne(n, -1)),
-        (sympy.S.Zero, True))
+        (sympy.gegenbauer(n + 1, a - 1, symbol) / (2 * (a - 1)), Ne(a, 1)),
+        (sympy.chebyshevt(n + 1, symbol) / (n + 1), Ne(n, -1)),
+        (sympy.S.Zero, True),
+    )
+
 
 @evaluates(ChebyshevTRule)
 def eval_chebyshevt(n, integrand, symbol):
-    return Piecewise(((sympy.chebyshevt(n + 1, symbol)/(n + 1) -
-        sympy.chebyshevt(n - 1, symbol)/(n - 1))/2, Ne(sympy.Abs(n), 1)),
-        (symbol**2/2, True))
+    return Piecewise(
+        (
+            (
+                sympy.chebyshevt(n + 1, symbol) / (n + 1)
+                - sympy.chebyshevt(n - 1, symbol) / (n - 1)
+            )
+            / 2,
+            Ne(sympy.Abs(n), 1),
+        ),
+        (symbol ** 2 / 2, True),
+    )
+
 
 @evaluates(ChebyshevURule)
 def eval_chebyshevu(n, integrand, symbol):
     return Piecewise(
-        (sympy.chebyshevt(n + 1, symbol)/(n + 1), Ne(n, -1)),
-        (sympy.S.Zero, True))
+        (sympy.chebyshevt(n + 1, symbol) / (n + 1), Ne(n, -1)), (sympy.S.Zero, True)
+    )
+
 
 @evaluates(LegendreRule)
 def eval_legendre(n, integrand, symbol):
-    return (sympy.legendre(n + 1, symbol) - sympy.legendre(n - 1, symbol))/(2*n + 1)
+    return (sympy.legendre(n + 1, symbol) - sympy.legendre(n - 1, symbol)) / (2 * n + 1)
+
 
 @evaluates(HermiteRule)
 def eval_hermite(n, integrand, symbol):
-    return sympy.hermite(n + 1, symbol)/(2*(n + 1))
+    return sympy.hermite(n + 1, symbol) / (2 * (n + 1))
+
 
 @evaluates(LaguerreRule)
 def eval_laguerre(n, integrand, symbol):
     return sympy.laguerre(n, symbol) - sympy.laguerre(n + 1, symbol)
 
+
 @evaluates(AssocLaguerreRule)
 def eval_assoclaguerre(n, a, integrand, symbol):
     return -sympy.assoc_laguerre(n + 1, a - 1, symbol)
 
+
 @evaluates(CiRule)
 def eval_ci(a, b, integrand, symbol):
-    return sympy.cos(b)*sympy.Ci(a*symbol) - sympy.sin(b)*sympy.Si(a*symbol)
+    return sympy.cos(b) * sympy.Ci(a * symbol) - sympy.sin(b) * sympy.Si(a * symbol)
+
 
 @evaluates(ChiRule)
 def eval_chi(a, b, integrand, symbol):
-    return sympy.cosh(b)*sympy.Chi(a*symbol) + sympy.sinh(b)*sympy.Shi(a*symbol)
+    return sympy.cosh(b) * sympy.Chi(a * symbol) + sympy.sinh(b) * sympy.Shi(a * symbol)
+
 
 @evaluates(EiRule)
 def eval_ei(a, b, integrand, symbol):
-    return sympy.exp(b)*sympy.Ei(a*symbol)
+    return sympy.exp(b) * sympy.Ei(a * symbol)
+
 
 @evaluates(SiRule)
 def eval_si(a, b, integrand, symbol):
-    return sympy.sin(b)*sympy.Ci(a*symbol) + sympy.cos(b)*sympy.Si(a*symbol)
+    return sympy.sin(b) * sympy.Ci(a * symbol) + sympy.cos(b) * sympy.Si(a * symbol)
+
 
 @evaluates(ShiRule)
 def eval_shi(a, b, integrand, symbol):
-    return sympy.sinh(b)*sympy.Chi(a*symbol) + sympy.cosh(b)*sympy.Shi(a*symbol)
+    return sympy.sinh(b) * sympy.Chi(a * symbol) + sympy.cosh(b) * sympy.Shi(a * symbol)
+
 
 @evaluates(ErfRule)
 def eval_erf(a, b, c, integrand, symbol):
     if a.is_extended_real:
         return Piecewise(
-            (sympy.sqrt(sympy.pi/(-a))/2 * sympy.exp(c - b**2/(4*a)) *
-                sympy.erf((-2*a*symbol - b)/(2*sympy.sqrt(-a))), a < 0),
-            (sympy.sqrt(sympy.pi/a)/2 * sympy.exp(c - b**2/(4*a)) *
-                sympy.erfi((2*a*symbol + b)/(2*sympy.sqrt(a))), True))
+            (
+                sympy.sqrt(sympy.pi / (-a))
+                / 2
+                * sympy.exp(c - b ** 2 / (4 * a))
+                * sympy.erf((-2 * a * symbol - b) / (2 * sympy.sqrt(-a))),
+                a < 0,
+            ),
+            (
+                sympy.sqrt(sympy.pi / a)
+                / 2
+                * sympy.exp(c - b ** 2 / (4 * a))
+                * sympy.erfi((2 * a * symbol + b) / (2 * sympy.sqrt(a))),
+                True,
+            ),
+        )
     else:
-        return sympy.sqrt(sympy.pi/a)/2 * sympy.exp(c - b**2/(4*a)) * \
-                sympy.erfi((2*a*symbol + b)/(2*sympy.sqrt(a)))
+        return (
+            sympy.sqrt(sympy.pi / a)
+            / 2
+            * sympy.exp(c - b ** 2 / (4 * a))
+            * sympy.erfi((2 * a * symbol + b) / (2 * sympy.sqrt(a)))
+        )
+
 
 @evaluates(FresnelCRule)
 def eval_fresnelc(a, b, c, integrand, symbol):
-    return sympy.sqrt(sympy.pi/(2*a)) * (
-        sympy.cos(b**2/(4*a) - c)*sympy.fresnelc((2*a*symbol + b)/sympy.sqrt(2*a*sympy.pi)) +
-        sympy.sin(b**2/(4*a) - c)*sympy.fresnels((2*a*symbol + b)/sympy.sqrt(2*a*sympy.pi)))
+    return sympy.sqrt(sympy.pi / (2 * a)) * (
+        sympy.cos(b ** 2 / (4 * a) - c)
+        * sympy.fresnelc((2 * a * symbol + b) / sympy.sqrt(2 * a * sympy.pi))
+        + sympy.sin(b ** 2 / (4 * a) - c)
+        * sympy.fresnels((2 * a * symbol + b) / sympy.sqrt(2 * a * sympy.pi))
+    )
+
 
 @evaluates(FresnelSRule)
 def eval_fresnels(a, b, c, integrand, symbol):
-    return sympy.sqrt(sympy.pi/(2*a)) * (
-        sympy.cos(b**2/(4*a) - c)*sympy.fresnels((2*a*symbol + b)/sympy.sqrt(2*a*sympy.pi)) -
-        sympy.sin(b**2/(4*a) - c)*sympy.fresnelc((2*a*symbol + b)/sympy.sqrt(2*a*sympy.pi)))
+    return sympy.sqrt(sympy.pi / (2 * a)) * (
+        sympy.cos(b ** 2 / (4 * a) - c)
+        * sympy.fresnels((2 * a * symbol + b) / sympy.sqrt(2 * a * sympy.pi))
+        - sympy.sin(b ** 2 / (4 * a) - c)
+        * sympy.fresnelc((2 * a * symbol + b) / sympy.sqrt(2 * a * sympy.pi))
+    )
+
 
 @evaluates(LiRule)
 def eval_li(a, b, integrand, symbol):
-    return sympy.li(a*symbol + b)/a
+    return sympy.li(a * symbol + b) / a
+
 
 @evaluates(PolylogRule)
 def eval_polylog(a, b, integrand, symbol):
-    return sympy.polylog(b + 1, a*symbol)
+    return sympy.polylog(b + 1, a * symbol)
+
 
 @evaluates(UpperGammaRule)
 def eval_uppergamma(a, e, integrand, symbol):
-    return symbol**e * (-a*symbol)**(-e) * sympy.uppergamma(e + 1, -a*symbol)/a
+    return (
+        symbol ** e * (-a * symbol) ** (-e) * sympy.uppergamma(e + 1, -a * symbol) / a
+    )
+
 
 @evaluates(EllipticFRule)
 def eval_elliptic_f(a, d, integrand, symbol):
-    return sympy.elliptic_f(symbol, d/a)/sympy.sqrt(a)
+    return sympy.elliptic_f(symbol, d / a) / sympy.sqrt(a)
+
 
 @evaluates(EllipticERule)
 def eval_elliptic_e(a, d, integrand, symbol):
-    return sympy.elliptic_e(symbol, d/a)*sympy.sqrt(a)
+    return sympy.elliptic_e(symbol, d / a) * sympy.sqrt(a)
+
 
 @evaluates(DontKnowRule)
 def eval_dontknowrule(integrand, symbol):
     return sympy.Integral(integrand, symbol)
+
 
 def _manualintegrate(rule):
     evaluator = evaluators.get(rule.__class__)
@@ -1599,6 +1877,7 @@ def _manualintegrate(rule):
 
         raise ValueError("Cannot evaluate rule %s" % repr(rule))
     return evaluator(*rule)
+
 
 def manualintegrate(f, var):
     """manualintegrate(f, var)
@@ -1654,6 +1933,6 @@ def manualintegrate(f, var):
         cond = result.args[0][1]
         if isinstance(cond, Eq) and result.args[1][1] == True:
             result = result.func(
-                (result.args[1][0], sympy.Ne(*cond.args)),
-                (result.args[0][0], True))
+                (result.args[1][0], sympy.Ne(*cond.args)), (result.args[0][0], True)
+            )
     return result

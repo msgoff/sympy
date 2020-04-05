@@ -5,8 +5,7 @@ from sympy.physics.vector import Point, ReferenceFrame, Dyadic
 
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
-__all__ = ['RigidBody']
-
+__all__ = ["RigidBody"]
 
 
 class RigidBody(object):
@@ -52,7 +51,7 @@ class RigidBody(object):
 
     def __init__(self, name, masscenter, frame, mass, inertia):
         if not isinstance(name, str):
-            raise TypeError('Supply a valid name.')
+            raise TypeError("Supply a valid name.")
         self._name = name
         self.masscenter = masscenter
         self.mass = mass
@@ -110,9 +109,10 @@ class RigidBody(object):
         # I S/O = I S/S* + I S*/O; I S/S* = I S/O - I S*/O
         # I_S/S* = I_S/O - I_S*/O
         from sympy.physics.mechanics.functions import inertia_of_point_mass
-        I_Ss_O = inertia_of_point_mass(self.mass,
-                                       self.masscenter.pos_from(I[1]),
-                                       self.frame)
+
+        I_Ss_O = inertia_of_point_mass(
+            self.mass, self.masscenter.pos_from(I[1]), self.frame
+        )
         self._central_inertia = I[0] - I_Ss_O
 
     @property
@@ -241,11 +241,15 @@ class RigidBody(object):
 
         """
 
-        rotational_KE = (self.frame.ang_vel_in(frame) & (self.central_inertia &
-                self.frame.ang_vel_in(frame)) / sympify(2))
+        rotational_KE = self.frame.ang_vel_in(frame) & (
+            self.central_inertia & self.frame.ang_vel_in(frame)
+        ) / sympify(2)
 
-        translational_KE = (self.mass * (self.masscenter.vel(frame) &
-            self.masscenter.vel(frame)) / sympify(2))
+        translational_KE = (
+            self.mass
+            * (self.masscenter.vel(frame) & self.masscenter.vel(frame))
+            / sympify(2)
+        )
 
         return rotational_KE + translational_KE
 
@@ -302,11 +306,13 @@ class RigidBody(object):
 
     def set_potential_energy(self, scalar):
         SymPyDeprecationWarning(
-                feature="Method sympy.physics.mechanics." +
-                    "RigidBody.set_potential_energy(self, scalar)",
-                useinstead="property sympy.physics.mechanics." +
-                    "RigidBody.potential_energy",
-                deprecated_since_version="1.5", issue=9800).warn()
+            feature="Method sympy.physics.mechanics."
+            + "RigidBody.set_potential_energy(self, scalar)",
+            useinstead="property sympy.physics.mechanics."
+            + "RigidBody.potential_energy",
+            deprecated_since_version="1.5",
+            issue=9800,
+        ).warn()
         self.potential_energy = scalar
 
     # XXX: To be consistent with the parallel_axis method in Particle this
@@ -329,7 +335,15 @@ class RigidBody(object):
         """
         # circular import issue
         from sympy.physics.mechanics.functions import inertia
+
         a, b, c = self.masscenter.pos_from(point).to_matrix(self.frame)
-        I = self.mass * inertia(self.frame, b**2 + c**2, c**2 + a**2, a**2 +
-                                b**2, -a * b, -b * c, -a * c)
+        I = self.mass * inertia(
+            self.frame,
+            b ** 2 + c ** 2,
+            c ** 2 + a ** 2,
+            a ** 2 + b ** 2,
+            -a * b,
+            -b * c,
+            -a * c,
+        )
         return self.central_inertia + I

@@ -10,11 +10,12 @@ from sympy.polys.domains.mpelements import MPContext
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
 
+
 @public
 class RealField(Field, CharacteristicZero, SimpleDomain):
     """Real numbers up to the given precision. """
 
-    rep = 'RR'
+    rep = "RR"
 
     is_RealField = is_RR = True
 
@@ -53,12 +54,16 @@ class RealField(Field, CharacteristicZero, SimpleDomain):
         self.one = self.dtype(1)
 
     def __eq__(self, other):
-        return (isinstance(other, RealField)
-           and self.precision == other.precision
-           and self.tolerance == other.tolerance)
+        return (
+            isinstance(other, RealField)
+            and self.precision == other.precision
+            and self.tolerance == other.tolerance
+        )
 
     def __hash__(self):
-        return hash((self.__class__.__name__, self.dtype, self.precision, self.tolerance))
+        return hash(
+            (self.__class__.__name__, self.dtype, self.precision, self.tolerance)
+        )
 
     def to_sympy(self, element):
         """Convert ``element`` to SymPy number. """
@@ -106,6 +111,7 @@ class RealField(Field, CharacteristicZero, SimpleDomain):
     def get_exact(self):
         """Returns an exact domain associated with ``self``. """
         from sympy.polys.domains import QQ
+
         return QQ
 
     def gcd(self, a, b):
@@ -114,7 +120,7 @@ class RealField(Field, CharacteristicZero, SimpleDomain):
 
     def lcm(self, a, b):
         """Returns LCM of ``a`` and ``b``. """
-        return a*b
+        return a * b
 
     def almosteq(self, a, b, tolerance=None):
         """Check if ``a`` and ``b`` are almost equal. """

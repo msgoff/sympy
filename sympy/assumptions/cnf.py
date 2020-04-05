@@ -45,7 +45,7 @@ class Literal(object):
         return Literal(self.lit, is_Not)
 
     def __str__(self):
-        return '%s(%s, %s)' % (type(self).__name__, self.lit, self.is_Not)
+        return "%s(%s, %s)" % (type(self).__name__, self.lit, self.is_Not)
 
     __repr__ = __str__
 
@@ -61,6 +61,7 @@ class OR(object):
     """
     A low-level implementation for Or
     """
+
     def __init__(self, *args):
         self._args = args
 
@@ -69,9 +70,7 @@ class OR(object):
         return sorted(self._args, key=str)
 
     def rcall(self, expr):
-        return type(self)(*[arg.rcall(expr)
-                            for arg in self._args
-                            ])
+        return type(self)(*[arg.rcall(expr) for arg in self._args])
 
     def __invert__(self):
         return AND(*[~arg for arg in self._args])
@@ -83,7 +82,7 @@ class OR(object):
         return self.args == other.args
 
     def __str__(self):
-        s = '(' + ' | '.join([str(arg) for arg in self.args]) + ')'
+        s = "(" + " | ".join([str(arg) for arg in self.args]) + ")"
         return s
 
     __repr__ = __str__
@@ -93,6 +92,7 @@ class AND(object):
     """
     A low-level implementation for And
     """
+
     def __init__(self, *args):
         self._args = args
 
@@ -104,9 +104,7 @@ class AND(object):
         return sorted(self._args, key=str)
 
     def rcall(self, expr):
-        return type(self)(*[arg.rcall(expr)
-                            for arg in self._args
-                            ])
+        return type(self)(*[arg.rcall(expr) for arg in self._args])
 
     def __hash__(self):
         return hash((type(self).__name__,) + tuple(self.args))
@@ -115,7 +113,7 @@ class AND(object):
         return self.args == other.args
 
     def __str__(self):
-        s = '('+' & '.join([str(arg) for arg in self.args])+')'
+        s = "(" + " & ".join([str(arg) for arg in self.args]) + ")"
         return s
 
     __repr__ = __str__
@@ -150,8 +148,7 @@ def to_NNF(expr):
         cnfs = []
         for i in range(0, len(expr.args) + 1, 2):
             for neg in combinations(expr.args, i):
-                clause = [~to_NNF(s) if s in neg else to_NNF(s)
-                          for s in expr.args]
+                clause = [~to_NNF(s) if s in neg else to_NNF(s) for s in expr.args]
                 cnfs.append(OR(*clause))
         return AND(*cnfs)
 
@@ -159,8 +156,7 @@ def to_NNF(expr):
         cnfs = []
         for i in range(0, len(expr.args) + 1, 2):
             for neg in combinations(expr.args, i):
-                clause = [~to_NNF(s) if s in neg else to_NNF(s)
-                          for s in expr.args]
+                clause = [~to_NNF(s) if s in neg else to_NNF(s) for s in expr.args]
                 cnfs.append(OR(*clause))
         return ~AND(*cnfs)
 
@@ -198,12 +194,10 @@ def distribute_AND_over_OR(expr):
         return CNF(tmp)
 
     if isinstance(expr, OR):
-        return CNF.all_or(*[distribute_AND_over_OR(arg)
-                            for arg in expr._args])
+        return CNF.all_or(*[distribute_AND_over_OR(arg) for arg in expr._args])
 
     if isinstance(expr, AND):
-        return CNF.all_and(*[distribute_AND_over_OR(arg)
-                             for arg in expr._args])
+        return CNF.all_and(*[distribute_AND_over_OR(arg) for arg in expr._args])
 
 
 class CNF(object):
@@ -212,6 +206,7 @@ class CNF(object):
     Consists of set of clauses, which themselves are stored as
     frozenset of Literal objects.
     """
+
     def __init__(self, clauses=None):
         if not clauses:
             clauses = set()
@@ -222,9 +217,11 @@ class CNF(object):
         self.add_clauses(clauses)
 
     def __str__(self):
-        s = ' & '.join(
-            ['(' + ' | '.join([str(lit) for lit in clause]) +')'
-            for clause in self.clauses]
+        s = " & ".join(
+            [
+                "(" + " | ".join([str(lit) for lit in clause]) + ")"
+                for clause in self.clauses
+            ]
         )
         return s
 
@@ -290,8 +287,6 @@ class CNF(object):
         expr = AND(*clause_list)
         return distribute_AND_over_OR(expr)
 
-
-
     @classmethod
     def all_or(cls, *cnfs):
         b = cnfs[0].copy()
@@ -318,16 +313,20 @@ class CNF(object):
         Converts CNF object to SymPy's boolean expression
         retaining the form of expression.
         """
+
         def remove_literal(arg):
             return Not(arg.lit) if arg.is_Not else arg.lit
 
-        return And(*(Or(*(remove_literal(arg) for arg in clause)) for clause in cnf.clauses))
+        return And(
+            *(Or(*(remove_literal(arg) for arg in clause)) for clause in cnf.clauses)
+        )
 
 
 class EncodedCNF(object):
     """
     Class for encoding the CNF expression.
     """
+
     def __init__(self, data=None, encoding=None):
         if not data and not encoding:
             data = list()

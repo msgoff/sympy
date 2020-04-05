@@ -4,14 +4,16 @@ from __future__ import print_function, division
 
 from sympy.core import S, Basic, Add, Mul, symbols, Dummy
 from sympy.polys.polyerrors import (
-    PolificationFailed, ComputationFailed,
-    MultivariatePolynomialError, OptionError)
+    PolificationFailed,
+    ComputationFailed,
+    MultivariatePolynomialError,
+    OptionError,
+)
 from sympy.polys.polyoptions import allowed_flags
-from sympy.polys.polytools import (
-    poly_from_expr, parallel_poly_from_expr, Poly)
-from sympy.polys.specialpolys import (
-    symmetric_poly, interpolating_poly)
+from sympy.polys.polytools import poly_from_expr, parallel_poly_from_expr, Poly
+from sympy.polys.specialpolys import symmetric_poly, interpolating_poly
 from sympy.utilities import numbered_symbols, take, public
+
 
 @public
 def symmetrize(F, *gens, **args):
@@ -46,11 +48,11 @@ def symmetrize(F, *gens, **args):
     (s1**2 - 2*s2, -2*y**2, [(s1, x + y), (s2, x*y)])
 
     """
-    allowed_flags(args, ['formal', 'symbols'])
+    allowed_flags(args, ["formal", "symbols"])
 
     iterable = True
 
-    if not hasattr(F, '__iter__'):
+    if not hasattr(F, "__iter__"):
         iterable = False
         F = [F]
 
@@ -63,10 +65,10 @@ def symmetrize(F, *gens, **args):
             if expr.is_Number:
                 result.append((expr, S.Zero))
             else:
-                raise ComputationFailed('symmetrize', len(F), exc)
+                raise ComputationFailed("symmetrize", len(F), exc)
 
         if not iterable:
-            result, = result
+            (result,) = result
 
         if not exc.opt.formal:
             return result
@@ -100,7 +102,7 @@ def symmetrize(F, *gens, **args):
 
             for i, (monom, coeff) in enumerate(f.terms()):
                 if all(monom[i] >= monom[i + 1] for i in indices):
-                    height = max([n*m for n, m in zip(weights, monom)])
+                    height = max([n * m for n, m in zip(weights, monom)])
 
                     if height > _height:
                         _height, _monom, _coeff = height, monom, coeff
@@ -115,8 +117,8 @@ def symmetrize(F, *gens, **args):
             for m1, m2 in zip(monom, monom[1:] + (0,)):
                 exponents.append(m1 - m2)
 
-            term = [s**n for (s, _), n in zip(polys, exponents)]
-            poly = [p**n for (_, p), n in zip(polys, exponents)]
+            term = [s ** n for (s, _), n in zip(polys, exponents)]
+            poly = [p ** n for (_, p), n in zip(polys, exponents)]
 
             symmetric.append(Mul(coeff, *term))
             product = poly[0].mul(coeff)
@@ -135,7 +137,7 @@ def symmetrize(F, *gens, **args):
             result[i] = (sym.subs(polys), non_sym)
 
     if not iterable:
-        result, = result
+        (result,) = result
 
     if not opt.formal:
         return result
@@ -190,12 +192,12 @@ def horner(f, *gens, **args):
 
     if F.is_univariate:
         for coeff in F.all_coeffs():
-            form = form*gen + coeff
+            form = form * gen + coeff
     else:
         F, gens = Poly(F, gen), gens[1:]
 
         for coeff in F.all_coeffs():
-            form = form*gen + horner(coeff, *gens, **args)
+            form = form * gen + horner(coeff, *gens, **args)
 
     return form
 
@@ -267,7 +269,7 @@ def interpolate(data, x):
 
 
 @public
-def rational_interpolate(data, degnum, X=symbols('x')):
+def rational_interpolate(data, degnum, X=symbols("x")):
     """
     Returns a rational interpolation, where the data points are element of
     any integral domain.
@@ -317,13 +319,14 @@ def rational_interpolate(data, degnum, X=symbols('x')):
     c = ones(degnum + k + 1, degnum + k + 2)
     for j in range(max(degnum, k)):
         for i in range(degnum + k + 1):
-            c[i, j + 1] = c[i, j]*xdata[i]
+            c[i, j + 1] = c[i, j] * xdata[i]
     for j in range(k + 1):
         for i in range(degnum + k + 1):
-            c[i, degnum + k + 1 - j] = -c[i, k - j]*ydata[i]
+            c[i, degnum + k + 1 - j] = -c[i, k - j] * ydata[i]
     r = c.nullspace()[0]
-    return (sum(r[i] * X**i for i in range(degnum + 1))
-            / sum(r[i + degnum + 1] * X**i for i in range(k + 1)))
+    return sum(r[i] * X ** i for i in range(degnum + 1)) / sum(
+        r[i + degnum + 1] * X ** i for i in range(k + 1)
+    )
 
 
 @public
@@ -351,20 +354,18 @@ def viete(f, roots=None, *gens, **args):
     try:
         f, opt = poly_from_expr(f, *gens, **args)
     except PolificationFailed as exc:
-        raise ComputationFailed('viete', 1, exc)
+        raise ComputationFailed("viete", 1, exc)
 
     if f.is_multivariate:
-        raise MultivariatePolynomialError(
-            "multivariate polynomials are not allowed")
+        raise MultivariatePolynomialError("multivariate polynomials are not allowed")
 
     n = f.degree()
 
     if n < 1:
-        raise ValueError(
-            "can't derive Viete's formulas for a constant polynomial")
+        raise ValueError("can't derive Viete's formulas for a constant polynomial")
 
     if roots is None:
-        roots = numbered_symbols('r', start=1)
+        roots = numbered_symbols("r", start=1)
 
     roots = take(roots, n)
 
@@ -376,7 +377,7 @@ def viete(f, roots=None, *gens, **args):
 
     for i, coeff in enumerate(coeffs[1:]):
         poly = symmetric_poly(i + 1, roots)
-        coeff = sign*(coeff/lc)
+        coeff = sign * (coeff / lc)
         result.append((poly, coeff))
         sign = -sign
 

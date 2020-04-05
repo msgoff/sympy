@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 
+
 class DefaultPrinting(object):
     """
     The default implementation of printing for SymPy classes.
@@ -15,6 +16,7 @@ class DefaultPrinting(object):
     # regardless of the global setting. See issue 5487.
     def __str__(self):
         from sympy.printing.str import sstr
+
         return sstr(self, order=None)
 
     __repr__ = __str__

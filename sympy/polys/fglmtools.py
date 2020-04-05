@@ -4,6 +4,7 @@ from __future__ import print_function, division
 
 from sympy.polys.monomials import monomial_mul, monomial_div
 
+
 def matrix_fglm(F, ring, O_to):
     """
     Converts the reduced Groebner basis ``F`` of a zero-dimensional
@@ -59,21 +60,25 @@ def matrix_fglm(F, ring, O_to):
             L = list(set(L))
             L.sort(key=lambda k_l: O_to(_incr_k(S[k_l[1]], k_l[0])), reverse=True)
 
-        L = [(k, l) for (k, l) in L if all(monomial_div(_incr_k(S[l], k), g.LM) is None for g in G)]
+        L = [
+            (k, l)
+            for (k, l) in L
+            if all(monomial_div(_incr_k(S[l], k), g.LM) is None for g in G)
+        ]
 
         if not L:
-            G = [ g.monic() for g in G ]
+            G = [g.monic() for g in G]
             return sorted(G, key=lambda g: O_to(g.LM), reverse=True)
 
         t = L.pop()
 
 
 def _incr_k(m, k):
-    return tuple(list(m[:k]) + [m[k] + 1] + list(m[k + 1:]))
+    return tuple(list(m[:k]) + [m[k] + 1] + list(m[k + 1 :]))
 
 
 def _identity_matrix(n, domain):
-    M = [[domain.zero]*n for _ in range(n)]
+    M = [[domain.zero] * n for _ in range(n)]
 
     for i in range(n):
         M[i][i] = domain.one
@@ -93,7 +98,9 @@ def _update(s, _lambda, P):
 
     for r in range(len(_lambda)):
         if r != k:
-            P[r] = [P[r][j] - (P[k][j] * _lambda[r]) / _lambda[k] for j in range(len(P[r]))]
+            P[r] = [
+                P[r][j] - (P[k][j] * _lambda[r]) / _lambda[k] for j in range(len(P[r]))
+            ]
 
     P[k] = [P[k][j] / _lambda[k] for j in range(len(P[k]))]
     P[k], P[s] = P[s], P[k]
@@ -107,7 +114,7 @@ def _representing_matrices(basis, G, ring):
     x_i m` for all variables `x_i`.
     """
     domain = ring.domain
-    u = ring.ngens-1
+    u = ring.ngens - 1
 
     def var(i):
         return tuple([0] * i + [1] + [0] * (u - i))
@@ -143,9 +150,13 @@ def _basis(G, ring):
         t = candidates.pop()
         basis.append(t)
 
-        new_candidates = [_incr_k(t, k) for k in range(ring.ngens)
-            if all(monomial_div(_incr_k(t, k), lmg) is None
-            for lmg in leading_monomials)]
+        new_candidates = [
+            _incr_k(t, k)
+            for k in range(ring.ngens)
+            if all(
+                monomial_div(_incr_k(t, k), lmg) is None for lmg in leading_monomials
+            )
+        ]
         candidates.extend(new_candidates)
         candidates.sort(key=lambda m: order(m), reverse=True)
 

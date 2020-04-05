@@ -1,10 +1,19 @@
-from sympy.core.backend import (diff, expand, sin, cos, sympify,
-                   eye, symbols, ImmutableMatrix as Matrix, MatrixBase)
-from sympy import (trigsimp, solve, Symbol, Dummy)
+from sympy.core.backend import (
+    diff,
+    expand,
+    sin,
+    cos,
+    sympify,
+    eye,
+    symbols,
+    ImmutableMatrix as Matrix,
+    MatrixBase,
+)
+from sympy import trigsimp, solve, Symbol, Dummy
 from sympy.physics.vector.vector import Vector, _check_vector
 from sympy.utilities.misc import translate
 
-__all__ = ['CoordinateSym', 'ReferenceFrame']
+__all__ = ["CoordinateSym", "ReferenceFrame"]
 
 
 class CoordinateSym(Symbol):
@@ -62,8 +71,8 @@ class CoordinateSym(Symbol):
         return self._id[0]
 
     def __eq__(self, other):
-        #Check if the other object is a CoordinateSym of the same frame
-        #and same index
+        # Check if the other object is a CoordinateSym of the same frame
+        # and same index
         if isinstance(other, CoordinateSym):
             if other._id == self._id:
                 return True
@@ -89,6 +98,7 @@ class ReferenceFrame(object):
     vector, defined in another frame.
 
     """
+
     _count = 0
 
     def __init__(self, name, indices=None, latexs=None, variables=None):
@@ -144,55 +154,63 @@ class ReferenceFrame(object):
         """
 
         if not isinstance(name, str):
-            raise TypeError('Need to supply a valid name')
+            raise TypeError("Need to supply a valid name")
         # The if statements below are for custom printing of basis-vectors for
         # each frame.
         # First case, when custom indices are supplied
         if indices is not None:
             if not isinstance(indices, (tuple, list)):
-                raise TypeError('Supply the indices as a list')
+                raise TypeError("Supply the indices as a list")
             if len(indices) != 3:
-                raise ValueError('Supply 3 indices')
+                raise ValueError("Supply 3 indices")
             for i in indices:
                 if not isinstance(i, str):
-                    raise TypeError('Indices must be strings')
-            self.str_vecs = [(name + '[\'' + indices[0] + '\']'),
-                             (name + '[\'' + indices[1] + '\']'),
-                             (name + '[\'' + indices[2] + '\']')]
-            self.pretty_vecs = [(name.lower() + u"_" + indices[0]),
-                                (name.lower() + u"_" + indices[1]),
-                                (name.lower() + u"_" + indices[2])]
-            self.latex_vecs = [(r"\mathbf{\hat{%s}_{%s}}" % (name.lower(),
-                               indices[0])), (r"\mathbf{\hat{%s}_{%s}}" %
-                               (name.lower(), indices[1])),
-                               (r"\mathbf{\hat{%s}_{%s}}" % (name.lower(),
-                               indices[2]))]
+                    raise TypeError("Indices must be strings")
+            self.str_vecs = [
+                (name + "['" + indices[0] + "']"),
+                (name + "['" + indices[1] + "']"),
+                (name + "['" + indices[2] + "']"),
+            ]
+            self.pretty_vecs = [
+                (name.lower() + u"_" + indices[0]),
+                (name.lower() + u"_" + indices[1]),
+                (name.lower() + u"_" + indices[2]),
+            ]
+            self.latex_vecs = [
+                (r"\mathbf{\hat{%s}_{%s}}" % (name.lower(), indices[0])),
+                (r"\mathbf{\hat{%s}_{%s}}" % (name.lower(), indices[1])),
+                (r"\mathbf{\hat{%s}_{%s}}" % (name.lower(), indices[2])),
+            ]
             self.indices = indices
         # Second case, when no custom indices are supplied
         else:
-            self.str_vecs = [(name + '.x'), (name + '.y'), (name + '.z')]
-            self.pretty_vecs = [name.lower() + u"_x",
-                                name.lower() + u"_y",
-                                name.lower() + u"_z"]
-            self.latex_vecs = [(r"\mathbf{\hat{%s}_x}" % name.lower()),
-                               (r"\mathbf{\hat{%s}_y}" % name.lower()),
-                               (r"\mathbf{\hat{%s}_z}" % name.lower())]
-            self.indices = ['x', 'y', 'z']
+            self.str_vecs = [(name + ".x"), (name + ".y"), (name + ".z")]
+            self.pretty_vecs = [
+                name.lower() + u"_x",
+                name.lower() + u"_y",
+                name.lower() + u"_z",
+            ]
+            self.latex_vecs = [
+                (r"\mathbf{\hat{%s}_x}" % name.lower()),
+                (r"\mathbf{\hat{%s}_y}" % name.lower()),
+                (r"\mathbf{\hat{%s}_z}" % name.lower()),
+            ]
+            self.indices = ["x", "y", "z"]
         # Different step, for custom latex basis vectors
         if latexs is not None:
             if not isinstance(latexs, (tuple, list)):
-                raise TypeError('Supply the indices as a list')
+                raise TypeError("Supply the indices as a list")
             if len(latexs) != 3:
-                raise ValueError('Supply 3 indices')
+                raise ValueError("Supply 3 indices")
             for i in latexs:
                 if not isinstance(i, str):
-                    raise TypeError('Latex entries must be strings')
+                    raise TypeError("Latex entries must be strings")
             self.latex_vecs = latexs
         self.name = name
         self._var_dict = {}
-        #The _dcm_dict dictionary will only store the dcms of parent-child
-        #relationships. The _dcm_cache dictionary will work as the dcm
-        #cache.
+        # The _dcm_dict dictionary will only store the dcms of parent-child
+        # relationships. The _dcm_cache dictionary will work as the dcm
+        # cache.
         self._dcm_dict = {}
         self._dcm_cache = {}
         self._ang_vel_dict = {}
@@ -202,20 +220,22 @@ class ReferenceFrame(object):
         self._x = Vector([(Matrix([1, 0, 0]), self)])
         self._y = Vector([(Matrix([0, 1, 0]), self)])
         self._z = Vector([(Matrix([0, 0, 1]), self)])
-        #Associate coordinate symbols wrt this frame
+        # Associate coordinate symbols wrt this frame
         if variables is not None:
             if not isinstance(variables, (tuple, list)):
-                raise TypeError('Supply the variable names as a list/tuple')
+                raise TypeError("Supply the variable names as a list/tuple")
             if len(variables) != 3:
-                raise ValueError('Supply 3 variable names')
+                raise ValueError("Supply 3 variable names")
             for i in variables:
                 if not isinstance(i, str):
-                    raise TypeError('Variable names must be strings')
+                    raise TypeError("Variable names must be strings")
         else:
-            variables = [name + '_x', name + '_y', name + '_z']
-        self.varlist = (CoordinateSym(variables[0], self, 0), \
-                        CoordinateSym(variables[1], self, 1), \
-                        CoordinateSym(variables[2], self, 2))
+            variables = [name + "_x", name + "_y", name + "_z"]
+        self.varlist = (
+            CoordinateSym(variables[0], self, 0),
+            CoordinateSym(variables[1], self, 1),
+            CoordinateSym(variables[2], self, 2),
+        )
         ReferenceFrame._count += 1
         self.index = ReferenceFrame._count
 
@@ -238,7 +258,7 @@ class ReferenceFrame(object):
         if self.indices[2] == ind:
             return self.z
         else:
-            raise ValueError('Not a defined index')
+            raise ValueError("Not a defined index")
 
     def __iter__(self):
         return iter([self.x, self.y, self.z])
@@ -268,12 +288,14 @@ class ReferenceFrame(object):
         outlist.sort(key=len)
         if len(outlist) != 0:
             return outlist[0]
-        raise ValueError('No Connecting Path found between ' + self.name +
-                         ' and ' + other.name)
+        raise ValueError(
+            "No Connecting Path found between " + self.name + " and " + other.name
+        )
 
     def _w_diff_dcm(self, otherframe):
         """Angular velocity from time differentiating the DCM. """
         from sympy.physics.vector.functions import dynamicsymbols
+
         dcm2diff = otherframe.dcm(self)
         diffed = dcm2diff.diff(dynamicsymbols._t)
         angvelmat = diffed * dcm2diff.T
@@ -318,7 +340,7 @@ class ReferenceFrame(object):
             mapping = {}
             for i, x in enumerate(self):
                 if Vector.simp:
-                    mapping[self.varlist[i]] = trigsimp(vars_matrix[i], method='fu')
+                    mapping[self.varlist[i]] = trigsimp(vars_matrix[i], method="fu")
                 else:
                     mapping[self.varlist[i]] = vars_matrix[i]
             self._var_dict[(otherframe, Vector.simp)] = mapping
@@ -476,7 +498,7 @@ class ReferenceFrame(object):
         otherframe._dcm_cache[self] = outdcm.T
         return outdcm
 
-    def orient(self, parent, rot_type, amounts, rot_order=''):
+    def orient(self, parent, rot_type, amounts, rot_order=""):
         """Sets the orientation of this reference frame relative to another
         (parent) reference frame.
 
@@ -688,10 +710,11 @@ class ReferenceFrame(object):
         """
 
         from sympy.physics.vector.functions import dynamicsymbols
+
         _check_frame(parent)
 
         # Allow passing a rotation matrix manually.
-        if rot_type == 'DCM':
+        if rot_type == "DCM":
             # When rot_type == 'DCM', then amounts must be a Matrix type object
             # (e.g. sympy.matrices.dense.MutableDenseMatrix).
             if not isinstance(amounts, MatrixBase):
@@ -705,79 +728,122 @@ class ReferenceFrame(object):
         def _rot(axis, angle):
             """DCM for simple axis 1,2,or 3 rotations. """
             if axis == 1:
-                return Matrix([[1, 0, 0],
-                               [0, cos(angle), -sin(angle)],
-                               [0, sin(angle), cos(angle)]])
+                return Matrix(
+                    [
+                        [1, 0, 0],
+                        [0, cos(angle), -sin(angle)],
+                        [0, sin(angle), cos(angle)],
+                    ]
+                )
             elif axis == 2:
-                return Matrix([[cos(angle), 0, sin(angle)],
-                               [0, 1, 0],
-                               [-sin(angle), 0, cos(angle)]])
+                return Matrix(
+                    [
+                        [cos(angle), 0, sin(angle)],
+                        [0, 1, 0],
+                        [-sin(angle), 0, cos(angle)],
+                    ]
+                )
             elif axis == 3:
-                return Matrix([[cos(angle), -sin(angle), 0],
-                               [sin(angle), cos(angle), 0],
-                               [0, 0, 1]])
+                return Matrix(
+                    [
+                        [cos(angle), -sin(angle), 0],
+                        [sin(angle), cos(angle), 0],
+                        [0, 0, 1],
+                    ]
+                )
 
-        approved_orders = ('123', '231', '312', '132', '213', '321', '121',
-                           '131', '212', '232', '313', '323', '')
+        approved_orders = (
+            "123",
+            "231",
+            "312",
+            "132",
+            "213",
+            "321",
+            "121",
+            "131",
+            "212",
+            "232",
+            "313",
+            "323",
+            "",
+        )
         # make sure XYZ => 123 and rot_type is in upper case
-        rot_order = translate(str(rot_order), 'XYZxyz', '123123')
+        rot_order = translate(str(rot_order), "XYZxyz", "123123")
         rot_type = rot_type.upper()
         if rot_order not in approved_orders:
-            raise TypeError('The supplied order is not an approved type')
+            raise TypeError("The supplied order is not an approved type")
         parent_orient = []
-        if rot_type == 'AXIS':
-            if not rot_order == '':
-                raise TypeError('Axis orientation takes no rotation order')
+        if rot_type == "AXIS":
+            if not rot_order == "":
+                raise TypeError("Axis orientation takes no rotation order")
             if not (isinstance(amounts, (list, tuple)) & (len(amounts) == 2)):
-                raise TypeError('Amounts are a list or tuple of length 2')
+                raise TypeError("Amounts are a list or tuple of length 2")
             theta = amounts[0]
             axis = amounts[1]
             axis = _check_vector(axis)
             if not axis.dt(parent) == 0:
-                raise ValueError('Axis cannot be time-varying')
+                raise ValueError("Axis cannot be time-varying")
             axis = axis.express(parent).normalize()
             axis = axis.args[0][0]
-            parent_orient = ((eye(3) - axis * axis.T) * cos(theta) +
-                             Matrix([[0, -axis[2], axis[1]],
-                                     [axis[2], 0, -axis[0]],
-                                     [-axis[1], axis[0], 0]]) *
-                             sin(theta) + axis * axis.T)
-        elif rot_type == 'QUATERNION':
-            if not rot_order == '':
-                raise TypeError(
-                    'Quaternion orientation takes no rotation order')
+            parent_orient = (
+                (eye(3) - axis * axis.T) * cos(theta)
+                + Matrix(
+                    [
+                        [0, -axis[2], axis[1]],
+                        [axis[2], 0, -axis[0]],
+                        [-axis[1], axis[0], 0],
+                    ]
+                )
+                * sin(theta)
+                + axis * axis.T
+            )
+        elif rot_type == "QUATERNION":
+            if not rot_order == "":
+                raise TypeError("Quaternion orientation takes no rotation order")
             if not (isinstance(amounts, (list, tuple)) & (len(amounts) == 4)):
-                raise TypeError('Amounts are a list or tuple of length 4')
+                raise TypeError("Amounts are a list or tuple of length 4")
             q0, q1, q2, q3 = amounts
-            parent_orient = (Matrix([[q0**2 + q1**2 - q2**2 - q3**2,
-                                      2 * (q1 * q2 - q0 * q3),
-                                      2 * (q0 * q2 + q1 * q3)],
-                                     [2 * (q1 * q2 + q0 * q3),
-                                      q0**2 - q1**2 + q2**2 - q3**2,
-                                      2 * (q2 * q3 - q0 * q1)],
-                                     [2 * (q1 * q3 - q0 * q2),
-                                      2 * (q0 * q1 + q2 * q3),
-                                      q0**2 - q1**2 - q2**2 + q3**2]]))
-        elif rot_type == 'BODY':
+            parent_orient = Matrix(
+                [
+                    [
+                        q0 ** 2 + q1 ** 2 - q2 ** 2 - q3 ** 2,
+                        2 * (q1 * q2 - q0 * q3),
+                        2 * (q0 * q2 + q1 * q3),
+                    ],
+                    [
+                        2 * (q1 * q2 + q0 * q3),
+                        q0 ** 2 - q1 ** 2 + q2 ** 2 - q3 ** 2,
+                        2 * (q2 * q3 - q0 * q1),
+                    ],
+                    [
+                        2 * (q1 * q3 - q0 * q2),
+                        2 * (q0 * q1 + q2 * q3),
+                        q0 ** 2 - q1 ** 2 - q2 ** 2 + q3 ** 2,
+                    ],
+                ]
+            )
+        elif rot_type == "BODY":
             if not (len(amounts) == 3 & len(rot_order) == 3):
-                raise TypeError('Body orientation takes 3 values & 3 orders')
+                raise TypeError("Body orientation takes 3 values & 3 orders")
             a1 = int(rot_order[0])
             a2 = int(rot_order[1])
             a3 = int(rot_order[2])
-            parent_orient = (_rot(a1, amounts[0]) * _rot(a2, amounts[1]) *
-                             _rot(a3, amounts[2]))
-        elif rot_type == 'SPACE':
+            parent_orient = (
+                _rot(a1, amounts[0]) * _rot(a2, amounts[1]) * _rot(a3, amounts[2])
+            )
+        elif rot_type == "SPACE":
             if not (len(amounts) == 3 & len(rot_order) == 3):
-                raise TypeError('Space orientation takes 3 values & 3 orders')
+                raise TypeError("Space orientation takes 3 values & 3 orders")
             a1 = int(rot_order[0])
             a2 = int(rot_order[1])
             a3 = int(rot_order[2])
-            parent_orient = (_rot(a3, amounts[2]) * _rot(a2, amounts[1]) *
-                             _rot(a1, amounts[0]))
-        elif rot_type == 'DCM':
+            parent_orient = (
+                _rot(a3, amounts[2]) * _rot(a2, amounts[1]) * _rot(a1, amounts[0])
+            )
+        elif rot_type == "DCM":
             parent_orient = amounts
         else:
-            raise NotImplementedError('That is not an implemented rotation')
+            raise NotImplementedError("That is not an implemented rotation")
         # Reset the _dcm_cache of this frame, and remove it from the
         # _dcm_caches of the frames it is linked to. Also remove it from the
         # _dcm_dict of its parent
@@ -800,7 +866,7 @@ class ReferenceFrame(object):
         self._dcm_cache = {}
         self._dcm_cache.update({parent: parent_orient.T})
         parent._dcm_cache.update({self: parent_orient})
-        if rot_type == 'QUATERNION':
+        if rot_type == "QUATERNION":
             t = dynamicsymbols._t
             q0, q1, q2, q3 = amounts
             q0d = diff(q0, t)
@@ -811,19 +877,21 @@ class ReferenceFrame(object):
             w2 = 2 * (q2d * q0 + q3d * q1 - q1d * q3 - q0d * q2)
             w3 = 2 * (q3d * q0 + q1d * q2 - q2d * q1 - q0d * q3)
             wvec = Vector([(Matrix([w1, w2, w3]), self)])
-        elif rot_type == 'AXIS':
+        elif rot_type == "AXIS":
             thetad = (amounts[0]).diff(dynamicsymbols._t)
             wvec = thetad * amounts[1].express(parent).normalize()
-        elif rot_type == 'DCM':
+        elif rot_type == "DCM":
             wvec = self._w_diff_dcm(parent)
         else:
             try:
                 from sympy.polys.polyerrors import CoercionFailed
                 from sympy.physics.vector.functions import kinematic_equations
+
                 q1, q2, q3 = amounts
-                u1, u2, u3 = symbols('u1, u2, u3', cls=Dummy)
-                templist = kinematic_equations([u1, u2, u3], [q1, q2, q3],
-                                               rot_type, rot_order)
+                u1, u2, u3 = symbols("u1, u2, u3", cls=Dummy)
+                templist = kinematic_equations(
+                    [u1, u2, u3], [q1, q2, q3], rot_type, rot_order
+                )
                 templist = [expand(i) for i in templist]
                 td = solve(templist, [u1, u2, u3])
                 u1 = expand(td[u1])
@@ -836,8 +904,16 @@ class ReferenceFrame(object):
         parent._ang_vel_dict.update({self: -wvec})
         self._var_dict = {}
 
-    def orientnew(self, newname, rot_type, amounts, rot_order='',
-                  variables=None, indices=None, latexs=None):
+    def orientnew(
+        self,
+        newname,
+        rot_type,
+        amounts,
+        rot_order="",
+        variables=None,
+        indices=None,
+        latexs=None,
+    ):
         r"""Returns a new reference frame oriented with respect to this
         reference frame.
 
@@ -918,8 +994,9 @@ class ReferenceFrame(object):
 
         """
 
-        newframe = self.__class__(newname, variables=variables,
-                                  indices=indices, latexs=latexs)
+        newframe = self.__class__(
+            newname, variables=variables, indices=indices, latexs=latexs
+        )
         newframe.orient(self, rot_type, amounts, rot_order)
         return newframe
 
@@ -1042,8 +1119,10 @@ class ReferenceFrame(object):
 
         """
 
-        partials = [self.ang_vel_in(frame).diff(speed, frame, var_in_dcm=False)
-                    for speed in gen_speeds]
+        partials = [
+            self.ang_vel_in(frame).diff(speed, frame, var_in_dcm=False)
+            for speed in gen_speeds
+        ]
 
         if len(partials) == 1:
             return partials[0]
@@ -1053,5 +1132,6 @@ class ReferenceFrame(object):
 
 def _check_frame(other):
     from .vector import VectorTypeError
+
     if not isinstance(other, ReferenceFrame):
-        raise VectorTypeError(other, ReferenceFrame('A'))
+        raise VectorTypeError(other, ReferenceFrame("A"))

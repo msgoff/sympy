@@ -7,10 +7,22 @@ from sympy.core import Add, Basic, sympify
 from sympy.functions import adjoint
 from sympy.matrices.matrices import MatrixBase
 from sympy.matrices.expressions.transpose import transpose
-from sympy.strategies import (rm_id, unpack, flatten, sort, condition,
-    exhaust, do_one, glom)
-from sympy.matrices.expressions.matexpr import (MatrixExpr, ShapeError,
-    ZeroMatrix, GenericZeroMatrix)
+from sympy.strategies import (
+    rm_id,
+    unpack,
+    flatten,
+    sort,
+    condition,
+    exhaust,
+    do_one,
+    glom,
+)
+from sympy.matrices.expressions.matexpr import (
+    MatrixExpr,
+    ShapeError,
+    ZeroMatrix,
+    GenericZeroMatrix,
+)
 from sympy.utilities import default_sort_key, sift
 
 # XXX: MatAdd should perhaps not subclass directly from Add
@@ -29,6 +41,7 @@ class MatAdd(MatrixExpr, Add):
     >>> MatAdd(A, B, C)
     A + B + C
     """
+
     is_MatAdd = True
 
     identity = GenericZeroMatrix()
@@ -41,7 +54,7 @@ class MatAdd(MatrixExpr, Add):
         # TypeErrors from GenericZeroMatrix().shape
         args = filter(lambda i: cls.identity != i, args)
         args = list(map(sympify, args))
-        check = kwargs.get('check', False)
+        check = kwargs.get("check", False)
 
         obj = Basic.__new__(cls, *args)
         if check:
@@ -65,10 +78,11 @@ class MatAdd(MatrixExpr, Add):
 
     def _eval_trace(self):
         from .trace import trace
+
         return Add(*[trace(arg) for arg in self.args]).doit()
 
     def doit(self, **kwargs):
-        deep = kwargs.get('deep', True)
+        deep = kwargs.get("deep", True)
         if deep:
             args = [arg.doit(**kwargs) for arg in self.args]
         else:
@@ -87,10 +101,13 @@ def validate(*args):
     A = args[0]
     for B in args[1:]:
         if A.shape != B.shape:
-            raise ShapeError("Matrices %s and %s are not aligned"%(A, B))
+            raise ShapeError("Matrices %s and %s are not aligned" % (A, B))
+
 
 factor_of = lambda arg: arg.as_coeff_mmul()[0]
 matrix_of = lambda arg: unpack(arg.as_coeff_mmul()[1])
+
+
 def combine(cnt, mat):
     if cnt == 1:
         return mat
@@ -126,12 +143,13 @@ def merge_explicit(matadd):
         return matadd
 
 
-rules = (rm_id(lambda x: x == 0 or isinstance(x, ZeroMatrix)),
-         unpack,
-         flatten,
-         glom(matrix_of, factor_of, combine),
-         merge_explicit,
-         sort(default_sort_key))
+rules = (
+    rm_id(lambda x: x == 0 or isinstance(x, ZeroMatrix)),
+    unpack,
+    flatten,
+    glom(matrix_of, factor_of, combine),
+    merge_explicit,
+    sort(default_sort_key),
+)
 
-canonicalize = exhaust(condition(lambda x: isinstance(x, MatAdd),
-                                 do_one(*rules)))
+canonicalize = exhaust(condition(lambda x: isinstance(x, MatAdd), do_one(*rules)))

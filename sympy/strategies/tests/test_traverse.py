@@ -1,5 +1,11 @@
-from sympy.strategies.traverse import (top_down, bottom_up, sall, top_down_once,
-        bottom_up_once, basic_fns)
+from sympy.strategies.traverse import (
+    top_down,
+    bottom_up,
+    sall,
+    top_down_once,
+    bottom_up_once,
+    basic_fns,
+)
 from sympy.strategies.rl import rebuild
 from sympy.strategies.util import expr_fns
 from sympy import Add, Basic, Symbol, S
@@ -29,8 +35,7 @@ def test_top_down():
 def _test_global_traversal(trav):
     zero_all_symbols = trav(zero_symbols)
 
-    assert zero_all_symbols(Basic(x, y, Basic(x, z))) == \
-        Basic(0, 0, Basic(0, 0))
+    assert zero_all_symbols(Basic(x, y, Basic(x, z))) == Basic(0, 0, Basic(0, 0))
 
 
 def _test_stop_on_non_basics(trav):
@@ -40,8 +45,8 @@ def _test_stop_on_non_basics(trav):
         except TypeError:
             return expr
 
-    expr = Basic(1, 'a', Basic(2, 'b'))
-    expected = Basic(2, 'a', Basic(3, 'b'))
+    expr = Basic(1, "a", Basic(2, "b"))
+    expected = Basic(2, "a", Basic(3, "b"))
     rl = trav(add_one_if_can)
 
     assert rl(expr) == expected
@@ -67,7 +72,7 @@ def test_bottom_up_once():
 
 
 def test_expr_fns():
-    expr = x + y**3
+    expr = x + y ** 3
     e = bottom_up(lambda v: v + 1, expr_fns)(expr)
     b = bottom_up(lambda v: Basic.__new__(Add, v, S(1)), basic_fns)(expr)
 

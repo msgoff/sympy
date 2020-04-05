@@ -22,17 +22,17 @@ from sympy.physics.quantum.qapply import qapply
 from sympy.physics.quantum.operatorset import operators_to_state, state_to_operators
 
 __all__ = [
-    'represent',
-    'rep_innerproduct',
-    'rep_expectation',
-    'integrate_result',
-    'get_basis',
-    'enumerate_states'
+    "represent",
+    "rep_innerproduct",
+    "rep_expectation",
+    "integrate_result",
+    "get_basis",
+    "enumerate_states",
 ]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Represent
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 def _sympy_to_scalar(e):
@@ -46,7 +46,7 @@ def _sympy_to_scalar(e):
             return float(e)
         elif e.is_Number or e.is_NumberSymbol or e == I:
             return complex(e)
-    raise TypeError('Expected number, got: %r' % e)
+    raise TypeError("Expected number, got: %r" % e)
 
 
 def represent(expr, **options):
@@ -135,19 +135,19 @@ def represent(expr, **options):
 
     """
 
-    format = options.get('format', 'sympy')
+    format = options.get("format", "sympy")
     if isinstance(expr, QExpr) and not isinstance(expr, OuterProduct):
-        options['replace_none'] = False
+        options["replace_none"] = False
         temp_basis = get_basis(expr, **options)
         if temp_basis is not None:
-            options['basis'] = temp_basis
+            options["basis"] = temp_basis
         try:
             return expr._represent(**options)
         except NotImplementedError as strerr:
-            #If no _represent_FOO method exists, map to the
-            #appropriate basis state and try
-            #the other methods of representation
-            options['replace_none'] = True
+            # If no _represent_FOO method exists, map to the
+            # appropriate basis state and try
+            # the other methods of representation
+            options["replace_none"] = True
 
             if isinstance(expr, (KetBase, BraBase)):
                 try:
@@ -169,14 +169,15 @@ def represent(expr, **options):
         return result
     elif isinstance(expr, Pow):
         base, exp = expr.as_base_exp()
-        if format == 'numpy' or format == 'scipy.sparse':
+        if format == "numpy" or format == "scipy.sparse":
             exp = _sympy_to_scalar(exp)
         base = represent(base, **options)
         # scipy.sparse doesn't support negative exponents
         # and warns when inverting a matrix in csr format.
-        if format == 'scipy.sparse' and exp < 0:
+        if format == "scipy.sparse" and exp < 0:
             from scipy.sparse.linalg import inv
-            exp = - exp
+
+            exp = -exp
             base = inv(base.tocsc()).tocsr()
         return base ** exp
     elif isinstance(expr, TensorProduct):
@@ -187,21 +188,21 @@ def represent(expr, **options):
     elif isinstance(expr, Commutator):
         A = represent(expr.args[0], **options)
         B = represent(expr.args[1], **options)
-        return A*B - B*A
+        return A * B - B * A
     elif isinstance(expr, AntiCommutator):
         A = represent(expr.args[0], **options)
         B = represent(expr.args[1], **options)
-        return A*B + B*A
+        return A * B + B * A
     elif isinstance(expr, InnerProduct):
         return represent(Mul(expr.bra, expr.ket), **options)
     elif not (isinstance(expr, Mul) or isinstance(expr, OuterProduct)):
         # For numpy and scipy.sparse, we can only handle numerical prefactors.
-        if format == 'numpy' or format == 'scipy.sparse':
+        if format == "numpy" or format == "scipy.sparse":
             return _sympy_to_scalar(expr)
         return expr
 
     if not (isinstance(expr, Mul) or isinstance(expr, OuterProduct)):
-        raise TypeError('Mul expected, got: %r' % expr)
+        raise TypeError("Mul expected, got: %r" % expr)
 
     if "index" in options:
         options["index"] += 1
@@ -225,7 +226,7 @@ def represent(expr, **options):
         elif isinstance(last_arg, KetBase) and isinstance(arg, BraBase):
             options["unities"].append(options["index"])
 
-        result = represent(arg, **options)*result
+        result = represent(arg, **options) * result
         last_arg = arg
 
     # All three matrix formats create 1 by 1 matrices when inner products of
@@ -280,16 +281,15 @@ def rep_innerproduct(expr, **options):
 
     if isinstance(expr, BraBase):
         bra = expr
-        ket = (basis_kets[1] if basis_kets[0].dual == expr else basis_kets[0])
+        ket = basis_kets[1] if basis_kets[0].dual == expr else basis_kets[0]
     else:
-        bra = (basis_kets[1].dual if basis_kets[0]
-               == expr else basis_kets[0].dual)
+        bra = basis_kets[1].dual if basis_kets[0] == expr else basis_kets[0].dual
         ket = expr
 
     prod = InnerProduct(bra, ket)
     result = prod.doit()
 
-    format = options.get('format', 'sympy')
+    format = options.get("format", "sympy")
     return expr._format_represent(result, format)
 
 
@@ -333,7 +333,7 @@ def rep_expectation(expr, **options):
     bra = basis_kets[1].dual
     ket = basis_kets[0]
 
-    return qapply(bra*expr*ket)
+    return qapply(bra * expr * ket)
 
 
 def integrate_result(orig_expr, result, **options):
@@ -380,7 +380,7 @@ def integrate_result(orig_expr, result, **options):
     if not isinstance(result, Expr):
         return result
 
-    options['replace_none'] = True
+    options["replace_none"] = True
     if not "basis" in options:
         arg = orig_expr.args[-1]
         options["basis"] = get_basis(arg, **options)
@@ -402,7 +402,7 @@ def integrate_result(orig_expr, result, **options):
 
     for coord in coords:
         if coord in result.free_symbols:
-            #TODO: Add support for sets of operators
+            # TODO: Add support for sets of operators
             basis_op = state_to_operators(basis)
             start = basis_op.hilbert_space.interval.start
             end = basis_op.hilbert_space.interval.end
@@ -475,11 +475,12 @@ def get_basis(expr, **options):
             return _make_default((expr.dual_class()))
         elif isinstance(expr, Operator):
             state_inst = operators_to_state(expr)
-            return (state_inst if state_inst is not None else None)
+            return state_inst if state_inst is not None else None
         else:
             return None
-    elif (isinstance(basis, Operator) or
-          (not isinstance(basis, StateBase) and issubclass(basis, Operator))):
+    elif isinstance(basis, Operator) or (
+        not isinstance(basis, StateBase) and issubclass(basis, Operator)
+    ):
         state = operators_to_state(basis)
         if state is None:
             return None
@@ -552,10 +553,10 @@ def enumerate_states(*args, **options):
 
     if len(args) == 3:
         num_states = args[2]
-        options['start_index'] = args[1]
+        options["start_index"] = args[1]
     else:
         num_states = len(args[1])
-        options['index_list'] = args[1]
+        options["index_list"] = args[1]
 
     try:
         ret = state._enumerate_state(num_states, **options)

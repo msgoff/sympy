@@ -16,6 +16,7 @@ from sympy.geometry.line import Line, Line2D, Ray2D, Segment2D, LinearEntity3D
 from sympy.geometry.ellipse import Ellipse
 from sympy.functions import sign
 
+
 class Parabola(GeometrySet):
     """A parabolic GeometryEntity.
 
@@ -70,11 +71,12 @@ class Parabola(GeometrySet):
 
         directrix = Line(directrix)
 
-        if (directrix.slope != 0 and directrix.slope != S.Infinity):
-            raise NotImplementedError('The directrix must be a horizontal'
-                                      ' or vertical line')
+        if directrix.slope != 0 and directrix.slope != S.Infinity:
+            raise NotImplementedError(
+                "The directrix must be a horizontal" " or vertical line"
+            )
         if directrix.contains(focus):
-            raise ValueError('The focus must not be a point of directrix')
+            raise ValueError("The focus must not be a point of directrix")
 
         return GeometryEntity.__new__(cls, focus, directrix, **kwargs)
 
@@ -185,7 +187,7 @@ class Parabola(GeometrySet):
         """
         return S.One
 
-    def equation(self, x='x', y='y'):
+    def equation(self, x="x", y="y"):
         """The equation of the parabola.
 
         Parameters
@@ -215,12 +217,12 @@ class Parabola(GeometrySet):
         x = _symbol(x, real=True)
         y = _symbol(y, real=True)
 
-        if (self.axis_of_symmetry.slope == 0):
+        if self.axis_of_symmetry.slope == 0:
             t1 = 4 * (self.p_parameter) * (x - self.vertex.x)
-            t2 = (y - self.vertex.y)**2
+            t2 = (y - self.vertex.y) ** 2
         else:
             t1 = 4 * (self.p_parameter) * (y - self.vertex.y)
-            t2 = (x - self.vertex.x)**2
+            t2 = (x - self.vertex.x) ** 2
 
         return t1 - t2
 
@@ -255,7 +257,7 @@ class Parabola(GeometrySet):
 
         """
         distance = self.directrix.distance(self.focus)
-        focal_length = distance/2
+        focal_length = distance / 2
 
         return focal_length
 
@@ -313,27 +315,37 @@ class Parabola(GeometrySet):
         []
 
         """
-        x, y = symbols('x y', real=True)
+        x, y = symbols("x y", real=True)
         parabola_eq = self.equation()
         if isinstance(o, Parabola):
             if o in self:
                 return [o]
             else:
-                return list(ordered([Point(i) for i in solve([parabola_eq, o.equation()], [x, y])]))
+                return list(
+                    ordered(
+                        [Point(i) for i in solve([parabola_eq, o.equation()], [x, y])]
+                    )
+                )
         elif isinstance(o, Point2D):
             if simplify(parabola_eq.subs(([(x, o._args[0]), (y, o._args[1])]))) == 0:
                 return [o]
             else:
                 return []
         elif isinstance(o, (Segment2D, Ray2D)):
-            result = solve([parabola_eq, Line2D(o.points[0], o.points[1]).equation()], [x, y])
+            result = solve(
+                [parabola_eq, Line2D(o.points[0], o.points[1]).equation()], [x, y]
+            )
             return list(ordered([Point2D(i) for i in result if i in o]))
         elif isinstance(o, (Line2D, Ellipse)):
-            return list(ordered([Point2D(i) for i in solve([parabola_eq, o.equation()], [x, y])]))
+            return list(
+                ordered(
+                    [Point2D(i) for i in solve([parabola_eq, o.equation()], [x, y])]
+                )
+            )
         elif isinstance(o, LinearEntity3D):
-            raise TypeError('Entity must be two dimensional, not three dimensional')
+            raise TypeError("Entity must be two dimensional, not three dimensional")
         else:
-            raise TypeError('Wrong type of argument were put')
+            raise TypeError("Wrong type of argument were put")
 
     @property
     def p_parameter(self):
@@ -400,7 +412,7 @@ class Parabola(GeometrySet):
 
         """
         focus = self.focus
-        if (self.axis_of_symmetry.slope == 0):
+        if self.axis_of_symmetry.slope == 0:
             vertex = Point(focus.args[0] - self.p_parameter, focus.args[1])
         else:
             vertex = Point(focus.args[0], focus.args[1] - self.p_parameter)

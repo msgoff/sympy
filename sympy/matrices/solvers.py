@@ -39,8 +39,7 @@ def _diagonal_solve(M, rhs):
     if rhs.rows != M.rows:
         raise TypeError("Size mis-match")
 
-    return M._new(
-        rhs.rows, rhs.cols, lambda i, j: rhs[i, j] / M[i, i])
+    return M._new(rhs.rows, rhs.cols, lambda i, j: rhs[i, j] / M[i, i])
 
 
 def _lower_triangular_solve(M, rhs):
@@ -69,17 +68,19 @@ def _lower_triangular_solve(M, rhs):
         raise ValueError("Matrix must be lower triangular.")
 
     dps = _get_intermediate_simp()
-    X   = MutableDenseMatrix.zeros(M.rows, rhs.cols)
+    X = MutableDenseMatrix.zeros(M.rows, rhs.cols)
 
     for j in range(rhs.cols):
         for i in range(M.rows):
             if M[i, i] == 0:
                 raise TypeError("Matrix must be non-singular.")
 
-            X[i, j] = dps((rhs[i, j] - sum(M[i, k]*X[k, j]
-                                        for k in range(i))) / M[i, i])
+            X[i, j] = dps(
+                (rhs[i, j] - sum(M[i, k] * X[k, j] for k in range(i))) / M[i, i]
+            )
 
     return M._new(X)
+
 
 def _lower_triangular_solve_sparse(M, rhs):
     """Solves ``Ax = B``, where A is a lower triangular matrix.
@@ -104,7 +105,7 @@ def _lower_triangular_solve_sparse(M, rhs):
     if not M.is_lower:
         raise ValueError("Matrix must be lower triangular.")
 
-    dps  = _get_intermediate_simp()
+    dps = _get_intermediate_simp()
     rows = [[] for i in range(M.rows)]
 
     for i, j, v in M.row_list():
@@ -116,7 +117,7 @@ def _lower_triangular_solve_sparse(M, rhs):
     for j in range(rhs.cols):
         for i in range(rhs.rows):
             for u, v in rows[i]:
-                X[i, j] -= v*X[u, j]
+                X[i, j] -= v * X[u, j]
 
             X[i, j] = dps(X[i, j] / M[i, i])
 
@@ -149,17 +150,20 @@ def _upper_triangular_solve(M, rhs):
         raise TypeError("Matrix is not upper triangular.")
 
     dps = _get_intermediate_simp()
-    X   = MutableDenseMatrix.zeros(M.rows, rhs.cols)
+    X = MutableDenseMatrix.zeros(M.rows, rhs.cols)
 
     for j in range(rhs.cols):
         for i in reversed(range(M.rows)):
             if M[i, i] == 0:
                 raise ValueError("Matrix must be non-singular.")
 
-            X[i, j] = dps((rhs[i, j] - sum(M[i, k]*X[k, j]
-                                        for k in range(i + 1, M.rows))) / M[i, i])
+            X[i, j] = dps(
+                (rhs[i, j] - sum(M[i, k] * X[k, j] for k in range(i + 1, M.rows)))
+                / M[i, i]
+            )
 
     return M._new(X)
+
 
 def _upper_triangular_solve_sparse(M, rhs):
     """Solves ``Ax = B``, where A is an upper triangular matrix.
@@ -184,7 +188,7 @@ def _upper_triangular_solve_sparse(M, rhs):
     if not M.is_upper:
         raise TypeError("Matrix is not upper triangular.")
 
-    dps  = _get_intermediate_simp()
+    dps = _get_intermediate_simp()
     rows = [[] for i in range(M.rows)]
 
     for i, j, v in M.row_list():
@@ -196,7 +200,7 @@ def _upper_triangular_solve_sparse(M, rhs):
     for j in range(rhs.cols):
         for i in reversed(range(rhs.rows)):
             for u, v in reversed(rows[i]):
-                X[i, j] -= v*X[u, j]
+                X[i, j] -= v * X[u, j]
 
             X[i, j] = dps(X[i, j] / M[i, i])
 
@@ -224,10 +228,11 @@ def _cholesky_solve(M, rhs):
 
     if M.rows < M.cols:
         raise NotImplementedError(
-            'Under-determined System. Try M.gauss_jordan_solve(rhs)')
+            "Under-determined System. Try M.gauss_jordan_solve(rhs)"
+        )
 
     hermitian = True
-    reform    = False
+    reform = False
 
     if M.is_symmetric():
         hermitian = False
@@ -235,9 +240,9 @@ def _cholesky_solve(M, rhs):
         reform = True
 
     if reform or M.is_positive_definite is False:
-        H         = M.H
-        M         = H.multiply(M)
-        rhs       = H.multiply(rhs)
+        H = M.H
+        M = H.multiply(M)
+        rhs = H.multiply(rhs)
         hermitian = not M.is_symmetric()
 
     L = M.cholesky(hermitian=hermitian)
@@ -281,10 +286,11 @@ def _LDLsolve(M, rhs):
 
     if M.rows < M.cols:
         raise NotImplementedError(
-            'Under-determined System. Try M.gauss_jordan_solve(rhs)')
+            "Under-determined System. Try M.gauss_jordan_solve(rhs)"
+        )
 
     hermitian = True
-    reform    = False
+    reform = False
 
     if M.is_symmetric():
         hermitian = False
@@ -292,14 +298,14 @@ def _LDLsolve(M, rhs):
         reform = True
 
     if reform or M.is_positive_definite is False:
-        H         = M.H
-        M         = H.multiply(M)
-        rhs       = H.multiply(rhs)
+        H = M.H
+        M = H.multiply(M)
+        rhs = H.multiply(rhs)
         hermitian = not M.is_symmetric()
 
     L, D = M.LDLdecomposition(hermitian=hermitian)
-    Y    = L.lower_triangular_solve(rhs)
-    Z    = D.diagonal_solve(Y)
+    Y = L.lower_triangular_solve(rhs)
+    Z = D.diagonal_solve(Y)
 
     if hermitian:
         return (L.H).upper_triangular_solve(Z)
@@ -328,8 +334,7 @@ def _LUsolve(M, rhs, iszerofunc=_iszero):
     """
 
     if rhs.rows != M.rows:
-        raise ShapeError(
-            "``M`` and ``rhs`` must have the same number of rows.")
+        raise ShapeError("``M`` and ``rhs`` must have the same number of rows.")
 
     m = M.rows
     n = M.cols
@@ -338,13 +343,12 @@ def _LUsolve(M, rhs, iszerofunc=_iszero):
         raise NotImplementedError("Underdetermined systems not supported.")
 
     try:
-        A, perm = M.LUdecomposition_Simple(
-            iszerofunc=_iszero, rankcheck=True)
+        A, perm = M.LUdecomposition_Simple(iszerofunc=_iszero, rankcheck=True)
     except ValueError:
         raise NotImplementedError("Underdetermined systems not supported.")
 
     dps = _get_intermediate_simp()
-    b   = rhs.permute_rows(perm).as_mutable()
+    b = rhs.permute_rows(perm).as_mutable()
 
     # forward substitution, all diag entries are scaled to 1
     for i in range(m):
@@ -359,7 +363,7 @@ def _LUsolve(M, rhs, iszerofunc=_iszero):
                 if not iszerofunc(b[i, j]):
                     raise ValueError("The system is inconsistent.")
 
-        b = b[0:n, :]   # truncate zero rows if consistent
+        b = b[0:n, :]  # truncate zero rows if consistent
 
     # backward substitution
     for i in range(n - 1, -1, -1):
@@ -403,9 +407,9 @@ def _QRsolve(M, b):
     QRdecomposition
     """
 
-    dps  = _get_intermediate_simp(expand_mul, expand_mul)
+    dps = _get_intermediate_simp(expand_mul, expand_mul)
     Q, R = M.QRdecomposition()
-    y    = Q.T * b
+    y = Q.T * b
 
     # back substitution to solve R*x = y:
     # We build up the result "backwards" in the vector 'x' and reverse it
@@ -531,16 +535,16 @@ def _gauss_jordan_solve(M, B, freevar=False):
 
     from sympy.matrices import Matrix, zeros
 
-    cls      = M.__class__
-    aug      = M.hstack(M.copy(), B.copy())
-    B_cols   = B.cols
+    cls = M.__class__
+    aug = M.hstack(M.copy(), B.copy())
+    B_cols = B.cols
     row, col = aug[:, :-B_cols].shape
 
     # solve by reduced row echelon form
     A, pivots = aug.rref(simplify=True)
-    A, v      = A[:, :-B_cols], A[:, -B_cols:]
-    pivots    = list(filter(lambda p: p < col, pivots))
-    rank      = len(pivots)
+    A, v = A[:, :-B_cols], A[:, -B_cols:]
+    pivots = list(filter(lambda p: p < col, pivots))
+    rank = len(pivots)
 
     # Bring to block form
     permutation = Matrix(range(col)).T
@@ -555,26 +559,28 @@ def _gauss_jordan_solve(M, B, freevar=False):
 
     # Get index of free symbols (free parameters)
     # non-pivots columns are free variables
-    free_var_index = permutation[len(pivots):]
+    free_var_index = permutation[len(pivots) :]
 
     # Free parameters
     # what are current unnumbered free symbol names?
-    name = _uniquely_named_symbol('tau', aug,
-            compare=lambda i: str(i).rstrip('1234567890')).name
-    gen  = numbered_symbols(name)
-    tau  = Matrix([next(gen) for k in range((col - rank)*B_cols)]).reshape(
-            col - rank, B_cols)
+    name = _uniquely_named_symbol(
+        "tau", aug, compare=lambda i: str(i).rstrip("1234567890")
+    ).name
+    gen = numbered_symbols(name)
+    tau = Matrix([next(gen) for k in range((col - rank) * B_cols)]).reshape(
+        col - rank, B_cols
+    )
 
     # Full parametric solution
-    V        = A[:rank, [c for c in range(A.cols) if c not in pivots]]
-    vt       = v[:rank, :]
+    V = A[:rank, [c for c in range(A.cols) if c not in pivots]]
+    vt = v[:rank, :]
     free_sol = tau.vstack(vt - V * tau, tau)
 
     # Undo permutation
     sol = zeros(col, B_cols)
 
     for k in range(col):
-        sol[permutation[k], :] = free_sol[k,:]
+        sol[permutation[k], :] = free_sol[k, :]
 
     sol, tau = cls(sol), cls(tau)
 
@@ -664,19 +670,20 @@ def _pinv_solve(M, B, arbitrary_matrix=None):
 
     from sympy.matrices import eye
 
-    A      = M
+    A = M
     A_pinv = M.pinv()
 
     if arbitrary_matrix is None:
-        rows, cols       = A.cols, B.cols
-        w                = symbols('w:{0}_:{1}'.format(rows, cols), cls=Dummy)
+        rows, cols = A.cols, B.cols
+        w = symbols("w:{0}_:{1}".format(rows, cols), cls=Dummy)
         arbitrary_matrix = M.__class__(cols, rows, w).T
 
-    return A_pinv.multiply(B) + (eye(A.cols) -
-            A_pinv.multiply(A)).multiply(arbitrary_matrix)
+    return A_pinv.multiply(B) + (eye(A.cols) - A_pinv.multiply(A)).multiply(
+        arbitrary_matrix
+    )
 
 
-def _solve(M, rhs, method='GJ'):
+def _solve(M, rhs, method="GJ"):
     """Solves linear equation where the unique solution exists.
 
     Parameters
@@ -723,34 +730,36 @@ def _solve(M, rhs, method='GJ'):
         for solving the system will be suggested.
     """
 
-    if method == 'GJ' or method == 'GE':
+    if method == "GJ" or method == "GE":
         try:
             soln, param = M.gauss_jordan_solve(rhs)
 
             if param:
-                raise NonInvertibleMatrixError("Matrix det == 0; not invertible. "
-                "Try ``M.gauss_jordan_solve(rhs)`` to obtain a parametric solution.")
+                raise NonInvertibleMatrixError(
+                    "Matrix det == 0; not invertible. "
+                    "Try ``M.gauss_jordan_solve(rhs)`` to obtain a parametric solution."
+                )
 
         except ValueError:
             raise NonInvertibleMatrixError("Matrix det == 0; not invertible.")
 
         return soln
 
-    elif method == 'LU':
+    elif method == "LU":
         return M.LUsolve(rhs)
-    elif method == 'CH':
+    elif method == "CH":
         return M.cholesky_solve(rhs)
-    elif method == 'QR':
+    elif method == "QR":
         return M.QRsolve(rhs)
-    elif method == 'LDL':
+    elif method == "LDL":
         return M.LDLsolve(rhs)
-    elif method == 'PINV':
+    elif method == "PINV":
         return M.pinv_solve(rhs)
     else:
         return M.inv(method=method).multiply(rhs)
 
 
-def _solve_least_squares(M, rhs, method='CH'):
+def _solve_least_squares(M, rhs, method="CH"):
     """Return the least-square fit to the data.
 
     Parameters
@@ -826,13 +835,13 @@ def _solve_least_squares(M, rhs, method='CH'):
 
     """
 
-    if method == 'CH':
+    if method == "CH":
         return M.cholesky_solve(rhs)
-    elif method == 'QR':
+    elif method == "QR":
         return M.QRsolve(rhs)
-    elif method == 'LDL':
+    elif method == "LDL":
         return M.LDLsolve(rhs)
-    elif method == 'PINV':
+    elif method == "PINV":
         return M.pinv_solve(rhs)
     else:
         t = M.H

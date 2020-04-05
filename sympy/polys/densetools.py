@@ -3,39 +3,53 @@
 from __future__ import print_function, division
 
 from sympy.polys.densearith import (
-    dup_add_term, dmp_add_term,
+    dup_add_term,
+    dmp_add_term,
     dup_lshift,
-    dup_add, dmp_add,
-    dup_sub, dmp_sub,
-    dup_mul, dmp_mul,
+    dup_add,
+    dmp_add,
+    dup_sub,
+    dmp_sub,
+    dup_mul,
+    dmp_mul,
     dup_sqr,
     dup_div,
-    dup_rem, dmp_rem,
+    dup_rem,
+    dmp_rem,
     dmp_expand,
-    dup_mul_ground, dmp_mul_ground,
-    dup_quo_ground, dmp_quo_ground,
-    dup_exquo_ground, dmp_exquo_ground,
+    dup_mul_ground,
+    dmp_mul_ground,
+    dup_quo_ground,
+    dmp_quo_ground,
+    dup_exquo_ground,
+    dmp_exquo_ground,
 )
 from sympy.polys.densebasic import (
-    dup_strip, dmp_strip,
-    dup_convert, dmp_convert,
-    dup_degree, dmp_degree,
+    dup_strip,
+    dmp_strip,
+    dup_convert,
+    dmp_convert,
+    dup_degree,
+    dmp_degree,
     dmp_to_dict,
     dmp_from_dict,
-    dup_LC, dmp_LC, dmp_ground_LC,
-    dup_TC, dmp_TC,
-    dmp_zero, dmp_ground,
+    dup_LC,
+    dmp_LC,
+    dmp_ground_LC,
+    dup_TC,
+    dmp_TC,
+    dmp_zero,
+    dmp_ground,
     dmp_zero_p,
-    dup_to_raw_dict, dup_from_raw_dict,
-    dmp_zeros
+    dup_to_raw_dict,
+    dup_from_raw_dict,
+    dmp_zeros,
 )
-from sympy.polys.polyerrors import (
-    MultivariatePolynomialError,
-    DomainError
-)
+from sympy.polys.polyerrors import MultivariatePolynomialError, DomainError
 from sympy.utilities import variations
 
 from math import ceil as _ceil, log as _log
+
 
 def dup_integrate(f, m, K):
     """
@@ -56,7 +70,7 @@ def dup_integrate(f, m, K):
     if m <= 0 or not f:
         return f
 
-    g = [K.zero]*m
+    g = [K.zero] * m
 
     for i, c in enumerate(reversed(f)):
         n = i + 1
@@ -111,7 +125,7 @@ def _rec_integrate_in(g, m, v, i, j, K):
 
     w, i = v - 1, i + 1
 
-    return dmp_strip([ _rec_integrate_in(c, m, w, i, j, K) for c in g ], v)
+    return dmp_strip([_rec_integrate_in(c, m, w, i, j, K) for c in g], v)
 
 
 def dmp_integrate_in(f, m, j, u, K):
@@ -164,7 +178,7 @@ def dup_diff(f, m, K):
 
     if m == 1:
         for coeff in f[:-m]:
-            deriv.append(K(n)*coeff)
+            deriv.append(K(n) * coeff)
             n -= 1
     else:
         for coeff in f[:-m]:
@@ -173,7 +187,7 @@ def dup_diff(f, m, K):
             for i in range(n - 1, n - m, -1):
                 k *= i
 
-            deriv.append(K(k)*coeff)
+            deriv.append(K(k) * coeff)
             n -= 1
 
     return dup_strip(deriv)
@@ -233,7 +247,7 @@ def _rec_diff_in(g, m, v, i, j, K):
 
     w, i = v - 1, i + 1
 
-    return dmp_strip([ _rec_diff_in(c, m, w, i, j, K) for c in g ], v)
+    return dmp_strip([_rec_diff_in(c, m, w, i, j, K) for c in g], v)
 
 
 def dmp_diff_in(f, m, j, u, K):
@@ -322,7 +336,7 @@ def _rec_eval_in(g, a, v, i, j, K):
 
     v, i = v - 1, i + 1
 
-    return dmp_strip([ _rec_eval_in(c, a, v, i, j, K) for c in g ], v)
+    return dmp_strip([_rec_eval_in(c, a, v, i, j, K) for c in g], v)
 
 
 def dmp_eval_in(f, a, j, u, K):
@@ -354,7 +368,7 @@ def _rec_eval_tail(g, i, A, u, K):
     if i == u:
         return dup_eval(g, A[-1], K)
     else:
-        h = [ _rec_eval_tail(c, i + 1, A, u, K) for c in g ]
+        h = [_rec_eval_tail(c, i + 1, A, u, K) for c in g]
 
         if i < u - len(A) + 1:
             return h
@@ -401,7 +415,7 @@ def _rec_diff_eval(g, m, a, v, i, j, K):
 
     v, i = v - 1, i + 1
 
-    return dmp_strip([ _rec_diff_eval(c, m, a, v, i, j, K) for c in g ], v)
+    return dmp_strip([_rec_diff_eval(c, m, a, v, i, j, K) for c in g], v)
 
 
 def dmp_diff_eval_in(f, m, a, j, u, K):
@@ -455,7 +469,7 @@ def dup_trunc(f, p, K):
             else:
                 g.append(c)
     else:
-        g = [ c % p for c in f ]
+        g = [c % p for c in f]
 
     return dup_strip(g)
 
@@ -477,7 +491,7 @@ def dmp_trunc(f, p, u, K):
     11*x**2 + 11*x + 5
 
     """
-    return dmp_strip([ dmp_rem(c, p, u - 1, K) for c in f ], u)
+    return dmp_strip([dmp_rem(c, p, u - 1, K) for c in f], u)
 
 
 def dmp_ground_trunc(f, p, u, K):
@@ -501,7 +515,7 @@ def dmp_ground_trunc(f, p, u, K):
 
     v = u - 1
 
-    return dmp_strip([ dmp_ground_trunc(c, p, v, K) for c in f ], u)
+    return dmp_strip([dmp_ground_trunc(c, p, v, K) for c in f], u)
 
 
 def dup_monic(f, K):
@@ -792,7 +806,9 @@ def dup_real_imag(f, K):
 
     """
     if not K.is_ZZ and not K.is_QQ:
-        raise DomainError("computing real and imaginary parts is not supported over %s" % K)
+        raise DomainError(
+            "computing real and imaginary parts is not supported over %s" % K
+        )
 
     f1 = dmp_zero(1)
     f2 = dmp_zero(1)
@@ -863,7 +879,7 @@ def dup_scale(f, a, K):
     f, n, b = list(f), len(f) - 1, a
 
     for i in range(n - 1, -1, -1):
-        f[i], b = b*f[i], b*a
+        f[i], b = b * f[i], b * a
 
     return f
 
@@ -886,7 +902,7 @@ def dup_shift(f, a, K):
 
     for i in range(n, 0, -1):
         for j in range(0, i):
-            f[j + 1] += a*f[j]
+            f[j + 1] += a * f[j]
 
     return f
 
@@ -986,7 +1002,7 @@ def _dup_right_decompose(f, s, K):
     lc = dup_LC(f, K)
 
     f = dup_to_raw_dict(f)
-    g = { s: K.one }
+    g = {s: K.one}
 
     r = n // s
 
@@ -1001,9 +1017,9 @@ def _dup_right_decompose(f, s, K):
                 continue
 
             fc, gc = f[n + j - i], g[s - j]
-            coeff += (i - r*j)*fc*gc
+            coeff += (i - r * j) * fc * gc
 
-        g[s - i] = K.quo(coeff, i*r*lc)
+        g[s - i] = K.quo(coeff, i * r * lc)
 
     return dup_from_raw_dict(g, K)
 
@@ -1113,8 +1129,7 @@ def dmp_lift(f, u, K):
 
     """
     if not K.is_Algebraic:
-        raise DomainError(
-            'computation can be done only in an algebraic domain')
+        raise DomainError("computation can be done only in an algebraic domain")
 
     F, monoms, polys = dmp_to_dict(f, u), [], []
 
@@ -1153,7 +1168,7 @@ def dup_sign_variations(f, K):
     prev, k = K.zero, 0
 
     for coeff in f:
-        if K.is_negative(coeff*prev):
+        if K.is_negative(coeff * prev):
             k += 1
 
         if coeff:

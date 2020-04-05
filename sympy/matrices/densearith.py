@@ -7,9 +7,9 @@ as a list of lists.
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
 SymPyDeprecationWarning(
-    feature="densearith",
-    issue=12695,
-    deprecated_since_version="1.1").warn()
+    feature="densearith", issue=12695, deprecated_since_version="1.1"
+).warn()
+
 
 def add(matlist1, matlist2, K):
     """
@@ -40,6 +40,7 @@ def add(matlist1, matlist2, K):
     addrow
     """
     return [addrow(row1, row2, K) for row1, row2 in zip(matlist1, matlist2)]
+
 
 def addrow(row1, row2, K):
     """
@@ -222,7 +223,7 @@ def mulrowscaler(row, scaler, K):
     [6, 8, 10]
 
     """
-    return [scaler*element for element in row]
+    return [scaler * element for element in row]
 
 
 def mulrowcol(row, col, K):
@@ -248,5 +249,5 @@ def mulrowcol(row, col, K):
     """
     result = K.zero
     for i in range(len(row)):
-        result += row[i]*col[i]
+        result += row[i] * col[i]
     return result

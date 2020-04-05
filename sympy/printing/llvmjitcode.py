@@ -1,10 +1,10 @@
 from __future__ import print_function, division
 
-'''
+"""
 Use llvmlite to create executable functions from Sympy expressions
 
 This module requires llvmlite (https://github.com/numba/llvmlite).
-'''
+"""
 
 import ctypes
 
@@ -13,20 +13,21 @@ from sympy.printing.printer import Printer
 from sympy import S, IndexedBase
 from sympy.utilities.decorator import doctest_depends_on
 
-llvmlite = import_module('llvmlite')
+llvmlite = import_module("llvmlite")
 if llvmlite:
-    ll = import_module('llvmlite.ir').ir
-    llvm = import_module('llvmlite.binding').binding
+    ll = import_module("llvmlite.ir").ir
+    llvm = import_module("llvmlite.binding").binding
     llvm.initialize()
     llvm.initialize_native_target()
     llvm.initialize_native_asmprinter()
 
 
-__doctest_requires__ = {('llvm_callable'): ['llvmlite']}
+__doctest_requires__ = {("llvm_callable"): ["llvmlite"]}
 
 
 class LLVMJitPrinter(Printer):
-    '''Convert expressions to LLVM IR'''
+    """Convert expressions to LLVM IR"""
+
     def __init__(self, module, builder, fn, *args, **kwargs):
         self.func_arg_map = kwargs.pop("func_arg_map", {})
         if not llvmlite:
@@ -106,8 +107,7 @@ class LLVMJitPrinter(Printer):
         return self.builder.call(fn, [e0], name)
 
     def emptyPrinter(self, expr):
-        raise TypeError("Unsupported type for LLVM JIT conversion: %s"
-                        % type(expr))
+        raise TypeError("Unsupported type for LLVM JIT conversion: %s" % type(expr))
 
 
 # Used when parameters are passed by array.  Often used in callbacks to
@@ -133,8 +133,7 @@ class LLVMJitCallbackPrinter(LLVMJitPrinter):
         if not array:
             raise LookupError("Symbol not found: %s" % s)
         array_ptr = self.builder.gep(array, [ll.Constant(ll.IntType(32), idx)])
-        fp_array_ptr = self.builder.bitcast(array_ptr,
-                                            ll.PointerType(self.fp_type))
+        fp_array_ptr = self.builder.bitcast(array_ptr, ll.PointerType(self.fp_type))
         value = self.builder.load(fp_array_ptr)
         return value
 
@@ -152,12 +151,12 @@ class LLVMJitCode(object):
     def __init__(self, signature):
         self.signature = signature
         self.fp_type = ll.DoubleType()
-        self.module = ll.Module('mod1')
+        self.module = ll.Module("mod1")
         self.fn = None
         self.llvm_arg_types = []
         self.llvm_ret_type = self.fp_type
         self.param_dict = {}  # map symbol name to LLVM function argument
-        self.link_name = ''
+        self.link_name = ""
 
     def _from_ctype(self, ctype):
         if ctype == ctypes.c_int:
@@ -176,13 +175,12 @@ class LLVMJitCode(object):
     def _create_args(self, func_args):
         """Create types for function arguments"""
         self.llvm_ret_type = self._from_ctype(self.signature.ret_type)
-        self.llvm_arg_types = \
-            [self._from_ctype(a) for a in self.signature.arg_ctypes]
+        self.llvm_arg_types = [self._from_ctype(a) for a in self.signature.arg_ctypes]
 
     def _create_function_base(self):
         """Create function with name and type signature"""
         global link_names, current_link_suffix
-        default_link_name = 'jit_func'
+        default_link_name = "jit_func"
         current_link_suffix += 1
         self.link_name = default_link_name + str(current_link_suffix)
         link_names.add(self.link_name)
@@ -198,11 +196,10 @@ class LLVMJitCode(object):
 
     def _create_function(self, expr):
         """Create function body and return LLVM IR"""
-        bb_entry = self.fn.append_basic_block('entry')
+        bb_entry = self.fn.append_basic_block("entry")
         builder = ll.IRBuilder(bb_entry)
 
-        lj = LLVMJitPrinter(self.module, builder, self.fn,
-                            func_arg_map=self.param_dict)
+        lj = LLVMJitPrinter(self.module, builder, self.fn, func_arg_map=self.param_dict)
 
         ret = self._convert_expr(lj, expr)
         lj.builder.ret(self._wrap_return(lj, ret))
@@ -234,7 +231,7 @@ class LLVMJitCode(object):
             # This should be Py_ssize_t
             tuple_arg_types = [ll.IntType(32)]
 
-            tuple_arg_types.extend([void_ptr]*len(vals))
+            tuple_arg_types.extend([void_ptr] * len(vals))
             tuple_type = ll.FunctionType(void_ptr, tuple_arg_types)
             tuple_fn = ll.Function(lj.module, tuple_type, "PyTuple_Pack")
 
@@ -252,7 +249,9 @@ class LLVMJitCode(object):
                 tmp_exprs = expr[0]
                 final_exprs = expr[1]
                 if len(final_exprs) != 1 and self.signature.ret_type == ctypes.c_double:
-                    raise NotImplementedError("Return of multiple expressions not supported for this callback")
+                    raise NotImplementedError(
+                        "Return of multiple expressions not supported for this callback"
+                    )
                 for name, e in tmp_exprs:
                     val = lj._print(e)
                     lj._add_tmp_var(name, val)
@@ -274,8 +273,7 @@ class LLVMJitCode(object):
 
         pass_manager.run(llmod)
 
-        target_machine = \
-            llvm.Target.from_default_triple().create_target_machine()
+        target_machine = llvm.Target.from_default_triple().create_target_machine()
         exe_eng = llvm.create_mcjit_compiler(llmod, target_machine)
         exe_eng.finalize_object()
         exe_engines.append(exe_eng)
@@ -299,22 +297,23 @@ class LLVMJitCodeCallback(LLVMJitCode):
                 self.param_dict[a] = (self.fn.args[i], i)
                 self.fn.args[i].name = str(a)
             else:
-                self.param_dict[a] = (self.fn.args[self.signature.input_arg],
-                                      i)
+                self.param_dict[a] = (self.fn.args[self.signature.input_arg], i)
 
     def _create_function(self, expr):
         """Create function body and return LLVM IR"""
-        bb_entry = self.fn.append_basic_block('entry')
+        bb_entry = self.fn.append_basic_block("entry")
         builder = ll.IRBuilder(bb_entry)
 
-        lj = LLVMJitCallbackPrinter(self.module, builder, self.fn,
-                                    func_arg_map=self.param_dict)
+        lj = LLVMJitCallbackPrinter(
+            self.module, builder, self.fn, func_arg_map=self.param_dict
+        )
 
         ret = self._convert_expr(lj, expr)
 
         if self.signature.ret_arg:
-            output_fp_ptr = builder.bitcast(self.fn.args[self.signature.ret_arg],
-                                            ll.PointerType(self.fp_type))
+            output_fp_ptr = builder.bitcast(
+                self.fn.args[self.signature.ret_arg], ll.PointerType(self.fp_type)
+            )
             for i, val in enumerate(ret):
                 index = ll.Constant(ll.IntType(32), i)
                 output_array_ptr = builder.gep(output_fp_ptr, [index])
@@ -358,9 +357,9 @@ def _llvm_jit_code(args, expr, signature, callback_type):
     return fptr
 
 
-@doctest_depends_on(modules=('llvmlite', 'scipy'))
+@doctest_depends_on(modules=("llvmlite", "scipy"))
 def llvm_callable(args, expr, callback_type=None):
-    '''Compile function from a Sympy expression
+    """Compile function from a Sympy expression
 
     Expressions are evaluated using double precision arithmetic.
     Some single argument math functions (exp, sin, cos, etc.) are supported
@@ -439,7 +438,7 @@ def llvm_callable(args, expr, callback_type=None):
     >>> j1 = jit.llvm_callable([x,y], after_cse)
     >>> j1(1.0, 2.0)
     (5.0, 28.0)
-    '''
+    """
 
     if not llvmlite:
         raise ImportError("llvmlite is required for llvmjitcode")
@@ -451,18 +450,19 @@ def llvm_callable(args, expr, callback_type=None):
         for _ in args:
             arg_ctype = ctypes.c_double
             arg_ctypes.append(arg_ctype)
-    elif callback_type == 'scipy.integrate' or callback_type == 'scipy.integrate.test':
+    elif callback_type == "scipy.integrate" or callback_type == "scipy.integrate.test":
         signature.ret_type = ctypes.c_double
         arg_ctypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_double)]
         arg_ctypes_formal = [ctypes.c_int, ctypes.c_double]
         signature.input_arg = 1
-    elif callback_type == 'cubature':
-        arg_ctypes = [ctypes.c_int,
-                      ctypes.POINTER(ctypes.c_double),
-                      ctypes.c_void_p,
-                      ctypes.c_int,
-                      ctypes.POINTER(ctypes.c_double)
-                      ]
+    elif callback_type == "cubature":
+        arg_ctypes = [
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.c_void_p,
+            ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double),
+        ]
         signature.ret_type = ctypes.c_int
         signature.input_arg = 1
         signature.ret_arg = 4
@@ -473,7 +473,7 @@ def llvm_callable(args, expr, callback_type=None):
 
     fptr = _llvm_jit_code(args, expr, signature, callback_type)
 
-    if callback_type and callback_type == 'scipy.integrate':
+    if callback_type and callback_type == "scipy.integrate":
         arg_ctypes = arg_ctypes_formal
 
     cfunc = ctypes.CFUNCTYPE(signature.ret_type, *arg_ctypes)(fptr)

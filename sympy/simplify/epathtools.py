@@ -38,14 +38,14 @@ class EPath(object):
 
         _path = path
 
-        if path[0] == '/':
+        if path[0] == "/":
             path = path[1:]
         else:
             raise NotImplementedError("non-root EPath")
 
         epath = []
 
-        for selector in path.split('/'):
+        for selector in path.split("/"):
             selector = selector.strip()
 
             if not selector:
@@ -54,7 +54,7 @@ class EPath(object):
             index = 0
 
             for c in selector:
-                if c.isalnum() or c == '_' or c == '|' or c == '?':
+                if c.isalnum() or c == "_" or c == "|" or c == "?":
                     index += 1
                 else:
                     break
@@ -66,34 +66,34 @@ class EPath(object):
                 elements = selector[:index]
                 selector = selector[index:]
 
-                for element in elements.split('|'):
+                for element in elements.split("|"):
                     element = element.strip()
 
                     if not element:
                         raise ValueError("empty element")
 
-                    if element.endswith('?'):
+                    if element.endswith("?"):
                         attrs.append(element[:-1])
                     else:
                         types.append(element)
 
             span = None
 
-            if selector == '*':
+            if selector == "*":
                 pass
             else:
-                if selector.startswith('['):
+                if selector.startswith("["):
                     try:
-                        i = selector.index(']')
+                        i = selector.index("]")
                     except ValueError:
                         raise ValueError("expected ']', got EOL")
 
                     _span, span = selector[1:i], []
 
-                    if ':' not in _span:
+                    if ":" not in _span:
                         span = int(_span)
                     else:
-                        for elt in _span.split(':', 3):
+                        for elt in _span.split(":", 3):
                             if not elt:
                                 span.append(None)
                             else:
@@ -101,7 +101,7 @@ class EPath(object):
 
                         span = slice(*span)
 
-                    selector = selector[i + 1:]
+                    selector = selector[i + 1 :]
 
                 if selector:
                     raise ValueError("trailing characters in selector")
@@ -137,7 +137,7 @@ class EPath(object):
 
     def _hastypes(self, expr, types):
         """Check if ``expr`` is any of ``types``. """
-        _types = [ cls.__name__ for cls in expr.__class__.mro() ]
+        _types = [cls.__name__ for cls in expr.__class__.mro()]
         return bool(set(_types).intersection(types))
 
     def _has(self, expr, attrs, types):
@@ -177,6 +177,7 @@ class EPath(object):
         t + sin(2*x + 1) + cos(2*x + 2*y + E)
 
         """
+
         def _apply(path, expr, func):
             if not path:
                 return func(expr)
@@ -189,7 +190,7 @@ class EPath(object):
                         args, basic = self._get_ordered_args(expr), True
                     else:
                         return expr
-                elif hasattr(expr, '__iter__'):
+                elif hasattr(expr, "__iter__"):
                     args, basic = expr, False
                 else:
                     return expr
@@ -258,7 +259,7 @@ class EPath(object):
 
                 if isinstance(expr, Basic):
                     args = self._get_ordered_args(expr)
-                elif hasattr(expr, '__iter__'):
+                elif hasattr(expr, "__iter__"):
                     args = expr
                 else:
                     return

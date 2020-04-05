@@ -1,11 +1,24 @@
 """Implementation of mathematical domains. """
 
-__all__ = ['Domain', 'FiniteField', 'IntegerRing', 'RationalField',
-           'RealField', 'ComplexField', 'PythonFiniteField',
-           'GMPYFiniteField', 'PythonIntegerRing',
-           'GMPYIntegerRing', 'PythonRational',
-           'GMPYRationalField', 'AlgebraicField', 'PolynomialRing',
-           'FractionField', 'ExpressionDomain', 'PythonRational']
+__all__ = [
+    "Domain",
+    "FiniteField",
+    "IntegerRing",
+    "RationalField",
+    "RealField",
+    "ComplexField",
+    "PythonFiniteField",
+    "GMPYFiniteField",
+    "PythonIntegerRing",
+    "GMPYIntegerRing",
+    "PythonRational",
+    "GMPYRationalField",
+    "AlgebraicField",
+    "PolynomialRing",
+    "FractionField",
+    "ExpressionDomain",
+    "PythonRational",
+]
 
 from .domain import Domain
 from .finitefield import FiniteField
@@ -40,8 +53,8 @@ CC = ComplexField()
 from sympy.core.compatibility import GROUND_TYPES
 
 _GROUND_TYPES_MAP = {
-    'gmpy': (FF_gmpy, ZZ_gmpy(), QQ_gmpy()),
-    'python': (FF_python, ZZ_python(), QQ_python()),
+    "gmpy": (FF_gmpy, ZZ_gmpy(), QQ_gmpy()),
+    "python": (FF_python, ZZ_python(), QQ_python()),
 }
 
 try:
@@ -53,9 +66,20 @@ GF = FF
 
 EX = ExpressionDomain()
 
-__all__.extend([
-    "FF_python", "FF_gmpy",
-    "ZZ_python", "ZZ_gmpy",
-    "QQ_python", "QQ_gmpy",
-    "GF", "FF", "ZZ", "QQ", "RR", "CC", "EX",
-])
+__all__.extend(
+    [
+        "FF_python",
+        "FF_gmpy",
+        "ZZ_python",
+        "ZZ_gmpy",
+        "QQ_python",
+        "QQ_gmpy",
+        "GF",
+        "FF",
+        "ZZ",
+        "QQ",
+        "RR",
+        "CC",
+        "EX",
+    ]
+)

@@ -129,22 +129,24 @@ def rational_algorithm(f, x, k, order=4, full=False):
 
                     xc = xterm[0].coeff(x)
                     a /= -xc
-                    num /= xc**j
+                    num /= xc ** j
 
-                    ak = ((-1)**j * num *
-                          binomial(j + k - 1, k).rewrite(factorial) /
-                          a**(j + k))
+                    ak = (
+                        (-1) ** j
+                        * num
+                        * binomial(j + k - 1, k).rewrite(factorial)
+                        / a ** (j + k)
+                    )
                     coeff += ak
 
             # Hacky, better way?
             if coeff.is_zero:
                 return None
-            if (coeff.has(x) or coeff.has(zoo) or coeff.has(oo) or
-                    coeff.has(nan)):
+            if coeff.has(x) or coeff.has(zoo) or coeff.has(oo) or coeff.has(nan):
                 return None
 
             for j in range(i):
-                coeff = (coeff / (k + j + 1))
+                coeff = coeff / (k + j + 1)
                 sep = integrate(sep, x)
                 sep += (ds.pop() - sep).limit(x, 0)  # constant of integration
             return (coeff.subs(k, k - i), sep, i)
@@ -206,11 +208,11 @@ def simpleDE(f, x, g, order=4):
     """
     from sympy.solvers.solveset import linsolve
 
-    a = symbols('a:%d' % (order))
+    a = symbols("a:%d" % (order))
 
     def _makeDE(k):
-        eq = f.diff(x, k) + Add(*[a[i]*f.diff(x, i) for i in range(0, k)])
-        DE = g(x).diff(x, k) + Add(*[a[i]*g(x).diff(x, i) for i in range(0, k)])
+        eq = f.diff(x, k) + Add(*[a[i] * f.diff(x, i) for i in range(0, k)])
+        DE = g(x).diff(x, k) + Add(*[a[i] * g(x).diff(x, i) for i in range(0, k)])
         return eq, DE
 
     found = False
@@ -324,19 +326,19 @@ def hyper_re(DE, r, k):
 
     RE = RE.subs(k, k - mini)
 
-    m = Wild('m')
+    m = Wild("m")
     return RE.collect(r(k + m))
 
 
 def _transformation_a(f, x, P, Q, k, m, shift):
-    f *= x**(-shift)
+    f *= x ** (-shift)
     P = P.subs(k, k + shift)
     Q = Q.subs(k, k + shift)
     return f, P, Q, m
 
 
 def _transformation_c(f, x, P, Q, k, m, scale):
-    f = f.subs(x, x**scale)
+    f = f.subs(x, x ** scale)
     P = P.subs(k, k / scale)
     Q = Q.subs(k, k / scale)
     m *= scale
@@ -359,8 +361,10 @@ def _apply_scale(sol, scale):
 
 
 def _apply_integrate(sol, x, k):
-    return [(res / ((cond + 1)*(cond.as_coeff_Add()[1].coeff(k))), cond + 1)
-            for res, cond in sol]
+    return [
+        (res / ((cond + 1) * (cond.as_coeff_Add()[1].coeff(k))), cond + 1)
+        for res, cond in sol
+    ]
 
 
 def _compute_formula(f, x, P, Q, k, m, k_max):
@@ -375,19 +379,19 @@ def _compute_formula(f, x, P, Q, k, m, k_max):
         if r.is_zero:
             continue
 
-        kterm = m*k + i
+        kterm = m * k + i
         res = r
 
         p = P.subs(k, kterm)
         q = Q.subs(k, kterm)
-        c1 = p.subs(k, 1/k).leadterm(k)[0]
-        c2 = q.subs(k, 1/k).leadterm(k)[0]
-        res *= (-c1 / c2)**k
+        c1 = p.subs(k, 1 / k).leadterm(k)[0]
+        c2 = q.subs(k, 1 / k).leadterm(k)[0]
+        res *= (-c1 / c2) ** k
 
         for r, mul in roots(p, k).items():
-            res *= rf(-r, k)**mul
+            res *= rf(-r, k) ** mul
         for r, mul in roots(q, k).items():
-            res /= rf(-r, k)**mul
+            res /= rf(-r, k) ** mul
 
         sol.append((res, kterm))
 
@@ -410,8 +414,7 @@ def _rsolve_hypergeometric(f, x, P, Q, k, m):
     proots, qroots = roots(P, k), roots(Q, k)
     all_roots = dict(proots)
     all_roots.update(qroots)
-    scale = lcm([r.as_numer_denom()[1] for r, t in all_roots.items()
-                 if r.is_rational])
+    scale = lcm([r.as_numer_denom()[1] for r, t in all_roots.items() if r.is_rational])
     f, P, Q, m = _transformation_c(f, x, P, Q, k, m, scale)
 
     # transformation - a
@@ -423,7 +426,7 @@ def _rsolve_hypergeometric(f, x, P, Q, k, m):
     shift = k_min + m
     f, P, Q, m = _transformation_a(f, x, P, Q, k, m, shift)
 
-    l = (x*f).limit(x, 0)
+    l = (x * f).limit(x, 0)
     if not isinstance(l, Limit) and l != 0:  # Ideally should only be l != 0
         return None
 
@@ -448,11 +451,11 @@ def _rsolve_hypergeometric(f, x, P, Q, k, m):
             mp += 1
             return sol, ind, mp
         elif r:
-            ind += r*x**(i + shift)
+            ind += r * x ** (i + shift)
             pow_x = Rational((i + shift), scale)
             if pow_x > mp:
                 mp = pow_x  # maximum power of x
-    ind = ind.subs(x, x**(1/scale))
+    ind = ind.subs(x, x ** (1 / scale))
 
     sol = _compute_formula(f, x, P, Q, k, m, k_max)
     sol = _apply_shift(sol, shift)
@@ -519,7 +522,7 @@ def rsolve_hypergeometric(f, x, P, Q, k, m):
         c = mk.coeff(k)
 
         if j.is_integer is False:
-            res *= x**frac(j)
+            res *= x ** frac(j)
             j = floor(j)
 
         res = res.subs(k, (k - j) / c)
@@ -542,7 +545,7 @@ def rsolve_hypergeometric(f, x, P, Q, k, m):
     #  save all the terms of
     #  form 1/x**k in ind
     if s < 0:
-        ind += sum(sequence(sol * x**k, (k, s, -1)))
+        ind += sum(sequence(sol * x ** k, (k, s, -1)))
         s = S.Zero
 
     return (sol, ind, s)
@@ -643,7 +646,7 @@ def _transform_DE_RE(DE, g, k, order, syms):
         eq.append(coeff)
     sol = dict(zip(syms, (i for s in linsolve(eq, list(syms)) for i in s)))
     if sol:
-        m = Wild('m')
+        m = Wild("m")
         RE = RE.subs(sol)
         RE = RE.factor().as_numer_denom()[0].collect(g(k + m))
         RE = RE.as_coeff_mul(g)[1][0]
@@ -735,7 +738,7 @@ def hyper_algorithm(f, x, k, order=4):
     sympy.series.formal.simpleDE
     sympy.series.formal.solve_de
     """
-    g = Function('g')
+    g = Function("g")
 
     des = []  # list of DE's
     sol = None
@@ -762,11 +765,11 @@ def _compute_fps(f, x, x0, dir, hyper, order, rational, full):
     """
     if x0 in [S.Infinity, S.NegativeInfinity]:
         dir = S.One if x0 is S.Infinity else -S.One
-        temp = f.subs(x, 1/x)
+        temp = f.subs(x, 1 / x)
         result = _compute_fps(temp, x, 0, dir, hyper, order, rational, full)
         if result is None:
             return None
-        return (result[0], result[1].subs(x, 1/x), result[2].subs(x, 1/x))
+        return (result[0], result[1].subs(x, 1 / x), result[2].subs(x, 1 / x))
     elif x0 or dir == -S.One:
         if dir == -S.One:
             rep = -x + x0
@@ -780,13 +783,16 @@ def _compute_fps(f, x, x0, dir, hyper, order, rational, full):
         result = _compute_fps(temp, x, 0, S.One, hyper, order, rational, full)
         if result is None:
             return None
-        return (result[0], result[1].subs(x, rep2 + rep2b),
-                result[2].subs(x, rep2 + rep2b))
+        return (
+            result[0],
+            result[1].subs(x, rep2 + rep2b),
+            result[2].subs(x, rep2 + rep2b),
+        )
 
     if f.is_polynomial(x):
-        k = Dummy('k')
+        k = Dummy("k")
         ak = sequence(Coeff(f, x, k), (k, 1, oo))
-        xk = sequence(x**k, (k, 0, oo))
+        xk = sequence(x ** k, (k, 0, oo))
         ind = f.coeff(x, 0)
         return ak, xk, ind
 
@@ -810,7 +816,7 @@ def _compute_fps(f, x, x0, dir, hyper, order, rational, full):
                 else:
                     seq = res[0]
                     s, f = res[0].start, ak.start
-                save = Add(*[z[0]*z[1] for z in zip(seq[0:(f - s)], xk[s:f])])
+                save = Add(*[z[0] * z[1] for z in zip(seq[0 : (f - s)], xk[s:f])])
                 ak += res[0]
                 ind += res[2] + save
             else:
@@ -830,7 +836,7 @@ def _compute_fps(f, x, x0, dir, hyper, order, rational, full):
     result = None
 
     # from here on it's x0=0 and dir=1 handling
-    k = Dummy('k')
+    k = Dummy("k")
     if rational:
         result = rational_algorithm(f, x, k, order, full)
 
@@ -841,15 +847,14 @@ def _compute_fps(f, x, x0, dir, hyper, order, rational, full):
         return None
 
     ak = sequence(result[0], (k, result[2], oo))
-    xk_formula = powsimp(x**k * symb)
+    xk_formula = powsimp(x ** k * symb)
     xk = sequence(xk_formula, (k, 0, oo))
     ind = powsimp(result[1] * symb)
 
     return ak, xk, ind
 
 
-def compute_fps(f, x, x0=0, dir=1, hyper=True, order=4, rational=True,
-                full=False):
+def compute_fps(f, x, x0=0, dir=1, hyper=True, order=4, rational=True, full=False):
     """Computes the formula for Formal Power Series of a function.
 
     Tries to compute the formula by applying the following techniques
@@ -907,9 +912,9 @@ def compute_fps(f, x, x0=0, dir=1, hyper=True, order=4, rational=True,
 
     x0 = sympify(x0)
 
-    if dir == '+':
+    if dir == "+":
         dir = S.One
-    elif dir == '-':
+    elif dir == "-":
         dir = -S.One
     elif dir not in [S.One, -S.One]:
         raise ValueError("Dir must be '+' or '-'")
@@ -923,6 +928,7 @@ class Coeff(Function):
     """
     Coeff(p, x, n) represents the nth coefficient of the polynomial p in x
     """
+
     @classmethod
     def eval(cls, p, x, n):
         if p.is_polynomial(x) and n.is_integer:
@@ -942,6 +948,7 @@ class FormalPowerSeries(SeriesBase):
 
     sympy.series.formal.fps
     """
+
     def __new__(cls, *args):
         args = map(sympify, args)
         return Expr.__new__(cls, *args)
@@ -1002,6 +1009,7 @@ class FormalPowerSeries(SeriesBase):
     def infinite(self):
         """Returns an infinite representation of the series"""
         from sympy.concrete import Sum
+
         ak, xk = self.ak, self.xk
         k = ak.variables[0]
         inf_sum = Sum(ak.formula * xk.formula, (k, ak.start, ak.stop))
@@ -1064,7 +1072,7 @@ class FormalPowerSeries(SeriesBase):
         except IndexError:
             term = S.Zero
         else:
-            term = (pt_ak * pt_xk)
+            term = pt_ak * pt_xk
 
         if self.ind:
             ind = S.Zero
@@ -1109,8 +1117,9 @@ class FormalPowerSeries(SeriesBase):
             form = Piecewise(*form)
             ak = sequence(form.subs(k, k + 1), (k, ak.start - 1, ak.stop))
         else:
-            ak = sequence((ak.formula * pow_xk).subs(k, k + 1),
-                          (k, ak.start - 1, ak.stop))
+            ak = sequence(
+                (ak.formula * pow_xk).subs(k, k + 1), (k, ak.start - 1, ak.stop)
+            )
 
         return self.func(f, self.x, self.x0, self.dir, (ak, self.xk, ind))
 
@@ -1153,8 +1162,9 @@ class FormalPowerSeries(SeriesBase):
             form = Piecewise(*form)
             ak = sequence(form.subs(k, k - 1), (k, ak.start + 1, ak.stop))
         else:
-            ak = sequence((ak.formula / (pow_xk + 1)).subs(k, k - 1),
-                          (k, ak.start + 1, ak.stop))
+            ak = sequence(
+                (ak.formula / (pow_xk + 1)).subs(k, k - 1), (k, ak.start + 1, ak.stop)
+            )
 
         return self.func(f, self.x, self.x0, self.dir, (ak, self.xk, ind))
 
@@ -1196,15 +1206,18 @@ class FormalPowerSeries(SeriesBase):
         other = sympify(other)
 
         if not isinstance(other, FormalPowerSeries):
-            raise ValueError("Both series should be an instance of FormalPowerSeries"
-                             " class.")
+            raise ValueError(
+                "Both series should be an instance of FormalPowerSeries" " class."
+            )
 
         if self.dir != other.dir:
-            raise ValueError("Both series should be calculated from the"
-                             " same direction.")
+            raise ValueError(
+                "Both series should be calculated from the" " same direction."
+            )
         elif self.x0 != other.x0:
-            raise ValueError("Both series should be calculated about the"
-                             " same point.")
+            raise ValueError(
+                "Both series should be calculated about the" " same point."
+            )
 
         elif self.x != other.x:
             raise ValueError("Both series should have the same symbol.")
@@ -1236,9 +1249,11 @@ class FormalPowerSeries(SeriesBase):
 
         """
 
-        inner_coeffs = [bell(n, j, tuple(self.bell_coeff_seq[:n-j+1])) for j in range(1, n+1)]
+        inner_coeffs = [
+            bell(n, j, tuple(self.bell_coeff_seq[: n - j + 1])) for j in range(1, n + 1)
+        ]
 
-        k = Dummy('k')
+        k = Dummy("k")
         return sequence(tuple(inner_coeffs), (k, 1, oo))
 
     def compose(self, other, x=None, n=6):
@@ -1296,22 +1311,27 @@ class FormalPowerSeries(SeriesBase):
         other = sympify(other)
 
         if not isinstance(other, FormalPowerSeries):
-            raise ValueError("Both series should be an instance of FormalPowerSeries"
-                             " class.")
+            raise ValueError(
+                "Both series should be an instance of FormalPowerSeries" " class."
+            )
 
         if self.dir != other.dir:
-            raise ValueError("Both series should be calculated from the"
-                             " same direction.")
+            raise ValueError(
+                "Both series should be calculated from the" " same direction."
+            )
         elif self.x0 != other.x0:
-            raise ValueError("Both series should be calculated about the"
-                             " same point.")
+            raise ValueError(
+                "Both series should be calculated about the" " same point."
+            )
 
         elif self.x != other.x:
             raise ValueError("Both series should have the same symbol.")
 
         if other._eval_term(0).as_coeff_mul(other.x)[0] is not S.Zero:
-            raise ValueError("The formal power series of the inner function should not have any "
-                "constant coefficient term.")
+            raise ValueError(
+                "The formal power series of the inner function should not have any "
+                "constant coefficient term."
+            )
 
         return FormalPowerSeriesCompose(self, other)
 
@@ -1368,8 +1388,10 @@ class FormalPowerSeries(SeriesBase):
             return iter(self)
 
         if self._eval_term(0).is_zero:
-            raise ValueError("Constant coefficient should exist for an inverse of a formal"
-                " power series to exist.")
+            raise ValueError(
+                "Constant coefficient should exist for an inverse of a formal"
+                " power series to exist."
+            )
 
         return FormalPowerSeriesInverse(self)
 
@@ -1378,11 +1400,13 @@ class FormalPowerSeries(SeriesBase):
 
         if isinstance(other, FormalPowerSeries):
             if self.dir != other.dir:
-                raise ValueError("Both series should be calculated from the"
-                                 " same direction.")
+                raise ValueError(
+                    "Both series should be calculated from the" " same direction."
+                )
             elif self.x0 != other.x0:
-                raise ValueError("Both series should be calculated about the"
-                                 " same point.")
+                raise ValueError(
+                    "Both series should be calculated about the" " same point."
+                )
 
             x, y = self.x, other.x
             f = self.function + other.function.subs(y, x)
@@ -1397,7 +1421,7 @@ class FormalPowerSeries(SeriesBase):
             else:
                 seq = self.ak
                 s, e = self.ak.start, other.ak.start
-            save = Add(*[z[0]*z[1] for z in zip(seq[0:(e - s)], self.xk[s:e])])
+            save = Add(*[z[0] * z[1] for z in zip(seq[0 : (e - s)], self.xk[s:e])])
             ind = self.ind + other.ind + save
 
             return self.func(f, x, self.x0, self.dir, (ak, self.xk, ind))
@@ -1406,8 +1430,7 @@ class FormalPowerSeries(SeriesBase):
             f = self.function + other
             ind = self.ind + other
 
-            return self.func(f, self.x, self.x0, self.dir,
-                             (self.ak, self.xk, ind))
+            return self.func(f, self.x, self.x0, self.dir, (self.ak, self.xk, ind))
 
         return Add(self, other)
 
@@ -1415,8 +1438,9 @@ class FormalPowerSeries(SeriesBase):
         return self.__add__(other)
 
     def __neg__(self):
-        return self.func(-self.function, self.x, self.x0, self.dir,
-                         (-self.ak, self.xk, -self.ind))
+        return self.func(
+            -self.function, self.x, self.x0, self.dir, (-self.ak, self.xk, -self.ind)
+        )
 
     def __sub__(self, other):
         return self.__add__(-other)
@@ -1464,15 +1488,18 @@ class FiniteFormalPowerSeries(FormalPowerSeries):
 
     @property
     def infinite(self):
-        raise NotImplementedError("No infinite version for an object of"
-                     " FiniteFormalPowerSeries class.")
+        raise NotImplementedError(
+            "No infinite version for an object of" " FiniteFormalPowerSeries class."
+        )
 
     def _eval_terms(self, n):
         raise NotImplementedError("(%s)._eval_terms()" % self)
 
     def _eval_term(self, pt):
-        raise NotImplementedError("By the current logic, one can get terms"
-                                   "upto a certain order, instead of getting term by term.")
+        raise NotImplementedError(
+            "By the current logic, one can get terms"
+            "upto a certain order, instead of getting term by term."
+        )
 
     def polynomial(self, n):
         return self._eval_terms(n)
@@ -1622,8 +1649,8 @@ class FormalPowerSeriesCompose(FiniteFormalPowerSeries):
 
         for i in range(1, n):
             bell_seq = gfps.coeff_bell(i)
-            seq = (ffps.bell_coeff_seq * bell_seq)
-            terms.append(Add(*(seq[:i])) / ffps.fact_seq[i-1] * ffps.xk.coeff(i))
+            seq = ffps.bell_coeff_seq * bell_seq
+            terms.append(Add(*(seq[:i])) / ffps.fact_seq[i - 1] * ffps.xk.coeff(i))
 
         return Add(*terms)
 
@@ -1646,6 +1673,7 @@ class FormalPowerSeriesInverse(FiniteFormalPowerSeries):
     sympy.series.formal.FiniteFormalPowerSeries
 
     """
+
     def __init__(self, *args):
         ffps = self.ffps
         k = ffps.xk.variables[0]
@@ -1662,13 +1690,17 @@ class FormalPowerSeriesInverse(FiniteFormalPowerSeries):
 
     @property
     def g(self):
-        raise ValueError("Only one function is considered while performing"
-                        "inverse of a formal power series.")
+        raise ValueError(
+            "Only one function is considered while performing"
+            "inverse of a formal power series."
+        )
 
     @property
     def gfps(self):
-        raise ValueError("Only one function is considered while performing"
-                        "inverse of a formal power series.")
+        raise ValueError(
+            "Only one function is considered while performing"
+            "inverse of a formal power series."
+        )
 
     def _eval_terms(self, n):
         """
@@ -1706,8 +1738,8 @@ class FormalPowerSeriesInverse(FiniteFormalPowerSeries):
 
         for i in range(1, n):
             bell_seq = ffps.coeff_bell(i)
-            seq = (self.aux_seq * bell_seq)
-            terms.append(Add(*(seq[:i])) / ffps.fact_seq[i-1] * ffps.xk.coeff(i))
+            seq = self.aux_seq * bell_seq
+            terms.append(Add(*(seq[:i])) / ffps.fact_seq[i - 1] * ffps.xk.coeff(i))
 
         return Add(*terms)
 

@@ -4,9 +4,7 @@ from __future__ import print_function, division
 
 from sympy import Dummy
 from sympy.polys.constructor import construct_domain
-from sympy.polys.densearith import (
-    dup_mul, dup_mul_ground, dup_lshift, dup_sub, dup_add
-)
+from sympy.polys.densearith import dup_mul, dup_mul_ground, dup_lshift, dup_sub, dup_add
 from sympy.polys.domains import ZZ, QQ
 from sympy.polys.polyclasses import DMP
 from sympy.polys.polytools import Poly, PurePoly
@@ -15,13 +13,18 @@ from sympy.utilities import public
 
 def dup_jacobi(n, a, b, K):
     """Low-level implementation of Jacobi polynomials. """
-    seq = [[K.one], [(a + b + K(2))/K(2), (a - b)/K(2)]]
+    seq = [[K.one], [(a + b + K(2)) / K(2), (a - b) / K(2)]]
 
     for i in range(2, n + 1):
-        den = K(i)*(a + b + i)*(a + b + K(2)*i - K(2))
-        f0 = (a + b + K(2)*i - K.one) * (a*a - b*b) / (K(2)*den)
-        f1 = (a + b + K(2)*i - K.one) * (a + b + K(2)*i - K(2)) * (a + b + K(2)*i) / (K(2)*den)
-        f2 = (a + i - K.one)*(b + i - K.one)*(a + b + K(2)*i) / den
+        den = K(i) * (a + b + i) * (a + b + K(2) * i - K(2))
+        f0 = (a + b + K(2) * i - K.one) * (a * a - b * b) / (K(2) * den)
+        f1 = (
+            (a + b + K(2) * i - K.one)
+            * (a + b + K(2) * i - K(2))
+            * (a + b + K(2) * i)
+            / (K(2) * den)
+        )
+        f2 = (a + i - K.one) * (b + i - K.one) * (a + b + K(2) * i) / den
         p0 = dup_mul_ground(seq[-1], f0, K)
         p1 = dup_mul_ground(dup_lshift(seq[-1], 1, K), f1, K)
         p2 = dup_mul_ground(seq[-2], f2, K)
@@ -59,18 +62,18 @@ def jacobi_poly(n, a, b, x=None, polys=False):
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
 
 def dup_gegenbauer(n, a, K):
     """Low-level implementation of Gegenbauer polynomials. """
-    seq = [[K.one], [K(2)*a, K.zero]]
+    seq = [[K.one], [K(2) * a, K.zero]]
 
     for i in range(2, n + 1):
         f1 = K(2) * (i + a - K.one) / i
-        f2 = (i + K(2)*a - K(2)) / i
+        f2 = (i + K(2) * a - K(2)) / i
         p1 = dup_mul_ground(dup_lshift(seq[-1], 1, K), f1, K)
         p2 = dup_mul_ground(seq[-2], f2, K)
         seq.append(dup_sub(p1, p2, K))
@@ -95,8 +98,7 @@ def gegenbauer_poly(n, a, x=None, polys=False):
         (default) returns an expression.
     """
     if n < 0:
-        raise ValueError(
-            "can't generate Gegenbauer polynomial of degree %s" % n)
+        raise ValueError("can't generate Gegenbauer polynomial of degree %s" % n)
 
     K, a = construct_domain(a, field=True)
     poly = DMP(dup_gegenbauer(int(n), a, K), K)
@@ -104,7 +106,7 @@ def gegenbauer_poly(n, a, x=None, polys=False):
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -136,14 +138,15 @@ def chebyshevt_poly(n, x=None, polys=False):
     """
     if n < 0:
         raise ValueError(
-            "can't generate 1st kind Chebyshev polynomial of degree %s" % n)
+            "can't generate 1st kind Chebyshev polynomial of degree %s" % n
+        )
 
     poly = DMP(dup_chebyshevt(int(n), ZZ), ZZ)
 
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -175,14 +178,15 @@ def chebyshevu_poly(n, x=None, polys=False):
     """
     if n < 0:
         raise ValueError(
-            "can't generate 2nd kind Chebyshev polynomial of degree %s" % n)
+            "can't generate 2nd kind Chebyshev polynomial of degree %s" % n
+        )
 
     poly = DMP(dup_chebyshevu(int(n), ZZ), ZZ)
 
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -224,7 +228,7 @@ def hermite_poly(n, x=None, polys=False):
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -234,7 +238,7 @@ def dup_legendre(n, K):
     seq = [[K.one], [K.one, K.zero]]
 
     for i in range(2, n + 1):
-        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(2*i - 1, i), K)
+        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(2 * i - 1, i), K)
         b = dup_mul_ground(seq[-2], K(i - 1, i), K)
 
         seq.append(dup_sub(a, b, K))
@@ -264,7 +268,7 @@ def legendre_poly(n, x=None, polys=False):
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -274,8 +278,8 @@ def dup_laguerre(n, alpha, K):
     seq = [[K.zero], [K.one]]
 
     for i in range(1, n + 1):
-        a = dup_mul(seq[-1], [-K.one/i, alpha/i + K(2*i - 1)/i], K)
-        b = dup_mul_ground(seq[-2], alpha/i + K(i - 1)/i, K)
+        a = dup_mul(seq[-1], [-K.one / i, alpha / i + K(2 * i - 1) / i], K)
+        b = dup_mul_ground(seq[-2], alpha / i + K(i - 1) / i, K)
 
         seq.append(dup_sub(a, b, K))
 
@@ -303,8 +307,7 @@ def laguerre_poly(n, x=None, alpha=None, polys=False):
         raise ValueError("can't generate Laguerre polynomial of degree %s" % n)
 
     if alpha is not None:
-        K, alpha = construct_domain(
-            alpha, field=True)  # XXX: ground_field=True
+        K, alpha = construct_domain(alpha, field=True)  # XXX: ground_field=True
     else:
         K, alpha = QQ, QQ(0)
 
@@ -313,7 +316,7 @@ def laguerre_poly(n, x=None, alpha=None, polys=False):
     if x is not None:
         poly = Poly.new(poly, x)
     else:
-        poly = PurePoly.new(poly, Dummy('x'))
+        poly = PurePoly.new(poly, Dummy("x"))
 
     return poly if polys else poly.as_expr()
 
@@ -323,7 +326,7 @@ def dup_spherical_bessel_fn(n, K):
     seq = [[K.one], [K.one, K.zero]]
 
     for i in range(2, n + 1):
-        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(2*i - 1), K)
+        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(2 * i - 1), K)
         seq.append(dup_sub(a, seq[-2], K))
 
     return dup_lshift(seq[n], 1, K)
@@ -334,7 +337,7 @@ def dup_spherical_bessel_fn_minus(n, K):
     seq = [[K.one, K.zero], [K.zero]]
 
     for i in range(2, n + 1):
-        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(3 - 2*i), K)
+        a = dup_mul_ground(dup_lshift(seq[-1], 1, K), K(3 - 2 * i), K)
         seq.append(dup_sub(a, seq[-2], K))
 
     return seq[n]
@@ -387,8 +390,8 @@ def spherical_bessel_fn(n, x=None, polys=False):
     poly = DMP(dup, ZZ)
 
     if x is not None:
-        poly = Poly.new(poly, 1/x)
+        poly = Poly.new(poly, 1 / x)
     else:
-        poly = PurePoly.new(poly, 1/Dummy('x'))
+        poly = PurePoly.new(poly, 1 / Dummy("x"))
 
     return poly if polys else poly.as_expr()

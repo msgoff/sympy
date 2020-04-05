@@ -6,8 +6,7 @@ from .repr import ReprPrinter
 from .str import StrPrinter
 
 # A list of classes that should be printed using StrPrinter
-STRPRINT = ("Add", "Infinity", "Integer", "Mul", "NegativeInfinity",
-            "Pow", "Zero")
+STRPRINT = ("Add", "Infinity", "Integer", "Mul", "NegativeInfinity", "Pow", "Zero")
 
 
 class PythonPrinter(ReprPrinter, StrPrinter):
@@ -39,7 +38,7 @@ class PythonPrinter(ReprPrinter, StrPrinter):
         return StrPrinter._print_Symbol(self, expr)
 
     def _print_module(self, expr):
-        raise ValueError('Modules in the expression are unacceptable')
+        raise ValueError("Modules in the expression are unacceptable")
 
 
 def python(expr, **settings):
@@ -49,7 +48,7 @@ def python(expr, **settings):
     printer = PythonPrinter(settings)
     exprp = printer.doprint(expr)
 
-    result = ''
+    result = ""
     # Returning found symbols and functions
     renamings = {}
     for symbolname in printer.symbols:
@@ -58,12 +57,13 @@ def python(expr, **settings):
         if kw.iskeyword(newsymbolname):
             while True:
                 newsymbolname += "_"
-                if (newsymbolname not in printer.symbols and
-                        newsymbolname not in printer.functions):
-                    renamings[sympy.Symbol(
-                        symbolname)] = sympy.Symbol(newsymbolname)
+                if (
+                    newsymbolname not in printer.symbols
+                    and newsymbolname not in printer.functions
+                ):
+                    renamings[sympy.Symbol(symbolname)] = sympy.Symbol(newsymbolname)
                     break
-        result += newsymbolname + ' = Symbol(\'' + symbolname + '\')\n'
+        result += newsymbolname + " = Symbol('" + symbolname + "')\n"
 
     for functionname in printer.functions:
         newfunctionname = functionname
@@ -71,16 +71,19 @@ def python(expr, **settings):
         if kw.iskeyword(newfunctionname):
             while True:
                 newfunctionname += "_"
-                if (newfunctionname not in printer.symbols and
-                        newfunctionname not in printer.functions):
-                    renamings[sympy.Function(
-                        functionname)] = sympy.Function(newfunctionname)
+                if (
+                    newfunctionname not in printer.symbols
+                    and newfunctionname not in printer.functions
+                ):
+                    renamings[sympy.Function(functionname)] = sympy.Function(
+                        newfunctionname
+                    )
                     break
-        result += newfunctionname + ' = Function(\'' + functionname + '\')\n'
+        result += newfunctionname + " = Function('" + functionname + "')\n"
 
     if renamings:
         exprp = expr.subs(renamings)
-    result += 'e = ' + printer._str(exprp)
+    result += "e = " + printer._str(exprp)
     return result
 
 

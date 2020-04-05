@@ -184,7 +184,7 @@ class Product(ExprWithIntLimits):
     .. [3] https://en.wikipedia.org/wiki/Empty_product
     """
 
-    __slots__ = ('is_commutative',)
+    __slots__ = ("is_commutative",)
 
     def __new__(cls, function, *symbols, **assumptions):
         obj = ExprWithIntLimits.__new__(cls, function, *symbols, **assumptions)
@@ -192,11 +192,13 @@ class Product(ExprWithIntLimits):
 
     def _eval_rewrite_as_Sum(self, *args, **kwargs):
         from sympy.concrete.summations import Sum
+
         return exp(Sum(log(self.function), *self.limits))
 
     @property
     def term(self):
         return self._args[0]
+
     function = term
 
     def _eval_is_zero(self):
@@ -249,6 +251,7 @@ class Product(ExprWithIntLimits):
         for xab in self.limits:
             # Must be imported here to avoid circular imports
             from .summations import _dummy_with_inherited_properties_concrete
+
             d = _dummy_with_inherited_properties_concrete(xab)
             if d:
                 reps[xab[0]] = d
@@ -275,7 +278,7 @@ class Product(ExprWithIntLimits):
             else:
                 f = g
 
-        if hints.get('deep', True):
+        if hints.get("deep", True):
             return f.doit(**hints)
         else:
             return powsimp(f)
@@ -298,7 +301,7 @@ class Product(ExprWithIntLimits):
         if k not in term.free_symbols:
             if (term - 1).is_zero:
                 return S.One
-            return term**(n - a + 1)
+            return term ** (n - a + 1)
 
         if a == n:
             return term.subs(k, a)
@@ -321,14 +324,14 @@ class Product(ExprWithIntLimits):
             M = 0
             for r, m in all_roots.items():
                 M += m
-                A *= RisingFactorial(a - r, n - a + 1)**m
-                Q *= (n - r)**m
+                A *= RisingFactorial(a - r, n - a + 1) ** m
+                Q *= (n - r) ** m
 
             if M < poly.degree():
                 arg = quo(poly, Q.as_poly(k))
                 B = self.func(arg, (k, a, n)).doit()
 
-            return poly.LC()**(n - a + 1) * A * B
+            return poly.LC() ** (n - a + 1) * A * B
 
         elif term.is_Add:
             factored = factor_terms(term, fraction=True)
@@ -356,25 +359,24 @@ class Product(ExprWithIntLimits):
                     arg = term._new_rawargs(*include)
                     A = Mul(*exclude)
                     B = self.func(arg, (k, a, n)).doit()
-                    return without_k**(n - a + 1)*A * B
+                    return without_k ** (n - a + 1) * A * B
             else:
                 # Just a single term
                 p = self._eval_product(with_k[0], (k, a, n))
                 if p is None:
                     p = self.func(with_k[0], (k, a, n)).doit()
-                return without_k**(n - a + 1)*p
-
+                return without_k ** (n - a + 1) * p
 
         elif term.is_Pow:
             if not term.base.has(k):
                 s = summation(term.exp, (k, a, n))
 
-                return term.base**s
+                return term.base ** s
             elif not term.exp.has(k):
                 p = self._eval_product(term.base, (k, a, n))
 
                 if p is not None:
-                    return p**term.exp
+                    return p ** term.exp
 
         elif isinstance(term, Product):
             evaluated = term.doit()
@@ -389,8 +391,9 @@ class Product(ExprWithIntLimits):
 
     def _eval_simplify(self, **kwargs):
         from sympy.simplify.simplify import product_simplify
+
         rv = product_simplify(self)
-        return rv.doit() if kwargs['doit'] else rv
+        return rv.doit() if kwargs["doit"] else rv
 
     def _eval_transpose(self):
         if self.is_commutative:
@@ -456,8 +459,10 @@ class Product(ExprWithIntLimits):
         except NotImplementedError:
             if Sum(sequence_term - 1, *lim).is_absolutely_convergent() is S.true:
                 return S.true
-            raise NotImplementedError("The algorithm to find the product convergence of %s "
-                                        "is not yet implemented" % (sequence_term))
+            raise NotImplementedError(
+                "The algorithm to find the product convergence of %s "
+                "is not yet implemented" % (sequence_term)
+            )
         return is_conv
 
     def reverse_order(expr, *indices):

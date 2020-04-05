@@ -43,16 +43,16 @@ def get_resource(identifier, pkgname=__name__):
     """
 
     mod = sys.modules[pkgname]
-    fn = getattr(mod, '__file__', None)
+    fn = getattr(mod, "__file__", None)
     if fn is None:
         raise IOError("%r has no __file__!")
     path = os.path.join(os.path.dirname(fn), identifier)
-    loader = getattr(mod, '__loader__', None)
+    loader = getattr(mod, "__loader__", None)
     if loader is not None:
         try:
             data = loader.get_data(path)
-        except (IOError,AttributeError):
+        except (IOError, AttributeError):
             pass
         else:
-            return StringIO(data.decode('utf-8'))
-    return open(os.path.normpath(path), 'rb')
+            return StringIO(data.decode("utf-8"))
+    return open(os.path.normpath(path), "rb")

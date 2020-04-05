@@ -6,37 +6,42 @@ from pyglet import font
 from sympy.core import S
 from sympy.core.compatibility import is_sequence
 from sympy.plotting.pygletplot.plot_object import PlotObject
-from sympy.plotting.pygletplot.util import billboard_matrix, dot_product, \
-        get_direction_vectors, strided_range, vec_mag, vec_sub
+from sympy.plotting.pygletplot.util import (
+    billboard_matrix,
+    dot_product,
+    get_direction_vectors,
+    strided_range,
+    vec_mag,
+    vec_sub,
+)
 
 
 class PlotAxes(PlotObject):
-
     def __init__(self, *args, **kwargs):
         # initialize style parameter
-        style = kwargs.pop('style', '').lower()
+        style = kwargs.pop("style", "").lower()
 
         # allow alias kwargs to override style kwarg
-        if kwargs.pop('none', None) is not None:
-            style = 'none'
-        if kwargs.pop('frame', None) is not None:
-            style = 'frame'
-        if kwargs.pop('box', None) is not None:
-            style = 'box'
-        if kwargs.pop('ordinate', None) is not None:
-            style = 'ordinate'
+        if kwargs.pop("none", None) is not None:
+            style = "none"
+        if kwargs.pop("frame", None) is not None:
+            style = "frame"
+        if kwargs.pop("box", None) is not None:
+            style = "box"
+        if kwargs.pop("ordinate", None) is not None:
+            style = "ordinate"
 
-        if style in ['', 'ordinate']:
+        if style in ["", "ordinate"]:
             self._render_object = PlotAxesOrdinate(self)
-        elif style in ['frame', 'box']:
+        elif style in ["frame", "box"]:
             self._render_object = PlotAxesFrame(self)
-        elif style in ['none']:
+        elif style in ["none"]:
             self._render_object = None
         else:
             raise ValueError(("Unrecognized axes style %s.") % (style))
 
         # initialize stride parameter
-        stride = kwargs.pop('stride', 0.25)
+        stride = kwargs.pop("stride", 0.25)
         try:
             stride = eval(stride)
         except TypeError:
@@ -47,7 +52,7 @@ class PlotAxes(PlotObject):
             self._stride = stride
         else:
             self._stride = [stride, stride, stride]
-        self._tick_length = float(kwargs.pop('tick_length', 0.1))
+        self._tick_length = float(kwargs.pop("tick_length", 0.1))
 
         # setup bounding box and ticks
         self._origin = [0, 0, 0]
@@ -56,24 +61,22 @@ class PlotAxes(PlotObject):
         def flexible_boolean(input, default):
             if input in [True, False]:
                 return input
-            if input in ['f', 'F', 'false', 'False']:
+            if input in ["f", "F", "false", "False"]:
                 return False
-            if input in ['t', 'T', 'true', 'True']:
+            if input in ["t", "T", "true", "True"]:
                 return True
             return default
 
         # initialize remaining parameters
-        self.visible = flexible_boolean(kwargs.pop('visible', ''), True)
-        self._overlay = flexible_boolean(kwargs.pop('overlay', ''), True)
-        self._colored = flexible_boolean(kwargs.pop('colored', ''), False)
-        self._label_axes = flexible_boolean(
-            kwargs.pop('label_axes', ''), False)
-        self._label_ticks = flexible_boolean(
-            kwargs.pop('label_ticks', ''), True)
+        self.visible = flexible_boolean(kwargs.pop("visible", ""), True)
+        self._overlay = flexible_boolean(kwargs.pop("overlay", ""), True)
+        self._colored = flexible_boolean(kwargs.pop("colored", ""), False)
+        self._label_axes = flexible_boolean(kwargs.pop("label_axes", ""), False)
+        self._label_ticks = flexible_boolean(kwargs.pop("label_ticks", ""), True)
 
         # setup label font
-        self.font_face = kwargs.pop('font_face', 'Arial')
-        self.font_size = kwargs.pop('font_size', 28)
+        self.font_face = kwargs.pop("font_face", "Arial")
+        self.font_size = kwargs.pop("font_size", 28)
 
         # this is also used to reinit the
         # font on window close/reopen
@@ -88,7 +91,9 @@ class PlotAxes(PlotObject):
 
     def draw(self):
         if self._render_object:
-            pgl.glPushAttrib(pgl.GL_ENABLE_BIT | pgl.GL_POLYGON_BIT | pgl.GL_DEPTH_BUFFER_BIT)
+            pgl.glPushAttrib(
+                pgl.GL_ENABLE_BIT | pgl.GL_POLYGON_BIT | pgl.GL_DEPTH_BUFFER_BIT
+            )
             if self._overlay:
                 pgl.glDisable(pgl.GL_DEPTH_TEST)
             self._render_object.draw()
@@ -110,8 +115,9 @@ class PlotAxes(PlotObject):
         if b[axis][0] is None or b[axis][1] is None:
             self._axis_ticks[axis] = []
         else:
-            self._axis_ticks[axis] = strided_range(b[axis][0], b[axis][1],
-                                                   self._stride[axis])
+            self._axis_ticks[axis] = strided_range(
+                b[axis][0], b[axis][1], self._stride[axis]
+            )
 
     def toggle_visible(self):
         self.visible = not self.visible
@@ -121,13 +127,14 @@ class PlotAxes(PlotObject):
 
 
 class PlotAxesBase(PlotObject):
-
     def __init__(self, parent_axes):
         self._p = parent_axes
 
     def draw(self):
-        color = [([0.2, 0.1, 0.3], [0.2, 0.1, 0.3], [0.2, 0.1, 0.3]),
-                 ([0.9, 0.3, 0.5], [0.5, 1.0, 0.5], [0.3, 0.3, 0.9])][self._p._colored]
+        color = [
+            ([0.2, 0.1, 0.3], [0.2, 0.1, 0.3], [0.2, 0.1, 0.3]),
+            ([0.9, 0.3, 0.5], [0.5, 1.0, 0.5], [0.3, 0.3, 0.9]),
+        ][self._p._colored]
         self.draw_background(color)
         self.draw_axis(2, color[2])
         self.draw_axis(1, color[1])
@@ -144,14 +151,17 @@ class PlotAxesBase(PlotObject):
             color = (color[0], color[1], color[2], 1.0)
 
         if self._p.label_font is None:
-            self._p.label_font = font.load(self._p.font_face,
-                                           self._p.font_size,
-                                           bold=True, italic=False)
+            self._p.label_font = font.load(
+                self._p.font_face, self._p.font_size, bold=True, italic=False
+            )
 
-        label = font.Text(self._p.label_font, text,
-                          color=color,
-                          valign=font.Text.BASELINE,
-                          halign=font.Text.CENTER)
+        label = font.Text(
+            self._p.label_font,
+            text,
+            color=color,
+            valign=font.Text.BASELINE,
+            halign=font.Text.CENTER,
+        )
 
         pgl.glPushMatrix()
         pgl.glTranslatef(*position)
@@ -172,7 +182,6 @@ class PlotAxesBase(PlotObject):
 
 
 class PlotAxesOrdinate(PlotAxesBase):
-
     def __init__(self, parent_axes):
         super(PlotAxesOrdinate, self).__init__(parent_axes)
 
@@ -215,7 +224,7 @@ class PlotAxesOrdinate(PlotAxesBase):
         axis_labels = [axis_line[0][::], axis_line[1][::]]
         axis_labels[0][axis] -= 0.3
         axis_labels[1][axis] += 0.3
-        a_str = ['X', 'Y', 'Z'][axis]
+        a_str = ["X", "Y", "Z"][axis]
         self.draw_text("-" + a_str, axis_labels[0], color)
         self.draw_text("+" + a_str, axis_labels[1], color)
 
@@ -233,13 +242,11 @@ class PlotAxesOrdinate(PlotAxesBase):
             return
         tick_label_vector = [0, 0, 0]
         tick_label_vector[axis] = tick
-        tick_label_vector[{0: 1, 1: 0, 2: 1}[axis]] = [-1, 1, 1][
-            axis] * radius * 3.5
+        tick_label_vector[{0: 1, 1: 0, 2: 1}[axis]] = [-1, 1, 1][axis] * radius * 3.5
         self.draw_text(str(tick), tick_label_vector, color, scale=0.5)
 
 
 class PlotAxesFrame(PlotAxesBase):
-
     def __init__(self, parent_axes):
         super(PlotAxesFrame, self).__init__(parent_axes)
 

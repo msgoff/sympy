@@ -69,6 +69,7 @@ def _as_pair(atom):
     else:
         return (atom, True)
 
+
 # XXX this prepares forward-chaining rules for alpha-network
 
 
@@ -117,7 +118,7 @@ def deduce_alpha_implications(implications):
     full_implications = transitive_closure(implications)
     for a, b in full_implications:
         if a == b:
-            continue    # skip a->a cyclic input
+            continue  # skip a->a cyclic input
 
         res[a].add(b)
 
@@ -127,7 +128,8 @@ def deduce_alpha_implications(implications):
         na = Not(a)
         if na in impl:
             raise ValueError(
-                'implications are inconsistent: %s -> %s %s' % (a, na, impl))
+                "implications are inconsistent: %s -> %s %s" % (a, na, impl)
+            )
 
     return res
 
@@ -244,6 +246,7 @@ def rules_2prereq(rules):
             prereq[i].add(a)
     return prereq
 
+
 ################
 # RULES PROVER #
 ################
@@ -251,6 +254,7 @@ def rules_2prereq(rules):
 
 class TautologyDetected(Exception):
     """(internal) Prover uses it for reporting detected tautology"""
+
     pass
 
 
@@ -289,8 +293,8 @@ class Prover(object):
 
     def split_alpha_beta(self):
         """split proved rules into alpha and beta chains"""
-        rules_alpha = []    # a      -> b
-        rules_beta = []     # &(...) -> b
+        rules_alpha = []  # a      -> b
+        rules_beta = []  # &(...) -> b
         for a, b in self.proved_rules:
             if isinstance(a, And):
                 rules_beta.append((a, b))
@@ -307,7 +311,7 @@ class Prover(object):
         return self.split_alpha_beta()[1]
 
     def process_rule(self, a, b):
-        """process a -> b rule"""   # TODO write more?
+        """process a -> b rule"""  # TODO write more?
         if (not a) or isinstance(b, bool):
             return
         if isinstance(a, bool):
@@ -337,15 +341,15 @@ class Prover(object):
         #               -->   a & !c -> b
         elif isinstance(b, Or):
             # detect tautology first
-            if not isinstance(a, Logic):    # Atom
+            if not isinstance(a, Logic):  # Atom
                 # tautology:  a -> a|c|...
                 if a in b.args:
-                    raise TautologyDetected(a, b, 'a -> a|c|...')
+                    raise TautologyDetected(a, b, "a -> a|c|...")
             self.process_rule(And(*[Not(barg) for barg in b.args]), Not(a))
 
             for bidx in range(len(b.args)):
                 barg = b.args[bidx]
-                brest = b.args[:bidx] + b.args[bidx + 1:]
+                brest = b.args[:bidx] + b.args[bidx + 1 :]
                 self.process_rule(And(a, Not(barg)), Or(*brest))
 
         # left part
@@ -354,20 +358,21 @@ class Prover(object):
         #                    (this will be the basis of beta-network)
         elif isinstance(a, And):
             if b in a.args:
-                raise TautologyDetected(a, b, 'a & b -> a')
+                raise TautologyDetected(a, b, "a & b -> a")
             self.proved_rules.append((a, b))
             # XXX NOTE at present we ignore  !c -> !a | !b
 
         elif isinstance(a, Or):
             if b in a.args:
-                raise TautologyDetected(a, b, 'a | b -> a')
+                raise TautologyDetected(a, b, "a | b -> a")
             for aarg in a.args:
                 self.process_rule(aarg, b)
 
         else:
             # both `a` and `b` are atoms
-            self.proved_rules.append((a, b))             # a  -> b
-            self.proved_rules.append((Not(b), Not(a)))   # !b -> !a
+            self.proved_rules.append((a, b))  # a  -> b
+            self.proved_rules.append((Not(b), Not(a)))  # !b -> !a
+
 
 ########################################
 
@@ -419,19 +424,20 @@ class FactRules(object):
             a = Logic.fromstring(a)
             b = Logic.fromstring(b)
 
-            if op == '->':
+            if op == "->":
                 P.process_rule(a, b)
-            elif op == '==':
+            elif op == "==":
                 P.process_rule(a, b)
                 P.process_rule(b, a)
             else:
-                raise ValueError('unknown op %r' % op)
+                raise ValueError("unknown op %r" % op)
 
         # --- build deduction networks ---
         self.beta_rules = []
         for bcond, bimpl in P.rules_beta:
             self.beta_rules.append(
-                (set(_as_pair(a) for a in bcond.args), _as_pair(bimpl)))
+                (set(_as_pair(a) for a in bcond.args), _as_pair(bimpl))
+            )
 
         # deduce alpha implications
         impl_a = deduce_alpha_implications(P.rules_alpha)
@@ -473,9 +479,9 @@ class FactKB(dict):
     """
     A simple propositional knowledge base relying on compiled inference rules.
     """
+
     def __str__(self):
-        return '{\n%s}' % ',\n'.join(
-            ["\t%s: %s" % i for i in sorted(self.items())])
+        return "{\n%s}" % ",\n".join(["\t%s: %s" % i for i in sorted(self.items())])
 
     def __init__(self, rules):
         self.rules = rules

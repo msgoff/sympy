@@ -5,6 +5,7 @@ from __future__ import print_function, division
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.polys.polytools import Poly
 
+
 class ExtensionElement(object):
     """
     Element of a finite extension.
@@ -16,7 +17,8 @@ class ExtensionElement(object):
     are of class DMP.
 
     """
-    __slots__ = ('rep', 'ext')
+
+    __slots__ = ("rep", "ext")
 
     def __init__(self, rep, ext):
         self.rep = rep
@@ -64,7 +66,7 @@ class ExtensionElement(object):
     def __mul__(f, g):
         rep = f._get_rep(g)
         if rep is not None:
-            return ExtElem((f.rep*rep) % f.ext.mod, f.ext)
+            return ExtElem((f.rep * rep) % f.ext.mod, f.ext)
         else:
             return NotImplemented
 
@@ -81,8 +83,8 @@ class ExtensionElement(object):
         r = f.ext.one.rep
         while n > 0:
             if n % 2:
-                r = (r*b) % m
-            b = (b*b) % m
+                r = (r * b) % m
+            b = (b * b) % m
             n //= 2
 
         return ExtElem(r, f.ext)
@@ -101,9 +103,11 @@ class ExtensionElement(object):
 
     def __str__(f):
         from sympy.printing.str import sstr
+
         return sstr(f.rep)
 
     __repr__ = __str__
+
 
 ExtElem = ExtensionElement
 
@@ -116,6 +120,7 @@ class MonogenicFiniteExtension(object):
     polynomial derived from the argument ``mod``.
 
     """
+
     def __init__(self, mod):
         if not (isinstance(mod, Poly) and mod.is_univariate):
             raise TypeError("modulus must be a univariate Poly")
@@ -136,8 +141,7 @@ class MonogenicFiniteExtension(object):
 
         gen = self.ring.gens[0]
         self.generator = self.convert(gen)
-        self.basis = tuple(self.convert(gen**i)
-                      for i in range(self.rank))
+        self.basis = tuple(self.convert(gen ** i) for i in range(self.rank))
 
     def convert(self, f):
         rep = self.ring.convert(f)
@@ -149,5 +153,6 @@ class MonogenicFiniteExtension(object):
         return "%s/(%s)" % (self.ring, self.modulus.as_expr())
 
     __repr__ = __str__
+
 
 FiniteExtension = MonogenicFiniteExtension

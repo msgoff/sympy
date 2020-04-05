@@ -17,12 +17,11 @@ def test_equal():
 
 def test_pretty():
     assert pretty(Q.positive(x)) == "Q.positive(x)"
-    assert pretty(
-        set([Q.positive, Q.integer])) == "{Q.integer, Q.positive}"
+    assert pretty(set([Q.positive, Q.integer])) == "{Q.integer, Q.positive}"
 
 
 def test_extract_facts():
-    a, b = symbols('a b', cls=Predicate)
+    a, b = symbols("a b", cls=Predicate)
     assert _extract_facts(a(x), x) == a
     assert _extract_facts(a(x), y) is None
     assert _extract_facts(~a(x), x) == ~a

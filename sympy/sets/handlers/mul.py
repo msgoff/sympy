@@ -7,19 +7,22 @@ _x, _y = symbols("x y")
 
 
 @dispatch(Basic, Basic)  # type: ignore # noqa:F811
-def _set_mul(x, y): # noqa:F811
+def _set_mul(x, y):  # noqa:F811
     return None
+
 
 @dispatch(Set, Set)  # type: ignore # noqa:F811
-def _set_mul(x, y): # noqa:F811
+def _set_mul(x, y):  # noqa:F811
     return None
 
+
 @dispatch(Expr, Expr)  # type: ignore # noqa:F811
-def _set_mul(x, y): # noqa:F811
-    return x*y
+def _set_mul(x, y):  # noqa:F811
+    return x * y
+
 
 @dispatch(Interval, Interval)  # type: ignore # noqa:F811
-def _set_mul(x, y): # noqa:F811
+def _set_mul(x, y):  # noqa:F811
     """
     Multiplications in interval arithmetic
     https://en.wikipedia.org/wiki/Interval_arithmetic
@@ -34,41 +37,41 @@ def _set_mul(x, y): # noqa:F811
     # TODO: handle symbolic intervals
     minval, minopen = min(comvals)
     maxval, maxopen = max(comvals)
-    return Interval(
-        minval,
-        maxval,
-        minopen,
-        maxopen
-    )
+    return Interval(minval, maxval, minopen, maxopen)
+
 
 @dispatch(Basic, Basic)  # type: ignore # noqa:F811
-def _set_div(x, y): # noqa:F811
+def _set_div(x, y):  # noqa:F811
     return None
+
 
 @dispatch(Expr, Expr)  # type: ignore # noqa:F811
-def _set_div(x, y): # noqa:F811
-    return x/y
+def _set_div(x, y):  # noqa:F811
+    return x / y
+
 
 @dispatch(Set, Set)  # type: ignore # noqa:F811 # noqa:F811
-def _set_div(x, y): # noqa:F811
+def _set_div(x, y):  # noqa:F811
     return None
 
+
 @dispatch(Interval, Interval)  # type: ignore # noqa:F811
-def _set_div(x, y): # noqa:F811
+def _set_div(x, y):  # noqa:F811
     """
     Divisions in interval arithmetic
     https://en.wikipedia.org/wiki/Interval_arithmetic
     """
     from sympy.sets.setexpr import set_mul
     from sympy import oo
-    if (y.start*y.end).is_negative:
+
+    if (y.start * y.end).is_negative:
         return Interval(-oo, oo)
     if y.start == 0:
         s2 = oo
     else:
-        s2 = 1/y.start
+        s2 = 1 / y.start
     if y.end == 0:
         s1 = -oo
     else:
-        s1 = 1/y.end
+        s1 = 1 / y.end
     return set_mul(x, Interval(s1, s2, y.right_open, y.left_open))

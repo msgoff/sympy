@@ -114,6 +114,7 @@ class ConditionSet(Set):
     >>> _.subs(_.sym, Symbol('_x'))
     ConditionSet(_x, (_x < y) & (_x + x < 2), Integers)
     """
+
     def __new__(cls, sym, condition, base_set=S.UniversalSet):
         # nonlinsolve uses ConditionSet to return an unsolved system
         # of equations (see _return_conditionset in solveset) so until
@@ -129,9 +130,9 @@ class ConditionSet(Set):
             SymPyDeprecationWarning(
                 feature="Using {} for condition".format(condition_orig),
                 issue=17651,
-                deprecated_since_version='1.5',
-                useinstead="{} for condition".format(condition)
-                ).warn()
+                deprecated_since_version="1.5",
+                useinstead="{} for condition".format(condition),
+            ).warn()
 
         condition = as_Boolean(condition)
 
@@ -139,7 +140,7 @@ class ConditionSet(Set):
             return Basic.__new__(cls, sym, condition, base_set)
 
         if not isinstance(base_set, Set):
-            raise TypeError('expecting set for base_set')
+            raise TypeError("expecting set for base_set")
 
         if condition is S.false:
             return S.EmptySet
@@ -150,8 +151,7 @@ class ConditionSet(Set):
 
         know = None
         if isinstance(base_set, FiniteSet):
-            sifted = sift(
-                base_set, lambda _: fuzzy_bool(condition.subs(sym, _)))
+            sifted = sift(base_set, lambda _: fuzzy_bool(condition.subs(sym, _)))
             if sifted[None]:
                 know = FiniteSet(*sifted[True])
                 base_set = FiniteSet(*sifted[None])
@@ -169,20 +169,16 @@ class ConditionSet(Set):
                 sym = s
             else:
                 # user will have to use cls.sym to get symbol
-                dum = Symbol('lambda')
-                if dum in condition.free_symbols or \
-                        dum in c.free_symbols:
+                dum = Symbol("lambda")
+                if dum in condition.free_symbols or dum in c.free_symbols:
                     dum = Dummy(str(dum))
-                condition = And(
-                    condition.xreplace({sym: dum}),
-                    c.xreplace({s: dum}))
+                condition = And(condition.xreplace({sym: dum}), c.xreplace({s: dum}))
                 sym = dum
 
         if not isinstance(sym, Symbol):
-            s = Dummy('lambda')
+            s = Dummy("lambda")
             if s not in condition.xreplace({sym: s}).free_symbols:
-                raise ValueError(
-                    'non-symbol dummy not recognized in condition')
+                raise ValueError("non-symbol dummy not recognized in condition")
 
         rv = Basic.__new__(cls, sym, condition, base_set)
         return rv if know is None else Union(know, rv)
@@ -198,12 +194,13 @@ class ConditionSet(Set):
 
     def _contains(self, other):
         return And(
-            Contains(other, self.base_set),
-            Lambda(self.sym, self.condition)(other))
+            Contains(other, self.base_set), Lambda(self.sym, self.condition)(other)
+        )
 
     def as_relational(self, other):
-        return And(Lambda(self.sym, self.condition)(
-            other), self.base_set.contains(other))
+        return And(
+            Lambda(self.sym, self.condition)(other), self.base_set.contains(other)
+        )
 
     def _eval_subs(self, old, new):
         if not isinstance(self.sym, Expr):
@@ -218,9 +215,11 @@ class ConditionSet(Set):
             if isinstance(new, Symbol):
                 # if the assumptions don't match, the cond
                 # might evaluate or change
-                if (new.assumptions0 == old.assumptions0 or
-                        len(new.assumptions0) == 1 and
-                        old.is_commutative == new.is_commutative):
+                if (
+                    new.assumptions0 == old.assumptions0
+                    or len(new.assumptions0) == 1
+                    and old.is_commutative == new.is_commutative
+                ):
                     if base != self.base_set:
                         # it will be aggravating to have the dummy
                         # symbol change if you are trying to target
@@ -230,12 +229,16 @@ class ConditionSet(Set):
                         return self.func(sym, cond, base)
                     else:
                         return self.func(new, cond.subs(old, new), base)
-                raise ValueError(filldedent('''
+                raise ValueError(
+                    filldedent(
+                        """
                     A dummy symbol can only be
                     replaced with a symbol having the same
                     assumptions or one having a single assumption
                     having the same commutativity.
-                '''))
+                """
+                    )
+                )
             # don't target cond: it is there to tell how
             # the base set should be filtered and if new is not in
             # the base set then this substitution is ignored
@@ -254,12 +257,12 @@ class ConditionSet(Set):
             # syntax is removed
             return False
         if symbol:
-            raise ValueError('symbol arg not supported for ConditionSet')
+            raise ValueError("symbol arg not supported for ConditionSet")
         o = other
         if isinstance(self.sym, Symbol) and isinstance(other.sym, Symbol):
             # this code will not need to be in an if-block when
             # the unsolved equations syntax is removed
-            o = other.func(self.sym,
-                other.condition.subs(other.sym, self.sym),
-                other.base_set)
+            o = other.func(
+                self.sym, other.condition.subs(other.sym, self.sym), other.base_set
+            )
         return self == o

@@ -158,67 +158,56 @@ from sympy.core.core import BasicMeta
 from random import shuffle
 
 
-_assume_rules = FactRules([
-
-    'integer        ->  rational',
-    'rational       ->  real',
-    'rational       ->  algebraic',
-    'algebraic      ->  complex',
-    'transcendental ==  complex & !algebraic',
-    'real           ->  hermitian',
-    'imaginary      ->  complex',
-    'imaginary      ->  antihermitian',
-    'extended_real  ->  commutative',
-    'complex        ->  commutative',
-    'complex        ->  finite',
-
-    'odd            ==  integer & !even',
-    'even           ==  integer & !odd',
-
-    'real           ->  complex',
-    'extended_real  ->  real | infinite',
-    'real           ==  extended_real & finite',
-
-    'extended_real        ==  extended_negative | zero | extended_positive',
-    'extended_negative    ==  extended_nonpositive & extended_nonzero',
-    'extended_positive    ==  extended_nonnegative & extended_nonzero',
-
-    'extended_nonpositive ==  extended_real & !extended_positive',
-    'extended_nonnegative ==  extended_real & !extended_negative',
-
-    'real           ==  negative | zero | positive',
-    'negative       ==  nonpositive & nonzero',
-    'positive       ==  nonnegative & nonzero',
-
-    'nonpositive    ==  real & !positive',
-    'nonnegative    ==  real & !negative',
-
-    'positive       ==  extended_positive & finite',
-    'negative       ==  extended_negative & finite',
-    'nonpositive    ==  extended_nonpositive & finite',
-    'nonnegative    ==  extended_nonnegative & finite',
-    'nonzero        ==  extended_nonzero & finite',
-
-    'zero           ->  even & finite',
-    'zero           ==  extended_nonnegative & extended_nonpositive',
-    'zero           ==  nonnegative & nonpositive',
-    'nonzero        ->  real',
-
-    'prime          ->  integer & positive',
-    'composite      ->  integer & positive & !prime',
-    '!composite     ->  !positive | !even | prime',
-
-    'irrational     ==  real & !rational',
-
-    'imaginary      ->  !extended_real',
-
-    'infinite       ->  !finite',
-    'noninteger     ==  extended_real & !integer',
-    'extended_nonzero == extended_real & !zero',
-])
+_assume_rules = FactRules(
+    [
+        "integer        ->  rational",
+        "rational       ->  real",
+        "rational       ->  algebraic",
+        "algebraic      ->  complex",
+        "transcendental ==  complex & !algebraic",
+        "real           ->  hermitian",
+        "imaginary      ->  complex",
+        "imaginary      ->  antihermitian",
+        "extended_real  ->  commutative",
+        "complex        ->  commutative",
+        "complex        ->  finite",
+        "odd            ==  integer & !even",
+        "even           ==  integer & !odd",
+        "real           ->  complex",
+        "extended_real  ->  real | infinite",
+        "real           ==  extended_real & finite",
+        "extended_real        ==  extended_negative | zero | extended_positive",
+        "extended_negative    ==  extended_nonpositive & extended_nonzero",
+        "extended_positive    ==  extended_nonnegative & extended_nonzero",
+        "extended_nonpositive ==  extended_real & !extended_positive",
+        "extended_nonnegative ==  extended_real & !extended_negative",
+        "real           ==  negative | zero | positive",
+        "negative       ==  nonpositive & nonzero",
+        "positive       ==  nonnegative & nonzero",
+        "nonpositive    ==  real & !positive",
+        "nonnegative    ==  real & !negative",
+        "positive       ==  extended_positive & finite",
+        "negative       ==  extended_negative & finite",
+        "nonpositive    ==  extended_nonpositive & finite",
+        "nonnegative    ==  extended_nonnegative & finite",
+        "nonzero        ==  extended_nonzero & finite",
+        "zero           ->  even & finite",
+        "zero           ==  extended_nonnegative & extended_nonpositive",
+        "zero           ==  nonnegative & nonpositive",
+        "nonzero        ->  real",
+        "prime          ->  integer & positive",
+        "composite      ->  integer & positive & !prime",
+        "!composite     ->  !positive | !even | prime",
+        "irrational     ==  real & !rational",
+        "imaginary      ->  !extended_real",
+        "infinite       ->  !finite",
+        "noninteger     ==  extended_real & !integer",
+        "extended_nonzero == extended_real & !zero",
+    ]
+)
 
 _assume_defined = _assume_rules.defined_facts.copy()
-_assume_defined.add('polar')
+_assume_defined.add("polar")
 _assume_defined = frozenset(_assume_defined)
 
 
@@ -227,6 +216,7 @@ class StdFactKB(FactKB):
 
     This is the only kind of FactKB that Basic objects should use.
     """
+
     def __init__(self, facts=None):
         super(StdFactKB, self).__init__(_assume_rules)
         # save a copy of the facts dict
@@ -249,7 +239,7 @@ class StdFactKB(FactKB):
 
 def as_property(fact):
     """Convert a fact name to the name of the corresponding property"""
-    return 'is_%s' % fact
+    return "is_%s" % fact
 
 
 def make_property(fact):
@@ -329,13 +319,14 @@ def _ask(fact, obj):
 
 class ManagedProperties(BasicMeta):
     """Metaclass for classes with old-style assumptions"""
+
     def __init__(cls, *args, **kws):
         BasicMeta.__init__(cls, *args, **kws)
 
         local_defs = {}
         for k in _assume_defined:
             attrname = as_property(k)
-            v = cls.__dict__.get(attrname, '')
+            v = cls.__dict__.get(attrname, "")
             if isinstance(v, (bool, int, type(None))):
                 if v is not None:
                     v = bool(v)
@@ -343,7 +334,7 @@ class ManagedProperties(BasicMeta):
 
         defs = {}
         for base in reversed(cls.__bases__):
-            assumptions = getattr(base, '_explicit_class_assumptions', None)
+            assumptions = getattr(base, "_explicit_class_assumptions", None)
             if assumptions is not None:
                 defs.update(assumptions)
         defs.update(local_defs)
@@ -353,7 +344,7 @@ class ManagedProperties(BasicMeta):
 
         cls._prop_handler = {}
         for k in _assume_defined:
-            eval_is_meth = getattr(cls, '_eval_is_%s' % k, None)
+            eval_is_meth = getattr(cls, "_eval_is_%s" % k, None)
             if eval_is_meth is not None:
                 cls._prop_handler[k] = eval_is_meth
 
@@ -364,7 +355,7 @@ class ManagedProperties(BasicMeta):
         # protection e.g. for Integer.is_even=F <- (Rational.is_integer=F)
         derived_from_bases = set()
         for base in cls.__bases__:
-            default_assumptions = getattr(base, 'default_assumptions', None)
+            default_assumptions = getattr(base, "default_assumptions", None)
             # is an assumption-aware class
             if default_assumptions is not None:
                 derived_from_bases.update(default_assumptions)

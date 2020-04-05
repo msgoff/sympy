@@ -31,6 +31,7 @@ class Inverse(MatPow):
     (A*B)**(-1)
 
     """
+
     is_Inverse = True
     exp = S.NegativeOne
 
@@ -57,20 +58,20 @@ class Inverse(MatPow):
 
     def _eval_determinant(self):
         from sympy.matrices.expressions.determinant import det
-        return 1/det(self.arg)
+
+        return 1 / det(self.arg)
 
     def doit(self, **hints):
-        if 'inv_expand' in hints and hints['inv_expand'] == False:
+        if "inv_expand" in hints and hints["inv_expand"] == False:
             return self
 
         arg = self.arg
-        if hints.get('deep', True):
+        if hints.get("deep", True):
             arg = arg.doit(**hints)
 
         if isinstance(arg, MatPow):
             return MatPow(arg.base, self.exp * arg.exp)
         return arg.inverse()
-
 
     def _eval_derivative_matrix_lines(self, x):
         arg = self.args[0]
@@ -104,4 +105,5 @@ def refine_Inverse(expr, assumptions):
 
     return expr
 
-handlers_dict['Inverse'] = refine_Inverse
+
+handlers_dict["Inverse"] = refine_Inverse

@@ -10,8 +10,15 @@ References:
 from __future__ import print_function, division
 
 from sympy import default_sort_key
-from sympy.logic.boolalg import Or, Not, conjuncts, disjuncts, to_cnf, \
-    to_int_repr, _find_predicates
+from sympy.logic.boolalg import (
+    Or,
+    Not,
+    conjuncts,
+    disjuncts,
+    to_cnf,
+    to_int_repr,
+    _find_predicates,
+)
 from sympy.assumptions.cnf import CNF
 from sympy.logic.inference import pl_true, literal_symbol
 
@@ -92,8 +99,9 @@ def dpll(clauses, symbols, model):
     model.update({P: True})
     model_copy.update({P: False})
     symbols_copy = symbols[:]
-    return (dpll(unit_propagate(unknown_clauses, P), symbols, model) or
-            dpll(unit_propagate(unknown_clauses, Not(P)), symbols_copy, model_copy))
+    return dpll(unit_propagate(unknown_clauses, P), symbols, model) or dpll(
+        unit_propagate(unknown_clauses, Not(P)), symbols_copy, model_copy
+    )
 
 
 def dpll_int_repr(clauses, symbols, model):
@@ -138,8 +146,12 @@ def dpll_int_repr(clauses, symbols, model):
     model.update({P: True})
     model_copy.update({P: False})
     symbols_copy = symbols.copy()
-    return (dpll_int_repr(unit_propagate_int_repr(unknown_clauses, P), symbols, model) or
-            dpll_int_repr(unit_propagate_int_repr(unknown_clauses, -P), symbols_copy, model_copy))
+    return dpll_int_repr(
+        unit_propagate_int_repr(unknown_clauses, P), symbols, model
+    ) or dpll_int_repr(
+        unit_propagate_int_repr(unknown_clauses, -P), symbols_copy, model_copy
+    )
+
 
 ### helper methods for DPLL
 

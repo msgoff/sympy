@@ -4,8 +4,8 @@ from sympy.physics.quantum.fermion import FermionFockKet, FermionFockBra
 
 
 def test_fermionoperator():
-    c = FermionOp('c')
-    d = FermionOp('d')
+    c = FermionOp("c")
+    d = FermionOp("d")
 
     assert isinstance(c, FermionOp)
     assert isinstance(Dagger(c), FermionOp)

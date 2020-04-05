@@ -10,12 +10,18 @@ from sympy.polys.domains.old_fractionfield import FractionField
 from sympy.polys.domains.ring import Ring
 from sympy.polys.orderings import monomial_key, build_product_order
 from sympy.polys.polyclasses import DMP, DMF
-from sympy.polys.polyerrors import (GeneratorsNeeded, PolynomialError,
-        CoercionFailed, ExactQuotientFailed, NotReversible)
+from sympy.polys.polyerrors import (
+    GeneratorsNeeded,
+    PolynomialError,
+    CoercionFailed,
+    ExactQuotientFailed,
+    NotReversible,
+)
 from sympy.polys.polyutils import dict_from_basic, basic_from_dict, _dict_reorder
 from sympy.utilities import public
 
 # XXX why does this derive from CharacteristicZero???
+
 
 @public
 class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
@@ -46,26 +52,30 @@ class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
         self.domain = self.dom = dom
         self.symbols = self.gens = gens
         # NOTE 'order' may not be set if inject was called through CompositeDomain
-        self.order = opts.get('order', monomial_key(self.default_order))
+        self.order = opts.get("order", monomial_key(self.default_order))
 
     def new(self, element):
         return self.dtype(element, self.dom, len(self.gens) - 1, ring=self)
 
     def __str__(self):
         s_order = str(self.order)
-        orderstr = (
-            " order=" + s_order) if s_order != self.default_order else ""
-        return str(self.dom) + '[' + ','.join(map(str, self.gens)) + orderstr + ']'
+        orderstr = (" order=" + s_order) if s_order != self.default_order else ""
+        return str(self.dom) + "[" + ",".join(map(str, self.gens)) + orderstr + "]"
 
     def __hash__(self):
-        return hash((self.__class__.__name__, self.dtype, self.dom,
-                     self.gens, self.order))
+        return hash(
+            (self.__class__.__name__, self.dtype, self.dom, self.gens, self.order)
+        )
 
     def __eq__(self, other):
         """Returns `True` if two domains are equivalent. """
-        return isinstance(other, PolynomialRingBase) and \
-            self.dtype == other.dtype and self.dom == other.dom and \
-            self.gens == other.gens and self.order == other.order
+        return (
+            isinstance(other, PolynomialRingBase)
+            and self.dtype == other.dtype
+            and self.dom == other.dom
+            and self.gens == other.gens
+            and self.order == other.order
+        )
 
     def from_ZZ_python(K1, a, K0):
         """Convert a Python `int` object to `dtype`. """
@@ -103,7 +113,7 @@ class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
             monoms, coeffs = _dict_reorder(a.to_dict(), K0.gens, K1.gens)
 
             if K1.dom != K0.dom:
-                coeffs = [ K1.dom.convert(c, K0.dom) for c in coeffs ]
+                coeffs = [K1.dom.convert(c, K0.dom) for c in coeffs]
 
             return K1(dict(zip(monoms, coeffs)))
 
@@ -113,17 +123,17 @@ class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
 
     def poly_ring(self, *gens):
         """Returns a polynomial ring, i.e. `K[X]`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def frac_field(self, *gens):
         """Returns a fraction field, i.e. `K(X)`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def revert(self, a):
         try:
-            return 1/a
+            return 1 / a
         except (ExactQuotientFailed, ZeroDivisionError):
-            raise NotReversible('%s is not a unit' % a)
+            raise NotReversible("%s is not a unit" % a)
 
     def gcdex(self, a, b):
         """Extended GCD of `a` and `b`. """
@@ -153,6 +163,7 @@ class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
     def _sdm_to_dics(self, s, n):
         """Helper for _sdm_to_vector."""
         from sympy.polys.distributedmodules import sdm_to_dict
+
         dic = sdm_to_dict(s)
         res = [{} for _ in range(n)]
         for k, v in dic.items():
@@ -197,6 +208,7 @@ class PolynomialRingBase(Ring, CharacteristicZero, CompositeDomain):
 def _vector_to_sdm_helper(v, order):
     """Helper method for common code in Global and Local poly rings."""
     from sympy.polys.distributedmodules import sdm_from_dict
+
     d = {}
     for i, e in enumerate(v):
         for key, value in e.to_dict().items():
@@ -294,10 +306,10 @@ class GeneralizedPolynomialRing(PolynomialRingBase):
         res = self.dtype(a, self.dom, len(self.gens) - 1, ring=self)
 
         # make sure res is actually in our ring
-        if res.denom().terms(order=self.order)[0][0] != (0,)*len(self.gens):
+        if res.denom().terms(order=self.order)[0][0] != (0,) * len(self.gens):
             from sympy.printing.str import sstr
-            raise CoercionFailed("denominator %s not allowed in %s"
-                                 % (sstr(res), self))
+
+            raise CoercionFailed("denominator %s not allowed in %s" % (sstr(res), self))
         return res
 
     def __contains__(self, a):
@@ -305,7 +317,7 @@ class GeneralizedPolynomialRing(PolynomialRingBase):
             a = self.convert(a)
         except CoercionFailed:
             return False
-        return a.denom().terms(order=self.order)[0][0] == (0,)*len(self.gens)
+        return a.denom().terms(order=self.order)[0][0] == (0,) * len(self.gens)
 
     def from_FractionField(K1, a, K0):
         dmf = K1.get_field().from_FractionField(a, K0)
@@ -313,8 +325,9 @@ class GeneralizedPolynomialRing(PolynomialRingBase):
 
     def to_sympy(self, a):
         """Convert `a` to a SymPy object. """
-        return (basic_from_dict(a.numer().to_sympy_dict(), *self.gens) /
-                basic_from_dict(a.denom().to_sympy_dict(), *self.gens))
+        return basic_from_dict(a.numer().to_sympy_dict(), *self.gens) / basic_from_dict(
+            a.denom().to_sympy_dict(), *self.gens
+        )
 
     def from_sympy(self, a):
         """Convert SymPy's expression to `dtype`. """
@@ -354,7 +367,7 @@ class GeneralizedPolynomialRing(PolynomialRingBase):
         u = self.one.numer()
         for x in v:
             u *= x.denom()
-        return _vector_to_sdm_helper([x.numer()*u/x.denom() for x in v], order)
+        return _vector_to_sdm_helper([x.numer() * u / x.denom() for x in v], order)
 
 
 @public
@@ -431,7 +444,7 @@ def PolynomialRing(dom, *gens, **opts):
     if iterable(order):
         order = build_product_order(order, gens)
     order = monomial_key(order)
-    opts['order'] = order
+    opts["order"] = order
 
     if order.is_global:
         return GlobalPolynomialRing(dom, *gens, **opts)

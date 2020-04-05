@@ -8,7 +8,15 @@ from sympy.matrices.expressions.matexpr import MatrixExpr, ShapeError, Identity
 from sympy.matrices.expressions.transpose import transpose
 from sympy.matrices.matrices import MatrixBase
 from sympy.strategies import (
-    canon, condition, distribute, do_one, exhaust, flatten, typed, unpack)
+    canon,
+    condition,
+    distribute,
+    do_one,
+    exhaust,
+    flatten,
+    typed,
+    unpack,
+)
 from sympy.strategies.traverse import bottom_up
 from sympy.utilities import sift
 
@@ -101,6 +109,7 @@ class KroneckerProduct(MatrixExpr):
     >>> isinstance(KroneckerProduct(A, B), KroneckerProduct)
     True
     """
+
     is_KroneckerProduct = True
 
     def __new__(cls, *args, **kwargs):
@@ -112,7 +121,7 @@ class KroneckerProduct(MatrixExpr):
             else:
                 return ret
 
-        check = kwargs.get('check', True)
+        check = kwargs.get("check", True)
         if check:
             validate(*args)
         return super(KroneckerProduct, cls).__new__(cls, *args)
@@ -144,25 +153,28 @@ class KroneckerProduct(MatrixExpr):
 
     def _eval_trace(self):
         from .trace import trace
+
         return prod(trace(a) for a in self.args)
 
     def _eval_determinant(self):
         from .determinant import det, Determinant
+
         if not all(a.is_square for a in self.args):
             return Determinant(self)
 
         m = self.rows
-        return prod(det(a)**(m/a.rows) for a in self.args)
+        return prod(det(a) ** (m / a.rows) for a in self.args)
 
     def _eval_inverse(self):
         try:
             return KroneckerProduct(*[a.inverse() for a in self.args])
         except ShapeError:
             from sympy.matrices.expressions.inverse import Inverse
+
             return Inverse(self)
 
     def structurally_equal(self, other):
-        '''Determine whether two matrices have the same Kronecker product structure
+        """Determine whether two matrices have the same Kronecker product structure
 
         Examples
         ========
@@ -179,15 +191,17 @@ class KroneckerProduct(MatrixExpr):
         False
         >>> KroneckerProduct(A, B).structurally_equal(C)
         False
-        '''
+        """
         # Inspired by BlockMatrix
-        return (isinstance(other, KroneckerProduct)
-                and self.shape == other.shape
-                and len(self.args) == len(other.args)
-                and all(a.shape == b.shape for (a, b) in zip(self.args, other.args)))
+        return (
+            isinstance(other, KroneckerProduct)
+            and self.shape == other.shape
+            and len(self.args) == len(other.args)
+            and all(a.shape == b.shape for (a, b) in zip(self.args, other.args))
+        )
 
     def has_matching_shape(self, other):
-        '''Determine whether two matrices have the appropriate structure to bring matrix
+        """Determine whether two matrices have the appropriate structure to bring matrix
         multiplication inside the KroneckerProdut
 
         Examples
@@ -202,14 +216,18 @@ class KroneckerProduct(MatrixExpr):
         False
         >>> KroneckerProduct(A, B).has_matching_shape(A)
         False
-        '''
-        return (isinstance(other, KroneckerProduct)
-                and self.cols == other.rows
-                and len(self.args) == len(other.args)
-                and all(a.cols == b.rows for (a, b) in zip(self.args, other.args)))
+        """
+        return (
+            isinstance(other, KroneckerProduct)
+            and self.cols == other.rows
+            and len(self.args) == len(other.args)
+            and all(a.cols == b.rows for (a, b) in zip(self.args, other.args))
+        )
 
     def _eval_expand_kroneckerproduct(self, **hints):
-        return flatten(canon(typed({KroneckerProduct: distribute(KroneckerProduct, MatAdd)}))(self))
+        return flatten(
+            canon(typed({KroneckerProduct: distribute(KroneckerProduct, MatAdd)}))(self)
+        )
 
     def _kronecker_add(self, other):
         if self.structurally_equal(other):
@@ -219,12 +237,12 @@ class KroneckerProduct(MatrixExpr):
 
     def _kronecker_mul(self, other):
         if self.has_matching_shape(other):
-            return self.__class__(*[a*b for (a, b) in zip(self.args, other.args)])
+            return self.__class__(*[a * b for (a, b) in zip(self.args, other.args)])
         else:
             return self * other
 
     def doit(self, **kwargs):
-        deep = kwargs.get('deep', True)
+        deep = kwargs.get("deep", True)
         if deep:
             args = [arg.doit(**kwargs) for arg in self.args]
         else:
@@ -239,6 +257,7 @@ def validate(*args):
 
 # rules
 
+
 def extract_commutative(kron):
     c_part = []
     nc_part = []
@@ -249,7 +268,7 @@ def extract_commutative(kron):
 
     c_part = Mul(*c_part)
     if c_part != 1:
-        return c_part*KroneckerProduct(*nc_part)
+        return c_part * KroneckerProduct(*nc_part)
     return kron
 
 
@@ -299,9 +318,7 @@ def matrix_kronecker_product(*matrices):
     """
     # Make sure we have a sequence of Matrices
     if not all(isinstance(m, MatrixBase) for m in matrices):
-        raise TypeError(
-            'Sequence of Matrices expected, got: %s' % repr(matrices)
-        )
+        raise TypeError("Sequence of Matrices expected, got: %s" % repr(matrices))
 
     # Pull out the first element in the product.
     matrix_expansion = matrices[-1]
@@ -312,12 +329,10 @@ def matrix_kronecker_product(*matrices):
         # Go through each row appending kronecker product to.
         # running matrix_expansion.
         for i in range(rows):
-            start = matrix_expansion*mat[i*cols]
+            start = matrix_expansion * mat[i * cols]
             # Go through each column joining each item
             for j in range(cols - 1):
-                start = start.row_join(
-                    matrix_expansion*mat[i*cols + j + 1]
-                )
+                start = start.row_join(matrix_expansion * mat[i * cols + j + 1])
             # If this is the first element, make it the start of the
             # new row.
             if i == 0:
@@ -341,13 +356,11 @@ def explicit_kronecker_product(kron):
     return matrix_kronecker_product(*kron.args)
 
 
-rules = (unpack,
-         explicit_kronecker_product,
-         flatten,
-         extract_commutative)
+rules = (unpack, explicit_kronecker_product, flatten, extract_commutative)
 
-canonicalize = exhaust(condition(lambda x: isinstance(x, KroneckerProduct),
-                                 do_one(*rules)))
+canonicalize = exhaust(
+    condition(lambda x: isinstance(x, KroneckerProduct), do_one(*rules))
+)
 
 
 def _kronecker_dims_key(expr):
@@ -359,13 +372,13 @@ def _kronecker_dims_key(expr):
 
 def kronecker_mat_add(expr):
     from functools import reduce
+
     args = sift(expr.args, _kronecker_dims_key)
     nonkrons = args.pop((0,), None)
     if not args:
         return expr
 
-    krons = [reduce(lambda x, y: x._kronecker_add(y), group)
-             for group in args.values()]
+    krons = [reduce(lambda x, y: x._kronecker_add(y), group) for group in args.values()]
 
     if not nonkrons:
         return MatAdd(*krons)
@@ -379,14 +392,14 @@ def kronecker_mat_mul(expr):
 
     i = 0
     while i < len(matrices) - 1:
-        A, B = matrices[i:i+2]
+        A, B = matrices[i : i + 2]
         if isinstance(A, KroneckerProduct) and isinstance(B, KroneckerProduct):
             matrices[i] = A._kronecker_mul(B)
-            matrices.pop(i+1)
+            matrices.pop(i + 1)
         else:
             i += 1
 
-    return factor*MatMul(*matrices)
+    return factor * MatMul(*matrices)
 
 
 def kronecker_mat_pow(expr):
@@ -417,16 +430,28 @@ def combine_kronecker(expr):
     >>> combine_kronecker(KroneckerProduct(A, B)**m)
     KroneckerProduct(A**m, B**m)
     """
+
     def haskron(expr):
         return isinstance(expr, MatrixExpr) and expr.has(KroneckerProduct)
 
     rule = exhaust(
-        bottom_up(exhaust(condition(haskron, typed(
-            {MatAdd: kronecker_mat_add,
-             MatMul: kronecker_mat_mul,
-             MatPow: kronecker_mat_pow})))))
+        bottom_up(
+            exhaust(
+                condition(
+                    haskron,
+                    typed(
+                        {
+                            MatAdd: kronecker_mat_add,
+                            MatMul: kronecker_mat_mul,
+                            MatPow: kronecker_mat_pow,
+                        }
+                    ),
+                )
+            )
+        )
+    )
     result = rule(expr)
-    doit = getattr(result, 'doit', None)
+    doit = getattr(result, "doit", None)
     if doit is not None:
         return doit()
     else:

@@ -1,4 +1,4 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 from hashlib import sha256
@@ -12,7 +12,7 @@ from sympy.testing.pytest import XFAIL
 
 
 def may_xfail(func):
-    if sys.platform.lower() == 'darwin' or os.name == 'nt':
+    if sys.platform.lower() == "darwin" or os.name == "nt":
         # sympy.utilities._compilation needs more testing on Windows and macOS
         # once those two platforms are reliably supported this xfail decorator
         # may be removed.
@@ -22,16 +22,21 @@ def may_xfail(func):
 
 
 if sys.version_info[0] == 2:
+
     class FileNotFoundError(IOError):
         pass
 
     class TemporaryDirectory(object):
         def __init__(self):
             self.path = tempfile.mkdtemp()
+
         def __enter__(self):
             return self.path
+
         def __exit__(self, exc, value, tb):
             shutil.rmtree(self.path)
+
+
 else:
     FileNotFoundError = FileNotFoundError
     TemporaryDirectory = tempfile.TemporaryDirectory
@@ -41,7 +46,7 @@ class CompilerNotFoundError(FileNotFoundError):
     pass
 
 
-def get_abspath(path, cwd='.'):
+def get_abspath(path, cwd="."):
     """ Returns the aboslute path.
 
     Parameters
@@ -57,14 +62,12 @@ def get_abspath(path, cwd='.'):
     else:
         if not os.path.isabs(cwd):
             cwd = os.path.abspath(cwd)
-        return os.path.abspath(
-            os.path.join(cwd, path)
-        )
+        return os.path.abspath(os.path.join(cwd, path))
 
 
 def make_dirs(path):
     """ Create directories (equivalent of ``mkdir -p``). """
-    if path[-1] == '/':
+    if path[-1] == "/":
         parent = os.path.dirname(path[:-1])
     else:
         parent = os.path.dirname(path)
@@ -79,8 +82,15 @@ def make_dirs(path):
         assert os.path.isdir(path)
 
 
-def copy(src, dst, only_update=False, copystat=True, cwd=None,
-         dest_is_dir=False, create_dest_dirs=False):
+def copy(
+    src,
+    dst,
+    only_update=False,
+    copystat=True,
+    cwd=None,
+    dest_is_dir=False,
+    create_dest_dirs=False,
+):
     """ Variation of ``shutil.copy`` with extra options.
 
     Parameters
@@ -120,8 +130,8 @@ def copy(src, dst, only_update=False, copystat=True, cwd=None,
     # We accept both (re)naming destination file _or_
     # passing a (possible non-existent) destination directory
     if dest_is_dir:
-        if not dst[-1] == '/':
-            dst = dst+'/'
+        if not dst[-1] == "/":
+            dst = dst + "/"
     else:
         if os.path.exists(dst) and os.path.isdir(dst):
             dest_is_dir = True
@@ -143,7 +153,7 @@ def copy(src, dst, only_update=False, copystat=True, cwd=None,
     if only_update:
         # This function is not defined:
         # XXX: This branch is clearly not tested!
-        if not missing_or_other_newer(dst, src): # noqa
+        if not missing_or_other_newer(dst, src):  # noqa
             return
 
     if os.path.islink(dst):
@@ -155,12 +165,14 @@ def copy(src, dst, only_update=False, copystat=True, cwd=None,
 
     return dst
 
-Glob = namedtuple('Glob', 'pathname')
-ArbitraryDepthGlob = namedtuple('ArbitraryDepthGlob', 'filename')
+
+Glob = namedtuple("Glob", "pathname")
+ArbitraryDepthGlob = namedtuple("ArbitraryDepthGlob", "filename")
+
 
 def glob_at_depth(filename_glob, cwd=None):
     if cwd is not None:
-        cwd = '.'
+        cwd = "."
     globbed = []
     for root, dirs, filenames in os.walk(cwd):
         for fn in filenames:
@@ -168,6 +180,7 @@ def glob_at_depth(filename_glob, cwd=None):
             if fnmatch.fnmatch(fn, filename_glob):
                 globbed.append(os.path.join(root, fn))
     return globbed
+
 
 def sha256_of_file(path, nblocks=128):
     """ Computes the SHA256 hash of a file.
@@ -187,8 +200,8 @@ def sha256_of_file(path, nblocks=128):
     on returned object to get binary or hex encoded string.
     """
     sh = sha256()
-    with open(path, 'rb') as f:
-        for chunk in iter(lambda: f.read(nblocks*sh.block_size), b''):
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(nblocks * sh.block_size), b""):
             sh.update(chunk)
     return sh
 
@@ -208,16 +221,19 @@ def pyx_is_cplus(path):
 
     Returns True if such a file is present in the file, else False.
     """
-    for line in open(path, 'rt'):
-        if line.startswith('#') and '=' in line:
-            splitted = line.split('=')
+    for line in open(path, "rt"):
+        if line.startswith("#") and "=" in line:
+            splitted = line.split("=")
             if len(splitted) != 2:
                 continue
             lhs, rhs = splitted
-            if lhs.strip().split()[-1].lower() == 'language' and \
-               rhs.strip().split()[0].lower() == 'c++':
-                    return True
+            if (
+                lhs.strip().split()[-1].lower() == "language"
+                and rhs.strip().split()[0].lower() == "c++"
+            ):
+                return True
     return False
+
 
 def import_module_from_file(filename, only_if_newer_than=None):
     """ Imports python extension (from shared object file)
@@ -248,9 +264,10 @@ def import_module_from_file(filename, only_if_newer_than=None):
     """
     path, name = os.path.split(filename)
     name, ext = os.path.splitext(name)
-    name = name.split('.')[0]
+    name = name.split(".")[0]
     if sys.version_info[0] == 2:
         from imp import find_module, load_module
+
         fobj, filename, data = find_module(name, [path])
         if only_if_newer_than:
             for dep in only_if_newer_than:
@@ -259,6 +276,7 @@ def import_module_from_file(filename, only_if_newer_than=None):
         mod = load_module(name, fobj, filename, data)
     else:
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(name, filename)
         if spec is None:
             raise ImportError("Failed to import: '%s'" % filename)
@@ -285,11 +303,14 @@ def find_binary_of_command(candidates):
     CompilerNotFoundError if no candidates match.
     """
     from distutils.spawn import find_executable
+
     for c in candidates:
         binary_path = find_executable(c)
         if c and binary_path:
             return c, binary_path
-    raise CompilerNotFoundError('No binary located for candidates: {}'.format(candidates))
+    raise CompilerNotFoundError(
+        "No binary located for candidates: {}".format(candidates)
+    )
 
 
 def unique_list(l):

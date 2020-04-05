@@ -84,8 +84,7 @@ References
 """
 from __future__ import print_function, division
 
-from sympy.categories import (CompositeMorphism, IdentityMorphism,
-                              NamedMorphism, Diagram)
+from sympy.categories import CompositeMorphism, IdentityMorphism, NamedMorphism, Diagram
 from sympy.core import Dict, Symbol
 from sympy.core.compatibility import iterable
 from sympy.printing import latex
@@ -96,7 +95,7 @@ from sympy.utilities.decorator import doctest_depends_on
 from itertools import chain
 
 
-__doctest_requires__ = {('preview_diagram',): 'pyglet'}
+__doctest_requires__ = {("preview_diagram",): "pyglet"}
 
 
 class _GrowableGrid(object):
@@ -111,6 +110,7 @@ class _GrowableGrid(object):
     This class currently represents a naive implementation of the
     functionality with little attempt at optimisation.
     """
+
     def __init__(self, width, height):
         self._width = width
         self._height = height
@@ -300,6 +300,7 @@ class DiagramGrid(object):
 
     [FiveLemma] https://en.wikipedia.org/wiki/Five_lemma
     """
+
     @staticmethod
     def _simplify_morphisms(morphisms):
         """
@@ -380,7 +381,8 @@ class DiagramGrid(object):
         # Create edges for morphisms.
         for morphism in morphisms:
             DiagramGrid._add_edge_append(
-                edges, frozenset([morphism.domain, morphism.codomain]), morphism)
+                edges, frozenset([morphism.domain, morphism.codomain]), morphism
+            )
 
         # Create new edges by juxtaposing existing edges.
         edges1 = dict(edges)
@@ -415,8 +417,7 @@ class DiagramGrid(object):
         Returns a list which contains only those triangles who have
         morphisms associated with at least two edges.
         """
-        return [tri for tri in triangles
-                if len([e for e in tri if skeleton[e]]) >= 2]
+        return [tri for tri in triangles if len([e for e in tri if skeleton[e]]) >= 2]
 
     @staticmethod
     def _morphism_length(morphism):
@@ -455,8 +456,7 @@ class DiagramGrid(object):
             for e in triangle:
                 morphisms = edges[e]
                 if morphisms:
-                    size += max(DiagramGrid._morphism_length(m)
-                                for m in morphisms)
+                    size += max(DiagramGrid._morphism_length(m) for m in morphisms)
             triangle_sizes[triangle] = size
         return triangle_sizes
 
@@ -488,8 +488,12 @@ class DiagramGrid(object):
         Checks if the cell at coordinates ``pt`` is either empty or
         out of the bounds of the grid.
         """
-        if (pt[0] < 0) or (pt[1] < 0) or \
-           (pt[0] >= grid.height) or (pt[1] >= grid.width):
+        if (
+            (pt[0] < 0)
+            or (pt[1] < 0)
+            or (pt[0] >= grid.height)
+            or (pt[1] >= grid.width)
+        ):
             return True
         return grid[pt] is None
 
@@ -617,7 +621,8 @@ class DiagramGrid(object):
             down_right = a[0] + 1, b[1]
 
             target_cell = DiagramGrid._choose_target_cell(
-                down_left, down_right, (a, b), obj, skeleton, grid)
+                down_left, down_right, (a, b), obj, skeleton, grid
+            )
 
             if not target_cell:
                 # No room below this edge.  Check above.
@@ -625,7 +630,8 @@ class DiagramGrid(object):
                 up_right = a[0] - 1, b[1]
 
                 target_cell = DiagramGrid._choose_target_cell(
-                    up_left, up_right, (a, b), obj, skeleton, grid)
+                    up_left, up_right, (a, b), obj, skeleton, grid
+                )
 
                 if not target_cell:
                     # This edge is not in the fringe, remove it
@@ -639,7 +645,8 @@ class DiagramGrid(object):
             right_down = b[0], a[1] + 1
 
             target_cell = DiagramGrid._choose_target_cell(
-                right_up, right_down, (a, b), obj, skeleton, grid)
+                right_up, right_down, (a, b), obj, skeleton, grid
+            )
 
             if not target_cell:
                 # No room to the left.  See what's to the right.
@@ -647,7 +654,8 @@ class DiagramGrid(object):
                 left_down = b[0], a[1] - 1
 
                 target_cell = DiagramGrid._choose_target_cell(
-                    left_up, left_down, (a, b), obj, skeleton, grid)
+                    left_up, left_down, (a, b), obj, skeleton, grid
+                )
 
                 if not target_cell:
                     # This edge is not in the fringe, remove it
@@ -661,8 +669,7 @@ class DiagramGrid(object):
 
         # Take care of the displacement of coordinates if a row or
         # a column was prepended.
-        target_cell = (target_cell[0] + offset[0],
-                       target_cell[1] + offset[1])
+        target_cell = (target_cell[0] + offset[0], target_cell[1] + offset[1])
         a = (a[0] + offset[0], a[1] + offset[1])
         b = (b[0] + offset[0], b[1] + offset[1])
 
@@ -677,8 +684,7 @@ class DiagramGrid(object):
         Returns a key for the supplied triangle.  It should be the
         same independently of the hash randomisation.
         """
-        objects = sorted(
-            DiagramGrid._triangle_objects(tri), key=default_sort_key)
+        objects = sorted(DiagramGrid._triangle_objects(tri), key=default_sort_key)
         return (triangle_sizes[tri], default_sort_key(objects))
 
     @staticmethod
@@ -687,8 +693,7 @@ class DiagramGrid(object):
         For a given triangle always picks the same root edge.  The
         root edge is the edge that will be placed first on the grid.
         """
-        candidates = [sorted(e, key=default_sort_key)
-                      for e in tri if skeleton[e]]
+        candidates = [sorted(e, key=default_sort_key) for e in tri if skeleton[e]]
         sorted_candidates = sorted(candidates, key=default_sort_key)
         # Don't forget to assure the proper ordering of the vertices
         # in this edge.
@@ -700,8 +705,11 @@ class DiagramGrid(object):
         Returns only those triangles whose set of objects is not
         completely included in ``placed_objects``.
         """
-        return [tri for tri in triangles if not placed_objects.issuperset(
-            DiagramGrid._triangle_objects(tri))]
+        return [
+            tri
+            for tri in triangles
+            if not placed_objects.issuperset(DiagramGrid._triangle_objects(tri))
+        ]
 
     @staticmethod
     def _grow_pseudopod(triangles, fringe, grid, skeleton, placed_objects):
@@ -727,8 +735,7 @@ class DiagramGrid(object):
 
                 def good_triangle(tri):
                     objs = DiagramGrid._triangle_objects(tri)
-                    return obj in objs and \
-                        placed_objects & (objs - {obj}) == set()
+                    return obj in objs and placed_objects & (objs - {obj}) == set()
 
                 tris = [tri for tri in triangles if good_triangle(tri)]
                 if not tris:
@@ -748,8 +755,10 @@ class DiagramGrid(object):
                 # We have found a triangle which could be attached to
                 # the existing structure by a vertex.
 
-                candidates = sorted([e for e in tri if skeleton[e]],
-                                    key=lambda e: FiniteSet(*e).sort_key())
+                candidates = sorted(
+                    [e for e in tri if skeleton[e]],
+                    key=lambda e: FiniteSet(*e).sort_key(),
+                )
                 edges = [e for e in candidates if obj in e]
 
                 # Note that a meaningful edge (i.e., and edge that is
@@ -765,15 +774,22 @@ class DiagramGrid(object):
                 # Now check for free directions.  When checking for
                 # free directions, prefer the horizontal and vertical
                 # directions.
-                neighbours = [(i - 1, j), (i, j + 1), (i + 1, j), (i, j - 1),
-                              (i - 1, j - 1), (i - 1, j + 1), (i + 1, j - 1), (i + 1, j + 1)]
+                neighbours = [
+                    (i - 1, j),
+                    (i, j + 1),
+                    (i + 1, j),
+                    (i, j - 1),
+                    (i - 1, j - 1),
+                    (i - 1, j + 1),
+                    (i + 1, j - 1),
+                    (i + 1, j + 1),
+                ]
 
                 for pt in neighbours:
                     if DiagramGrid._empty_point(pt, grid):
                         # We have a found a place to grow the
                         # pseudopod into.
-                        offset = DiagramGrid._put_object(
-                            pt, other_obj, grid, fringe)
+                        offset = DiagramGrid._put_object(pt, other_obj, grid, fringe)
 
                         i += offset[0]
                         j += offset[1]
@@ -795,6 +811,7 @@ class DiagramGrid(object):
         without any influence from ``hints``.  Otherwise, it is laid
         out with ``hints``.
         """
+
         def lay_out_group(group, local_hints):
             """
             If ``group`` is a set of objects, uses a ``DiagramGrid``
@@ -813,10 +830,12 @@ class DiagramGrid(object):
                 # Lay out the current group.
                 if local_hints:
                     groups_grids[group] = DiagramGrid(
-                        diagram.subdiagram_from_objects(group), **local_hints)
+                        diagram.subdiagram_from_objects(group), **local_hints
+                    )
                 else:
                     groups_grids[group] = DiagramGrid(
-                        diagram.subdiagram_from_objects(group), **hints)
+                        diagram.subdiagram_from_objects(group), **hints
+                    )
             else:
                 obj_groups[group] = group
 
@@ -887,13 +906,15 @@ class DiagramGrid(object):
             else:
                 return (1, 1)
 
-        row_heights = [max(group_size(top_grid[i, j])[0]
-                           for j in range(top_grid.width))
-                       for i in range(top_grid.height)]
+        row_heights = [
+            max(group_size(top_grid[i, j])[0] for j in range(top_grid.width))
+            for i in range(top_grid.height)
+        ]
 
-        column_widths = [max(group_size(top_grid[i, j])[1]
-                             for i in range(top_grid.height))
-                         for j in range(top_grid.width)]
+        column_widths = [
+            max(group_size(top_grid[i, j])[1] for i in range(top_grid.height))
+            for j in range(top_grid.width)
+        ]
 
         grid = _GrowableGrid(sum(column_widths), sum(row_heights))
 
@@ -909,8 +930,7 @@ class DiagramGrid(object):
                     local_grid = groups_grids[obj]
                     for i in range(local_grid.height):
                         for j in range(local_grid.width):
-                            grid[real_row + i,
-                                real_column + j] = local_grid[i, j]
+                            grid[real_row + i, real_column + j] = local_grid[i, j]
                 else:
                     # This is an object.  Just put it there.
                     grid[real_row, real_column] = obj
@@ -949,11 +969,11 @@ class DiagramGrid(object):
 
         triangles = DiagramGrid._list_triangles(skeleton)
         triangles = DiagramGrid._drop_redundant_triangles(triangles, skeleton)
-        triangle_sizes = DiagramGrid._compute_triangle_min_sizes(
-            triangles, skeleton)
+        triangle_sizes = DiagramGrid._compute_triangle_min_sizes(triangles, skeleton)
 
-        triangles = sorted(triangles, key=lambda tri:
-                           DiagramGrid._triangle_key(tri, triangle_sizes))
+        triangles = sorted(
+            triangles, key=lambda tri: DiagramGrid._triangle_key(tri, triangle_sizes)
+        )
 
         # Place the first edge on the grid.
         root_edge = DiagramGrid._pick_root_edge(triangles[0], skeleton)
@@ -964,24 +984,24 @@ class DiagramGrid(object):
         placed_objects = set(root_edge)
 
         while placed_objects != all_objects:
-            welding = DiagramGrid._find_triangle_to_weld(
-                triangles, fringe, grid)
+            welding = DiagramGrid._find_triangle_to_weld(triangles, fringe, grid)
 
             if welding:
                 (triangle, welding_edge) = welding
 
                 restart_required = DiagramGrid._weld_triangle(
-                    triangle, welding_edge, fringe, grid, skeleton)
+                    triangle, welding_edge, fringe, grid, skeleton
+                )
                 if restart_required:
                     continue
 
-                placed_objects.update(
-                    DiagramGrid._triangle_objects(triangle))
+                placed_objects.update(DiagramGrid._triangle_objects(triangle))
             else:
                 # No more weldings found.  Try to attach triangles by
                 # vertices.
                 new_obj = DiagramGrid._grow_pseudopod(
-                    triangles, fringe, grid, skeleton, placed_objects)
+                    triangles, fringe, grid, skeleton, placed_objects
+                )
 
                 if not new_obj:
                     # No more triangles can be attached, not even by
@@ -992,7 +1012,8 @@ class DiagramGrid(object):
                     remaining_objects = all_objects - placed_objects
 
                     remaining_diagram = diagram.subdiagram_from_objects(
-                        FiniteSet(*remaining_objects))
+                        FiniteSet(*remaining_objects)
+                    )
                     remaining_grid = DiagramGrid(remaining_diagram)
 
                     # Now, let's glue ``remaining_grid`` to ``grid``.
@@ -1014,7 +1035,8 @@ class DiagramGrid(object):
                 placed_objects.add(new_obj)
 
             triangles = DiagramGrid._drop_irrelevant_triangles(
-                triangles, placed_objects)
+                triangles, placed_objects
+            )
 
         return grid
 
@@ -1173,20 +1195,22 @@ class DiagramGrid(object):
         premises = DiagramGrid._simplify_morphisms(diagram.premises)
         conclusions = DiagramGrid._simplify_morphisms(diagram.conclusions)
         all_merged_morphisms = DiagramGrid._merge_premises_conclusions(
-            premises, conclusions)
-        merged_morphisms = DiagramGrid._drop_inessential_morphisms(
-            all_merged_morphisms)
+            premises, conclusions
+        )
+        merged_morphisms = DiagramGrid._drop_inessential_morphisms(all_merged_morphisms)
 
         # Store the merged morphisms for later use.
         self._morphisms = all_merged_morphisms
 
         components = DiagramGrid._get_connected_components(
-            diagram.objects, all_merged_morphisms)
+            diagram.objects, all_merged_morphisms
+        )
 
         if groups and (groups != diagram.objects):
             # Lay out the diagram according to the groups.
             self._grid = DiagramGrid._handle_groups(
-                diagram, groups, merged_morphisms, hints)
+                diagram, groups, merged_morphisms, hints
+            )
         elif len(components) > 1:
             # Note that we check for connectedness _before_ checking
             # the layout hints because the layout strategies don't
@@ -1220,8 +1244,7 @@ class DiagramGrid(object):
             self._grid = grid
         elif "layout" in hints:
             if hints["layout"] == "sequential":
-                self._grid = DiagramGrid._sequential_layout(
-                    diagram, merged_morphisms)
+                self._grid = DiagramGrid._sequential_layout(diagram, merged_morphisms)
         else:
             self._grid = DiagramGrid._generic_layout(diagram, merged_morphisms)
 
@@ -1455,9 +1478,19 @@ class ArrowStringDescription(object):
 
     [Xypic] http://xy-pic.sourceforge.net/
     """
-    def __init__(self, unit, curving, curving_amount, looping_start,
-                 looping_end, horizontal_direction, vertical_direction,
-                 label_position, label):
+
+    def __init__(
+        self,
+        unit,
+        curving,
+        curving_amount,
+        looping_start,
+        looping_end,
+        horizontal_direction,
+        vertical_direction,
+        label_position,
+        label,
+    ):
         self.unit = unit
         self.curving = curving
         self.curving_amount = curving_amount
@@ -1478,8 +1511,7 @@ class ArrowStringDescription(object):
 
     def __str__(self):
         if self.curving:
-            curving_str = "@/%s%d%s/" % (self.curving, self.curving_amount,
-                                         self.unit)
+            curving_str = "@/%s%d%s/" % (self.curving, self.curving_amount, self.unit)
         else:
             curving_str = ""
 
@@ -1494,10 +1526,16 @@ class ArrowStringDescription(object):
         else:
             style_str = ""
 
-        return "\\ar%s%s%s[%s%s]%s%s{%s}" % \
-               (curving_str, looping_str, style_str, self.horizontal_direction,
-                self.vertical_direction, self.label_position,
-                self.label_displacement, self.label)
+        return "\\ar%s%s%s[%s%s]%s%s{%s}" % (
+            curving_str,
+            looping_str,
+            style_str,
+            self.horizontal_direction,
+            self.vertical_direction,
+            self.label_position,
+            self.label_displacement,
+            self.label,
+        )
 
 
 class XypicDiagramDrawer(object):
@@ -1616,6 +1654,7 @@ class XypicDiagramDrawer(object):
 
     draw, ArrowStringDescription
     """
+
     def __init__(self):
         self.unit = "mm"
         self.default_curving_amount = 3
@@ -1767,14 +1806,16 @@ class XypicDiagramDrawer(object):
                 freest_quadrant = i
 
         # Now set up proper looping.
-        (looping_start, looping_end) = [("r", "u"), ("u", "l"), ("l", "d"),
-                                        ("d", "r")][freest_quadrant]
+        (looping_start, looping_end) = [("r", "u"), ("u", "l"), ("l", "d"), ("d", "r")][
+            freest_quadrant
+        ]
 
         return (curving, label_pos, looping_start, looping_end)
 
     @staticmethod
-    def _process_horizontal_morphism(i, j, target_j, grid, morphisms_str_info,
-                                     object_coords):
+    def _process_horizontal_morphism(
+        i, j, target_j, grid, morphisms_str_info, object_coords
+    ):
         """
         Produces the information required for constructing the string
         representation of a horizontal morphism.  This function is
@@ -1898,8 +1939,9 @@ class XypicDiagramDrawer(object):
         return (curving, label_pos)
 
     @staticmethod
-    def _process_vertical_morphism(i, j, target_i, grid, morphisms_str_info,
-                                   object_coords):
+    def _process_vertical_morphism(
+        i, j, target_i, grid, morphisms_str_info, object_coords
+    ):
         """
         Produces the information required for constructing the string
         representation of a vertical morphism.  This function is
@@ -2004,12 +2046,14 @@ class XypicDiagramDrawer(object):
 
         return (curving, label_pos)
 
-    def _process_morphism(self, diagram, grid, morphism, object_coords,
-                          morphisms, morphisms_str_info):
+    def _process_morphism(
+        self, diagram, grid, morphism, object_coords, morphisms, morphisms_str_info
+    ):
         """
         Given the required information, produces the string
         representation of ``morphism``.
         """
+
         def repeat_string_cond(times, str_gt, str_lt):
             """
             If ``times > 0``, repeats ``str_gt`` ``times`` times.
@@ -2025,17 +2069,27 @@ class XypicDiagramDrawer(object):
             Counts how many processed morphisms there are between the
             two supplied objects.
             """
-            return len([m for m in morphisms_str_info
-                        if set([m.domain, m.codomain]) == set([A, B])])
+            return len(
+                [
+                    m
+                    for m in morphisms_str_info
+                    if set([m.domain, m.codomain]) == set([A, B])
+                ]
+            )
 
         def count_morphisms_filtered(dom, cod, curving):
             """
             Counts the processed morphisms which go out of ``dom``
             into ``cod`` with curving ``curving``.
             """
-            return len([m for m, m_str_info in morphisms_str_info.items()
-                        if (m.domain, m.codomain) == (dom, cod) and
-                        (m_str_info.curving == curving)])
+            return len(
+                [
+                    m
+                    for m, m_str_info in morphisms_str_info.items()
+                    if (m.domain, m.codomain) == (dom, cod)
+                    and (m_str_info.curving == curving)
+                ]
+            )
 
         (i, j) = object_coords[morphism.domain]
         (target_i, target_j) = object_coords[morphism.codomain]
@@ -2044,10 +2098,8 @@ class XypicDiagramDrawer(object):
         # the arrow.
         delta_i = target_i - i
         delta_j = target_j - j
-        vertical_direction = repeat_string_cond(delta_i,
-                                                "d", "u")
-        horizontal_direction = repeat_string_cond(delta_j,
-                                                  "r", "l")
+        vertical_direction = repeat_string_cond(delta_i, "d", "u")
+        horizontal_direction = repeat_string_cond(delta_j, "r", "l")
 
         curving = ""
         label_pos = "^"
@@ -2056,24 +2108,32 @@ class XypicDiagramDrawer(object):
 
         if (delta_i == 0) and (delta_j == 0):
             # This is a loop morphism.
-            (curving, label_pos, looping_start,
-             looping_end) = XypicDiagramDrawer._process_loop_morphism(
-                 i, j, grid, morphisms_str_info, object_coords)
+            (
+                curving,
+                label_pos,
+                looping_start,
+                looping_end,
+            ) = XypicDiagramDrawer._process_loop_morphism(
+                i, j, grid, morphisms_str_info, object_coords
+            )
         elif (delta_i == 0) and (abs(j - target_j) > 1):
             # This is a horizontal morphism.
             (curving, label_pos) = XypicDiagramDrawer._process_horizontal_morphism(
-                i, j, target_j, grid, morphisms_str_info, object_coords)
+                i, j, target_j, grid, morphisms_str_info, object_coords
+            )
         elif (delta_j == 0) and (abs(i - target_i) > 1):
             # This is a vertical morphism.
             (curving, label_pos) = XypicDiagramDrawer._process_vertical_morphism(
-                i, j, target_i, grid, morphisms_str_info, object_coords)
+                i, j, target_i, grid, morphisms_str_info, object_coords
+            )
 
         count = count_morphisms_undirected(morphism.domain, morphism.codomain)
         curving_amount = ""
         if curving:
             # This morphisms should be curved anyway.
-            curving_amount = self.default_curving_amount + count * \
-                self.default_curving_step
+            curving_amount = (
+                self.default_curving_amount + count * self.default_curving_step
+            )
         elif count:
             # There are no objects between the domain and codomain of
             # the current morphism, but this is not there already are
@@ -2081,27 +2141,37 @@ class XypicDiagramDrawer(object):
             # have to curve this one.
             curving = "^"
             filtered_morphisms = count_morphisms_filtered(
-                morphism.domain, morphism.codomain, curving)
-            curving_amount = self.default_curving_amount + \
-                filtered_morphisms * \
-                self.default_curving_step
+                morphism.domain, morphism.codomain, curving
+            )
+            curving_amount = (
+                self.default_curving_amount
+                + filtered_morphisms * self.default_curving_step
+            )
 
         # Let's now get the name of the morphism.
         morphism_name = ""
         if isinstance(morphism, IdentityMorphism):
             morphism_name = "id_{%s}" + latex(grid[i, j])
         elif isinstance(morphism, CompositeMorphism):
-            component_names = [latex(Symbol(component.name)) for
-                               component in morphism.components]
+            component_names = [
+                latex(Symbol(component.name)) for component in morphism.components
+            ]
             component_names.reverse()
             morphism_name = "\\circ ".join(component_names)
         elif isinstance(morphism, NamedMorphism):
             morphism_name = latex(Symbol(morphism.name))
 
         return ArrowStringDescription(
-            self.unit, curving, curving_amount, looping_start,
-            looping_end, horizontal_direction, vertical_direction,
-            label_pos, morphism_name)
+            self.unit,
+            curving,
+            curving_amount,
+            looping_start,
+            looping_end,
+            horizontal_direction,
+            vertical_direction,
+            label_pos,
+            morphism_name,
+        )
 
     @staticmethod
     def _check_free_space_horizontal(dom_i, dom_j, cod_j, grid):
@@ -2121,15 +2191,13 @@ class XypicDiagramDrawer(object):
         if dom_i == 0:
             free_up = True
         else:
-            free_up = all([grid[dom_i - 1, j] for j in
-                           range(start, end + 1)])
+            free_up = all([grid[dom_i - 1, j] for j in range(start, end + 1)])
 
         # Check for free space below.
         if dom_i == grid.height - 1:
             free_down = True
         else:
-            free_down = all([not grid[dom_i + 1, j] for j in
-                             range(start, end + 1)])
+            free_down = all([not grid[dom_i + 1, j] for j in range(start, end + 1)])
 
         return (free_up, free_down, backwards)
 
@@ -2151,14 +2219,12 @@ class XypicDiagramDrawer(object):
         if dom_j == 0:
             free_left = True
         else:
-            free_left = all([not grid[i, dom_j - 1] for i in
-                             range(start, end + 1)])
+            free_left = all([not grid[i, dom_j - 1] for i in range(start, end + 1)])
 
         if dom_j == grid.width - 1:
             free_right = True
         else:
-            free_right = all([not grid[i, dom_j + 1] for i in
-                              range(start, end + 1)])
+            free_right = all([not grid[i, dom_j + 1] for i in range(start, end + 1)])
 
         return (free_left, free_right, backwards)
 
@@ -2169,6 +2235,7 @@ class XypicDiagramDrawer(object):
         (i.e., space not occupied by any objects) above the morphism
         or below it.
         """
+
         def abs_xrange(start, end):
             if start < end:
                 return range(start, end + 1)
@@ -2225,7 +2292,7 @@ class XypicDiagramDrawer(object):
         # relatively small sizes of diagram grids, while the
         # code would have become harder to understand.
 
-        alpha = float(end_i - start_i)/(end_j - start_j)
+        alpha = float(end_i - start_i) / (end_j - start_j)
         free_up = True
         free_down = True
         for i in abs_xrange(start_i, end_i):
@@ -2242,7 +2309,7 @@ class XypicDiagramDrawer(object):
                 if j == start_j:
                     alpha1 = "inf"
                 else:
-                    alpha1 = float(i - start_i)/(j - start_j)
+                    alpha1 = float(i - start_i) / (j - start_j)
 
                 if grid[i, j]:
                     if (alpha1 == "inf") or (abs(alpha1) > abs(alpha)):
@@ -2257,6 +2324,7 @@ class XypicDiagramDrawer(object):
         For all straight morphisms which form the visual boundary of
         the laid out diagram, puts their labels on their outer sides.
         """
+
         def set_label_position(free1, free2, pos1, pos2, backwards, m_str_info):
             """
             Given the information about room available to one side and
@@ -2296,28 +2364,39 @@ class XypicDiagramDrawer(object):
 
             if dom_i == cod_i:
                 # Horizontal morphism.
-                (free_up, free_down,
-                 backwards) = XypicDiagramDrawer._check_free_space_horizontal(
-                     dom_i, dom_j, cod_j, grid)
+                (
+                    free_up,
+                    free_down,
+                    backwards,
+                ) = XypicDiagramDrawer._check_free_space_horizontal(
+                    dom_i, dom_j, cod_j, grid
+                )
 
-                set_label_position(free_up, free_down, "^", "_",
-                                   backwards, m_str_info)
+                set_label_position(free_up, free_down, "^", "_", backwards, m_str_info)
             elif dom_j == cod_j:
                 # Vertical morphism.
-                (free_left, free_right,
-                 backwards) = XypicDiagramDrawer._check_free_space_vertical(
-                     dom_i, cod_i, dom_j, grid)
+                (
+                    free_left,
+                    free_right,
+                    backwards,
+                ) = XypicDiagramDrawer._check_free_space_vertical(
+                    dom_i, cod_i, dom_j, grid
+                )
 
-                set_label_position(free_left, free_right, "_", "^",
-                                   backwards, m_str_info)
+                set_label_position(
+                    free_left, free_right, "_", "^", backwards, m_str_info
+                )
             else:
                 # A diagonal morphism.
-                (free_up, free_down,
-                 backwards) = XypicDiagramDrawer._check_free_space_diagonal(
-                     dom_i, cod_i, dom_j, cod_j, grid)
+                (
+                    free_up,
+                    free_down,
+                    backwards,
+                ) = XypicDiagramDrawer._check_free_space_diagonal(
+                    dom_i, cod_i, dom_j, cod_j, grid
+                )
 
-                set_label_position(free_up, free_down, "^", "_",
-                                   backwards, m_str_info)
+                set_label_position(free_up, free_down, "^", "_", backwards, m_str_info)
 
     @staticmethod
     def _morphism_sort_key(morphism, object_coords):
@@ -2346,8 +2425,9 @@ class XypicDiagramDrawer(object):
         return (2, 0, default_sort_key(morphism))
 
     @staticmethod
-    def _build_xypic_string(diagram, grid, morphisms,
-                            morphisms_str_info, diagram_format):
+    def _build_xypic_string(
+        diagram, grid, morphisms, morphisms_str_info, diagram_format
+    ):
         """
         Given a collection of :class:`ArrowStringDescription`
         describing the morphisms of a diagram and the object layout
@@ -2483,17 +2563,18 @@ class XypicDiagramDrawer(object):
                 if grid[i, j]:
                     object_coords[grid[i, j]] = (i, j)
 
-        morphisms = sorted(morphisms_props,
-                           key=lambda m: XypicDiagramDrawer._morphism_sort_key(
-                               m, object_coords))
+        morphisms = sorted(
+            morphisms_props,
+            key=lambda m: XypicDiagramDrawer._morphism_sort_key(m, object_coords),
+        )
 
         # Build the tuples defining the string representations of
         # morphisms.
         morphisms_str_info = {}
         for morphism in morphisms:
             string_description = self._process_morphism(
-                diagram, grid, morphism, object_coords, morphisms,
-                morphisms_str_info)
+                diagram, grid, morphism, object_coords, morphisms, morphisms_str_info
+            )
 
             if self.default_arrow_formatter:
                 self.default_arrow_formatter(string_description)
@@ -2510,11 +2591,11 @@ class XypicDiagramDrawer(object):
         self._push_labels_out(morphisms_str_info, grid, object_coords)
 
         return XypicDiagramDrawer._build_xypic_string(
-            diagram, grid, morphisms, morphisms_str_info, diagram_format)
+            diagram, grid, morphisms, morphisms_str_info, diagram_format
+        )
 
 
-def xypic_draw_diagram(diagram, masked=None, diagram_format="",
-                       groups=None, **hints):
+def xypic_draw_diagram(diagram, masked=None, diagram_format="", groups=None, **hints):
     r"""
     Provides a shortcut combining :class:`DiagramGrid` and
     :class:`XypicDiagramDrawer`.  Returns an Xy-pic presentation of
@@ -2554,9 +2635,17 @@ def xypic_draw_diagram(diagram, masked=None, diagram_format="",
     return drawer.draw(diagram, grid, masked, diagram_format)
 
 
-@doctest_depends_on(exe=('latex', 'dvipng'), modules=('pyglet',))
-def preview_diagram(diagram, masked=None, diagram_format="", groups=None,
-                    output='png', viewer=None, euler=True, **hints):
+@doctest_depends_on(exe=("latex", "dvipng"), modules=("pyglet",))
+def preview_diagram(
+    diagram,
+    masked=None,
+    diagram_format="",
+    groups=None,
+    output="png",
+    viewer=None,
+    euler=True,
+    **hints
+):
     """
     Combines the functionality of ``xypic_draw_diagram`` and
     ``sympy.printing.preview``.  The arguments ``masked``,
@@ -2583,6 +2672,6 @@ def preview_diagram(diagram, masked=None, diagram_format="", groups=None,
     XypicDiagramDrawer
     """
     from sympy.printing import preview
-    latex_output = xypic_draw_diagram(diagram, masked, diagram_format,
-                                      groups, **hints)
+
+    latex_output = xypic_draw_diagram(diagram, masked, diagram_format, groups, **hints)
     preview(latex_output, output, viewer, euler, ("xypic",))

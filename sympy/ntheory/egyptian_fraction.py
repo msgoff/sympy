@@ -4,7 +4,8 @@ from sympy import Integer
 import sympy.polys
 
 import sys
-if sys.version_info < (3,5):
+
+if sys.version_info < (3, 5):
     from fractions import gcd
 else:
     from math import gcd
@@ -133,13 +134,13 @@ def egypt_greedy(x, y):
         return [y]
     else:
         a = (-y) % (x)
-        b = y*(y//x + 1)
+        b = y * (y // x + 1)
         c = gcd(a, b)
         if c > 1:
-            num, denom = a//c, b//c
+            num, denom = a // c, b // c
         else:
             num, denom = a, b
-        return [y//x + 1] + egypt_greedy(num, denom)
+        return [y // x + 1] + egypt_greedy(num, denom)
 
 
 def egypt_graham_jewett(x, y):
@@ -159,7 +160,7 @@ def egypt_graham_jewett(x, y):
         # now comes the application of the result of graham and jewett:
         l[i + 1] = l[i] + 1
         # and we just iterate that until the list has no duplicates.
-        l.append(l[i]*(l[i] + 1))
+        l.append(l[i] * (l[i] + 1))
     return sorted(l)
 
 
@@ -175,7 +176,7 @@ def egypt_takenouchi(x, y):
             l[i] = l[i] // 2
             del l[i + 1]
         else:
-            l[i], l[i + 1] = (k + 1)//2, k*(k + 1)//2
+            l[i], l[i + 1] = (k + 1) // 2, k * (k + 1) // 2
     return sorted(l)
 
 
@@ -183,8 +184,8 @@ def egypt_golomb(x, y):
     if x == 1:
         return [y]
     xp = sympy.polys.ZZ.invert(int(x), int(y))
-    rv = [Integer(xp*y)]
-    rv.extend(egypt_golomb((x*xp - 1)//y, xp))
+    rv = [Integer(xp * y)]
+    rv.extend(egypt_golomb((x * xp - 1) // y, xp))
     return sorted(rv)
 
 
@@ -192,8 +193,8 @@ def egypt_harmonic(r):
     rv = []
     d = Integer(1)
     acc = Integer(0)
-    while acc + 1/d <= r:
-        acc += 1/d
+    while acc + 1 / d <= r:
+        acc += 1 / d
         rv.append(d)
         d += 1
     return (rv, r - acc)

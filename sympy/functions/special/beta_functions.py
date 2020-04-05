@@ -8,6 +8,7 @@ from sympy.functions.special.gamma_functions import gamma, digamma
 ############################ COMPLETE BETA  FUNCTION ##########################
 ###############################################################################
 
+
 class beta(Function):
     r"""
     The beta integral is called the Eulerian integral of the first kind by
@@ -94,23 +95,23 @@ class beta(Function):
         x, y = self.args
         if argindex == 1:
             # Diff wrt x
-            return beta(x, y)*(digamma(x) - digamma(x + y))
+            return beta(x, y) * (digamma(x) - digamma(x + y))
         elif argindex == 2:
             # Diff wrt y
-            return beta(x, y)*(digamma(y) - digamma(x + y))
+            return beta(x, y) * (digamma(y) - digamma(x + y))
         else:
             raise ArgumentIndexError(self, argindex)
 
     @classmethod
     def eval(cls, x, y):
         if y is S.One:
-            return 1/x
+            return 1 / x
         if x is S.One:
-            return 1/y
+            return 1 / y
 
     def _eval_expand_func(self, **hints):
         x, y = self.args
-        return gamma(x)*gamma(y) / gamma(x + y)
+        return gamma(x) * gamma(y) / gamma(x + y)
 
     def _eval_is_real(self):
         return self.args[0].is_real and self.args[1].is_real

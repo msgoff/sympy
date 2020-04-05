@@ -10,6 +10,7 @@ from antlr4 import *
 from io import StringIO
 import sys
 
+
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
@@ -59,18 +60,18 @@ def serializedATN():
         buf.write(u"\5\35\u019b\n\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3")
         buf.write(u"\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\7\35\u01ac\n\35")
         buf.write(u"\f\35\16\35\u01af\13\35\3\35\2\38\36\2\4\6\b\n\f\16\20")
-        buf.write(u"\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668\2\t\3\2\5")
+        buf.write(u'\22\24\26\30\32\34\36 "$&(*,.\60\62\64\668\2\t\3\2\5')
         buf.write(u"\13\3\2\35\36\3\2\23\24\4\2\f\f\25\25\3\2./\4\2.\60\62")
         buf.write(u"\62\3\2\33\34\2\u01e5\2;\3\2\2\2\4F\3\2\2\2\6Z\3\2\2")
         buf.write(u"\2\b\\\3\2\2\2\n^\3\2\2\2\fg\3\2\2\2\16\u0085\3\2\2\2")
         buf.write(u"\20\u0087\3\2\2\2\22\u00a6\3\2\2\2\24\u00a8\3\2\2\2\26")
         buf.write(u"\u00d2\3\2\2\2\30\u00e1\3\2\2\2\32\u00ea\3\2\2\2\34\u00ee")
-        buf.write(u"\3\2\2\2\36\u00fb\3\2\2\2 \u010e\3\2\2\2\"\u0115\3\2")
+        buf.write(u'\3\2\2\2\36\u00fb\3\2\2\2 \u010e\3\2\2\2"\u0115\3\2')
         buf.write(u"\2\2$\u0117\3\2\2\2&\u011b\3\2\2\2(\u0124\3\2\2\2*\u012d")
         buf.write(u"\3\2\2\2,\u0131\3\2\2\2.\u0137\3\2\2\2\60\u0140\3\2\2")
         buf.write(u"\2\62\u0144\3\2\2\2\64\u0164\3\2\2\2\66\u016e\3\2\2\2")
         buf.write(u"8\u019a\3\2\2\2:<\5\4\3\2;:\3\2\2\2<=\3\2\2\2=;\3\2\2")
-        buf.write(u"\2=>\3\2\2\2>\3\3\2\2\2?G\5\20\t\2@G\5\16\b\2AG\5\"\22")
+        buf.write(u'\2=>\3\2\2\2>\3\3\2\2\2?G\5\20\t\2@G\5\16\b\2AG\5"\22')
         buf.write(u"\2BG\5\30\r\2CG\5\34\17\2DG\5\6\4\2EG\5$\23\2F?\3\2\2")
         buf.write(u"\2F@\3\2\2\2FA\3\2\2\2FB\3\2\2\2FC\3\2\2\2FD\3\2\2\2")
         buf.write(u"FE\3\2\2\2G\5\3\2\2\2HI\5\66\34\2IJ\5\b\5\2JK\58\35\2")
@@ -94,7 +95,7 @@ def serializedATN():
         buf.write(u"\u008b\u0089\3\2\2\2\u008c\u008f\3\2\2\2\u008d\u008b")
         buf.write(u"\3\2\2\2\u008d\u008e\3\2\2\2\u008e\21\3\2\2\2\u008f\u008d")
         buf.write(u"\3\2\2\2\u0090\u00a7\7$\2\2\u0091\u00a7\7%\2\2\u0092")
-        buf.write(u"\u00a7\7&\2\2\u0093\u00a7\7\'\2\2\u0094\u00a7\7(\2\2")
+        buf.write(u"\u00a7\7&\2\2\u0093\u00a7\7'\2\2\u0094\u00a7\7(\2\2")
         buf.write(u"\u0095\u00a7\7)\2\2\u0096\u00a7\7*\2\2\u0097\u00a7\7")
         buf.write(u"+\2\2\u0098\u009c\7,\2\2\u0099\u009b\7\r\2\2\u009a\u0099")
         buf.write(u"\3\2\2\2\u009b\u009e\3\2\2\2\u009c\u009a\3\2\2\2\u009c")
@@ -156,10 +157,10 @@ def serializedATN():
         buf.write(u"\2\2\u0115\u0112\3\2\2\2\u0115\u0113\3\2\2\2\u0115\u0114")
         buf.write(u"\3\2\2\2\u0116#\3\2\2\2\u0117\u0119\7\62\2\2\u0118\u011a")
         buf.write(u"\t\7\2\2\u0119\u0118\3\2\2\2\u0119\u011a\3\2\2\2\u011a")
-        buf.write(u"%\3\2\2\2\u011b\u011c\7\"\2\2\u011c\u0121\7\62\2\2\u011d")
+        buf.write(u'%\3\2\2\2\u011b\u011c\7"\2\2\u011c\u0121\7\62\2\2\u011d')
         buf.write(u"\u011e\7\f\2\2\u011e\u0120\7\62\2\2\u011f\u011d\3\2\2")
         buf.write(u"\2\u0120\u0123\3\2\2\2\u0121\u011f\3\2\2\2\u0121\u0122")
-        buf.write(u"\3\2\2\2\u0122\'\3\2\2\2\u0123\u0121\3\2\2\2\u0124\u0125")
+        buf.write(u"\3\2\2\2\u0122'\3\2\2\2\u0123\u0121\3\2\2\2\u0124\u0125")
         buf.write(u"\7\37\2\2\u0125\u012a\5,\27\2\u0126\u0127\7\f\2\2\u0127")
         buf.write(u"\u0129\5,\27\2\u0128\u0126\3\2\2\2\u0129\u012c\3\2\2")
         buf.write(u"\2\u012a\u0128\3\2\2\2\u012a\u012b\3\2\2\2\u012b)\3\2")
@@ -232,34 +233,98 @@ def serializedATN():
         return buf.getvalue()
 
 
-class AutolevParser ( Parser ):
+class AutolevParser(Parser):
 
     grammarFileName = "Autolev.g4"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ u"<INVALID>", u"'['", u"']'", u"'='", u"'+='", u"'-='", 
-                     u"':='", u"'*='", u"'/='", u"'^='", u"','", u"'''", 
-                     u"'('", u"')'", u"'{'", u"'}'", u"':'", u"'+'", u"'-'", 
-                     u"';'", u"'.'", u"'>'", u"'0>'", u"'1>>'", u"'^'", 
-                     u"'*'", u"'/'" ]
+    literalNames = [
+        u"<INVALID>",
+        u"'['",
+        u"']'",
+        u"'='",
+        u"'+='",
+        u"'-='",
+        u"':='",
+        u"'*='",
+        u"'/='",
+        u"'^='",
+        u"','",
+        u"'''",
+        u"'('",
+        u"')'",
+        u"'{'",
+        u"'}'",
+        u"':'",
+        u"'+'",
+        u"'-'",
+        u"';'",
+        u"'.'",
+        u"'>'",
+        u"'0>'",
+        u"'1>>'",
+        u"'^'",
+        u"'*'",
+        u"'/'",
+    ]
 
-    symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"Mass", 
-                      u"Inertia", u"Input", u"Output", u"Save", u"UnitSystem", 
-                      u"Encode", u"Newtonian", u"Frames", u"Bodies", u"Particles", 
-                      u"Points", u"Constants", u"Specifieds", u"Imaginary", 
-                      u"Variables", u"MotionVariables", u"INT", u"FLOAT", 
-                      u"EXP", u"LINE_COMMENT", u"ID", u"WS" ]
+    symbolicNames = [
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"<INVALID>",
+        u"Mass",
+        u"Inertia",
+        u"Input",
+        u"Output",
+        u"Save",
+        u"UnitSystem",
+        u"Encode",
+        u"Newtonian",
+        u"Frames",
+        u"Bodies",
+        u"Particles",
+        u"Points",
+        u"Constants",
+        u"Specifieds",
+        u"Imaginary",
+        u"Variables",
+        u"MotionVariables",
+        u"INT",
+        u"FLOAT",
+        u"EXP",
+        u"LINE_COMMENT",
+        u"ID",
+        u"WS",
+    ]
 
     RULE_prog = 0
     RULE_stat = 1
@@ -290,74 +355,97 @@ class AutolevParser ( Parser ):
     RULE_vec = 26
     RULE_expr = 27
 
-    ruleNames =  [ u"prog", u"stat", u"assignment", u"equals", u"index", 
-                   u"diff", u"functionCall", u"varDecl", u"varType", u"varDecl2", 
-                   u"ranges", u"massDecl", u"massDecl2", u"inertiaDecl", 
-                   u"matrix", u"matrixInOutput", u"codeCommands", u"settings", 
-                   u"units", u"inputs", u"id_diff", u"inputs2", u"outputs", 
-                   u"outputs2", u"codegen", u"commands", u"vec", u"expr" ]
+    ruleNames = [
+        u"prog",
+        u"stat",
+        u"assignment",
+        u"equals",
+        u"index",
+        u"diff",
+        u"functionCall",
+        u"varDecl",
+        u"varType",
+        u"varDecl2",
+        u"ranges",
+        u"massDecl",
+        u"massDecl2",
+        u"inertiaDecl",
+        u"matrix",
+        u"matrixInOutput",
+        u"codeCommands",
+        u"settings",
+        u"units",
+        u"inputs",
+        u"id_diff",
+        u"inputs2",
+        u"outputs",
+        u"outputs2",
+        u"codegen",
+        u"commands",
+        u"vec",
+        u"expr",
+    ]
 
     EOF = Token.EOF
-    T__0=1
-    T__1=2
-    T__2=3
-    T__3=4
-    T__4=5
-    T__5=6
-    T__6=7
-    T__7=8
-    T__8=9
-    T__9=10
-    T__10=11
-    T__11=12
-    T__12=13
-    T__13=14
-    T__14=15
-    T__15=16
-    T__16=17
-    T__17=18
-    T__18=19
-    T__19=20
-    T__20=21
-    T__21=22
-    T__22=23
-    T__23=24
-    T__24=25
-    T__25=26
-    Mass=27
-    Inertia=28
-    Input=29
-    Output=30
-    Save=31
-    UnitSystem=32
-    Encode=33
-    Newtonian=34
-    Frames=35
-    Bodies=36
-    Particles=37
-    Points=38
-    Constants=39
-    Specifieds=40
-    Imaginary=41
-    Variables=42
-    MotionVariables=43
-    INT=44
-    FLOAT=45
-    EXP=46
-    LINE_COMMENT=47
-    ID=48
-    WS=49
+    T__0 = 1
+    T__1 = 2
+    T__2 = 3
+    T__3 = 4
+    T__4 = 5
+    T__5 = 6
+    T__6 = 7
+    T__7 = 8
+    T__8 = 9
+    T__9 = 10
+    T__10 = 11
+    T__11 = 12
+    T__12 = 13
+    T__13 = 14
+    T__14 = 15
+    T__15 = 16
+    T__16 = 17
+    T__17 = 18
+    T__18 = 19
+    T__19 = 20
+    T__20 = 21
+    T__21 = 22
+    T__22 = 23
+    T__23 = 24
+    T__24 = 25
+    T__25 = 26
+    Mass = 27
+    Inertia = 28
+    Input = 29
+    Output = 30
+    Save = 31
+    UnitSystem = 32
+    Encode = 33
+    Newtonian = 34
+    Frames = 35
+    Bodies = 36
+    Particles = 37
+    Points = 38
+    Constants = 39
+    Specifieds = 40
+    Imaginary = 41
+    Variables = 42
+    MotionVariables = 43
+    INT = 44
+    FLOAT = 45
+    EXP = 46
+    LINE_COMMENT = 47
+    ID = 48
+    WS = 49
 
     def __init__(self, input, output=sys.stdout):
         super(AutolevParser, self).__init__(input, output=output)
         self.checkVersion("4.7.1")
-        self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
+        self._interp = ParserATNSimulator(
+            self, self.atn, self.decisionsToDFA, self.sharedContextCache
+        )
         self._predicates = None
 
-
-
     class ProgContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.ProgContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -366,8 +454,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.StatContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.StatContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.StatContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_prog
@@ -380,26 +467,53 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitProg"):
                 listener.exitProg(self)
 
-
-
-
     def prog(self):
 
         localctx = AutolevParser.ProgContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_prog)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 57 
+            self.state = 57
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
                 self.state = 56
                 self.stat()
-                self.state = 59 
+                self.state = 59
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutolevParser.T__21) | (1 << AutolevParser.T__22) | (1 << AutolevParser.Mass) | (1 << AutolevParser.Inertia) | (1 << AutolevParser.Input) | (1 << AutolevParser.Output) | (1 << AutolevParser.Save) | (1 << AutolevParser.UnitSystem) | (1 << AutolevParser.Encode) | (1 << AutolevParser.Newtonian) | (1 << AutolevParser.Frames) | (1 << AutolevParser.Bodies) | (1 << AutolevParser.Particles) | (1 << AutolevParser.Points) | (1 << AutolevParser.Constants) | (1 << AutolevParser.Specifieds) | (1 << AutolevParser.Imaginary) | (1 << AutolevParser.Variables) | (1 << AutolevParser.MotionVariables) | (1 << AutolevParser.ID))) != 0)):
+                if not (
+                    (
+                        ((_la) & ~0x3F) == 0
+                        and (
+                            (1 << _la)
+                            & (
+                                (1 << AutolevParser.T__21)
+                                | (1 << AutolevParser.T__22)
+                                | (1 << AutolevParser.Mass)
+                                | (1 << AutolevParser.Inertia)
+                                | (1 << AutolevParser.Input)
+                                | (1 << AutolevParser.Output)
+                                | (1 << AutolevParser.Save)
+                                | (1 << AutolevParser.UnitSystem)
+                                | (1 << AutolevParser.Encode)
+                                | (1 << AutolevParser.Newtonian)
+                                | (1 << AutolevParser.Frames)
+                                | (1 << AutolevParser.Bodies)
+                                | (1 << AutolevParser.Particles)
+                                | (1 << AutolevParser.Points)
+                                | (1 << AutolevParser.Constants)
+                                | (1 << AutolevParser.Specifieds)
+                                | (1 << AutolevParser.Imaginary)
+                                | (1 << AutolevParser.Variables)
+                                | (1 << AutolevParser.MotionVariables)
+                                | (1 << AutolevParser.ID)
+                            )
+                        )
+                        != 0
+                    )
+                ):
                     break
 
         except RecognitionException as re:
@@ -411,38 +525,30 @@ class AutolevParser ( Parser ):
         return localctx
 
     class StatContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.StatContext, self).__init__(parent, invokingState)
             self.parser = parser
 
         def varDecl(self):
-            return self.getTypedRuleContext(AutolevParser.VarDeclContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.VarDeclContext, 0)
 
         def functionCall(self):
-            return self.getTypedRuleContext(AutolevParser.FunctionCallContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.FunctionCallContext, 0)
 
         def codeCommands(self):
-            return self.getTypedRuleContext(AutolevParser.CodeCommandsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.CodeCommandsContext, 0)
 
         def massDecl(self):
-            return self.getTypedRuleContext(AutolevParser.MassDeclContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.MassDeclContext, 0)
 
         def inertiaDecl(self):
-            return self.getTypedRuleContext(AutolevParser.InertiaDeclContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.InertiaDeclContext, 0)
 
         def assignment(self):
-            return self.getTypedRuleContext(AutolevParser.AssignmentContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.AssignmentContext, 0)
 
         def settings(self):
-            return self.getTypedRuleContext(AutolevParser.SettingsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.SettingsContext, 0)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_stat
@@ -455,9 +561,6 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitStat"):
                 listener.exitStat(self)
 
-
-
-
     def stat(self):
 
         localctx = AutolevParser.StatContext(self, self._ctx, self.state)
@@ -465,7 +568,7 @@ class AutolevParser ( Parser ):
         try:
             self.state = 68
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,1,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 1, self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 61
@@ -508,7 +611,6 @@ class AutolevParser ( Parser ):
                 self.settings()
                 pass
 
-
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -518,36 +620,29 @@ class AutolevParser ( Parser ):
         return localctx
 
     class AssignmentContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.AssignmentContext, self).__init__(parent, invokingState)
             self.parser = parser
 
-
         def getRuleIndex(self):
             return AutolevParser.RULE_assignment
 
-     
         def copyFrom(self, ctx):
             super(AutolevParser.AssignmentContext, self).copyFrom(ctx)
 
-
-
     class VecAssignContext(AssignmentContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.AssignmentContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.AssignmentContext)
             super(AutolevParser.VecAssignContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def vec(self):
-            return self.getTypedRuleContext(AutolevParser.VecContext,0)
+            return self.getTypedRuleContext(AutolevParser.VecContext, 0)
 
         def equals(self):
-            return self.getTypedRuleContext(AutolevParser.EqualsContext,0)
+            return self.getTypedRuleContext(AutolevParser.EqualsContext, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterVecAssign"):
@@ -557,24 +652,22 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVecAssign"):
                 listener.exitVecAssign(self)
 
-
     class RegularAssignContext(AssignmentContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.AssignmentContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.AssignmentContext)
             super(AutolevParser.RegularAssignContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def ID(self):
             return self.getToken(AutolevParser.ID, 0)
+
         def equals(self):
-            return self.getTypedRuleContext(AutolevParser.EqualsContext,0)
+            return self.getTypedRuleContext(AutolevParser.EqualsContext, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def diff(self):
-            return self.getTypedRuleContext(AutolevParser.DiffContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.DiffContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterRegularAssign"):
@@ -584,24 +677,22 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitRegularAssign"):
                 listener.exitRegularAssign(self)
 
-
     class IndexAssignContext(AssignmentContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.AssignmentContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.AssignmentContext)
             super(AutolevParser.IndexAssignContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def ID(self):
             return self.getToken(AutolevParser.ID, 0)
+
         def index(self):
-            return self.getTypedRuleContext(AutolevParser.IndexContext,0)
+            return self.getTypedRuleContext(AutolevParser.IndexContext, 0)
 
         def equals(self):
-            return self.getTypedRuleContext(AutolevParser.EqualsContext,0)
+            return self.getTypedRuleContext(AutolevParser.EqualsContext, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterIndexAssign"):
@@ -611,17 +702,15 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitIndexAssign"):
                 listener.exitIndexAssign(self)
 
-
-
     def assignment(self):
 
         localctx = AutolevParser.AssignmentContext(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_assignment)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 88
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 3, self._ctx)
             if la_ == 1:
                 localctx = AutolevParser.VecAssignContext(self, localctx)
                 self.enterOuterAlt(localctx, 1)
@@ -658,17 +747,15 @@ class AutolevParser ( Parser ):
                 self.state = 83
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==AutolevParser.T__10:
+                if _la == AutolevParser.T__10:
                     self.state = 82
                     self.diff()
-
 
                 self.state = 85
                 self.equals()
                 self.state = 86
                 self.expr(0)
                 pass
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -679,11 +766,9 @@ class AutolevParser ( Parser ):
         return localctx
 
     class EqualsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.EqualsContext, self).__init__(parent, invokingState)
             self.parser = parser
-
 
         def getRuleIndex(self):
             return AutolevParser.RULE_equals
@@ -696,19 +781,33 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitEquals"):
                 listener.exitEquals(self)
 
-
-
-
     def equals(self):
 
         localctx = AutolevParser.EqualsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_equals)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 90
             _la = self._input.LA(1)
-            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutolevParser.T__2) | (1 << AutolevParser.T__3) | (1 << AutolevParser.T__4) | (1 << AutolevParser.T__5) | (1 << AutolevParser.T__6) | (1 << AutolevParser.T__7) | (1 << AutolevParser.T__8))) != 0)):
+            if not (
+                (
+                    ((_la) & ~0x3F) == 0
+                    and (
+                        (1 << _la)
+                        & (
+                            (1 << AutolevParser.T__2)
+                            | (1 << AutolevParser.T__3)
+                            | (1 << AutolevParser.T__4)
+                            | (1 << AutolevParser.T__5)
+                            | (1 << AutolevParser.T__6)
+                            | (1 << AutolevParser.T__7)
+                            | (1 << AutolevParser.T__8)
+                        )
+                    )
+                    != 0
+                )
+            ):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -722,7 +821,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class IndexContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.IndexContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -731,8 +829,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_index
@@ -745,14 +842,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitIndex"):
                 listener.exitIndex(self)
 
-
-
-
     def index(self):
 
         localctx = AutolevParser.IndexContext(self, self._ctx, self.state)
         self.enterRule(localctx, 8, self.RULE_index)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 92
@@ -760,7 +854,7 @@ class AutolevParser ( Parser ):
             self.state = 97
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 93
                 self.match(AutolevParser.T__9)
                 self.state = 94
@@ -778,11 +872,9 @@ class AutolevParser ( Parser ):
         return localctx
 
     class DiffContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.DiffContext, self).__init__(parent, invokingState)
             self.parser = parser
-
 
         def getRuleIndex(self):
             return AutolevParser.RULE_diff
@@ -795,26 +887,23 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitDiff"):
                 listener.exitDiff(self)
 
-
-
-
     def diff(self):
 
         localctx = AutolevParser.DiffContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_diff)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 101 
+            self.state = 101
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
                 self.state = 100
                 self.match(AutolevParser.T__10)
-                self.state = 103 
+                self.state = 103
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not (_la==AutolevParser.T__10):
+                if not (_la == AutolevParser.T__10):
                     break
 
         except RecognitionException as re:
@@ -826,9 +915,10 @@ class AutolevParser ( Parser ):
         return localctx
 
     class FunctionCallContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutolevParser.FunctionCallContext, self).__init__(parent, invokingState)
+            super(AutolevParser.FunctionCallContext, self).__init__(
+                parent, invokingState
+            )
             self.parser = parser
 
         def ID(self, i=None):
@@ -841,8 +931,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def Mass(self):
             return self.getToken(AutolevParser.Mass, 0)
@@ -861,14 +950,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitFunctionCall"):
                 listener.exitFunctionCall(self)
 
-
-
-
     def functionCall(self):
 
         localctx = AutolevParser.FunctionCallContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_functionCall)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 131
             self._errHandler.sync(self)
@@ -882,13 +968,29 @@ class AutolevParser ( Parser ):
                 self.state = 115
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutolevParser.T__0) | (1 << AutolevParser.T__11) | (1 << AutolevParser.T__13) | (1 << AutolevParser.T__17) | (1 << AutolevParser.T__21) | (1 << AutolevParser.T__22) | (1 << AutolevParser.Mass) | (1 << AutolevParser.Inertia) | (1 << AutolevParser.INT) | (1 << AutolevParser.FLOAT) | (1 << AutolevParser.EXP) | (1 << AutolevParser.ID))) != 0):
+                if ((_la) & ~0x3F) == 0 and (
+                    (1 << _la)
+                    & (
+                        (1 << AutolevParser.T__0)
+                        | (1 << AutolevParser.T__11)
+                        | (1 << AutolevParser.T__13)
+                        | (1 << AutolevParser.T__17)
+                        | (1 << AutolevParser.T__21)
+                        | (1 << AutolevParser.T__22)
+                        | (1 << AutolevParser.Mass)
+                        | (1 << AutolevParser.Inertia)
+                        | (1 << AutolevParser.INT)
+                        | (1 << AutolevParser.FLOAT)
+                        | (1 << AutolevParser.EXP)
+                        | (1 << AutolevParser.ID)
+                    )
+                ) != 0:
                     self.state = 107
                     self.expr(0)
                     self.state = 112
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    while _la==AutolevParser.T__9:
+                    while _la == AutolevParser.T__9:
                         self.state = 108
                         self.match(AutolevParser.T__9)
                         self.state = 109
@@ -897,8 +999,6 @@ class AutolevParser ( Parser ):
                         self._errHandler.sync(self)
                         _la = self._input.LA(1)
 
-
-
                 self.state = 117
                 self.match(AutolevParser.T__12)
                 pass
@@ -906,7 +1006,7 @@ class AutolevParser ( Parser ):
                 self.enterOuterAlt(localctx, 2)
                 self.state = 118
                 _la = self._input.LA(1)
-                if not(_la==AutolevParser.Mass or _la==AutolevParser.Inertia):
+                if not (_la == AutolevParser.Mass or _la == AutolevParser.Inertia):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -916,13 +1016,13 @@ class AutolevParser ( Parser ):
                 self.state = 128
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==AutolevParser.ID:
+                if _la == AutolevParser.ID:
                     self.state = 120
                     self.match(AutolevParser.ID)
                     self.state = 125
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    while _la==AutolevParser.T__9:
+                    while _la == AutolevParser.T__9:
                         self.state = 121
                         self.match(AutolevParser.T__9)
                         self.state = 122
@@ -930,8 +1030,6 @@ class AutolevParser ( Parser ):
                         self.state = 127
                         self._errHandler.sync(self)
                         _la = self._input.LA(1)
-
-
 
                 self.state = 130
                 self.match(AutolevParser.T__12)
@@ -948,21 +1046,18 @@ class AutolevParser ( Parser ):
         return localctx
 
     class VarDeclContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.VarDeclContext, self).__init__(parent, invokingState)
             self.parser = parser
 
         def varType(self):
-            return self.getTypedRuleContext(AutolevParser.VarTypeContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.VarTypeContext, 0)
 
         def varDecl2(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.VarDecl2Context)
             else:
-                return self.getTypedRuleContext(AutolevParser.VarDecl2Context,i)
-
+                return self.getTypedRuleContext(AutolevParser.VarDecl2Context, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_varDecl
@@ -975,14 +1070,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVarDecl"):
                 listener.exitVarDecl(self)
 
-
-
-
     def varDecl(self):
 
         localctx = AutolevParser.VarDeclContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_varDecl)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 133
@@ -992,7 +1084,7 @@ class AutolevParser ( Parser ):
             self.state = 139
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 135
                 self.match(AutolevParser.T__9)
                 self.state = 136
@@ -1010,7 +1102,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class VarTypeContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.VarTypeContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1056,14 +1147,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVarType"):
                 listener.exitVarType(self)
 
-
-
-
     def varType(self):
 
         localctx = AutolevParser.VarTypeContext(self, self._ctx, self.state)
         self.enterRule(localctx, 16, self.RULE_varType)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 164
             self._errHandler.sync(self)
@@ -1115,7 +1203,7 @@ class AutolevParser ( Parser ):
                 self.state = 154
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__10:
+                while _la == AutolevParser.T__10:
                     self.state = 151
                     self.match(AutolevParser.T__10)
                     self.state = 156
@@ -1130,7 +1218,7 @@ class AutolevParser ( Parser ):
                 self.state = 161
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__10:
+                while _la == AutolevParser.T__10:
                     self.state = 158
                     self.match(AutolevParser.T__10)
                     self.state = 163
@@ -1150,7 +1238,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class VarDecl2Context(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.VarDecl2Context, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1165,8 +1252,7 @@ class AutolevParser ( Parser ):
                 return self.getToken(AutolevParser.INT, i)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_varDecl2
@@ -1179,21 +1265,18 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVarDecl2"):
                 listener.exitVarDecl2(self)
 
-
-
-
     def varDecl2(self):
 
         localctx = AutolevParser.VarDecl2Context(self, self._ctx, self.state)
         self.enterRule(localctx, 18, self.RULE_varDecl2)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 166
             self.match(AutolevParser.ID)
             self.state = 172
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,15,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 15, self._ctx)
             if la_ == 1:
                 self.state = 167
                 self.match(AutolevParser.T__13)
@@ -1206,10 +1289,9 @@ class AutolevParser ( Parser ):
                 self.state = 171
                 self.match(AutolevParser.T__14)
 
-
             self.state = 188
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,17,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 17, self._ctx)
             if la_ == 1:
                 self.state = 174
                 self.match(AutolevParser.T__13)
@@ -1222,7 +1304,7 @@ class AutolevParser ( Parser ):
                 self.state = 184
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__9:
+                while _la == AutolevParser.T__9:
                     self.state = 178
                     self.match(AutolevParser.T__9)
                     self.state = 179
@@ -1238,11 +1320,10 @@ class AutolevParser ( Parser ):
                 self.state = 187
                 self.match(AutolevParser.T__14)
 
-
             self.state = 193
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__13:
+            if _la == AutolevParser.T__13:
                 self.state = 190
                 self.match(AutolevParser.T__13)
                 self.state = 191
@@ -1250,24 +1331,22 @@ class AutolevParser ( Parser ):
                 self.state = 192
                 self.match(AutolevParser.T__14)
 
-
             self.state = 196
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__16 or _la==AutolevParser.T__17:
+            if _la == AutolevParser.T__16 or _la == AutolevParser.T__17:
                 self.state = 195
                 _la = self._input.LA(1)
-                if not(_la==AutolevParser.T__16 or _la==AutolevParser.T__17):
+                if not (_la == AutolevParser.T__16 or _la == AutolevParser.T__17):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
 
-
             self.state = 201
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__10:
+            while _la == AutolevParser.T__10:
                 self.state = 198
                 self.match(AutolevParser.T__10)
                 self.state = 203
@@ -1277,12 +1356,11 @@ class AutolevParser ( Parser ):
             self.state = 206
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__2:
+            if _la == AutolevParser.T__2:
                 self.state = 204
                 self.match(AutolevParser.T__2)
                 self.state = 205
                 self.expr(0)
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1293,7 +1371,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class RangesContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.RangesContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1315,14 +1392,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitRanges"):
                 listener.exitRanges(self)
 
-
-
-
     def ranges(self):
 
         localctx = AutolevParser.RangesContext(self, self._ctx, self.state)
         self.enterRule(localctx, 20, self.RULE_ranges)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 208
@@ -1336,7 +1410,7 @@ class AutolevParser ( Parser ):
             self.state = 218
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 212
                 self.match(AutolevParser.T__9)
                 self.state = 213
@@ -1360,7 +1434,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class MassDeclContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.MassDeclContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1372,8 +1445,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.MassDecl2Context)
             else:
-                return self.getTypedRuleContext(AutolevParser.MassDecl2Context,i)
-
+                return self.getTypedRuleContext(AutolevParser.MassDecl2Context, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_massDecl
@@ -1386,14 +1458,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitMassDecl"):
                 listener.exitMassDecl(self)
 
-
-
-
     def massDecl(self):
 
         localctx = AutolevParser.MassDeclContext(self, self._ctx, self.state)
         self.enterRule(localctx, 22, self.RULE_massDecl)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 223
@@ -1403,7 +1472,7 @@ class AutolevParser ( Parser ):
             self.state = 229
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 225
                 self.match(AutolevParser.T__9)
                 self.state = 226
@@ -1421,7 +1490,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class MassDecl2Context(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.MassDecl2Context, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1430,8 +1498,7 @@ class AutolevParser ( Parser ):
             return self.getToken(AutolevParser.ID, 0)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_massDecl2
@@ -1443,9 +1510,6 @@ class AutolevParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitMassDecl2"):
                 listener.exitMassDecl2(self)
-
-
-
 
     def massDecl2(self):
 
@@ -1468,9 +1532,10 @@ class AutolevParser ( Parser ):
         return localctx
 
     class InertiaDeclContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutolevParser.InertiaDeclContext, self).__init__(parent, invokingState)
+            super(AutolevParser.InertiaDeclContext, self).__init__(
+                parent, invokingState
+            )
             self.parser = parser
 
         def Inertia(self):
@@ -1486,8 +1551,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_inertiaDecl
@@ -1500,14 +1564,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitInertiaDecl"):
                 listener.exitInertiaDecl(self)
 
-
-
-
     def inertiaDecl(self):
 
         localctx = AutolevParser.InertiaDeclContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_inertiaDecl)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 236
@@ -1517,7 +1578,7 @@ class AutolevParser ( Parser ):
             self.state = 241
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__11:
+            if _la == AutolevParser.T__11:
                 self.state = 238
                 self.match(AutolevParser.T__11)
                 self.state = 239
@@ -1525,8 +1586,7 @@ class AutolevParser ( Parser ):
                 self.state = 240
                 self.match(AutolevParser.T__12)
 
-
-            self.state = 245 
+            self.state = 245
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
@@ -1534,10 +1594,10 @@ class AutolevParser ( Parser ):
                 self.match(AutolevParser.T__9)
                 self.state = 244
                 self.expr(0)
-                self.state = 247 
+                self.state = 247
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not (_la==AutolevParser.T__9):
+                if not (_la == AutolevParser.T__9):
                     break
 
         except RecognitionException as re:
@@ -1549,7 +1609,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class MatrixContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.MatrixContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1558,8 +1617,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_matrix
@@ -1572,14 +1630,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitMatrix"):
                 listener.exitMatrix(self)
 
-
-
-
     def matrix(self):
 
         localctx = AutolevParser.MatrixContext(self, self._ctx, self.state)
         self.enterRule(localctx, 28, self.RULE_matrix)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 249
@@ -1589,10 +1644,10 @@ class AutolevParser ( Parser ):
             self.state = 255
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9 or _la==AutolevParser.T__18:
+            while _la == AutolevParser.T__9 or _la == AutolevParser.T__18:
                 self.state = 251
                 _la = self._input.LA(1)
-                if not(_la==AutolevParser.T__9 or _la==AutolevParser.T__18):
+                if not (_la == AutolevParser.T__9 or _la == AutolevParser.T__18):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1614,9 +1669,10 @@ class AutolevParser ( Parser ):
         return localctx
 
     class MatrixInOutputContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutolevParser.MatrixInOutputContext, self).__init__(parent, invokingState)
+            super(AutolevParser.MatrixInOutputContext, self).__init__(
+                parent, invokingState
+            )
             self.parser = parser
 
         def ID(self, i=None):
@@ -1642,14 +1698,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitMatrixInOutput"):
                 listener.exitMatrixInOutput(self)
 
-
-
-
     def matrixInOutput(self):
 
         localctx = AutolevParser.MatrixInOutputContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_matrixInOutput)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 268
             self._errHandler.sync(self)
@@ -1666,15 +1719,14 @@ class AutolevParser ( Parser ):
                 self.state = 264
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==AutolevParser.INT or _la==AutolevParser.FLOAT:
+                if _la == AutolevParser.INT or _la == AutolevParser.FLOAT:
                     self.state = 263
                     _la = self._input.LA(1)
-                    if not(_la==AutolevParser.INT or _la==AutolevParser.FLOAT):
+                    if not (_la == AutolevParser.INT or _la == AutolevParser.FLOAT):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-
 
                 pass
             elif token in [AutolevParser.FLOAT]:
@@ -1699,30 +1751,26 @@ class AutolevParser ( Parser ):
         return localctx
 
     class CodeCommandsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
-            super(AutolevParser.CodeCommandsContext, self).__init__(parent, invokingState)
+            super(AutolevParser.CodeCommandsContext, self).__init__(
+                parent, invokingState
+            )
             self.parser = parser
 
         def units(self):
-            return self.getTypedRuleContext(AutolevParser.UnitsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.UnitsContext, 0)
 
         def inputs(self):
-            return self.getTypedRuleContext(AutolevParser.InputsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.InputsContext, 0)
 
         def outputs(self):
-            return self.getTypedRuleContext(AutolevParser.OutputsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.OutputsContext, 0)
 
         def codegen(self):
-            return self.getTypedRuleContext(AutolevParser.CodegenContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.CodegenContext, 0)
 
         def commands(self):
-            return self.getTypedRuleContext(AutolevParser.CommandsContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.CommandsContext, 0)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_codeCommands
@@ -1734,9 +1782,6 @@ class AutolevParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitCodeCommands"):
                 listener.exitCodeCommands(self)
-
-
-
 
     def codeCommands(self):
 
@@ -1783,7 +1828,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class SettingsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.SettingsContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1814,30 +1858,40 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitSettings"):
                 listener.exitSettings(self)
 
-
-
-
     def settings(self):
 
         localctx = AutolevParser.SettingsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_settings)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 277
             self.match(AutolevParser.ID)
             self.state = 279
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,30,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 30, self._ctx)
             if la_ == 1:
                 self.state = 278
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << AutolevParser.INT) | (1 << AutolevParser.FLOAT) | (1 << AutolevParser.EXP) | (1 << AutolevParser.ID))) != 0)):
+                if not (
+                    (
+                        ((_la) & ~0x3F) == 0
+                        and (
+                            (1 << _la)
+                            & (
+                                (1 << AutolevParser.INT)
+                                | (1 << AutolevParser.FLOAT)
+                                | (1 << AutolevParser.EXP)
+                                | (1 << AutolevParser.ID)
+                            )
+                        )
+                        != 0
+                    )
+                ):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1848,7 +1902,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class UnitsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.UnitsContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1873,14 +1926,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitUnits"):
                 listener.exitUnits(self)
 
-
-
-
     def units(self):
 
         localctx = AutolevParser.UnitsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 36, self.RULE_units)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 281
@@ -1890,7 +1940,7 @@ class AutolevParser ( Parser ):
             self.state = 287
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 283
                 self.match(AutolevParser.T__9)
                 self.state = 284
@@ -1908,7 +1958,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class InputsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.InputsContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1920,8 +1969,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.Inputs2Context)
             else:
-                return self.getTypedRuleContext(AutolevParser.Inputs2Context,i)
-
+                return self.getTypedRuleContext(AutolevParser.Inputs2Context, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_inputs
@@ -1934,14 +1982,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitInputs"):
                 listener.exitInputs(self)
 
-
-
-
     def inputs(self):
 
         localctx = AutolevParser.InputsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_inputs)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 290
@@ -1951,7 +1996,7 @@ class AutolevParser ( Parser ):
             self.state = 296
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 292
                 self.match(AutolevParser.T__9)
                 self.state = 293
@@ -1969,7 +2014,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class Id_diffContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.Id_diffContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -1978,8 +2022,7 @@ class AutolevParser ( Parser ):
             return self.getToken(AutolevParser.ID, 0)
 
         def diff(self):
-            return self.getTypedRuleContext(AutolevParser.DiffContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.DiffContext, 0)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_id_diff
@@ -1992,14 +2035,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitId_diff"):
                 listener.exitId_diff(self)
 
-
-
-
     def id_diff(self):
 
         localctx = AutolevParser.Id_diffContext(self, self._ctx, self.state)
         self.enterRule(localctx, 40, self.RULE_id_diff)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 299
@@ -2007,10 +2047,9 @@ class AutolevParser ( Parser ):
             self.state = 301
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__10:
+            if _la == AutolevParser.T__10:
                 self.state = 300
                 self.diff()
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -2021,21 +2060,18 @@ class AutolevParser ( Parser ):
         return localctx
 
     class Inputs2Context(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.Inputs2Context, self).__init__(parent, invokingState)
             self.parser = parser
 
         def id_diff(self):
-            return self.getTypedRuleContext(AutolevParser.Id_diffContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.Id_diffContext, 0)
 
         def expr(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_inputs2
@@ -2047,9 +2083,6 @@ class AutolevParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitInputs2"):
                 listener.exitInputs2(self)
-
-
-
 
     def inputs2(self):
 
@@ -2065,11 +2098,10 @@ class AutolevParser ( Parser ):
             self.expr(0)
             self.state = 307
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,34,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 34, self._ctx)
             if la_ == 1:
                 self.state = 306
                 self.expr(0)
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -2080,7 +2112,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class OutputsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.OutputsContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -2092,8 +2123,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.Outputs2Context)
             else:
-                return self.getTypedRuleContext(AutolevParser.Outputs2Context,i)
-
+                return self.getTypedRuleContext(AutolevParser.Outputs2Context, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_outputs
@@ -2106,14 +2136,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitOutputs"):
                 listener.exitOutputs(self)
 
-
-
-
     def outputs(self):
 
         localctx = AutolevParser.OutputsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 44, self.RULE_outputs)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 309
@@ -2123,7 +2150,7 @@ class AutolevParser ( Parser ):
             self.state = 315
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==AutolevParser.T__9:
+            while _la == AutolevParser.T__9:
                 self.state = 311
                 self.match(AutolevParser.T__9)
                 self.state = 312
@@ -2141,7 +2168,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class Outputs2Context(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.Outputs2Context, self).__init__(parent, invokingState)
             self.parser = parser
@@ -2150,8 +2176,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_outputs2
@@ -2164,9 +2189,6 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitOutputs2"):
                 listener.exitOutputs2(self)
 
-
-
-
     def outputs2(self):
 
         localctx = AutolevParser.Outputs2Context(self, self._ctx, self.state)
@@ -2177,11 +2199,10 @@ class AutolevParser ( Parser ):
             self.expr(0)
             self.state = 320
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,36,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 36, self._ctx)
             if la_ == 1:
                 self.state = 319
                 self.expr(0)
-
 
         except RecognitionException as re:
             localctx.exception = re
@@ -2192,7 +2213,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class CodegenContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.CodegenContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -2204,15 +2224,13 @@ class AutolevParser ( Parser ):
                 return self.getToken(AutolevParser.ID, i)
 
         def functionCall(self):
-            return self.getTypedRuleContext(AutolevParser.FunctionCallContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.FunctionCallContext, 0)
 
         def matrixInOutput(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.MatrixInOutputContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.MatrixInOutputContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.MatrixInOutputContext, i)
 
         def getRuleIndex(self):
             return AutolevParser.RULE_codegen
@@ -2225,14 +2243,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitCodegen"):
                 listener.exitCodegen(self)
 
-
-
-
     def codegen(self):
 
         localctx = AutolevParser.CodegenContext(self, self._ctx, self.state)
         self.enterRule(localctx, 48, self.RULE_codegen)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 322
@@ -2242,7 +2257,7 @@ class AutolevParser ( Parser ):
             self.state = 335
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==AutolevParser.T__0:
+            if _la == AutolevParser.T__0:
                 self.state = 324
                 self.match(AutolevParser.T__0)
                 self.state = 325
@@ -2250,7 +2265,7 @@ class AutolevParser ( Parser ):
                 self.state = 330
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__9:
+                while _la == AutolevParser.T__9:
                     self.state = 326
                     self.match(AutolevParser.T__9)
                     self.state = 327
@@ -2261,7 +2276,6 @@ class AutolevParser ( Parser ):
 
                 self.state = 333
                 self.match(AutolevParser.T__1)
-
 
             self.state = 337
             self.match(AutolevParser.ID)
@@ -2278,7 +2292,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class CommandsContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.CommandsContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -2306,14 +2319,11 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitCommands"):
                 listener.exitCommands(self)
 
-
-
-
     def commands(self):
 
         localctx = AutolevParser.CommandsContext(self, self._ctx, self.state)
         self.enterRule(localctx, 50, self.RULE_commands)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 354
             self._errHandler.sync(self)
@@ -2338,7 +2348,7 @@ class AutolevParser ( Parser ):
                 self.state = 351
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__9:
+                while _la == AutolevParser.T__9:
                     self.state = 347
                     self.match(AutolevParser.T__9)
                     self.state = 348
@@ -2360,7 +2370,6 @@ class AutolevParser ( Parser ):
         return localctx
 
     class VecContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.VecContext, self).__init__(parent, invokingState)
             self.parser = parser
@@ -2379,9 +2388,6 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVec"):
                 listener.exitVec(self)
 
-
-
-
     def vec(self):
 
         localctx = AutolevParser.VecContext(self, self._ctx, self.state)
@@ -2394,19 +2400,19 @@ class AutolevParser ( Parser ):
                 self.enterOuterAlt(localctx, 1)
                 self.state = 356
                 self.match(AutolevParser.ID)
-                self.state = 358 
+                self.state = 358
                 self._errHandler.sync(self)
                 _alt = 1
-                while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
+                while _alt != 2 and _alt != ATN.INVALID_ALT_NUMBER:
                     if _alt == 1:
                         self.state = 357
                         self.match(AutolevParser.T__20)
 
                     else:
                         raise NoViableAltException(self)
-                    self.state = 360 
+                    self.state = 360
                     self._errHandler.sync(self)
-                    _alt = self._interp.adaptivePredict(self._input,41,self._ctx)
+                    _alt = self._interp.adaptivePredict(self._input, 41, self._ctx)
 
                 pass
             elif token in [AutolevParser.T__21]:
@@ -2431,29 +2437,23 @@ class AutolevParser ( Parser ):
         return localctx
 
     class ExprContext(ParserRuleContext):
-
         def __init__(self, parser, parent=None, invokingState=-1):
             super(AutolevParser.ExprContext, self).__init__(parent, invokingState)
             self.parser = parser
 
-
         def getRuleIndex(self):
             return AutolevParser.RULE_expr
 
-     
         def copyFrom(self, ctx):
             super(AutolevParser.ExprContext, self).copyFrom(ctx)
 
-
     class ParensContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.ParensContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterParens"):
@@ -2463,16 +2463,13 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitParens"):
                 listener.exitParens(self)
 
-
     class VectorOrDyadicContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.VectorOrDyadicContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def vec(self):
-            return self.getTypedRuleContext(AutolevParser.VecContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.VecContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterVectorOrDyadic"):
@@ -2482,10 +2479,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitVectorOrDyadic"):
                 listener.exitVectorOrDyadic(self)
 
-
     class ExponentContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.ExponentContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2493,8 +2488,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterExponent"):
@@ -2504,10 +2498,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitExponent"):
                 listener.exitExponent(self)
 
-
     class MulDivContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.MulDivContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2515,8 +2507,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterMulDiv"):
@@ -2526,10 +2517,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitMulDiv"):
                 listener.exitMulDiv(self)
 
-
     class AddSubContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.AddSubContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2537,8 +2526,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterAddSub"):
@@ -2548,10 +2536,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitAddSub"):
                 listener.exitAddSub(self)
 
-
     class FloatContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.FloatContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2566,10 +2552,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitFloat"):
                 listener.exitFloat(self)
 
-
     class IntContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.IntContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2584,10 +2568,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitInt"):
                 listener.exitInt(self)
 
-
     class IdEqualsExprContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.IdEqualsExprContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2595,8 +2577,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterIdEqualsExpr"):
@@ -2606,16 +2587,13 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitIdEqualsExpr"):
                 listener.exitIdEqualsExpr(self)
 
-
     class NegativeOneContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.NegativeOneContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def expr(self):
-            return self.getTypedRuleContext(AutolevParser.ExprContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.ExprContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterNegativeOne"):
@@ -2625,16 +2603,13 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitNegativeOne"):
                 listener.exitNegativeOne(self)
 
-
     class FunctionContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.FunctionContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def functionCall(self):
-            return self.getTypedRuleContext(AutolevParser.FunctionCallContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.FunctionCallContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterFunction"):
@@ -2644,15 +2619,13 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitFunction"):
                 listener.exitFunction(self)
 
-
     class RangessContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.RangessContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def ranges(self):
-            return self.getTypedRuleContext(AutolevParser.RangesContext,0)
+            return self.getTypedRuleContext(AutolevParser.RangesContext, 0)
 
         def ID(self):
             return self.getToken(AutolevParser.ID, 0)
@@ -2665,10 +2638,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitRangess"):
                 listener.exitRangess(self)
 
-
     class ColonContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.ColonContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2676,8 +2647,7 @@ class AutolevParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterColon"):
@@ -2687,10 +2657,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitColon"):
                 listener.exitColon(self)
 
-
     class IdContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.IdContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2705,10 +2673,8 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitId"):
                 listener.exitId(self)
 
-
     class ExpContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.ExpContext, self).__init__(parser)
             self.copyFrom(ctx)
 
@@ -2723,16 +2689,13 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitExp"):
                 listener.exitExp(self)
 
-
     class MatricesContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.MatricesContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def matrix(self):
-            return self.getTypedRuleContext(AutolevParser.MatrixContext,0)
-
+            return self.getTypedRuleContext(AutolevParser.MatrixContext, 0)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterMatrices"):
@@ -2742,21 +2705,19 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitMatrices"):
                 listener.exitMatrices(self)
 
-
     class IndexingContext(ExprContext):
-
-        def __init__(self, parser, ctx): # actually a AutolevParser.ExprContext)
+        def __init__(self, parser, ctx):  # actually a AutolevParser.ExprContext)
             super(AutolevParser.IndexingContext, self).__init__(parser)
             self.copyFrom(ctx)
 
         def ID(self):
             return self.getToken(AutolevParser.ID, 0)
+
         def expr(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(AutolevParser.ExprContext)
             else:
-                return self.getTypedRuleContext(AutolevParser.ExprContext,i)
-
+                return self.getTypedRuleContext(AutolevParser.ExprContext, i)
 
         def enterRule(self, listener):
             if hasattr(listener, "enterIndexing"):
@@ -2766,8 +2727,6 @@ class AutolevParser ( Parser ):
             if hasattr(listener, "exitIndexing"):
                 listener.exitIndexing(self)
 
-
-
     def expr(self, _p=0):
         _parentctx = self._ctx
         _parentState = self.state
@@ -2775,12 +2734,12 @@ class AutolevParser ( Parser ):
         _prevctx = localctx
         _startState = 54
         self.enterRecursionRule(localctx, 54, self.RULE_expr, _p)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 408
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,47,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 47, self._ctx)
             if la_ == 1:
                 localctx = AutolevParser.ExpContext(self, localctx)
                 self._ctx = localctx
@@ -2824,14 +2783,14 @@ class AutolevParser ( Parser ):
                 self.match(AutolevParser.ID)
                 self.state = 376
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,43,self._ctx)
-                while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
-                    if _alt==1:
+                _alt = self._interp.adaptivePredict(self._input, 43, self._ctx)
+                while _alt != 2 and _alt != ATN.INVALID_ALT_NUMBER:
+                    if _alt == 1:
                         self.state = 373
-                        self.match(AutolevParser.T__10) 
+                        self.match(AutolevParser.T__10)
                     self.state = 378
                     self._errHandler.sync(self)
-                    _alt = self._interp.adaptivePredict(self._input,43,self._ctx)
+                    _alt = self._interp.adaptivePredict(self._input, 43, self._ctx)
 
                 pass
 
@@ -2856,7 +2815,7 @@ class AutolevParser ( Parser ):
                 self.state = 387
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==AutolevParser.T__9:
+                while _la == AutolevParser.T__9:
                     self.state = 383
                     self.match(AutolevParser.T__9)
                     self.state = 384
@@ -2904,46 +2863,52 @@ class AutolevParser ( Parser ):
                 self.state = 399
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==AutolevParser.ID:
+                if _la == AutolevParser.ID:
                     self.state = 398
                     self.match(AutolevParser.ID)
-
 
                 self.state = 401
                 self.ranges()
                 self.state = 405
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,46,self._ctx)
-                while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
-                    if _alt==1:
+                _alt = self._interp.adaptivePredict(self._input, 46, self._ctx)
+                while _alt != 2 and _alt != ATN.INVALID_ALT_NUMBER:
+                    if _alt == 1:
                         self.state = 402
-                        self.match(AutolevParser.T__10) 
+                        self.match(AutolevParser.T__10)
                     self.state = 407
                     self._errHandler.sync(self)
-                    _alt = self._interp.adaptivePredict(self._input,46,self._ctx)
+                    _alt = self._interp.adaptivePredict(self._input, 46, self._ctx)
 
                 pass
-
 
             self._ctx.stop = self._input.LT(-1)
             self.state = 427
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,49,self._ctx)
-            while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
-                if _alt==1:
+            _alt = self._interp.adaptivePredict(self._input, 49, self._ctx)
+            while _alt != 2 and _alt != ATN.INVALID_ALT_NUMBER:
+                if _alt == 1:
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
                     self.state = 425
                     self._errHandler.sync(self)
-                    la_ = self._interp.adaptivePredict(self._input,48,self._ctx)
+                    la_ = self._interp.adaptivePredict(self._input, 48, self._ctx)
                     if la_ == 1:
-                        localctx = AutolevParser.ExponentContext(self, AutolevParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
+                        localctx = AutolevParser.ExponentContext(
+                            self,
+                            AutolevParser.ExprContext(self, _parentctx, _parentState),
+                        )
+                        self.pushNewRecursionContext(
+                            localctx, _startState, self.RULE_expr
+                        )
                         self.state = 410
                         if not self.precpred(self._ctx, 16):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 16)")
+
+                            raise FailedPredicateException(
+                                self, "self.precpred(self._ctx, 16)"
+                            )
                         self.state = 411
                         self.match(AutolevParser.T__23)
                         self.state = 412
@@ -2951,15 +2916,25 @@ class AutolevParser ( Parser ):
                         pass
 
                     elif la_ == 2:
-                        localctx = AutolevParser.MulDivContext(self, AutolevParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
+                        localctx = AutolevParser.MulDivContext(
+                            self,
+                            AutolevParser.ExprContext(self, _parentctx, _parentState),
+                        )
+                        self.pushNewRecursionContext(
+                            localctx, _startState, self.RULE_expr
+                        )
                         self.state = 413
                         if not self.precpred(self._ctx, 15):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 15)")
+
+                            raise FailedPredicateException(
+                                self, "self.precpred(self._ctx, 15)"
+                            )
                         self.state = 414
                         _la = self._input.LA(1)
-                        if not(_la==AutolevParser.T__24 or _la==AutolevParser.T__25):
+                        if not (
+                            _la == AutolevParser.T__24 or _la == AutolevParser.T__25
+                        ):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -2969,15 +2944,25 @@ class AutolevParser ( Parser ):
                         pass
 
                     elif la_ == 3:
-                        localctx = AutolevParser.AddSubContext(self, AutolevParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
+                        localctx = AutolevParser.AddSubContext(
+                            self,
+                            AutolevParser.ExprContext(self, _parentctx, _parentState),
+                        )
+                        self.pushNewRecursionContext(
+                            localctx, _startState, self.RULE_expr
+                        )
                         self.state = 416
                         if not self.precpred(self._ctx, 14):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 14)")
+
+                            raise FailedPredicateException(
+                                self, "self.precpred(self._ctx, 14)"
+                            )
                         self.state = 417
                         _la = self._input.LA(1)
-                        if not(_la==AutolevParser.T__16 or _la==AutolevParser.T__17):
+                        if not (
+                            _la == AutolevParser.T__16 or _la == AutolevParser.T__17
+                        ):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -2987,12 +2972,20 @@ class AutolevParser ( Parser ):
                         pass
 
                     elif la_ == 4:
-                        localctx = AutolevParser.IdEqualsExprContext(self, AutolevParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
+                        localctx = AutolevParser.IdEqualsExprContext(
+                            self,
+                            AutolevParser.ExprContext(self, _parentctx, _parentState),
+                        )
+                        self.pushNewRecursionContext(
+                            localctx, _startState, self.RULE_expr
+                        )
                         self.state = 419
                         if not self.precpred(self._ctx, 3):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
+
+                            raise FailedPredicateException(
+                                self, "self.precpred(self._ctx, 3)"
+                            )
                         self.state = 420
                         self.match(AutolevParser.T__2)
                         self.state = 421
@@ -3000,22 +2993,29 @@ class AutolevParser ( Parser ):
                         pass
 
                     elif la_ == 5:
-                        localctx = AutolevParser.ColonContext(self, AutolevParser.ExprContext(self, _parentctx, _parentState))
-                        self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
+                        localctx = AutolevParser.ColonContext(
+                            self,
+                            AutolevParser.ExprContext(self, _parentctx, _parentState),
+                        )
+                        self.pushNewRecursionContext(
+                            localctx, _startState, self.RULE_expr
+                        )
                         self.state = 422
                         if not self.precpred(self._ctx, 2):
                             from antlr4.error.Errors import FailedPredicateException
-                            raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
+
+                            raise FailedPredicateException(
+                                self, "self.precpred(self._ctx, 2)"
+                            )
                         self.state = 423
                         self.match(AutolevParser.T__15)
                         self.state = 424
                         self.expr(3)
                         pass
 
-             
                 self.state = 429
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,49,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input, 49, self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -3024,8 +3024,6 @@ class AutolevParser ( Parser ):
         finally:
             self.unrollRecursionContexts(_parentctx)
         return localctx
-
-
 
     def sempred(self, localctx, ruleIndex, predIndex):
         if self._predicates == None:
@@ -3038,26 +3036,17 @@ class AutolevParser ( Parser ):
             return pred(localctx, predIndex)
 
     def expr_sempred(self, localctx, predIndex):
-            if predIndex == 0:
-                return self.precpred(self._ctx, 16)
-         
+        if predIndex == 0:
+            return self.precpred(self._ctx, 16)
 
-            if predIndex == 1:
-                return self.precpred(self._ctx, 15)
-         
+        if predIndex == 1:
+            return self.precpred(self._ctx, 15)
 
-            if predIndex == 2:
-                return self.precpred(self._ctx, 14)
-         
+        if predIndex == 2:
+            return self.precpred(self._ctx, 14)
 
-            if predIndex == 3:
-                return self.precpred(self._ctx, 3)
-         
+        if predIndex == 3:
+            return self.precpred(self._ctx, 3)
 
-            if predIndex == 4:
-                return self.precpred(self._ctx, 2)
-         
-
-
-
-
+        if predIndex == 4:
+            return self.precpred(self._ctx, 2)

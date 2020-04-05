@@ -18,9 +18,17 @@ def _get_conversion_matrix_for_expr(expr, target_units, unit_system):
     dimension_system = unit_system.get_dimension_system()
 
     expr_dim = Dimension(unit_system.get_dimensional_expr(expr))
-    dim_dependencies = dimension_system.get_dimensional_dependencies(expr_dim, mark_dimensionless=True)
+    dim_dependencies = dimension_system.get_dimensional_dependencies(
+        expr_dim, mark_dimensionless=True
+    )
     target_dims = [Dimension(unit_system.get_dimensional_expr(x)) for x in target_units]
-    canon_dim_units = [i for x in target_dims for i in dimension_system.get_dimensional_dependencies(x, mark_dimensionless=True)]
+    canon_dim_units = [
+        i
+        for x in target_dims
+        for i in dimension_system.get_dimensional_dependencies(
+            x, mark_dimensionless=True
+        )
+    ]
     canon_expr_units = {i for i in dim_dependencies}
 
     if not canon_expr_units.issubset(set(canon_dim_units)):
@@ -29,7 +37,17 @@ def _get_conversion_matrix_for_expr(expr, target_units, unit_system):
     seen = set([])
     canon_dim_units = [i for i in canon_dim_units if not (i in seen or seen.add(i))]
 
-    camat = Matrix([[dimension_system.get_dimensional_dependencies(i, mark_dimensionless=True).get(j, 0) for i in target_dims] for j in canon_dim_units])
+    camat = Matrix(
+        [
+            [
+                dimension_system.get_dimensional_dependencies(
+                    i, mark_dimensionless=True
+                ).get(j, 0)
+                for i in target_dims
+            ]
+            for j in canon_dim_units
+        ]
+    )
     exprmat = Matrix([dim_dependencies.get(k, 0) for k in canon_dim_units])
 
     res_exponents = camat.solve_least_squares(exprmat, method=None)
@@ -82,6 +100,7 @@ def convert_to(expr, target_units, unit_system="SI"):
 
     """
     from sympy.physics.units import UnitSystem
+
     unit_system = UnitSystem.get_unit_system(unit_system)
 
     if not isinstance(target_units, (Iterable, Tuple)):
@@ -93,11 +112,16 @@ def convert_to(expr, target_units, unit_system="SI"):
     expr = sympify(expr)
 
     if not isinstance(expr, Quantity) and expr.has(Quantity):
-        expr = expr.replace(lambda x: isinstance(x, Quantity), lambda x: x.convert_to(target_units, unit_system))
+        expr = expr.replace(
+            lambda x: isinstance(x, Quantity),
+            lambda x: x.convert_to(target_units, unit_system),
+        )
 
     def get_total_scale_factor(expr):
         if isinstance(expr, Mul):
-            return reduce(lambda x, y: x * y, [get_total_scale_factor(i) for i in expr.args])
+            return reduce(
+                lambda x, y: x * y, [get_total_scale_factor(i) for i in expr.args]
+            )
         elif isinstance(expr, Pow):
             return get_total_scale_factor(expr.base) ** expr.exp
         elif isinstance(expr, Quantity):
@@ -109,7 +133,9 @@ def convert_to(expr, target_units, unit_system="SI"):
         return expr
 
     expr_scale_factor = get_total_scale_factor(expr)
-    return expr_scale_factor * Mul.fromiter((1/get_total_scale_factor(u) * u) ** p for u, p in zip(target_units, depmat))
+    return expr_scale_factor * Mul.fromiter(
+        (1 / get_total_scale_factor(u) * u) ** p for u, p in zip(target_units, depmat)
+    )
 
 
 def quantity_simplify(expr):
@@ -143,8 +169,8 @@ def quantity_simplify(expr):
         if len(d[k]) == 1:
             continue
         v = list(ordered(d[k]))
-        ref = v[0]/v[0].scale_factor
-        expr = expr.xreplace({vi: ref*vi.scale_factor for vi in v[1:]})
+        ref = v[0] / v[0].scale_factor
+        expr = expr.xreplace({vi: ref * vi.scale_factor for vi in v[1:]})
 
     return expr
 
@@ -160,6 +186,7 @@ def check_dimensions(expr, unit_system="SI"):
     # might be introduced, so remove those now
 
     from sympy.physics.units import UnitSystem
+
     unit_system = UnitSystem.get_unit_system(unit_system)
 
     adds = expr.atoms(Add)
@@ -183,15 +210,13 @@ def check_dimensions(expr, unit_system="SI"):
             if not skip:
                 deset.add(tuple(sorted(dims)))
                 if len(deset) > 1:
-                    raise ValueError(
-                        "addends have incompatible dimensions")
+                    raise ValueError("addends have incompatible dimensions")
 
     # clear multiplicative constants on Dimensions which may be
     # left after substitution
     reps = {}
     for m in expr.atoms(Mul):
         if any(isinstance(i, Dimension) for i in m.args):
-            reps[m] = m.func(*[
-                i for i in m.args if not i.is_number])
+            reps[m] = m.func(*[i for i in m.args if not i.is_number])
 
     return expr.xreplace(reps)

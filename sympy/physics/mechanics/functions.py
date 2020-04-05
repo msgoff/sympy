@@ -2,30 +2,45 @@ from __future__ import print_function, division
 
 from sympy.utilities import dict_merge
 from sympy.utilities.iterables import iterable
-from sympy.physics.vector import (Dyadic, Vector, ReferenceFrame,
-                                  Point, dynamicsymbols)
-from sympy.physics.vector.printing import (vprint, vsprint, vpprint, vlatex,
-                                           init_vprinting)
+from sympy.physics.vector import Dyadic, Vector, ReferenceFrame, Point, dynamicsymbols
+from sympy.physics.vector.printing import (
+    vprint,
+    vsprint,
+    vpprint,
+    vlatex,
+    init_vprinting,
+)
 from sympy.physics.mechanics.particle import Particle
 from sympy.physics.mechanics.rigidbody import RigidBody
 from sympy import simplify
-from sympy.core.backend import (Matrix, sympify, Mul, Derivative, sin, cos,
-                                tan, AppliedUndef, S)
+from sympy.core.backend import (
+    Matrix,
+    sympify,
+    Mul,
+    Derivative,
+    sin,
+    cos,
+    tan,
+    AppliedUndef,
+    S,
+)
 
-__all__ = ['inertia',
-           'inertia_of_point_mass',
-           'linear_momentum',
-           'angular_momentum',
-           'kinetic_energy',
-           'potential_energy',
-           'Lagrangian',
-           'mechanics_printing',
-           'mprint',
-           'msprint',
-           'mpprint',
-           'mlatex',
-           'msubs',
-           'find_dynamicsymbols']
+__all__ = [
+    "inertia",
+    "inertia_of_point_mass",
+    "linear_momentum",
+    "angular_momentum",
+    "kinetic_energy",
+    "potential_energy",
+    "Lagrangian",
+    "mechanics_printing",
+    "mprint",
+    "msprint",
+    "mpprint",
+    "mlatex",
+    "msubs",
+    "find_dynamicsymbols",
+]
 
 # These are functions that we've moved and renamed during extracting the
 # basic vector calculus code from the mechanics packages.
@@ -43,6 +58,7 @@ def mechanics_printing(**kwargs):
     """
 
     init_vprinting(**kwargs)
+
 
 mechanics_printing.__doc__ = init_vprinting.__doc__
 
@@ -82,7 +98,7 @@ def inertia(frame, ixx, iyy, izz, ixy=0, iyz=0, izx=0):
     """
 
     if not isinstance(frame, ReferenceFrame):
-        raise TypeError('Need to define the inertia in a frame')
+        raise TypeError("Need to define the inertia in a frame")
     ol = sympify(ixx) * (frame.x | frame.x)
     ol += sympify(ixy) * (frame.x | frame.y)
     ol += sympify(izx) * (frame.x | frame.z)
@@ -121,9 +137,11 @@ def inertia_of_point_mass(mass, pos_vec, frame):
 
     """
 
-    return mass * (((frame.x | frame.x) + (frame.y | frame.y) +
-                   (frame.z | frame.z)) * (pos_vec & pos_vec) -
-                   (pos_vec | pos_vec))
+    return mass * (
+        ((frame.x | frame.x) + (frame.y | frame.y) + (frame.z | frame.z))
+        * (pos_vec & pos_vec)
+        - (pos_vec | pos_vec)
+    )
 
 
 def linear_momentum(frame, *body):
@@ -165,14 +183,14 @@ def linear_momentum(frame, *body):
     """
 
     if not isinstance(frame, ReferenceFrame):
-        raise TypeError('Please specify a valid ReferenceFrame')
+        raise TypeError("Please specify a valid ReferenceFrame")
     else:
         linear_momentum_sys = Vector(0)
         for e in body:
             if isinstance(e, (RigidBody, Particle)):
                 linear_momentum_sys += e.linear_momentum(frame)
             else:
-                raise TypeError('*body must have only Particle or RigidBody')
+                raise TypeError("*body must have only Particle or RigidBody")
     return linear_momentum_sys
 
 
@@ -221,16 +239,16 @@ def angular_momentum(point, frame, *body):
     """
 
     if not isinstance(frame, ReferenceFrame):
-        raise TypeError('Please enter a valid ReferenceFrame')
+        raise TypeError("Please enter a valid ReferenceFrame")
     if not isinstance(point, Point):
-        raise TypeError('Please specify a valid Point')
+        raise TypeError("Please specify a valid Point")
     else:
         angular_momentum_sys = Vector(0)
         for e in body:
             if isinstance(e, (RigidBody, Particle)):
                 angular_momentum_sys += e.angular_momentum(point, frame)
             else:
-                raise TypeError('*body must have only Particle or RigidBody')
+                raise TypeError("*body must have only Particle or RigidBody")
     return angular_momentum_sys
 
 
@@ -280,13 +298,13 @@ def kinetic_energy(frame, *body):
     """
 
     if not isinstance(frame, ReferenceFrame):
-        raise TypeError('Please enter a valid ReferenceFrame')
+        raise TypeError("Please enter a valid ReferenceFrame")
     ke_sys = S.Zero
     for e in body:
         if isinstance(e, (RigidBody, Particle)):
             ke_sys += e.kinetic_energy(frame)
         else:
-            raise TypeError('*body must have only Particle or RigidBody')
+            raise TypeError("*body must have only Particle or RigidBody")
     return ke_sys
 
 
@@ -338,7 +356,7 @@ def potential_energy(*body):
         if isinstance(e, (RigidBody, Particle)):
             pe_sys += e.potential_energy
         else:
-            raise TypeError('*body must have only Particle or RigidBody')
+            raise TypeError("*body must have only Particle or RigidBody")
     return pe_sys
 
 
@@ -373,11 +391,11 @@ def gravity(acceleration, *bodies):
         raise TypeError("No bodies(instances of Particle or Rigidbody) were passed.")
 
     for e in bodies:
-        point = getattr(e, 'masscenter', None)
+        point = getattr(e, "masscenter", None)
         if point is None:
             point = e.point
 
-        gravity_force.append((point, e.mass*acceleration))
+        gravity_force.append((point, e.mass * acceleration))
 
     return gravity_force
 
@@ -422,12 +440,12 @@ def center_of_mass(point, *bodies):
     for i in bodies:
         total_mass += i.mass
 
-        masscenter = getattr(i, 'masscenter', None)
+        masscenter = getattr(i, "masscenter", None)
         if masscenter is None:
             masscenter = i.point
-        vec += i.mass*masscenter.pos_from(point)
+        vec += i.mass * masscenter.pos_from(point)
 
-    return vec/total_mass
+    return vec / total_mass
 
 
 def Lagrangian(frame, *body):
@@ -480,10 +498,10 @@ def Lagrangian(frame, *body):
     """
 
     if not isinstance(frame, ReferenceFrame):
-        raise TypeError('Please supply a valid ReferenceFrame')
+        raise TypeError("Please supply a valid ReferenceFrame")
     for e in body:
         if not isinstance(e, (RigidBody, Particle)):
-            raise TypeError('*body must have only Particle or RigidBody')
+            raise TypeError("*body must have only Particle or RigidBody")
     return kinetic_energy(frame, *body) - potential_energy(*body)
 
 
@@ -536,12 +554,22 @@ def find_dynamicsymbols(expression, exclude=None, reference_frame=None):
         exclude_set = set()
     if isinstance(expression, Vector):
         if reference_frame is None:
-            raise ValueError("You must provide reference_frame when passing a "
-                             "vector expression, got %s." % reference_frame)
+            raise ValueError(
+                "You must provide reference_frame when passing a "
+                "vector expression, got %s." % reference_frame
+            )
         else:
             expression = expression.to_matrix(reference_frame)
-    return set([i for i in expression.atoms(AppliedUndef, Derivative) if
-            i.free_symbols == t_set]) - exclude_set
+    return (
+        set(
+            [
+                i
+                for i in expression.atoms(AppliedUndef, Derivative)
+                if i.free_symbols == t_set
+            ]
+        )
+        - exclude_set
+    )
 
 
 def msubs(expr, *sub_dicts, **kwargs):
@@ -582,10 +610,10 @@ def msubs(expr, *sub_dicts, **kwargs):
     """
 
     sub_dict = dict_merge(*sub_dicts)
-    smart = kwargs.pop('smart', False)
+    smart = kwargs.pop("smart", False)
     if smart:
         func = _smart_subs
-    elif hasattr(expr, 'msubs'):
+    elif hasattr(expr, "msubs"):
         return expr.msubs(sub_dict)
     else:
         func = lambda expr, sub_dict: _crawl(expr, _sub_func, sub_dict)
@@ -654,6 +682,7 @@ def _smart_subs(expr, sub_dict):
             return val
         new_args = (_recurser(arg, sub_dict) for arg in expr.args)
         return expr.func(*new_args)
+
     return _recurser(expr, sub_dict)
 
 
@@ -685,6 +714,7 @@ def _f_list_parser(fl, ref_frame):
 
     Used internally in the KanesMethod and LagrangesMethod classes.
     """
+
     def flist_iter():
         for pair in fl:
             obj, force = pair
@@ -693,8 +723,9 @@ def _f_list_parser(fl, ref_frame):
             elif isinstance(obj, Point):
                 yield obj.vel(ref_frame), force
             else:
-                raise TypeError('First entry in each forcelist pair must '
-                                'be a point or frame.')
+                raise TypeError(
+                    "First entry in each forcelist pair must " "be a point or frame."
+                )
 
     if not fl:
         vel_list, f_list = (), ()

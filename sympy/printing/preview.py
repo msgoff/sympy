@@ -17,13 +17,27 @@ from sympy.utilities.decorator import doctest_depends_on
 from sympy.utilities.misc import find_executable
 from .latex import latex
 
-__doctest_requires__ = {('preview',): ['pyglet']}
+__doctest_requires__ = {("preview",): ["pyglet"]}
 
-@doctest_depends_on(exe=('latex', 'dvipng'), modules=('pyglet',),
-            disable_viewers=('evince', 'gimp', 'superior-dvi-viewer'))
-def preview(expr, output='png', viewer=None, euler=True, packages=(),
-            filename=None, outputbuffer=None, preamble=None, dvioptions=None,
-            outputTexFile=None, **latex_settings):
+
+@doctest_depends_on(
+    exe=("latex", "dvipng"),
+    modules=("pyglet",),
+    disable_viewers=("evince", "gimp", "superior-dvi-viewer"),
+)
+def preview(
+    expr,
+    output="png",
+    viewer=None,
+    euler=True,
+    packages=(),
+    filename=None,
+    outputbuffer=None,
+    preamble=None,
+    dvioptions=None,
+    outputTexFile=None,
+    **latex_settings
+):
     r"""
     View expression or LaTeX markup in PNG, DVI, PostScript or PDF form.
 
@@ -109,7 +123,7 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
 
 
     """
-    special = [ 'pyglet' ]
+    special = ["pyglet"]
 
     if viewer is None:
         if output == "png":
@@ -119,9 +133,9 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
             # very discussable, but indeed 'gv' looks awful :)
             # TODO add candidates for windows to list
             candidates = {
-                "dvi": [ "evince", "okular", "kdvi", "xdvi" ],
-                "ps": [ "evince", "okular", "gsview", "gv" ],
-                "pdf": [ "evince", "okular", "kpdf", "acroread", "xpdf", "gv" ],
+                "dvi": ["evince", "okular", "kdvi", "xdvi"],
+                "ps": ["evince", "okular", "gsview", "gv"],
+                "pdf": ["evince", "okular", "kpdf", "acroread", "xpdf", "gv"],
             }
 
             try:
@@ -132,76 +146,86 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
                         break
                 else:
                     raise SystemError(
-                        "No viewers found for '%s' output format." % output)
+                        "No viewers found for '%s' output format." % output
+                    )
             except KeyError:
                 raise SystemError("Invalid output format: %s" % output)
     else:
         if viewer == "StringIO":
             viewer = "BytesIO"
             if outputbuffer is None:
-                raise ValueError("outputbuffer has to be a BytesIO "
-                                 "compatible object if viewer=\"StringIO\"")
+                raise ValueError(
+                    "outputbuffer has to be a BytesIO "
+                    'compatible object if viewer="StringIO"'
+                )
         elif viewer == "BytesIO":
             if outputbuffer is None:
-                raise ValueError("outputbuffer has to be a BytesIO "
-                                 "compatible object if viewer=\"BytesIO\"")
+                raise ValueError(
+                    "outputbuffer has to be a BytesIO "
+                    'compatible object if viewer="BytesIO"'
+                )
         elif viewer not in special and not find_executable(viewer):
             raise SystemError("Unrecognized viewer: %s" % viewer)
-
 
     if preamble is None:
         actual_packages = packages + ("amsmath", "amsfonts")
         if euler:
             actual_packages += ("euler",)
-        package_includes = "\n" + "\n".join(["\\usepackage{%s}" % p
-                                             for p in actual_packages])
+        package_includes = "\n" + "\n".join(
+            ["\\usepackage{%s}" % p for p in actual_packages]
+        )
 
         preamble = r"""\documentclass[varwidth,12pt]{standalone}
 %s
 
 \begin{document}
-""" % (package_includes)
+""" % (
+            package_includes
+        )
     else:
         if packages:
-            raise ValueError("The \"packages\" keyword must not be set if a "
-                             "custom LaTeX preamble was specified")
-    latex_main = preamble + '\n%s\n\n' + r"\end{document}"
+            raise ValueError(
+                'The "packages" keyword must not be set if a '
+                "custom LaTeX preamble was specified"
+            )
+    latex_main = preamble + "\n%s\n\n" + r"\end{document}"
 
     if isinstance(expr, str):
         latex_string = expr
     else:
-        latex_string = ('$\\displaystyle ' +
-                        latex(expr, mode='plain', **latex_settings) +
-                        '$')
+        latex_string = (
+            "$\\displaystyle " + latex(expr, mode="plain", **latex_settings) + "$"
+        )
 
     try:
         workdir = tempfile.mkdtemp()
 
-        with io.open(join(workdir, 'texput.tex'), 'w', encoding='utf-8') as fh:
+        with io.open(join(workdir, "texput.tex"), "w", encoding="utf-8") as fh:
             fh.write(unicode(latex_main) % u_decode(latex_string))
 
         if outputTexFile is not None:
-            shutil.copyfile(join(workdir, 'texput.tex'), outputTexFile)
+            shutil.copyfile(join(workdir, "texput.tex"), outputTexFile)
 
-        if not find_executable('latex'):
+        if not find_executable("latex"):
             raise RuntimeError("latex program is not installed")
 
         try:
             # Avoid showing a cmd.exe window when running this
             # on Windows
-            if os.name == 'nt':
-                creation_flag = 0x08000000 # CREATE_NO_WINDOW
+            if os.name == "nt":
+                creation_flag = 0x08000000  # CREATE_NO_WINDOW
             else:
-                creation_flag = 0 # Default value
-            check_output(['latex', '-halt-on-error', '-interaction=nonstopmode',
-                          'texput.tex'],
-                         cwd=workdir,
-                         stderr=STDOUT,
-                         creationflags=creation_flag)
+                creation_flag = 0  # Default value
+            check_output(
+                ["latex", "-halt-on-error", "-interaction=nonstopmode", "texput.tex"],
+                cwd=workdir,
+                stderr=STDOUT,
+                creationflags=creation_flag,
+            )
         except CalledProcessError as e:
             raise RuntimeError(
-                "'latex' exited abnormally with the following output:\n%s" %
-                e.output)
+                "'latex' exited abnormally with the following output:\n%s" % e.output
+            )
 
         if output != "dvi":
             defaultoptions = {
@@ -236,39 +260,44 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
             try:
                 # Avoid showing a cmd.exe window when running this
                 # on Windows
-                if os.name == 'nt':
-                    creation_flag = 0x08000000 # CREATE_NO_WINDOW
+                if os.name == "nt":
+                    creation_flag = 0x08000000  # CREATE_NO_WINDOW
                 else:
-                    creation_flag = 0 # Default value
-                check_output(cmd, cwd=workdir, stderr=STDOUT,
-                             creationflags=creation_flag)
+                    creation_flag = 0  # Default value
+                check_output(
+                    cmd, cwd=workdir, stderr=STDOUT, creationflags=creation_flag
+                )
             except CalledProcessError as e:
                 raise RuntimeError(
-                    "'%s' exited abnormally with the following output:\n%s" %
-                    (' '.join(cmd), e.output))
+                    "'%s' exited abnormally with the following output:\n%s"
+                    % (" ".join(cmd), e.output)
+                )
 
         src = "texput.%s" % (output)
 
         if viewer == "file":
             if filename is None:
                 buffer = BytesIO()
-                with open(join(workdir, src), 'rb') as fh:
+                with open(join(workdir, src), "rb") as fh:
                     buffer.write(fh.read())
                 return buffer
             else:
-                shutil.move(join(workdir,src), filename)
+                shutil.move(join(workdir, src), filename)
         elif viewer == "BytesIO":
-            with open(join(workdir, src), 'rb') as fh:
+            with open(join(workdir, src), "rb") as fh:
                 outputbuffer.write(fh.read())
         elif viewer == "pyglet":
             try:
                 from pyglet import window, image, gl
                 from pyglet.window import key
             except ImportError:
-                raise ImportError("pyglet is required for preview.\n visit http://www.pyglet.org/")
+                raise ImportError(
+                    "pyglet is required for preview.\n visit http://www.pyglet.org/"
+                )
 
             if output == "png":
                 from pyglet.image.codecs.png import PNGImageDecoder
+
                 img = image.load(join(workdir, src), decoder=PNGImageDecoder())
             else:
                 raise SystemError("pyglet preview works only for 'png' files.")
@@ -277,16 +306,17 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
 
             config = gl.Config(double_buffer=False)
             win = window.Window(
-                width=img.width + 2*offset,
-                height=img.height + 2*offset,
+                width=img.width + 2 * offset,
+                height=img.height + 2 * offset,
                 caption="sympy",
                 resizable=False,
-                config=config
+                config=config,
             )
 
             win.set_vsync(False)
 
             try:
+
                 def on_close():
                     win.has_exit = True
 
@@ -302,10 +332,7 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
                     gl.glClearColor(1.0, 1.0, 1.0, 1.0)
                     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
-                    img.blit(
-                        (win.width - img.width) / 2,
-                        (win.height - img.height) / 2
-                    )
+                    img.blit((win.width - img.width) / 2, (win.height - img.height) / 2)
 
                 win.on_expose = on_expose
 
@@ -320,19 +347,24 @@ def preview(expr, output='png', viewer=None, euler=True, packages=(),
             try:
                 # Avoid showing a cmd.exe window when running this
                 # on Windows
-                if os.name == 'nt':
-                    creation_flag = 0x08000000 # CREATE_NO_WINDOW
+                if os.name == "nt":
+                    creation_flag = 0x08000000  # CREATE_NO_WINDOW
                 else:
-                    creation_flag = 0 # Default value
-                check_output([viewer, src], cwd=workdir, stderr=STDOUT,
-                             creationflags=creation_flag)
+                    creation_flag = 0  # Default value
+                check_output(
+                    [viewer, src],
+                    cwd=workdir,
+                    stderr=STDOUT,
+                    creationflags=creation_flag,
+                )
             except CalledProcessError as e:
                 raise RuntimeError(
-                    "'%s %s' exited abnormally with the following output:\n%s" %
-                    (viewer, src, e.output))
+                    "'%s %s' exited abnormally with the following output:\n%s"
+                    % (viewer, src, e.output)
+                )
     finally:
         try:
-            shutil.rmtree(workdir) # delete directory
+            shutil.rmtree(workdir)  # delete directory
         except OSError as e:
-            if e.errno != 2: # code 2 - no such file or directory
+            if e.errno != 2:  # code 2 - no such file or directory
                 raise

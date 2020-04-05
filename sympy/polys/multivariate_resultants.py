@@ -18,7 +18,8 @@ from sympy.functions.combinatorial.factorials import binomial
 from itertools import combinations_with_replacement
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
-class DixonResultant():
+
+class DixonResultant:
     """
     A class for retrieving the Dixon's resultant of a multivariate
     system.
@@ -84,14 +85,16 @@ class DixonResultant():
         self.dummy_variables = [a[i] for i in range(self.n)]
 
         # A list of the d_max of each variable.
-        self._max_degrees = [max(degree_list(poly)[i] for poly in self.polynomials)
-            for i in range(self.n)]
+        self._max_degrees = [
+            max(degree_list(poly)[i] for poly in self.polynomials)
+            for i in range(self.n)
+        ]
 
     @property
     def max_degrees(self):
-        SymPyDeprecationWarning(feature="max_degrees",
-                        issue=17763,
-                        deprecated_since_version="1.5").warn()
+        SymPyDeprecationWarning(
+            feature="max_degrees", issue=17763, deprecated_since_version="1.5"
+        ).warn()
         return self._max_degrees
 
     def get_dixon_polynomial(self):
@@ -110,7 +113,7 @@ class DixonResultant():
                  |p_1(a_1,... a_n), ..., p_n(a_1,... a_n)|
         """
         if self.m != (self.n + 1):
-            raise ValueError('Method invalid for given combination.')
+            raise ValueError("Method invalid for given combination.")
 
         # First row
         rows = [self.polynomials]
@@ -131,13 +134,16 @@ class DixonResultant():
         return poly_from_expr(dixon_polynomial, self.dummy_variables)[0]
 
     def get_upper_degree(self):
-        SymPyDeprecationWarning(feature="get_upper_degree",
-                        useinstead="get_max_degrees",
-                        issue=17763,
-                        deprecated_since_version="1.5").warn()
+        SymPyDeprecationWarning(
+            feature="get_upper_degree",
+            useinstead="get_max_degrees",
+            issue=17763,
+            deprecated_since_version="1.5",
+        ).warn()
 
-        list_of_products = [self.variables[i] ** self._max_degrees[i]
-                            for i in range(self.n)]
+        list_of_products = [
+            self.variables[i] ** self._max_degrees[i] for i in range(self.n)
+        ]
         product = prod(list_of_products)
         product = Poly(product).monoms()
 
@@ -149,8 +155,9 @@ class DixonResultant():
         in the coefficients of the Dixon polynomial. The coefficients are
         viewed as polys in x_1, ... , x_n.
         """
-        deg_lists = [degree_list(Poly(poly, self.variables))
-                     for poly in polynomial.coeffs()]
+        deg_lists = [
+            degree_list(Poly(poly, self.variables)) for poly in polynomial.coeffs()
+        ]
 
         max_degrees = [max(degs) for degs in zip(*deg_lists)]
 
@@ -167,18 +174,24 @@ class DixonResultant():
 
         # list of column headers of the Dixon matrix.
         monomials = itermonomials(self.variables, max_degrees)
-        monomials = sorted(monomials, reverse=True,
-                           key=monomial_key('lex', self.variables))
+        monomials = sorted(
+            monomials, reverse=True, key=monomial_key("lex", self.variables)
+        )
 
-        dixon_matrix = Matrix([[Poly(c, *self.variables).coeff_monomial(m)
-                                for m in monomials]
-                                for c in polynomial.coeffs()])
+        dixon_matrix = Matrix(
+            [
+                [Poly(c, *self.variables).coeff_monomial(m) for m in monomials]
+                for c in polynomial.coeffs()
+            ]
+        )
 
         # remove columns if needed
         if dixon_matrix.shape[0] != dixon_matrix.shape[1]:
-            keep = [column for column in range(dixon_matrix.shape[-1])
-                    if any([element != 0 for element
-                        in dixon_matrix[:, column]])]
+            keep = [
+                column
+                for column in range(dixon_matrix.shape[-1])
+                if any([element != 0 for element in dixon_matrix[:, column]])
+            ]
 
             dixon_matrix = dixon_matrix[:, keep]
 
@@ -202,21 +215,19 @@ class DixonResultant():
         # simplify the matrix and keep only its non-zero rows
         matrix = simplify(matrix.rref()[0])
         rows = [i for i in range(m) if any(matrix[i, j] != 0 for j in range(n))]
-        matrix = matrix[rows,:]
+        matrix = matrix[rows, :]
 
-        condition = Matrix([[0]*(n-1) + [1]])
+        condition = Matrix([[0] * (n - 1) + [1]])
 
-        if matrix[-1,:] == condition:
+        if matrix[-1, :] == condition:
             return True
         else:
             return False
 
     def delete_zero_rows_and_columns(self, matrix):
         """Remove the zero rows and columns of the matrix."""
-        rows = [
-            i for i in range(matrix.rows) if not matrix.row(i).is_zero_matrix]
-        cols = [
-            j for j in range(matrix.cols) if not matrix.col(j).is_zero_matrix]
+        rows = [i for i in range(matrix.rows) if not matrix.row(i).is_zero_matrix]
+        cols = [j for j in range(matrix.cols) if not matrix.col(j).is_zero_matrix]
 
         return matrix[rows, cols]
 
@@ -238,7 +249,8 @@ class DixonResultant():
 
         return self.product_leading_entries(matrix)
 
-class MacaulayResultant():
+
+class MacaulayResultant:
     """
     A class for calculating the Macaulay resultant. Note that the
     polynomials must be homogenized and their coefficients must be
@@ -285,6 +297,7 @@ class MacaulayResultant():
     .. [2] [Stiller96]_
 
     """
+
     def __init__(self, polynomials, variables):
         """
         Parameters
@@ -300,8 +313,9 @@ class MacaulayResultant():
         self.n = len(variables)
 
         # A list of the d_max of each polynomial.
-        self.degrees = [total_degree(poly, *self.variables) for poly
-                        in self.polynomials]
+        self.degrees = [
+            total_degree(poly, *self.variables) for poly in self.polynomials
+        ]
 
         self.degree_m = self._get_degree_m()
         self.monomials_size = self.get_size()
@@ -340,12 +354,12 @@ class MacaulayResultant():
         monomials: list
             A list of monomials of a certain degree.
         """
-        monomials = [Mul(*monomial) for monomial
-                     in combinations_with_replacement(self.variables,
-                                                      degree)]
+        monomials = [
+            Mul(*monomial)
+            for monomial in combinations_with_replacement(self.variables, degree)
+        ]
 
-        return sorted(monomials, reverse=True,
-                      key=monomial_key('lex', self.variables))
+        return sorted(monomials, reverse=True, key=monomial_key("lex", self.variables))
 
     def get_row_coefficients(self):
         """
@@ -363,15 +377,13 @@ class MacaulayResultant():
                 monomial = self.get_monomials_of_certain_degree(degree)
                 row_coefficients.append(monomial)
             else:
-                divisible.append(self.variables[i - 1] **
-                                 self.degrees[i - 1])
+                divisible.append(self.variables[i - 1] ** self.degrees[i - 1])
                 degree = self.degree_m - self.degrees[i]
                 poss_rows = self.get_monomials_of_certain_degree(degree)
                 for div in divisible:
                     for p in poss_rows:
                         if rem(p, div) == 0:
-                            poss_rows = [item for item in poss_rows
-                                         if item != p]
+                            poss_rows = [item for item in poss_rows if item != p]
                 row_coefficients.append(poss_rows)
         return row_coefficients
 
@@ -388,8 +400,7 @@ class MacaulayResultant():
         for i in range(self.n):
             for multiplier in row_coefficients[i]:
                 coefficients = []
-                poly = Poly(self.polynomials[i] * multiplier,
-                            *self.variables)
+                poly = Poly(self.polynomials[i] * multiplier, *self.variables)
 
                 for mono in self.monomial_set:
                     coefficients.append(poly.coeff_monomial(mono))
@@ -422,10 +433,8 @@ class MacaulayResultant():
             for i, v in enumerate(self.variables):
                 temp.append(bool(total_degree(m, v) >= self.degrees[i]))
             divisible.append(temp)
-        reduced = [i for i, r in enumerate(divisible)
-                   if sum(r) < self.n - 1]
-        non_reduced = [i for i, r in enumerate(divisible)
-                       if sum(r) >= self.n -1]
+        reduced = [i for i, r in enumerate(divisible) if sum(r) < self.n - 1]
+        non_reduced = [i for i, r in enumerate(divisible) if sum(r) >= self.n - 1]
 
         return reduced, non_reduced
 
@@ -446,11 +455,9 @@ class MacaulayResultant():
             return diag([1])
 
         # reduced != []
-        reduction_set = [v ** self.degrees[i] for i, v
-                         in enumerate(self.variables)]
+        reduction_set = [v ** self.degrees[i] for i, v in enumerate(self.variables)]
 
-        ais = list([self.polynomials[i].coeff(reduction_set[i])
-                    for i in range(self.n)])
+        ais = list([self.polynomials[i].coeff(reduction_set[i]) for i in range(self.n)])
 
         reduced_matrix = matrix[:, reduced]
         keep = []

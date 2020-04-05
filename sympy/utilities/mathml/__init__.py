@@ -8,17 +8,21 @@ from sympy.utilities.pkgdata import get_resource
 from sympy.utilities.decorator import doctest_depends_on
 
 
-__doctest_requires__ = {('apply_xsl', 'c2p'): ['lxml']}
+__doctest_requires__ = {("apply_xsl", "c2p"): ["lxml"]}
 
 
 def add_mathml_headers(s):
-    return """<math xmlns:mml="http://www.w3.org/1998/Math/MathML"
+    return (
+        """<math xmlns:mml="http://www.w3.org/1998/Math/MathML"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.w3.org/1998/Math/MathML
-        http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd">""" + s + "</math>"
+        http://www.w3.org/Math/XMLSchema/mathml2/mathml2.xsd">"""
+        + s
+        + "</math>"
+    )
 
 
-@doctest_depends_on(modules=('lxml',))
+@doctest_depends_on(modules=("lxml",))
 def apply_xsl(mml, xsl):
     """Apply a xsl to a MathML string
     @param mml: a string with MathML code
@@ -34,6 +38,7 @@ def apply_xsl(mml, xsl):
 
     """
     from lxml import etree
+
     s = etree.XML(get_resource(xsl).read())
     transform = etree.XSLT(s)
     doc = etree.XML(mml)
@@ -42,7 +47,7 @@ def apply_xsl(mml, xsl):
     return s
 
 
-@doctest_depends_on(modules=('lxml',))
+@doctest_depends_on(modules=("lxml",))
 def c2p(mml, simple=False):
     """Transforms a document in MathML content (like the one that sympy produces)
     in one document in MathML presentation, more suitable for printing, and more
@@ -55,10 +60,10 @@ def c2p(mml, simple=False):
 
     """
 
-    if not mml.startswith('<math'):
+    if not mml.startswith("<math"):
         mml = add_mathml_headers(mml)
 
     if simple:
-        return apply_xsl(mml, 'mathml/data/simple_mmlctop.xsl')
+        return apply_xsl(mml, "mathml/data/simple_mmlctop.xsl")
 
-    return apply_xsl(mml, 'mathml/data/mmlctop.xsl')
+    return apply_xsl(mml, "mathml/data/mmlctop.xsl")

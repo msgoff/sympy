@@ -16,8 +16,17 @@ from typing import Dict as tDict
 
 import collections
 
-from sympy import (Integer, Matrix, S, Symbol, sympify, Basic, Tuple, Dict,
-    default_sort_key)
+from sympy import (
+    Integer,
+    Matrix,
+    S,
+    Symbol,
+    sympify,
+    Basic,
+    Tuple,
+    Dict,
+    default_sort_key,
+)
 from sympy.core.compatibility import reduce
 from sympy.core.expr import Expr
 from sympy.core.power import Pow
@@ -36,6 +45,7 @@ class _QuantityMapper(object):
 
     def set_quantity_dimension(self, unit, dimension):
         from sympy.physics.units import Quantity
+
         dimension = sympify(dimension)
         if not isinstance(dimension, Dimension):
             if dimension == 1:
@@ -49,21 +59,22 @@ class _QuantityMapper(object):
     def set_quantity_scale_factor(self, unit, scale_factor):
         from sympy.physics.units import Quantity
         from sympy.physics.units.prefixes import Prefix
+
         scale_factor = sympify(scale_factor)
         # replace all prefixes by their ratio to canonical units:
         scale_factor = scale_factor.replace(
-            lambda x: isinstance(x, Prefix),
-            lambda x: x.scale_factor
+            lambda x: isinstance(x, Prefix), lambda x: x.scale_factor
         )
         # replace all quantities by their ratio to canonical units:
         scale_factor = scale_factor.replace(
             lambda x: isinstance(x, Quantity),
-            lambda x: self.get_quantity_scale_factor(x)
+            lambda x: self.get_quantity_scale_factor(x),
         )
         self._quantity_scale_factors[unit] = scale_factor
 
     def get_quantity_dimension(self, unit):
         from sympy.physics.units import Quantity
+
         # First look-up the local dimension map, then the global one:
         if unit in self._quantity_dimension_map:
             return self._quantity_dimension_map[unit]
@@ -85,7 +96,7 @@ class _QuantityMapper(object):
             return self._quantity_scale_factors[unit]
         if unit in self._quantity_scale_factors_global:
             mul_factor, other_unit = self._quantity_scale_factors_global[unit]
-            return mul_factor*self.get_quantity_scale_factor(other_unit)
+            return mul_factor * self.get_quantity_scale_factor(other_unit)
         return S.One
 
 
@@ -201,6 +212,7 @@ class Dimension(Expr):
 
     def __add__(self, other):
         from sympy.physics.units.quantities import Quantity
+
         other = sympify(other)
         if isinstance(other, Basic):
             if other.has(Quantity):
@@ -228,15 +240,16 @@ class Dimension(Expr):
 
     def _eval_power(self, other):
         other = sympify(other)
-        return Dimension(self.name**other)
+        return Dimension(self.name ** other)
 
     def __mul__(self, other):
         from sympy.physics.units.quantities import Quantity
+
         if isinstance(other, Basic):
             if other.has(Quantity):
                 raise TypeError("cannot sum dimension and quantity")
             if isinstance(other, Dimension):
-                return Dimension(self.name*other.name)
+                return Dimension(self.name * other.name)
             if not other.free_symbols:  # other.is_number cannot be used
                 return self
             return super(Dimension, self).__mul__(other)
@@ -246,7 +259,7 @@ class Dimension(Expr):
         return self.__mul__(other)
 
     def __div__(self, other):
-        return self*Pow(other, -1)
+        return self * Pow(other, -1)
 
     def __rdiv__(self, other):
         return other * pow(self, -1)
@@ -256,18 +269,19 @@ class Dimension(Expr):
 
     @classmethod
     def _from_dimensional_dependencies(cls, dependencies):
-        return reduce(lambda x, y: x * y, (
-            Dimension(d)**e for d, e in dependencies.items()
-        ))
+        return reduce(
+            lambda x, y: x * y, (Dimension(d) ** e for d, e in dependencies.items())
+        )
 
     @classmethod
     def _get_dimensional_dependencies_for_name(cls, name):
         from sympy.physics.units.systems.si import dimsys_default
+
         SymPyDeprecationWarning(
             deprecated_since_version="1.2",
             issue=13336,
             feature="do not call from `Dimension` objects.",
-            useinstead="DimensionSystem"
+            useinstead="DimensionSystem",
         ).warn()
         return dimsys_default.get_dimensional_dependencies(name)
 
@@ -282,12 +296,11 @@ class Dimension(Expr):
             return True
 
         from sympy.physics.units.systems.si import dimsys_default
+
         SymPyDeprecationWarning(
-            deprecated_since_version="1.2",
-            issue=13336,
-            feature="wrong class",
+            deprecated_since_version="1.2", issue=13336, feature="wrong class",
         ).warn()
-        dimensional_dependencies=dimsys_default
+        dimensional_dependencies = dimsys_default
 
         return dimensional_dependencies.get_dimensional_dependencies(self) == {}
 
@@ -328,7 +341,14 @@ class DimensionSystem(Basic, _QuantityMapper):
     may be omitted.
     """
 
-    def __new__(cls, base_dims, derived_dims=[], dimensional_dependencies={}, name=None, descr=None):
+    def __new__(
+        cls,
+        base_dims,
+        derived_dims=[],
+        dimensional_dependencies={},
+        name=None,
+        descr=None,
+    ):
         dimensional_dependencies = dict(dimensional_dependencies)
 
         if (name is not None) or (descr is not None):
@@ -354,9 +374,10 @@ class DimensionSystem(Basic, _QuantityMapper):
 
         for dim in base_dims:
             dim = dim.name
-            if (dim in dimensional_dependencies
-                and (len(dimensional_dependencies[dim]) != 1 or
-                dimensional_dependencies[dim].get(dim, None) != 1)):
+            if dim in dimensional_dependencies and (
+                len(dimensional_dependencies[dim]) != 1
+                or dimensional_dependencies[dim].get(dim, None) != 1
+            ):
                 raise IndexError("Repeated value in base dimensions")
             dimensional_dependencies[dim] = Dict({dim: 1})
 
@@ -379,8 +400,10 @@ class DimensionSystem(Basic, _QuantityMapper):
             return Dict({parse_dim_name(i): j for i, j in d.items()})
 
         # Make sure everything is a SymPy type:
-        dimensional_dependencies = {parse_dim_name(i): parse_dict(j) for i, j in
-                                    dimensional_dependencies.items()}
+        dimensional_dependencies = {
+            parse_dim_name(i): parse_dict(j)
+            for i, j in dimensional_dependencies.items()
+        }
 
         for dim in derived_dims:
             if dim in base_dims:
@@ -394,7 +417,9 @@ class DimensionSystem(Basic, _QuantityMapper):
 
         base_dims = Tuple(*base_dims)
         derived_dims = Tuple(*derived_dims)
-        dimensional_dependencies = Dict({i: Dict(j) for i, j in dimensional_dependencies.items()})
+        dimensional_dependencies = Dict(
+            {i: Dict(j) for i, j in dimensional_dependencies.items()}
+        )
         obj = Basic.__new__(cls, base_dims, derived_dims, dimensional_dependencies)
         return obj
 
@@ -432,11 +457,13 @@ class DimensionSystem(Basic, _QuantityMapper):
 
         if name.is_Pow:
             dim = get_for_name(name.base)
-            return {k: v*name.exp for (k, v) in dim.items()}
+            return {k: v * name.exp for (k, v) in dim.items()}
 
         if name.is_Function:
-            args = (Dimension._from_dimensional_dependencies(
-                get_for_name(arg)) for arg in name.args)
+            args = (
+                Dimension._from_dimensional_dependencies(get_for_name(arg))
+                for arg in name.args
+            )
             result = name.func(*args)
 
             if isinstance(result, Dimension):
@@ -454,7 +481,7 @@ class DimensionSystem(Basic, _QuantityMapper):
 
         dimdep = self._get_dimensional_dependencies_for_name(name)
         if mark_dimensionless and dimdep == {}:
-            return {'dimensionless': 1}
+            return {"dimensionless": 1}
         return {str(i): j for i, j in dimdep.items()}
 
     def equivalent_dims(self, dim1, dim2):
@@ -462,7 +489,14 @@ class DimensionSystem(Basic, _QuantityMapper):
         deps2 = self.get_dimensional_dependencies(dim2)
         return deps1 == deps2
 
-    def extend(self, new_base_dims, new_derived_dims=[], new_dim_deps={}, name=None, description=None):
+    def extend(
+        self,
+        new_base_dims,
+        new_derived_dims=[],
+        new_dim_deps={},
+        name=None,
+        description=None,
+    ):
         if (name is not None) or (description is not None):
             SymPyDeprecationWarning(
                 deprecated_since_version="1.2",
@@ -477,7 +511,7 @@ class DimensionSystem(Basic, _QuantityMapper):
         new_dim_sys = DimensionSystem(
             tuple(self.base_dims) + tuple(new_base_dims),
             tuple(self.derived_dims) + tuple(new_derived_dims),
-            deps
+            deps,
         )
         new_dim_sys._quantity_dimension_map.update(self._quantity_dimension_map)
         new_dim_sys._quantity_scale_factors.update(self._quantity_scale_factors)
@@ -518,7 +552,7 @@ class DimensionSystem(Basic, _QuantityMapper):
             useinstead="the dimension definition",
         ).warn()
         d = self.get_dim(key)
-        #TODO: really want to raise an error?
+        # TODO: really want to raise an error?
         if d is None:
             raise KeyError(key)
         return d
@@ -581,8 +615,9 @@ class DimensionSystem(Basic, _QuantityMapper):
         to get them in this basis. Nonetheless if this matrix is not square
         (or not invertible) it means that we have chosen a bad basis.
         """
-        matrix = reduce(lambda x, y: x.row_join(y),
-                        [self.dim_can_vector(d) for d in self.base_dims])
+        matrix = reduce(
+            lambda x, y: x.row_join(y), [self.dim_can_vector(d) for d in self.base_dims]
+        )
         return matrix
 
     @property
@@ -598,11 +633,12 @@ class DimensionSystem(Basic, _QuantityMapper):
         It is the inverse of the matrix computed with inv_can_transf_matrix().
         """
 
-        #TODO: the inversion will fail if the system is inconsistent, for
+        # TODO: the inversion will fail if the system is inconsistent, for
         #      example if the matrix is not a square
-        return reduce(lambda x, y: x.row_join(y),
-                      [self.dim_can_vector(d) for d in sorted(self.base_dims, key=str)]
-                      ).inv()
+        return reduce(
+            lambda x, y: x.row_join(y),
+            [self.dim_can_vector(d) for d in sorted(self.base_dims, key=str)],
+        ).inv()
 
     def dim_can_vector(self, dim):
         """
@@ -637,7 +673,7 @@ class DimensionSystem(Basic, _QuantityMapper):
         symbols = [i.symbol if i.symbol is not None else i.name for i in self.base_dims]
         res = S.One
         for (s, p) in zip(symbols, dims):
-            res *= s**p
+            res *= s ** p
         return res
 
     @property

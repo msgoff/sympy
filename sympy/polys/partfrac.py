@@ -89,7 +89,7 @@ def apart(f, x=None, full=False, **options):
             nc = f.func(*nc)
             if c:
                 c = apart(f.func._from_args(c), x=x, full=full, **_options)
-                return c*nc
+                return c * nc
             else:
                 return nc
         elif f.is_Add:
@@ -121,8 +121,7 @@ def apart(f, x=None, full=False, **options):
         if fc != f:
             return apart(fc, x=x, full=full, **_options)
 
-        raise NotImplementedError(
-            "multivariate partial fraction decomposition")
+        raise NotImplementedError("multivariate partial fraction decomposition")
 
     common, P, Q = P.cancel(Q)
 
@@ -130,7 +129,7 @@ def apart(f, x=None, full=False, **options):
     P, Q = P.rat_clear_denoms(Q)
 
     if Q.degree() <= 1:
-        partial = P/Q
+        partial = P / Q
     else:
         if not full:
             partial = apart_undetermined_coeffs(P, Q)
@@ -145,7 +144,7 @@ def apart(f, x=None, full=False, **options):
         else:
             terms += factor(term)
 
-    return common*(poly.as_expr() + terms)
+    return common * (poly.as_expr() + terms)
 
 
 def apart_undetermined_coeffs(P, Q):
@@ -170,7 +169,7 @@ def apart_undetermined_coeffs(P, Q):
         h = Poly(coeffs, Q.gen, domain=dom)
         partial[i] = (h, f, k)
         q = q.set_domain(dom)
-        F += h*q
+        F += h * q
 
     system, result = [], S.Zero
 
@@ -178,11 +177,12 @@ def apart_undetermined_coeffs(P, Q):
         system.append(coeff - P.nth(k))
 
     from sympy.solvers import solve
+
     solution = solve(system, symbols)
 
     for h, f, k in partial:
         h = h.as_expr().subs(solution)
-        result += h/f.as_expr()**k
+        result += h / f.as_expr() ** k
 
     return result
 
@@ -206,7 +206,7 @@ def apart_full_decomposition(P, Q):
     .. [1] [Bronstein93]_
 
     """
-    return assemble_partfrac_list(apart_list(P/Q, P.gens[0]))
+    return assemble_partfrac_list(apart_list(P / Q, P.gens[0]))
 
 
 @public
@@ -327,8 +327,7 @@ def apart_list(f, x=None, dummies=None, **options):
     (P, Q), opt = parallel_poly_from_expr((P, Q), x, **options)
 
     if P.is_multivariate:
-        raise NotImplementedError(
-            "multivariate partial fraction decomposition")
+        raise NotImplementedError("multivariate partial fraction decomposition")
 
     common, P, Q = P.cancel(Q)
 
@@ -338,6 +337,7 @@ def apart_list(f, x=None, dummies=None, **options):
     polypart = poly
 
     if dummies is None:
+
         def dummies(name):
             d = Dummy(name)
             while True:
@@ -369,26 +369,26 @@ def apart_list_full_decomposition(P, Q, dummygen):
     .. [1] [Bronstein93]_
 
     """
-    f, x, U = P/Q, P.gen, []
+    f, x, U = P / Q, P.gen, []
 
-    u = Function('u')(x)
-    a = Dummy('a')
+    u = Function("u")(x)
+    a = Dummy("a")
 
     partial = []
 
     for d, n in Q.sqf_list_include(all=True):
         b = d.as_expr()
-        U += [ u.diff(x, n - 1) ]
+        U += [u.diff(x, n - 1)]
 
-        h = cancel(f*b**n) / u**n
+        h = cancel(f * b ** n) / u ** n
 
         H, subs = [h], []
 
         for j in range(1, n):
-            H += [ H[-1].diff(x) / j ]
+            H += [H[-1].diff(x) / j]
 
         for j in range(1, n + 1):
-            subs += [ (U[j - 1], b.diff(x, j) / j) ]
+            subs += [(U[j - 1], b.diff(x, j) / j)]
 
         for j in range(0, n):
             P, Q = cancel(H[j]).as_numer_denom()
@@ -410,7 +410,7 @@ def apart_list_full_decomposition(P, Q, dummygen):
             Dw = D.subs(x, next(dummygen))
             numer = Lambda(a, b.as_expr().subs(x, a))
             denom = Lambda(a, (x - a))
-            exponent = n-j
+            exponent = n - j
 
             partial.append((Dw, numer, denom, exponent))
 
@@ -487,11 +487,11 @@ def assemble_partfrac_list(partial_list):
             ad, de = df.variables, df.expr
             # Hack to make dummies equal because Lambda created new Dummies
             de = de.subs(ad[0], an[0])
-            func = Lambda(tuple(an), nu/de**ex)
+            func = Lambda(tuple(an), nu / de ** ex)
             pfd += RootSum(r, func, auto=False, quadratic=False)
         else:
             # Assemble in case the roots are given explicitly by a list of algebraic numbers
             for root in r:
-                pfd += nf(root)/df(root)**ex
+                pfd += nf(root) / df(root) ** ex
 
-    return common*pfd
+    return common * pfd

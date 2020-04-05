@@ -3,12 +3,18 @@
 from __future__ import print_function, division
 
 from sympy.polys.domains.groundtypes import (
-    PythonInteger, SymPyInteger, python_sqrt,
-    python_factorial, python_gcdex, python_gcd, python_lcm,
+    PythonInteger,
+    SymPyInteger,
+    python_sqrt,
+    python_factorial,
+    python_gcdex,
+    python_gcd,
+    python_lcm,
 )
 from sympy.polys.domains.integerring import IntegerRing
 from sympy.polys.polyerrors import CoercionFailed
 from sympy.utilities import public
+
 
 @public
 class PythonIntegerRing(IntegerRing):
@@ -17,7 +23,7 @@ class PythonIntegerRing(IntegerRing):
     dtype = PythonInteger
     zero = dtype(0)
     one = dtype(1)
-    alias = 'ZZ_python'
+    alias = "ZZ_python"
 
     def __init__(self):
         """Allow instantiation of this domain. """

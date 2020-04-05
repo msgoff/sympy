@@ -12,6 +12,7 @@ class ClassRegistry(Registry):
     For performance reasons, this is coupled with a set `all_classes` holding
     the classes, which should not be modified directly.
     """
+
     __slots__ = ()
 
     def __setattr__(self, name, cls):
@@ -29,13 +30,14 @@ class ClassRegistry(Registry):
     def __getattr__(self, name):
         # Warning on hasattr(C, '__wrapped__') leadds to warnings during test
         # collection when running doctests under pytest.
-        if name != '__wrapped__':
+        if name != "__wrapped__":
             SymPyDeprecationWarning(
-                feature='C, including its class ClassRegistry,',
-                last_supported_version='1.0',
-                useinstead='direct imports from the defining module',
+                feature="C, including its class ClassRegistry,",
+                last_supported_version="1.0",
+                useinstead="direct imports from the defining module",
                 issue=9371,
-                deprecated_since_version='1.0').warn(stacklevel=2)
+                deprecated_since_version="1.0",
+            ).warn(stacklevel=2)
 
         return any(cls.__name__ == name for cls in all_classes)
 
@@ -46,6 +48,7 @@ class ClassRegistry(Registry):
         # since the user is trying to use C like a symbol -- and if
         # we get here, it hasn't been defined as a symbol
         raise NameError("name 'C' is not defined as a Symbol")
+
 
 C = ClassRegistry()
 C.BasicMeta = BasicMeta

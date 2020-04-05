@@ -18,6 +18,7 @@ def _Factorization(predicate, expr, assumptions):
     if predicate in expr.predicates:
         return True
 
+
 class AskSquareHandler(CommonHandler):
     """
     Handler for key 'square'
@@ -55,8 +56,11 @@ class AskSymmetricHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.symmetric(base), assumptions)
         return None
 
@@ -109,8 +113,7 @@ class AskInvertibleHandler(CommonHandler):
         factor, mmul = expr.as_coeff_mmul()
         if all(ask(Q.invertible(arg), assumptions) for arg in mmul.args):
             return True
-        if any(ask(Q.invertible(arg), assumptions) is False
-               for arg in mmul.args):
+        if any(ask(Q.invertible(arg), assumptions) is False for arg in mmul.args):
             return False
 
     @staticmethod
@@ -135,7 +138,7 @@ class AskInvertibleHandler(CommonHandler):
         if Q.invertible(expr) in conjuncts(assumptions):
             return True
 
-    Identity, Inverse = [staticmethod(CommonHandler.AlwaysTrue)]*2
+    Identity, Inverse = [staticmethod(CommonHandler.AlwaysTrue)] * 2
 
     ZeroMatrix = staticmethod(CommonHandler.AlwaysFalse)
 
@@ -150,20 +153,23 @@ class AskInvertibleHandler(CommonHandler):
         else:
             return ask(Q.invertible(expr.parent), assumptions)
 
+
 class AskOrthogonalHandler(CommonHandler):
     """
     Handler for key 'orthogonal'
     """
+
     predicate = Q.orthogonal
 
     @staticmethod
     def MatMul(expr, assumptions):
         factor, mmul = expr.as_coeff_mmul()
-        if (all(ask(Q.orthogonal(arg), assumptions) for arg in mmul.args) and
-                factor == 1):
+        if (
+            all(ask(Q.orthogonal(arg), assumptions) for arg in mmul.args)
+            and factor == 1
+        ):
             return True
-        if any(ask(Q.invertible(arg), assumptions) is False
-                for arg in mmul.args):
+        if any(ask(Q.invertible(arg), assumptions) is False for arg in mmul.args):
             return False
 
     @staticmethod
@@ -177,14 +183,12 @@ class AskOrthogonalHandler(CommonHandler):
 
     @staticmethod
     def MatAdd(expr, assumptions):
-        if (len(expr.args) == 1 and
-                ask(Q.orthogonal(expr.args[0]), assumptions)):
+        if len(expr.args) == 1 and ask(Q.orthogonal(expr.args[0]), assumptions):
             return True
 
     @staticmethod
     def MatrixSymbol(expr, assumptions):
-        if (not expr.is_square or
-                        ask(Q.invertible(expr), assumptions) is False):
+        if not expr.is_square or ask(Q.invertible(expr), assumptions) is False:
             return False
         if Q.orthogonal(expr) in conjuncts(assumptions):
             return True
@@ -208,20 +212,23 @@ class AskOrthogonalHandler(CommonHandler):
 
     Factorization = staticmethod(partial(_Factorization, Q.orthogonal))
 
+
 class AskUnitaryHandler(CommonHandler):
     """
     Handler for key 'unitary'
     """
+
     predicate = Q.unitary
 
     @staticmethod
     def MatMul(expr, assumptions):
         factor, mmul = expr.as_coeff_mmul()
-        if (all(ask(Q.unitary(arg), assumptions) for arg in mmul.args) and
-                abs(factor) == 1):
+        if (
+            all(ask(Q.unitary(arg), assumptions) for arg in mmul.args)
+            and abs(factor) == 1
+        ):
             return True
-        if any(ask(Q.invertible(arg), assumptions) is False
-                for arg in mmul.args):
+        if any(ask(Q.invertible(arg), assumptions) is False for arg in mmul.args):
             return False
 
     @staticmethod
@@ -235,8 +242,7 @@ class AskUnitaryHandler(CommonHandler):
 
     @staticmethod
     def MatrixSymbol(expr, assumptions):
-        if (not expr.is_square or
-                        ask(Q.invertible(expr), assumptions) is False):
+        if not expr.is_square or ask(Q.invertible(expr), assumptions) is False:
             return False
         if Q.unitary(expr) in conjuncts(assumptions):
             return True
@@ -263,6 +269,7 @@ class AskUnitaryHandler(CommonHandler):
     Identity = staticmethod(CommonHandler.AlwaysTrue)
 
     ZeroMatrix = staticmethod(CommonHandler.AlwaysFalse)
+
 
 class AskFullRankHandler(CommonHandler):
     """
@@ -298,6 +305,7 @@ class AskFullRankHandler(CommonHandler):
         if ask(Q.orthogonal(expr.parent), assumptions):
             return True
 
+
 class AskPositiveDefiniteHandler(CommonHandler):
     """
     Handler for key 'positive_definite'
@@ -306,14 +314,17 @@ class AskPositiveDefiniteHandler(CommonHandler):
     @staticmethod
     def MatMul(expr, assumptions):
         factor, mmul = expr.as_coeff_mmul()
-        if (all(ask(Q.positive_definite(arg), assumptions)
-                for arg in mmul.args) and factor > 0):
+        if (
+            all(ask(Q.positive_definite(arg), assumptions) for arg in mmul.args)
+            and factor > 0
+        ):
             return True
-        if (len(mmul.args) >= 2
-                and mmul.args[0] == mmul.args[-1].T
-                and ask(Q.fullrank(mmul.args[0]), assumptions)):
-            return ask(Q.positive_definite(
-                MatMul(*mmul.args[1:-1])), assumptions)
+        if (
+            len(mmul.args) >= 2
+            and mmul.args[0] == mmul.args[-1].T
+            and ask(Q.fullrank(mmul.args[0]), assumptions)
+        ):
+            return ask(Q.positive_definite(MatMul(*mmul.args[1:-1])), assumptions)
 
     @staticmethod
     def MatPow(expr, assumptions):
@@ -323,8 +334,7 @@ class AskPositiveDefiniteHandler(CommonHandler):
 
     @staticmethod
     def MatAdd(expr, assumptions):
-        if all(ask(Q.positive_definite(arg), assumptions)
-                for arg in expr.args):
+        if all(ask(Q.positive_definite(arg), assumptions) for arg in expr.args):
             return True
 
     @staticmethod
@@ -351,6 +361,7 @@ class AskPositiveDefiniteHandler(CommonHandler):
         else:
             return ask(Q.positive_definite(expr.parent), assumptions)
 
+
 class AskUpperTriangularHandler(CommonHandler):
     """
     Handler for key 'upper_triangular'
@@ -375,8 +386,11 @@ class AskUpperTriangularHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.upper_triangular(base), assumptions)
         return None
 
@@ -385,7 +399,7 @@ class AskUpperTriangularHandler(CommonHandler):
         if Q.upper_triangular(expr) in conjuncts(assumptions):
             return True
 
-    Identity, ZeroMatrix = [staticmethod(CommonHandler.AlwaysTrue)]*2
+    Identity, ZeroMatrix = [staticmethod(CommonHandler.AlwaysTrue)] * 2
 
     @staticmethod
     def Transpose(expr, assumptions):
@@ -403,6 +417,7 @@ class AskUpperTriangularHandler(CommonHandler):
             return ask(Q.upper_triangular(expr.parent), assumptions)
 
     Factorization = staticmethod(partial(_Factorization, Q.upper_triangular))
+
 
 class AskLowerTriangularHandler(CommonHandler):
     """
@@ -428,8 +443,11 @@ class AskLowerTriangularHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.lower_triangular(base), assumptions)
         return None
 
@@ -438,7 +456,7 @@ class AskLowerTriangularHandler(CommonHandler):
         if Q.lower_triangular(expr) in conjuncts(assumptions):
             return True
 
-    Identity, ZeroMatrix = [staticmethod(CommonHandler.AlwaysTrue)]*2
+    Identity, ZeroMatrix = [staticmethod(CommonHandler.AlwaysTrue)] * 2
 
     @staticmethod
     def Transpose(expr, assumptions):
@@ -456,6 +474,7 @@ class AskLowerTriangularHandler(CommonHandler):
             return ask(Q.lower_triangular(expr.parent), assumptions)
 
     Factorization = staticmethod(partial(_Factorization, Q.lower_triangular))
+
 
 class AskDiagonalHandler(CommonHandler):
     """
@@ -482,8 +501,11 @@ class AskDiagonalHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.diagonal(base), assumptions)
         return None
 
@@ -539,16 +561,22 @@ def BM_elements(predicate, expr, assumptions):
     """ Block Matrix elements """
     return all(ask(predicate(b), assumptions) for b in expr.blocks)
 
+
 def MS_elements(predicate, expr, assumptions):
     """ Matrix Slice elements """
     return ask(predicate(expr.parent), assumptions)
 
+
 def MatMul_elements(matrix_predicate, scalar_predicate, expr, assumptions):
     d = sift(expr.args, lambda x: isinstance(x, MatrixExpr))
     factors, matrices = d[False], d[True]
-    return fuzzy_and([
-        test_closed_group(Basic(*factors), assumptions, scalar_predicate),
-        test_closed_group(Basic(*matrices), assumptions, matrix_predicate)])
+    return fuzzy_and(
+        [
+            test_closed_group(Basic(*factors), assumptions, scalar_predicate),
+            test_closed_group(Basic(*matrices), assumptions, matrix_predicate),
+        ]
+    )
+
 
 class AskIntegerElementsHandler(CommonHandler):
     @staticmethod
@@ -566,14 +594,14 @@ class AskIntegerElementsHandler(CommonHandler):
             return ask(Q.integer_elements(base), assumptions)
         return None
 
-    HadamardProduct, Determinant, Trace, Transpose = [MatAdd]*4
+    HadamardProduct, Determinant, Trace, Transpose = [MatAdd] * 4
 
-    ZeroMatrix, Identity = [staticmethod(CommonHandler.AlwaysTrue)]*2
+    ZeroMatrix, Identity = [staticmethod(CommonHandler.AlwaysTrue)] * 2
 
-    MatMul = staticmethod(partial(MatMul_elements, Q.integer_elements,
-                                                   Q.integer))
+    MatMul = staticmethod(partial(MatMul_elements, Q.integer_elements, Q.integer))
     MatrixSlice = staticmethod(partial(MS_elements, Q.integer_elements))
     BlockMatrix = staticmethod(partial(BM_elements, Q.integer_elements))
+
 
 class AskRealElementsHandler(CommonHandler):
     @staticmethod
@@ -588,13 +616,15 @@ class AskRealElementsHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.real_elements(base), assumptions)
         return None
 
-    HadamardProduct, Determinant, Trace, Transpose, \
-            Factorization = [MatAdd]*5
+    HadamardProduct, Determinant, Trace, Transpose, Factorization = [MatAdd] * 5
 
     MatMul = staticmethod(partial(MatMul_elements, Q.real_elements, Q.real))
     MatrixSlice = staticmethod(partial(MS_elements, Q.real_elements))
@@ -614,16 +644,19 @@ class AskComplexElementsHandler(CommonHandler):
         if not int_exp:
             return None
         non_negative = ask(~Q.negative(exp), assumptions)
-        if (non_negative or non_negative == False
-                            and ask(Q.invertible(base), assumptions)):
+        if (
+            non_negative
+            or non_negative == False
+            and ask(Q.invertible(base), assumptions)
+        ):
             return ask(Q.complex_elements(base), assumptions)
         return None
 
-    HadamardProduct, Determinant, Trace, Transpose, Inverse, \
-         Factorization = [MatAdd]*6
+    HadamardProduct, Determinant, Trace, Transpose, Inverse, Factorization = [
+        MatAdd
+    ] * 6
 
-    MatMul = staticmethod(partial(MatMul_elements, Q.complex_elements,
-                                                   Q.complex))
+    MatMul = staticmethod(partial(MatMul_elements, Q.complex_elements, Q.complex))
     MatrixSlice = staticmethod(partial(MS_elements, Q.complex_elements))
     BlockMatrix = staticmethod(partial(BM_elements, Q.complex_elements))
 

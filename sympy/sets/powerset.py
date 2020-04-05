@@ -71,14 +71,15 @@ class PowerSet(Set):
 
     .. [2] https://en.wikipedia.org/wiki/Axiom_of_power_set
     """
+
     def __new__(cls, arg, evaluate=None):
         if evaluate is None:
-            evaluate=global_parameters.evaluate
+            evaluate = global_parameters.evaluate
 
         arg = _sympify(arg)
 
         if not isinstance(arg, Set):
-            raise ValueError('{} must be a set.'.format(arg))
+            raise ValueError("{} must be a set.".format(arg))
 
         return super(PowerSet, cls).__new__(cls, arg)
 
@@ -92,7 +93,7 @@ class PowerSet(Set):
             return arg.powerset()
         return None
 
-    @_sympifyit('other', NotImplemented)
+    @_sympifyit("other", NotImplemented)
     def _contains(self, other):
         if not isinstance(other, Set):
             return None
@@ -108,6 +109,7 @@ class PowerSet(Set):
 
     def __iter__(self):
         from .sets import FiniteSet
+
         found = [S.EmptySet]
         yield S.EmptySet
 

@@ -17,12 +17,11 @@ def as_Basic(expr):
     or raise a TypeError; this is just a wrapper to _sympify,
     raising a TypeError instead of a SympifyError."""
     from sympy.utilities.misc import func_name
+
     try:
         return _sympify(expr)
     except SympifyError:
-        raise TypeError(
-            'Argument must be a Basic object, not `%s`' % func_name(
-            expr))
+        raise TypeError("Argument must be a Basic object, not `%s`" % func_name(expr))
 
 
 class Basic(metaclass=ManagedProperties):
@@ -55,10 +54,8 @@ class Basic(metaclass=ManagedProperties):
     (x,)
 
     """
-    __slots__ = ('_mhash',              # hash value
-                 '_args',               # arguments
-                 '_assumptions'
-                )
+
+    __slots__ = ("_mhash", "_args", "_assumptions")  # hash value  # arguments
 
     # To be overridden with True in the appropriate subclasses
     is_number = False
@@ -217,6 +214,7 @@ class Basic(metaclass=ManagedProperties):
     @staticmethod
     def _compare_pretty(a, b):
         from sympy.series.order import Order
+
         if isinstance(a, Order) and not isinstance(b, Order):
             return 1
         if not isinstance(a, Order) and isinstance(b, Order):
@@ -228,11 +226,12 @@ class Basic(metaclass=ManagedProperties):
             return (l > r) - (l < r)
         else:
             from sympy.core.symbol import Wild
+
             p1, p2, p3 = Wild("p1"), Wild("p2"), Wild("p3")
-            r_a = a.match(p1 * p2**p3)
+            r_a = a.match(p1 * p2 ** p3)
             if r_a and p3 in r_a:
                 a3 = r_a[p3]
-                r_b = b.match(p1 * p2**p3)
+                r_b = b.match(p1 * p2 ** p3)
                 if r_b and p3 in r_b:
                     b3 = r_b[p3]
                     c = Basic.compare(a3, b3)
@@ -406,10 +405,12 @@ class Basic(metaclass=ManagedProperties):
         Return the expression as a string.
         """
         from sympy.printing import sstr
+
         return sstr(self, order=None)
 
     def __str__(self):
         from sympy.printing import sstr
+
         return sstr(self, order=None)
 
     # We don't define _repr_png_ here because it would add a large amount of
@@ -426,7 +427,8 @@ class Basic(metaclass=ManagedProperties):
         SymPy objects, like lists and dictionaries of expressions.
         """
         from sympy.printing.latex import latex
-        s = latex(self, mode='plain')
+
+        s = latex(self, mode="plain")
         return "$\\displaystyle %s$" % s
 
     _repr_latex_orig = _repr_latex_
@@ -501,8 +503,7 @@ class Basic(metaclass=ManagedProperties):
 
         """
         if types:
-            types = tuple(
-                [t if isinstance(t, type) else type(t) for t in types])
+            types = tuple([t if isinstance(t, type) else type(t) for t in types])
         nodes = preorder_traversal(self)
         if types:
             result = {node for node in nodes if isinstance(node, types)}
@@ -561,6 +562,7 @@ class Basic(metaclass=ManagedProperties):
         >>> Lambda(x, x + 1) == Lambda(y, y + 1)
         True
         """
+
         def can(x):
             d = {i: i.as_dummy() for i in x.bound_symbols}
             # mask free that shadow bound
@@ -571,9 +573,8 @@ class Basic(metaclass=ManagedProperties):
             # undo masking
             x = x.xreplace(dict((v, k) for k, v in d.items()))
             return x
-        return self.replace(
-            lambda x: hasattr(x, 'bound_symbols'),
-            lambda x: can(x))
+
+        return self.replace(lambda x: hasattr(x, "bound_symbols"), lambda x: can(x))
 
     @property
     def canonical_variables(self):
@@ -591,9 +592,10 @@ class Basic(metaclass=ManagedProperties):
         """
         from sympy.core.symbol import Symbol
         from sympy.utilities.iterables import numbered_symbols
-        if not hasattr(self, 'bound_symbols'):
+
+        if not hasattr(self, "bound_symbols"):
             return {}
-        dums = numbered_symbols('_')
+        dums = numbered_symbols("_")
         reps = {}
         v = self.bound_symbols
         # this free will include bound symbols that are not part of
@@ -628,25 +630,26 @@ class Basic(metaclass=ManagedProperties):
     def _recursive_call(expr_to_call, on_args):
         """Helper for rcall method."""
         from sympy import Symbol
+
         def the_call_method_is_overridden(expr):
             for cls in getmro(type(expr)):
-                if '__call__' in cls.__dict__:
+                if "__call__" in cls.__dict__:
                     return cls != Basic
 
         if callable(expr_to_call) and the_call_method_is_overridden(expr_to_call):
             if isinstance(expr_to_call, Symbol):  # XXX When you call a Symbol it is
-                return expr_to_call               # transformed into an UndefFunction
+                return expr_to_call  # transformed into an UndefFunction
             else:
                 return expr_to_call(*on_args)
         elif expr_to_call.args:
-            args = [Basic._recursive_call(
-                sub, on_args) for sub in expr_to_call.args]
+            args = [Basic._recursive_call(sub, on_args) for sub in expr_to_call.args]
             return type(expr_to_call)(*args)
         else:
             return expr_to_call
 
     def is_hypergeometric(self, k):
         from sympy.simplify import hypersimp
+
         return hypersimp(self, k) is not None
 
     @property
@@ -683,8 +686,7 @@ class Basic(metaclass=ManagedProperties):
             return False
         # don't re-eval numbers that are already evaluated since
         # this will create spurious precision
-        n, i = [p.evalf(2) if not p.is_Number else p
-            for p in self.as_real_imag()]
+        n, i = [p.evalf(2) if not p.is_Number else p for p in self.as_real_imag()]
         if not (i.is_Number and n.is_Number):
             return False
         if i:
@@ -901,10 +903,15 @@ class Basic(metaclass=ManagedProperties):
                 sequence = sequence.items()
             elif not iterable(sequence):
                 from sympy.utilities.misc import filldedent
-                raise ValueError(filldedent("""
+
+                raise ValueError(
+                    filldedent(
+                        """
                    When a single argument is passed to subs
                    it should be a dictionary of old: new pairs or an iterable
-                   of (old, new) tuples."""))
+                   of (old, new) tuples."""
+                    )
+                )
         elif len(args) == 2:
             sequence = [args]
         else:
@@ -916,8 +923,7 @@ class Basic(metaclass=ManagedProperties):
                 # when old is a string we prefer Symbol
                 s = Symbol(s[0]), s[1]
             try:
-                s = [sympify(_, strict=not isinstance(_, str))
-                     for _ in s]
+                s = [sympify(_, strict=not isinstance(_, str)) for _ in s]
             except SympifyError:
                 # if it can't be sympified, skip it
                 sequence[i] = None
@@ -928,25 +934,28 @@ class Basic(metaclass=ManagedProperties):
 
         if unordered:
             sequence = dict(sequence)
-            atoms, nonatoms = sift(list(sequence),
-                lambda x: x.is_Atom, binary=True)
-            sequence = [(k, sequence[k]) for k in
-                list(reversed(list(ordered(nonatoms)))) + list(ordered(atoms))]
+            atoms, nonatoms = sift(list(sequence), lambda x: x.is_Atom, binary=True)
+            sequence = [
+                (k, sequence[k])
+                for k in list(reversed(list(ordered(nonatoms)))) + list(ordered(atoms))
+            ]
 
-        if kwargs.pop('simultaneous', False):  # XXX should this be the default for dict subs?
+        if kwargs.pop(
+            "simultaneous", False
+        ):  # XXX should this be the default for dict subs?
             reps = {}
             rv = self
-            kwargs['hack2'] = True
-            m = Dummy('subs_m')
+            kwargs["hack2"] = True
+            m = Dummy("subs_m")
             for old, new in sequence:
                 com = new.is_commutative
                 if com is None:
                     com = True
-                d = Dummy('subs_d', commutative=com)
+                d = Dummy("subs_d", commutative=com)
                 # using d*m so Subs will be used on dummy variables
                 # in things like Derivative(f(x, y), x) in which x
                 # is both free and bound
-                rv = rv._subs(old, d*m, **kwargs)
+                rv = rv._subs(old, d * m, **kwargs)
                 if not isinstance(rv, Basic):
                     break
                 reps[d] = new
@@ -1039,7 +1048,7 @@ class Basic(metaclass=ManagedProperties):
             hit = False
             args = list(self.args)
             for i, arg in enumerate(args):
-                if not hasattr(arg, '_eval_subs'):
+                if not hasattr(arg, "_eval_subs"):
                     continue
                 arg = arg._subs(old, new, **hints)
                 if not _aresame(arg, args[i]):
@@ -1047,7 +1056,7 @@ class Basic(metaclass=ManagedProperties):
                     args[i] = arg
             if hit:
                 rv = self.func(*args)
-                hack2 = hints.get('hack2', False)
+                hack2 = hints.get("hack2", False)
                 if hack2 and self.is_Mul and not rv.is_Mul:  # 2-arg hack
                     coeff = S.One
                     nonnumber = []
@@ -1158,7 +1167,7 @@ class Basic(metaclass=ManagedProperties):
             args = []
             changed = False
             for a in self.args:
-                _xreplace = getattr(a, '_xreplace', None)
+                _xreplace = getattr(a, "_xreplace", None)
                 if _xreplace is not None:
                     a_xr = _xreplace(rule)
                     args.append(a_xr[0])
@@ -1222,16 +1231,18 @@ class Basic(metaclass=ManagedProperties):
     def _has(self, pattern):
         """Helper for .has()"""
         from sympy.core.function import UndefinedFunction, Function
+
         if isinstance(pattern, UndefinedFunction):
-            return any(f.func == pattern or f == pattern
-            for f in self.atoms(Function, UndefinedFunction))
+            return any(
+                f.func == pattern or f == pattern
+                for f in self.atoms(Function, UndefinedFunction)
+            )
 
         pattern = sympify(pattern)
         if isinstance(pattern, BasicMeta):
-            return any(isinstance(arg, pattern)
-            for arg in preorder_traversal(self))
+            return any(isinstance(arg, pattern) for arg in preorder_traversal(self))
 
-        _has_matcher = getattr(pattern, '_has_matcher', None)
+        _has_matcher = getattr(pattern, "_has_matcher", None)
         if _has_matcher is not None:
             match = _has_matcher()
             return any(match(arg) for arg in preorder_traversal(self))
@@ -1424,17 +1435,18 @@ class Basic(metaclass=ManagedProperties):
                 _value = lambda expr, result: value(*expr.args)
             else:
                 raise TypeError(
-                    "given a type, replace() expects another "
-                    "type or a callable")
+                    "given a type, replace() expects another " "type or a callable"
+                )
         elif isinstance(query, Basic):
             _query = lambda expr: expr.match(query)
             if exact is None:
-                exact = (len(query.atoms(Wild)) > 1)
+                exact = len(query.atoms(Wild)) > 1
 
             if isinstance(value, Basic):
                 if exact:
-                    _value = lambda expr, result: (value.subs(result)
-                        if all(result.values()) else expr)
+                    _value = lambda expr, result: (
+                        value.subs(result) if all(result.values()) else expr
+                    )
                 else:
                     _value = lambda expr, result: value.subs(result)
             elif callable(value):
@@ -1443,16 +1455,20 @@ class Basic(metaclass=ManagedProperties):
                 # if ``exact`` is True, only accept match if there are no null
                 # values amongst those matched.
                 if exact:
-                    _value = lambda expr, result: (value(**
-                        {str(k)[:-1]: v for k, v in result.items()})
-                        if all(val for val in result.values()) else expr)
+                    _value = lambda expr, result: (
+                        value(**{str(k)[:-1]: v for k, v in result.items()})
+                        if all(val for val in result.values())
+                        else expr
+                    )
                 else:
-                    _value = lambda expr, result: value(**
-                        {str(k)[:-1]: v for k, v in result.items()})
+                    _value = lambda expr, result: value(
+                        **{str(k)[:-1]: v for k, v in result.items()}
+                    )
             else:
                 raise TypeError(
                     "given an expression, replace() expects "
-                    "another expression or a callable")
+                    "another expression or a callable"
+                )
         elif callable(query):
             _query = query
 
@@ -1460,12 +1476,13 @@ class Basic(metaclass=ManagedProperties):
                 _value = lambda expr, result: value(expr)
             else:
                 raise TypeError(
-                    "given a callable, replace() expects "
-                    "another callable")
+                    "given a callable, replace() expects " "another callable"
+                )
         else:
             raise TypeError(
                 "first argument to replace() must be a "
-                "type, an expression or a callable")
+                "type, an expression or a callable"
+            )
 
         mapping = {}  # changes that took place
         mask = []  # the dummies that were used as change placeholders
@@ -1482,10 +1499,10 @@ class Basic(metaclass=ManagedProperties):
                         # cannot be represented as a Dummy in the expression
                         # tree, e.g. an ExprConditionPair in Piecewise
                         # cannot be represented with a Dummy
-                        com = getattr(new, 'is_commutative', True)
+                        com = getattr(new, "is_commutative", True)
                         if com is None:
                             com = True
-                        d = Dummy('rec_replace', commutative=com)
+                        d = Dummy("rec_replace", commutative=com)
                         mask.append((d, new))
                         expr = d
                     else:
@@ -1513,8 +1530,7 @@ class Basic(metaclass=ManagedProperties):
                 # restore subexpressions in mapping
                 for o, n in mask:
                     r = {o: n}
-                    mapping = {k.xreplace(r): v.xreplace(r)
-                        for k, v in mapping.items()}
+                    mapping = {k.xreplace(r): v.xreplace(r) for k, v in mapping.items()}
             return rv, mapping
 
     def find(self, query, group=False):
@@ -1621,6 +1637,7 @@ class Basic(metaclass=ManagedProperties):
     def count_ops(self, visual=None):
         """wrapper for count_ops that returns the operation count."""
         from sympy import count_ops
+
         return count_ops(self, visual)
 
     def doit(self, **hints):
@@ -1642,9 +1659,11 @@ class Basic(metaclass=ManagedProperties):
         2*Integral(x, x)
 
         """
-        if hints.get('deep', True):
-            terms = [term.doit(**hints) if isinstance(term, Basic) else term
-                                         for term in self.args]
+        if hints.get("deep", True):
+            terms = [
+                term.doit(**hints) if isinstance(term, Basic) else term
+                for term in self.args
+            ]
             return self.func(*terms)
         else:
             return self
@@ -1652,6 +1671,7 @@ class Basic(metaclass=ManagedProperties):
     def simplify(self, **kwargs):
         """See the simplify function in sympy.simplify"""
         from sympy.simplify import simplify
+
         return simplify(self, **kwargs)
 
     def _eval_rewrite(self, pattern, rule, **hints):
@@ -1660,10 +1680,11 @@ class Basic(metaclass=ManagedProperties):
                 return getattr(self, rule)()
             return self
 
-        if hints.get('deep', True):
-            args = [a._eval_rewrite(pattern, rule, **hints)
-                        if isinstance(a, Basic) else a
-                        for a in self.args]
+        if hints.get("deep", True):
+            args = [
+                a._eval_rewrite(pattern, rule, **hints) if isinstance(a, Basic) else a
+                for a in self.args
+            ]
         else:
             args = self.args
 
@@ -1673,7 +1694,7 @@ class Basic(metaclass=ManagedProperties):
                 if rewritten is not None:
                     return rewritten
 
-        return self.func(*args) if hints.get('evaluate', True) else self
+        return self.func(*args) if hints.get("evaluate", True) else self
 
     def _accept_eval_derivative(self, s):
         # This method needs to be overridden by array-like objects
@@ -1698,6 +1719,7 @@ class Basic(metaclass=ManagedProperties):
         # method should be overridden if the object has a closed form for its
         # symbolic n-th derivative.
         from sympy import Integer
+
         if isinstance(n, (int, Integer)):
             obj = self
             for i in range(n):
@@ -1754,7 +1776,7 @@ class Basic(metaclass=ManagedProperties):
         else:
             pattern = args[:-1]
             if isinstance(args[-1], str):
-                rule = '_eval_rewrite_as_' + args[-1]
+                rule = "_eval_rewrite_as_" + args[-1]
             else:
                 # rewrite arg is usually a class but can also be a
                 # singleton (e.g. GoldenRatio) so we check
@@ -1762,7 +1784,7 @@ class Basic(metaclass=ManagedProperties):
                 clsname = getattr(args[-1], "__name__", None)
                 if clsname is None:
                     clsname = args[-1].__class__.__name__
-                rule = '_eval_rewrite_as_' + clsname
+                rule = "_eval_rewrite_as_" + clsname
 
             if not pattern:
                 return self._eval_rewrite(None, rule, **hints)
@@ -1799,7 +1821,9 @@ class Basic(metaclass=ManagedProperties):
                     if cls in Basic._constructor_postprocessor_mapping
                 )
                 for k, v in chain.from_iterable(postprocessor_mappings):
-                    postprocessors[k].extend([j for j in v if j not in postprocessors[k]])
+                    postprocessors[k].extend(
+                        [j for j in v if j not in postprocessors[k]]
+                    )
             except TypeError:
                 pass
 
@@ -1851,8 +1875,10 @@ class Atom(Basic):
         # on Atoms -- they cannot be rebuilt as atom.func(*atom._sorted_args)
         # since there are no args. So the calling routine should be checking
         # to see that this property is not called for Atoms.
-        raise AttributeError('Atoms have no args. It might be necessary'
-        ' to make a check for Atoms in the calling code.')
+        raise AttributeError(
+            "Atoms have no args. It might be necessary"
+            " to make a check for Atoms in the calling code."
+        )
 
 
 def _aresame(a, b):
@@ -1881,12 +1907,14 @@ def _aresame(a, b):
     """
     from .numbers import Number
     from .function import AppliedUndef, UndefinedFunction as UndefFunc
+
     if isinstance(a, Number) and isinstance(b, Number):
         return a == b and a.__class__ == b.__class__
     for i, j in zip_longest(preorder_traversal(a), preorder_traversal(b)):
         if i != j or type(i) != type(j):
-            if ((isinstance(i, UndefFunc) and isinstance(j, UndefFunc)) or
-                (isinstance(i, AppliedUndef) and isinstance(j, AppliedUndef))):
+            if (isinstance(i, UndefFunc) and isinstance(j, UndefFunc)) or (
+                isinstance(i, AppliedUndef) and isinstance(j, AppliedUndef)
+            ):
                 if i.class_key() != j.class_key():
                     return False
             else:
@@ -1916,6 +1944,7 @@ def _atomic(e, recursive=False):
 
     """
     from sympy import Derivative, Function, Symbol
+
     pot = preorder_traversal(e)
     seen = set()
     if isinstance(e, Basic):
@@ -1985,6 +2014,7 @@ class preorder_traversal(Iterator):
     [z*(x + y), z, x + y, x, y]
 
     """
+
     def __init__(self, node, keys=None):
         self._skip_flag = False
         self._pt = self._preorder_traversal(node, keys)
@@ -1995,7 +2025,7 @@ class preorder_traversal(Iterator):
             self._skip_flag = False
             return
         if isinstance(node, Basic):
-            if not keys and hasattr(node, '_argset'):
+            if not keys and hasattr(node, "_argset"):
                 # LatticeOp keeps args as a set. We should use this if we
                 # don't care about the order, to prevent unnecessary sorting.
                 args = node._argset

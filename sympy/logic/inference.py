@@ -79,7 +79,7 @@ def satisfiable(expr, algorithm=None, all_models=False):
 
     """
     if algorithm is None or algorithm == "pycosat":
-        pycosat = import_module('pycosat')
+        pycosat = import_module("pycosat")
         if pycosat is not None:
             algorithm = "pycosat"
         else:
@@ -91,12 +91,15 @@ def satisfiable(expr, algorithm=None, all_models=False):
 
     if algorithm == "dpll":
         from sympy.logic.algorithms.dpll import dpll_satisfiable
+
         return dpll_satisfiable(expr)
     elif algorithm == "dpll2":
         from sympy.logic.algorithms.dpll2 import dpll_satisfiable
+
         return dpll_satisfiable(expr, all_models)
     elif algorithm == "pycosat":
         from sympy.logic.algorithms.pycosat_wrapper import pycosat_satisfiable
+
         return pycosat_satisfiable(expr, all_models)
     raise NotImplementedError
 
@@ -167,6 +170,7 @@ def pl_true(expr, model={}, deep=False):
 
     from sympy.core.symbol import Symbol
     from sympy.logic.boolalg import BooleanFunction
+
     boolean = (True, False)
 
     def _validate(expr):
@@ -228,6 +232,7 @@ def entails(expr, formula_set={}):
 
 class KB(object):
     """Base class for all knowledge bases"""
+
     def __init__(self, sentence=None):
         self.clauses_ = set()
         if sentence:

@@ -17,14 +17,15 @@
 
 from sympy.external import import_module
 
-sage = import_module('sage.all', import_kwargs={'fromlist': ['all']})
+sage = import_module("sage.all", import_kwargs={"fromlist": ["all"]})
 if not sage:
-    #bin/test will not execute any tests now
+    # bin/test will not execute any tests now
     disabled = True
 
 import sympy
 
 from sympy.testing.pytest import XFAIL
+
 
 def is_trivially_equal(lhs, rhs):
     """
@@ -35,6 +36,7 @@ def is_trivially_equal(lhs, rhs):
     the time of testing.
     """
     assert (lhs - rhs).is_trivial_zero()
+
 
 def check_expression(expr, var_symbols, only_from_sympy=False):
     """
@@ -126,8 +128,9 @@ def test_oo():
     assert sage.oo == sage.SR(sympy.oo).pyobject()
     assert sympy.sympify(-sage.oo) == -sympy.oo
     assert -sage.oo == sage.SR(-sympy.oo).pyobject()
-    #assert sympy.sympify(sage.UnsignedInfinityRing.gen()) == sympy.zoo
-    #assert sage.UnsignedInfinityRing.gen() == sage.SR(sympy.zoo)
+    # assert sympy.sympify(sage.UnsignedInfinityRing.gen()) == sympy.zoo
+    # assert sage.UnsignedInfinityRing.gen() == sage.SR(sympy.zoo)
+
 
 def test_NaN():
     assert sympy.sympify(sage.NaN) == sympy.nan
@@ -192,23 +195,30 @@ def test_functions():
     check_expression("hyper((n,m),(m,n),x)", "n, m, x")
     check_expression("uppergamma(y, x)", "x, y")
 
+
 def test_issue_4023():
     sage.var("a x")
     log = sage.log
-    i = sympy.integrate(log(x)/a, (x, a, a + 1)) # noqa:F821
+    i = sympy.integrate(log(x) / a, (x, a, a + 1))  # noqa:F821
     i2 = sympy.simplify(i)
     s = sage.SR(i2)
-    is_trivially_equal(s, -log(a) + log(a + 1) + log(a + 1)/a - 1/a) # noqa:F821
+    is_trivially_equal(s, -log(a) + log(a + 1) + log(a + 1) / a - 1 / a)  # noqa:F821
+
 
 def test_integral():
-    #test Sympy-->Sage
+    # test Sympy-->Sage
     check_expression("Integral(x, (x,))", "x", only_from_sympy=True)
     check_expression("Integral(x, (x, 0, 1))", "x", only_from_sympy=True)
     check_expression("Integral(x*y, (x,), (y, ))", "x,y", only_from_sympy=True)
     check_expression("Integral(x*y, (x,), (y, 0, 1))", "x,y", only_from_sympy=True)
     check_expression("Integral(x*y, (x, 0, 1), (y,))", "x,y", only_from_sympy=True)
     check_expression("Integral(x*y, (x, 0, 1), (y, 0, 1))", "x,y", only_from_sympy=True)
-    check_expression("Integral(x*y*z, (x, 0, 1), (y, 0, 1), (z, 0, 1))", "x,y,z", only_from_sympy=True)
+    check_expression(
+        "Integral(x*y*z, (x, 0, 1), (y, 0, 1), (z, 0, 1))",
+        "x,y,z",
+        only_from_sympy=True,
+    )
+
 
 @XFAIL
 def test_integral_failing():
@@ -217,27 +227,31 @@ def test_integral_failing():
     check_expression("Integral(x*y, (x,), (y, 0))", "x,y", only_from_sympy=True)
     check_expression("Integral(x*y, (x, 0, 1), (y, 0))", "x,y", only_from_sympy=True)
 
+
 def test_undefined_function():
-    f = sympy.Function('f')
-    sf = sage.function('f')
-    x = sympy.symbols('x')
-    sx = sage.var('x')
+    f = sympy.Function("f")
+    sf = sage.function("f")
+    x = sympy.symbols("x")
+    sx = sage.var("x")
     is_trivially_equal(sf(sx), f(x)._sage_())
     assert f(x) == sympy.sympify(sf(sx))
     assert sf == f._sage_()
-    #assert bool(f == sympy.sympify(sf))
+    # assert bool(f == sympy.sympify(sf))
+
 
 def test_abstract_function():
     from sage.symbolic.expression import Expression
-    x,y = sympy.symbols('x y')
-    f = sympy.Function('f')
-    expr =  f(x,y)
+
+    x, y = sympy.symbols("x y")
+    f = sympy.Function("f")
+    expr = f(x, y)
     sexpr = expr._sage_()
-    assert isinstance(sexpr,Expression), "converted expression %r is not sage expression" % sexpr
+    assert isinstance(sexpr, Expression), (
+        "converted expression %r is not sage expression" % sexpr
+    )
     # This test has to be uncommented in the future: it depends on the sage ticket #22802 (https://trac.sagemath.org/ticket/22802)
     # invexpr = sexpr._sympy_()
     # assert invexpr == expr, "inverse coversion %r is not correct " % invexpr
-
 
 
 # This string contains Sage doctests, that execute all the functions above.

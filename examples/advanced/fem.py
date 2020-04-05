@@ -15,17 +15,27 @@ $ python fem.py
 
 """
 
-from sympy import symbols, Symbol, factorial, Rational, zeros, eye, \
-    integrate, diff, pprint, reduced
+from sympy import (
+    symbols,
+    Symbol,
+    factorial,
+    Rational,
+    zeros,
+    eye,
+    integrate,
+    diff,
+    pprint,
+    reduced,
+)
 
-x, y, z = symbols('x,y,z')
+x, y, z = symbols("x,y,z")
 
 
 class ReferenceSimplex:
     def __init__(self, nsd):
         self.nsd = nsd
         if nsd <= 3:
-            coords = symbols('x,y,z')[:nsd]
+            coords = symbols("x,y,z")[:nsd]
         else:
             coords = [Symbol("x_%d" % d) for d in range(nsd)]
         self.coords = coords
@@ -59,8 +69,8 @@ def bernstein_space(order, nsd):
             for o2 in range(0, order + 1):
                 if o1 + o2 == order:
                     aij = Symbol("a_%d_%d" % (o1, o2))
-                    sum += aij*binomial(order, o1)*pow(b1, o1)*pow(b2, o2)
-                    basis.append(binomial(order, o1)*pow(b1, o1)*pow(b2, o2))
+                    sum += aij * binomial(order, o1) * pow(b1, o1) * pow(b2, o2)
+                    basis.append(binomial(order, o1) * pow(b1, o1) * pow(b2, o2))
                     coeff.append(aij)
 
     if nsd == 2:
@@ -70,9 +80,11 @@ def bernstein_space(order, nsd):
                 for o3 in range(0, order + 1):
                     if o1 + o2 + o3 == order:
                         aij = Symbol("a_%d_%d_%d" % (o1, o2, o3))
-                        fac = factorial(order) / (factorial(o1)*factorial(o2)*factorial(o3))
-                        sum += aij*fac*pow(b1, o1)*pow(b2, o2)*pow(b3, o3)
-                        basis.append(fac*pow(b1, o1)*pow(b2, o2)*pow(b3, o3))
+                        fac = factorial(order) / (
+                            factorial(o1) * factorial(o2) * factorial(o3)
+                        )
+                        sum += aij * fac * pow(b1, o1) * pow(b2, o2) * pow(b3, o3)
+                        basis.append(fac * pow(b1, o1) * pow(b2, o2) * pow(b3, o3))
                         coeff.append(aij)
 
     if nsd == 3:
@@ -83,9 +95,27 @@ def bernstein_space(order, nsd):
                     for o4 in range(0, order + 1):
                         if o1 + o2 + o3 + o4 == order:
                             aij = Symbol("a_%d_%d_%d_%d" % (o1, o2, o3, o4))
-                            fac = factorial(order)/(factorial(o1)*factorial(o2)*factorial(o3)*factorial(o4))
-                            sum += aij*fac*pow(b1, o1)*pow(b2, o2)*pow(b3, o3)*pow(b4, o4)
-                            basis.append(fac*pow(b1, o1)*pow(b2, o2)*pow(b3, o3)*pow(b4, o4))
+                            fac = factorial(order) / (
+                                factorial(o1)
+                                * factorial(o2)
+                                * factorial(o3)
+                                * factorial(o4)
+                            )
+                            sum += (
+                                aij
+                                * fac
+                                * pow(b1, o1)
+                                * pow(b2, o2)
+                                * pow(b3, o3)
+                                * pow(b4, o4)
+                            )
+                            basis.append(
+                                fac
+                                * pow(b1, o1)
+                                * pow(b2, o2)
+                                * pow(b3, o3)
+                                * pow(b4, o4)
+                            )
                             coeff.append(aij)
 
     return sum, coeff, basis
@@ -97,25 +127,25 @@ def create_point_set(order, nsd):
 
     if nsd == 1:
         for i in range(0, order + 1):
-            x = i*h
+            x = i * h
             if x <= 1:
                 set.append((x, y))
 
     if nsd == 2:
         for i in range(0, order + 1):
-            x = i*h
+            x = i * h
             for j in range(0, order + 1):
-                y = j*h
+                y = j * h
                 if x + y <= 1:
                     set.append((x, y))
 
     if nsd == 3:
         for i in range(0, order + 1):
-            x = i*h
+            x = i * h
             for j in range(0, order + 1):
-                y = j*h
+                y = j * h
                 for k in range(0, order + 1):
-                    z = j*h
+                    z = j * h
                     if x + y + z <= 1:
                         set.append((x, y, z))
 
@@ -165,7 +195,7 @@ class Lagrange:
 
         b = eye(len(equations))
 
-        xx = Ainv*b
+        xx = Ainv * b
 
         for i in range(0, len(equations)):
             Ni = pol
@@ -186,11 +216,11 @@ def main():
     for i in range(0, fe.nbf()):
         ui = Symbol("u_%d" % i)
         us.append(ui)
-        u += ui*fe.N[i]
+        u += ui * fe.N[i]
 
     J = zeros(fe.nbf())
     for i in range(0, fe.nbf()):
-        Fi = u*fe.N[i]
+        Fi = u * fe.N[i]
         print(Fi)
         for j in range(0, fe.nbf()):
             uj = us[j]

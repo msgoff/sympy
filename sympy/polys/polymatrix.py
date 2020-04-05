@@ -40,6 +40,7 @@ class MutablePolyDenseMatrix(MutableDenseMatrix):
     Matrix([[Poly(x**2, x, domain='QQ')]])
 
     """
+
     _class_priority = 10
     # we don't want to sympify the elements of PolyMatrix
     _sympify = staticmethod(lambda x: x)
@@ -47,7 +48,7 @@ class MutablePolyDenseMatrix(MutableDenseMatrix):
     def __init__(self, *args, **kwargs):
         # if any non-Poly element is given as input then
         # 'ring' defaults 'EX'
-        ring = kwargs.get('ring', EX)
+        ring = kwargs.get("ring", EX)
         if all(isinstance(p, Poly) for p in self._mat) and self._mat:
             domain = tuple([p.domain[p.gens] for p in self._mat])
             ring = domain[0]
@@ -58,31 +59,37 @@ class MutablePolyDenseMatrix(MutableDenseMatrix):
     def _eval_matrix_mul(self, other):
         self_cols = self.cols
         other_rows, other_cols = other.rows, other.cols
-        other_len = other_rows*other_cols
+        other_len = other_rows * other_cols
         new_mat_rows = self.rows
         new_mat_cols = other.cols
 
-        new_mat = [0]*new_mat_rows*new_mat_cols
+        new_mat = [0] * new_mat_rows * new_mat_cols
 
         if self.cols != 0 and other.rows != 0:
             mat = self._mat
             other_mat = other._mat
             for i in range(len(new_mat)):
                 row, col = i // new_mat_cols, i % new_mat_cols
-                row_indices = range(self_cols*row, self_cols*(row+1))
+                row_indices = range(self_cols * row, self_cols * (row + 1))
                 col_indices = range(col, other_len, other_cols)
-                vec = (mat[a]*other_mat[b] for a,b in zip(row_indices, col_indices))
+                vec = (mat[a] * other_mat[b] for a, b in zip(row_indices, col_indices))
                 # 'Add' shouldn't be used here
                 new_mat[i] = sum(vec)
 
         return self.__class__(new_mat_rows, new_mat_cols, new_mat, copy=False)
 
     def _eval_scalar_mul(self, other):
-        mat = [Poly(a.as_expr()*other, *a.gens) if isinstance(a, Poly) else a*other for a in self._mat]
+        mat = [
+            Poly(a.as_expr() * other, *a.gens) if isinstance(a, Poly) else a * other
+            for a in self._mat
+        ]
         return self.__class__(self.rows, self.cols, mat, copy=False)
 
     def _eval_scalar_rmul(self, other):
-        mat = [Poly(other*a.as_expr(), *a.gens) if isinstance(a, Poly) else other*a for a in self._mat]
+        mat = [
+            Poly(other * a.as_expr(), *a.gens) if isinstance(a, Poly) else other * a
+            for a in self._mat
+        ]
         return self.__class__(self.rows, self.cols, mat, copy=False)
 
 

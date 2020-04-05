@@ -48,6 +48,7 @@ class DiagonalMatrix(MatrixExpr):
     True
 
     """
+
     arg = property(lambda self: self.args[0])
 
     shape = property(lambda self: self.arg.shape)
@@ -81,7 +82,7 @@ class DiagonalMatrix(MatrixExpr):
             return self.arg[i, i]
         elif eq is S.false:
             return S.Zero
-        return self.arg[i, j]*KroneckerDelta(i, j)
+        return self.arg[i, j] * KroneckerDelta(i, j)
 
 
 class DiagonalOf(MatrixExpr):
@@ -128,7 +129,9 @@ class DiagonalOf(MatrixExpr):
     True
 
     """
+
     arg = property(lambda self: self.args[0])
+
     @property
     def shape(self):
         r, c = self.arg.shape
@@ -159,6 +162,7 @@ class DiagMatrix(MatrixExpr):
     """
     Turn a vector into a diagonal matrix.
     """
+
     def __new__(cls, vector):
         vector = _sympify(vector)
         obj = MatrixExpr.__new__(cls, vector)
@@ -190,12 +194,14 @@ class DiagMatrix(MatrixExpr):
 
     def as_explicit(self):
         from sympy import diag
+
         return diag(*list(self._vector.as_explicit()))
 
     def doit(self, **hints):
         from sympy.assumptions import ask, Q
         from sympy import Transpose, Mul, MatMul
         from sympy import MatrixBase, eye
+
         vector = self._vector
         # This accounts for shape (1, 1) and identity matrices, among others:
         if ask(Q.diagonal(vector)):
@@ -209,7 +215,10 @@ class DiagMatrix(MatrixExpr):
             matrices = [arg for arg in vector.args if arg.is_Matrix]
             scalars = [arg for arg in vector.args if arg not in matrices]
             if scalars:
-                return Mul.fromiter(scalars)*DiagMatrix(MatMul.fromiter(matrices).doit()).doit()
+                return (
+                    Mul.fromiter(scalars)
+                    * DiagMatrix(MatMul.fromiter(matrices).doit()).doit()
+                )
         if isinstance(vector, Transpose):
             vector = vector.arg
         return DiagMatrix(vector)

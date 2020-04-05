@@ -45,14 +45,16 @@ class TreeNode(object):
         return res
 
     def print_tree(self, level=0, max_depth=None):
-        print("  "*level + str(self))
+        print("  " * level + str(self))
         if max_depth is not None and max_depth <= level:
             return
         for child in self.children():
             child.print_tree(level + 1, max_depth=max_depth)
 
     def print_generic(self, n=50, method="time"):
-        slowest = sorted((getattr(node, method)(), node.name()) for node in self.linearize())[-n:]
+        slowest = sorted(
+            (getattr(node, method)(), node.name()) for node in self.linearize()
+        )[-n:]
         for time, name in slowest[::-1]:
             print("%s %s" % (time, name))
 
@@ -91,7 +93,7 @@ class TreeNode(object):
 
 
 pp = TreeNode(None)  # We have to use pp since there is a sage function
-                     #called parent that gets imported
+# called parent that gets imported
 seen = set()
 
 
@@ -107,15 +109,16 @@ def new_import(name, globals={}, locals={}, fromlist=[]):
     old_pp = pp
     pp = node
 
-    #Do the actual import
+    # Do the actual import
     t1 = timeit.default_timer()
     module = old_import(name, globals, locals, fromlist)
     t2 = timeit.default_timer()
-    node.set_time(int(1000000*(t2 - t1)))
+    node.set_time(int(1000000 * (t2 - t1)))
 
     pp = old_pp
 
     return module
+
 
 old_import = __builtins__.__import__
 

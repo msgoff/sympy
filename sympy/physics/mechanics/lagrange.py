@@ -2,13 +2,12 @@ from __future__ import print_function, division
 
 from sympy.core.backend import diff, zeros, Matrix, eye, sympify
 from sympy.physics.vector import dynamicsymbols, ReferenceFrame
-from sympy.physics.mechanics.functions import (find_dynamicsymbols, msubs,
-                                               _f_list_parser)
+from sympy.physics.mechanics.functions import find_dynamicsymbols, msubs, _f_list_parser
 from sympy.physics.mechanics.linearize import Linearizer
 from sympy.utilities import default_sort_key
 from sympy.utilities.iterables import iterable
 
-__all__ = ['LagrangesMethod']
+__all__ = ["LagrangesMethod"]
 
 
 class LagrangesMethod(object):
@@ -100,8 +99,16 @@ class LagrangesMethod(object):
     Please refer to the docstrings on each method for more details.
     """
 
-    def __init__(self, Lagrangian, qs, forcelist=None, bodies=None, frame=None,
-                 hol_coneqs=None, nonhol_coneqs=None):
+    def __init__(
+        self,
+        Lagrangian,
+        qs,
+        forcelist=None,
+        bodies=None,
+        frame=None,
+        hol_coneqs=None,
+        nonhol_coneqs=None,
+    ):
         """Supply the following for the initialization of LagrangesMethod
 
         Lagrangian : Sympifyable
@@ -132,18 +139,18 @@ class LagrangesMethod(object):
 
         self._L = Matrix([sympify(Lagrangian)])
         self.eom = None
-        self._m_cd = Matrix()           # Mass Matrix of differentiated coneqs
-        self._m_d = Matrix()            # Mass Matrix of dynamic equations
-        self._f_cd = Matrix()           # Forcing part of the diff coneqs
-        self._f_d = Matrix()            # Forcing part of the dynamic equations
-        self.lam_coeffs = Matrix()      # The coeffecients of the multipliers
+        self._m_cd = Matrix()  # Mass Matrix of differentiated coneqs
+        self._m_d = Matrix()  # Mass Matrix of dynamic equations
+        self._f_cd = Matrix()  # Forcing part of the diff coneqs
+        self._f_d = Matrix()  # Forcing part of the dynamic equations
+        self.lam_coeffs = Matrix()  # The coeffecients of the multipliers
 
         forcelist = forcelist if forcelist else []
         if not iterable(forcelist):
-            raise TypeError('Force pairs must be supplied in an iterable.')
+            raise TypeError("Force pairs must be supplied in an iterable.")
         self._forcelist = forcelist
         if frame and not isinstance(frame, ReferenceFrame):
-            raise TypeError('frame must be a valid ReferenceFrame')
+            raise TypeError("frame must be a valid ReferenceFrame")
         self._bodies = bodies
         self.inertial = frame
 
@@ -156,7 +163,7 @@ class LagrangesMethod(object):
 
         # Creating the qs, qdots and qdoubledots
         if not iterable(qs):
-            raise TypeError('Generalized coordinates must be an iterable')
+            raise TypeError("Generalized coordinates must be an iterable")
         self._q = Matrix(qs)
         self._qdots = self.q.diff(dynamicsymbols._t)
         self._qdoubledots = self._qdots.diff(dynamicsymbols._t)
@@ -164,8 +171,7 @@ class LagrangesMethod(object):
         mat_build = lambda x: Matrix(x) if x else Matrix()
         hol_coneqs = mat_build(hol_coneqs)
         nonhol_coneqs = mat_build(nonhol_coneqs)
-        self.coneqs = Matrix([hol_coneqs.diff(dynamicsymbols._t),
-                nonhol_coneqs])
+        self.coneqs = Matrix([hol_coneqs.diff(dynamicsymbols._t), nonhol_coneqs])
         self._hol_coneqs = hol_coneqs
 
     def form_lagranges_equations(self):
@@ -194,7 +200,7 @@ class LagrangesMethod(object):
             coneqs = self.coneqs
             m = len(coneqs)
             # Creating the multipliers
-            self.lam_vec = Matrix(dynamicsymbols('lam1:' + str(m + 1)))
+            self.lam_vec = Matrix(dynamicsymbols("lam1:" + str(m + 1)))
             self.lam_coeffs = -coneqs.jacobian(qds)
             self._term3 = self.lam_coeffs.T * self.lam_vec
             # Extracting the coeffecients of the qdds from the diff coneqs
@@ -239,7 +245,7 @@ class LagrangesMethod(object):
         """
 
         if self.eom is None:
-            raise ValueError('Need to compute the equations of motion first')
+            raise ValueError("Need to compute the equations of motion first")
         if self.coneqs:
             return (self._m_d).row_join(self.lam_coeffs.T)
         else:
@@ -250,7 +256,7 @@ class LagrangesMethod(object):
         """Augments the coefficients of qdots to the mass_matrix."""
 
         if self.eom is None:
-            raise ValueError('Need to compute the equations of motion first')
+            raise ValueError("Need to compute the equations of motion first")
         n = len(self.q)
         m = len(self.coneqs)
         row1 = eye(n).row_join(zeros(n, n + m))
@@ -266,7 +272,7 @@ class LagrangesMethod(object):
         """Returns the forcing vector from 'lagranges_equations' method."""
 
         if self.eom is None:
-            raise ValueError('Need to compute the equations of motion first')
+            raise ValueError("Need to compute the equations of motion first")
         return self._f_d
 
     @property
@@ -274,7 +280,7 @@ class LagrangesMethod(object):
         """Augments qdots to the forcing vector above."""
 
         if self.eom is None:
-            raise ValueError('Need to compute the equations of motion first')
+            raise ValueError("Need to compute the equations of motion first")
         if self.coneqs:
             return self._qdots.col_join(self.forcing).col_join(self._f_cd)
         else:
@@ -321,14 +327,22 @@ class LagrangesMethod(object):
         # Check that there are an appropriate number of independent and
         # dependent coordinates
         if len(q_d) != len(f_c) or len(u_d) != len(f_v):
-            raise ValueError(("Must supply {:} dependent coordinates, and " +
-                    "{:} dependent speeds").format(len(f_c), len(f_v)))
+            raise ValueError(
+                (
+                    "Must supply {:} dependent coordinates, and "
+                    + "{:} dependent speeds"
+                ).format(len(f_c), len(f_v))
+            )
         if set(Matrix([q_i, q_d])) != set(q):
-            raise ValueError("Must partition q into q_ind and q_dep, with " +
-                    "no extra or missing symbols.")
+            raise ValueError(
+                "Must partition q into q_ind and q_dep, with "
+                + "no extra or missing symbols."
+            )
         if set(Matrix([u_i, u_d])) != set(u):
-            raise ValueError("Must partition qd into qd_ind and qd_dep, " +
-                    "with no extra or missing symbols.")
+            raise ValueError(
+                "Must partition qd into qd_ind and qd_dep, "
+                + "with no extra or missing symbols."
+            )
 
         # Find all other dynamic symbols, forming the forcing vector r.
         # Sort r to make it canonical.
@@ -338,14 +352,16 @@ class LagrangesMethod(object):
         # Check for any derivatives of variables in r that are also found in r.
         for i in r:
             if diff(i, dynamicsymbols._t) in r:
-                raise ValueError('Cannot have derivatives of specified \
-                                 quantities when linearizing forcing terms.')
+                raise ValueError(
+                    "Cannot have derivatives of specified \
+                                 quantities when linearizing forcing terms."
+                )
 
-        return Linearizer(f_0, f_1, f_2, f_3, f_4, f_c, f_v, f_a, q, u, q_i,
-                q_d, u_i, u_d, r, lams)
+        return Linearizer(
+            f_0, f_1, f_2, f_3, f_4, f_c, f_v, f_a, q, u, q_i, q_d, u_i, u_d, r, lams
+        )
 
-    def linearize(self, q_ind=None, qd_ind=None, q_dep=None, qd_dep=None,
-            **kwargs):
+    def linearize(self, q_ind=None, qd_ind=None, q_dep=None, qd_dep=None, **kwargs):
         """Linearize the equations of motion about a symbolic operating point.
 
         If kwarg A_and_B is False (default), returns M, A, B, r for the
@@ -374,7 +390,7 @@ class LagrangesMethod(object):
         result = linearizer.linearize(**kwargs)
         return result + (linearizer.r,)
 
-    def solve_multipliers(self, op_point=None, sol_type='dict'):
+    def solve_multipliers(self, op_point=None, sol_type="dict"):
         """Solves for the values of the lagrange multipliers symbolically at
         the specified operating point
 
@@ -405,20 +421,23 @@ class LagrangesMethod(object):
         elif op_point is None:
             op_point_dict = {}
         else:
-            raise TypeError("op_point must be either a dictionary or an "
-                            "iterable of dictionaries.")
+            raise TypeError(
+                "op_point must be either a dictionary or an "
+                "iterable of dictionaries."
+            )
         # Compose the system to be solved
-        mass_matrix = self.mass_matrix.col_join((-self.lam_coeffs.row_join(
-                zeros(k, k))))
+        mass_matrix = self.mass_matrix.col_join(
+            (-self.lam_coeffs.row_join(zeros(k, k)))
+        )
         force_matrix = self.forcing.col_join(self._f_cd)
         # Sub in the operating point
         mass_matrix = msubs(mass_matrix, op_point_dict)
         force_matrix = msubs(force_matrix, op_point_dict)
         # Solve for the multipliers
         sol_list = mass_matrix.LUsolve(-force_matrix)[-k:]
-        if sol_type == 'dict':
+        if sol_type == "dict":
             return dict(zip(self.lam_vec, sol_list))
-        elif sol_type == 'Matrix':
+        elif sol_type == "Matrix":
             return Matrix(sol_list)
         else:
             raise ValueError("Unknown sol_type {:}.".format(sol_type))
@@ -438,8 +457,10 @@ class LagrangesMethod(object):
         if inv_method is None:
             self._rhs = self.mass_matrix_full.LUsolve(self.forcing_full)
         else:
-            self._rhs = (self.mass_matrix_full.inv(inv_method,
-                         try_block_diag=True) * self.forcing_full)
+            self._rhs = (
+                self.mass_matrix_full.inv(inv_method, try_block_diag=True)
+                * self.forcing_full
+            )
         return self._rhs
 
     @property

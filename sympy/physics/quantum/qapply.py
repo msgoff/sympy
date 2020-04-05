@@ -16,14 +16,13 @@ from sympy.physics.quantum.operator import OuterProduct, Operator
 from sympy.physics.quantum.state import State, KetBase, BraBase, Wavefunction
 from sympy.physics.quantum.tensorproduct import TensorProduct
 
-__all__ = [
-    'qapply'
-]
+__all__ = ["qapply"]
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Main code
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 
 def qapply(e, **options):
     """Apply operators to states in a quantum expression.
@@ -69,7 +68,7 @@ def qapply(e, **options):
     """
     from sympy.physics.quantum.density import Density
 
-    dagger = options.get('dagger', False)
+    dagger = options.get("dagger", False)
 
     if e == 0:
         return S.Zero
@@ -96,8 +95,7 @@ def qapply(e, **options):
 
     # For a Density operator call qapply on its state
     elif isinstance(e, Density):
-        new_args = [(qapply(state, **options), prob) for (state,
-                     prob) in e.args]
+        new_args = [(qapply(state, **options), prob) for (state, prob) in e.args]
         return Density(*new_args)
 
     # For a raw TensorProduct, call qapply on its args.
@@ -106,7 +104,7 @@ def qapply(e, **options):
 
     # For a Pow, call qapply on its base.
     elif isinstance(e, Pow):
-        return qapply(e.base, **options)**e.exp
+        return qapply(e.base, **options) ** e.exp
 
     # We have a Mul where there might be actual operators to apply to kets.
     elif isinstance(e, Mul):
@@ -114,9 +112,9 @@ def qapply(e, **options):
         c_mul = Mul(*c_part)
         nc_mul = Mul(*nc_part)
         if isinstance(nc_mul, Mul):
-            result = c_mul*qapply_Mul(nc_mul, **options)
+            result = c_mul * qapply_Mul(nc_mul, **options)
         else:
-            result = c_mul*qapply(nc_mul, **options)
+            result = c_mul * qapply(nc_mul, **options)
         if result == e and dagger:
             return Dagger(qapply_Mul(Dagger(e), **options))
         else:
@@ -130,7 +128,7 @@ def qapply(e, **options):
 
 def qapply_Mul(e, **options):
 
-    ip_doit = options.get('ip_doit', True)
+    ip_doit = options.get("ip_doit", True)
 
     args = list(e.args)
 
@@ -141,14 +139,15 @@ def qapply_Mul(e, **options):
     lhs = args.pop()
 
     # Make sure we have two non-commutative objects before proceeding.
-    if (sympify(rhs).is_commutative and not isinstance(rhs, Wavefunction)) or \
-            (sympify(lhs).is_commutative and not isinstance(lhs, Wavefunction)):
+    if (sympify(rhs).is_commutative and not isinstance(rhs, Wavefunction)) or (
+        sympify(lhs).is_commutative and not isinstance(lhs, Wavefunction)
+    ):
         return e
 
     # For a Pow with an integer exponent, apply one of them and reduce the
     # exponent by one.
     if isinstance(lhs, Pow) and lhs.exp.is_Integer:
-        args.append(lhs.base**(lhs.exp - 1))
+        args.append(lhs.base ** (lhs.exp - 1))
         lhs = lhs.base
 
     # Pull OuterProduct apart
@@ -161,19 +160,38 @@ def qapply_Mul(e, **options):
         comm = lhs.doit()
         if isinstance(comm, Add):
             return qapply(
-                e.func(*(args + [comm.args[0], rhs])) +
-                e.func(*(args + [comm.args[1], rhs])),
+                e.func(*(args + [comm.args[0], rhs]))
+                + e.func(*(args + [comm.args[1], rhs])),
                 **options
             )
         else:
-            return qapply(e.func(*args)*comm*rhs, **options)
+            return qapply(e.func(*args) * comm * rhs, **options)
 
     # Apply tensor products of operators to states
-    if isinstance(lhs, TensorProduct) and all([isinstance(arg, (Operator, State, Mul, Pow)) or arg == 1 for arg in lhs.args]) and \
-            isinstance(rhs, TensorProduct) and all([isinstance(arg, (Operator, State, Mul, Pow)) or arg == 1 for arg in rhs.args]) and \
-            len(lhs.args) == len(rhs.args):
-        result = TensorProduct(*[qapply(lhs.args[n]*rhs.args[n], **options) for n in range(len(lhs.args))]).expand(tensorproduct=True)
-        return qapply_Mul(e.func(*args), **options)*result
+    if (
+        isinstance(lhs, TensorProduct)
+        and all(
+            [
+                isinstance(arg, (Operator, State, Mul, Pow)) or arg == 1
+                for arg in lhs.args
+            ]
+        )
+        and isinstance(rhs, TensorProduct)
+        and all(
+            [
+                isinstance(arg, (Operator, State, Mul, Pow)) or arg == 1
+                for arg in rhs.args
+            ]
+        )
+        and len(lhs.args) == len(rhs.args)
+    ):
+        result = TensorProduct(
+            *[
+                qapply(lhs.args[n] * rhs.args[n], **options)
+                for n in range(len(lhs.args))
+            ]
+        ).expand(tensorproduct=True)
+        return qapply_Mul(e.func(*args), **options) * result
 
     # Now try to actually apply the operator and build an inner product.
     try:
@@ -197,8 +215,8 @@ def qapply_Mul(e, **options):
             # We had two args to begin with so args=[].
             return e
         else:
-            return qapply_Mul(e.func(*(args + [lhs])), **options)*rhs
+            return qapply_Mul(e.func(*(args + [lhs])), **options) * rhs
     elif isinstance(result, InnerProduct):
-        return result*qapply_Mul(e.func(*args), **options)
+        return result * qapply_Mul(e.func(*args), **options)
     else:  # result is a scalar times a Mul, Add or TensorProduct
-        return qapply(e.func(*args)*result, **options)
+        return qapply(e.func(*args) * result, **options)

@@ -101,8 +101,8 @@ def __import__(name, globals=None, locals=None, fromlist=None):
 
     # If any of the following calls raises an exception,
     # there's a problem we can't handle -- let the caller handle it.
-    module_name = name.split('.')[-1]
-    module_path = os.path.join(EXAMPLE_DIR, *name.split('.')[:-1])
+    module_name = name.split(".")[-1]
+    module_path = os.path.join(EXAMPLE_DIR, *name.split(".")[:-1])
 
     fp, pathname, description = imp.find_module(module_name, [module_path])
 
@@ -134,6 +134,7 @@ def run_examples(windowed=False, quiet=False, summary=True):
 
     if quiet:
         from sympy.testing.runtests import PyTestReporter
+
         reporter = PyTestReporter()
         reporter.write("Testing Examples\n")
         reporter.write("-" * reporter.terminal_width)
@@ -224,18 +225,39 @@ def show_summary(successes, failures, reporter=None):
 def main(*args, **kws):
     """Main script runner"""
     parser = optparse.OptionParser()
-    parser.add_option('-w', '--windowed', action="store_true", dest="windowed",
-        help="also run examples requiring windowed environment")
-    parser.add_option('-q', '--quiet', action="store_true", dest="quiet",
+    parser.add_option(
+        "-w",
+        "--windowed",
+        action="store_true",
+        dest="windowed",
+        help="also run examples requiring windowed environment",
+    )
+    parser.add_option(
+        "-q",
+        "--quiet",
+        action="store_true",
+        dest="quiet",
         help="runs examples in 'quiet mode' suppressing example output and \
-              showing simple status messages.")
-    parser.add_option('--no-summary', action="store_true", dest="no_summary",
-        help="hides the summary at the end of testing the examples")
+              showing simple status messages.",
+    )
+    parser.add_option(
+        "--no-summary",
+        action="store_true",
+        dest="no_summary",
+        help="hides the summary at the end of testing the examples",
+    )
 
     (options, _) = parser.parse_args()
 
-    return 0 if run_examples(windowed=options.windowed, quiet=options.quiet,
-                             summary=not options.no_summary) else 1
+    return (
+        0
+        if run_examples(
+            windowed=options.windowed,
+            quiet=options.quiet,
+            summary=not options.no_summary,
+        )
+        else 1
+    )
 
 
 if __name__ == "__main__":

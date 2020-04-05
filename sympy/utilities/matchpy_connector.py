@@ -1,15 +1,37 @@
 from sympy.external import import_module
-from sympy.functions import (log, sin, cos, tan, cot, csc, sec, erf, gamma, uppergamma)
-from sympy.functions.elementary.hyperbolic import acosh, asinh, atanh, acoth, acsch, asech, cosh, sinh, tanh, coth, sech, csch
+from sympy.functions import log, sin, cos, tan, cot, csc, sec, erf, gamma, uppergamma
+from sympy.functions.elementary.hyperbolic import (
+    acosh,
+    asinh,
+    atanh,
+    acoth,
+    acsch,
+    asech,
+    cosh,
+    sinh,
+    tanh,
+    coth,
+    sech,
+    csch,
+)
 from sympy.functions.elementary.trigonometric import atan, acsc, asin, acot, acos, asec
 from sympy.functions.special.error_functions import fresnelc, fresnels, erfc, erfi, Ei
-from sympy import (Basic, Mul, Add, Pow, Integral, exp)
+from sympy import Basic, Mul, Add, Pow, Integral, exp
 
 matchpy = import_module("matchpy")
 
 if matchpy:
-    from matchpy import Operation, CommutativeOperation, AssociativeOperation, OneIdentityOperation
-    from matchpy.expressions.functions import op_iter, create_operation_expression, op_len
+    from matchpy import (
+        Operation,
+        CommutativeOperation,
+        AssociativeOperation,
+        OneIdentityOperation,
+    )
+    from matchpy.expressions.functions import (
+        op_iter,
+        create_operation_expression,
+        op_len,
+    )
 
     Operation.register(Integral)
     Operation.register(Pow)
@@ -78,4 +100,4 @@ if matchpy:
 
     @create_operation_expression.register(Basic)
     def sympy_op_factory(old_operation, new_operands, variable_name=True):
-         return type(old_operation)(*new_operands)
+        return type(old_operation)(*new_operands)

@@ -2,8 +2,7 @@
 
 from __future__ import print_function, division
 
-from sympy.core import (S, Add, Mul, Pow, Eq, Expr,
-    expand_mul, expand_multinomial)
+from sympy.core import S, Add, Mul, Pow, Eq, Expr, expand_mul, expand_multinomial
 from sympy.core.exprtools import decompose_power, decompose_power_rat
 from sympy.polys.polyerrors import PolynomialError, GeneratorsError
 from sympy.polys.polyoptions import build_options
@@ -12,13 +11,32 @@ from sympy.polys.polyoptions import build_options
 import re
 
 _gens_order = {
-    'a': 301, 'b': 302, 'c': 303, 'd': 304,
-    'e': 305, 'f': 306, 'g': 307, 'h': 308,
-    'i': 309, 'j': 310, 'k': 311, 'l': 312,
-    'm': 313, 'n': 314, 'o': 315, 'p': 216,
-    'q': 217, 'r': 218, 's': 219, 't': 220,
-    'u': 221, 'v': 222, 'w': 223, 'x': 124,
-    'y': 125, 'z': 126,
+    "a": 301,
+    "b": 302,
+    "c": 303,
+    "d": 304,
+    "e": 305,
+    "f": 306,
+    "g": 307,
+    "h": 308,
+    "i": 309,
+    "j": 310,
+    "k": 311,
+    "l": 312,
+    "m": 313,
+    "n": 314,
+    "o": 315,
+    "p": 216,
+    "q": 217,
+    "r": 218,
+    "s": 219,
+    "t": 220,
+    "u": 221,
+    "v": 222,
+    "w": 223,
+    "x": 124,
+    "y": 125,
+    "z": 126,
 }
 
 _max_order = 1000
@@ -88,7 +106,7 @@ def _sort_gens(gens, **args):
             index = 0
 
         try:
-            return ( gens_order[name], name, index)
+            return (gens_order[name], name, index)
         except KeyError:
             pass
 
@@ -129,12 +147,12 @@ def _unify_gens(f_gens, g_gens):
         i = f_gens.index(gen)
 
         gens.extend(f_gens[:i])
-        f_gens = f_gens[i + 1:]
+        f_gens = f_gens[i + 1 :]
 
         i = g_gens.index(gen)
 
         gens.extend(g_gens[:i])
-        g_gens = g_gens[i + 1:]
+        g_gens = g_gens[i + 1 :]
 
         gens.append(gen)
 
@@ -146,7 +164,7 @@ def _unify_gens(f_gens, g_gens):
 
 def _analyze_gens(gens):
     """Support for passing generators as `*gens` and `[gens]`. """
-    if len(gens) == 1 and hasattr(gens[0], '__iter__'):
+    if len(gens) == 1 and hasattr(gens[0], "__iter__"):
         return tuple(gens[0])
     else:
         return tuple(gens)
@@ -154,6 +172,7 @@ def _analyze_gens(gens):
 
 def _sort_factors(factors, **args):
     """Sort low-level factors in increasing 'complexity' order. """
+
     def order_if_multiple_key(factor):
         (f, n) = factor
         return (len(f), n, f)
@@ -161,13 +180,16 @@ def _sort_factors(factors, **args):
     def order_no_multiple_key(f):
         return (len(f), f)
 
-    if args.get('multiple', True):
+    if args.get("multiple", True):
         return sorted(factors, key=order_if_multiple_key)
     else:
         return sorted(factors, key=order_no_multiple_key)
 
+
 illegal = [S.NaN, S.Infinity, S.NegativeInfinity, S.ComplexInfinity]
 finf = [float(i) for i in illegal[1:3]]
+
+
 def _not_a_coeff(expr):
     """Do not treat NaN and infinities as valid polynomial coefficients. """
     if expr in illegal or expr in finf:
@@ -193,7 +215,7 @@ def _parallel_dict_from_expr_if_gens(exprs, opt):
             expr = expr.lhs - expr.rhs
 
         for term in Add.make_args(expr):
-            coeff, monom = [], [0]*k
+            coeff, monom = [], [0] * k
 
             for factor in Mul.make_args(term):
                 if not _not_a_coeff(factor) and factor.is_Number:
@@ -213,8 +235,10 @@ def _parallel_dict_from_expr_if_gens(exprs, opt):
                         if not factor.free_symbols.intersection(opt.gens):
                             coeff.append(factor)
                         else:
-                            raise PolynomialError("%s contains an element of "
-                                                  "the set of generators." % factor)
+                            raise PolynomialError(
+                                "%s contains an element of "
+                                "the set of generators." % factor
+                            )
 
             monom = tuple(monom)
 
@@ -231,15 +255,22 @@ def _parallel_dict_from_expr_if_gens(exprs, opt):
 def _parallel_dict_from_expr_no_gens(exprs, opt):
     """Transform expressions into a multinomial form and figure out generators. """
     if opt.domain is not None:
+
         def _is_coeff(factor):
             return factor in opt.domain
+
     elif opt.extension is True:
+
         def _is_coeff(factor):
             return factor.is_algebraic
+
     elif opt.greedy is not False:
+
         def _is_coeff(factor):
             return False
+
     else:
+
         def _is_coeff(factor):
             return factor.is_number
 
@@ -285,7 +316,7 @@ def _parallel_dict_from_expr_no_gens(exprs, opt):
         poly = {}
 
         for coeff, term in terms:
-            monom = [0]*k
+            monom = [0] * k
 
             for base, exp in term.items():
                 monom[indices[base]] = exp
@@ -323,17 +354,17 @@ def parallel_dict_from_expr(exprs, **args):
 def _parallel_dict_from_expr(exprs, opt):
     """Transform expressions into a multinomial form. """
     if opt.expand is not False:
-        exprs = [ expr.expand() for expr in exprs ]
+        exprs = [expr.expand() for expr in exprs]
 
     if any(expr.is_commutative is False for expr in exprs):
-        raise PolynomialError('non-commutative expressions are not supported')
+        raise PolynomialError("non-commutative expressions are not supported")
 
     if opt.gens:
         reps, gens = _parallel_dict_from_expr_if_gens(exprs, opt)
     else:
         reps, gens = _parallel_dict_from_expr_no_gens(exprs, opt)
 
-    return reps, opt.clone({'gens': gens})
+    return reps, opt.clone({"gens": gens})
 
 
 def dict_from_expr(expr, **args):
@@ -345,23 +376,32 @@ def dict_from_expr(expr, **args):
 def _dict_from_expr(expr, opt):
     """Transform an expression into a multinomial form. """
     if expr.is_commutative is False:
-        raise PolynomialError('non-commutative expressions are not supported')
+        raise PolynomialError("non-commutative expressions are not supported")
 
     def _is_expandable_pow(expr):
-        return (expr.is_Pow and expr.exp.is_positive and expr.exp.is_Integer
-                and expr.base.is_Add)
+        return (
+            expr.is_Pow
+            and expr.exp.is_positive
+            and expr.exp.is_Integer
+            and expr.base.is_Add
+        )
 
     if opt.expand is not False:
         if not isinstance(expr, (Expr, Eq)):
-            raise PolynomialError('expression must be of type Expr')
+            raise PolynomialError("expression must be of type Expr")
         expr = expr.expand()
         # TODO: Integrate this into expand() itself
-        while any(_is_expandable_pow(i) or i.is_Mul and
-            any(_is_expandable_pow(j) for j in i.args) for i in
-                Add.make_args(expr)):
+        while any(
+            _is_expandable_pow(i)
+            or i.is_Mul
+            and any(_is_expandable_pow(j) for j in i.args)
+            for i in Add.make_args(expr)
+        ):
 
             expr = expand_multinomial(expr)
-        while any(i.is_Mul and any(j.is_Add for j in i.args) for i in Add.make_args(expr)):
+        while any(
+            i.is_Mul and any(j.is_Add for j in i.args) for i in Add.make_args(expr)
+        ):
             expr = expand_mul(expr)
 
     if opt.gens:
@@ -369,7 +409,7 @@ def _dict_from_expr(expr, opt):
     else:
         rep, gens = _dict_from_expr_no_gens(expr, opt)
 
-    return rep, opt.clone({'gens': gens})
+    return rep, opt.clone({"gens": gens})
 
 
 def expr_from_dict(rep, *gens):
@@ -386,6 +426,7 @@ def expr_from_dict(rep, *gens):
 
     return Add(*result)
 
+
 parallel_dict_from_basic = parallel_dict_from_expr
 dict_from_basic = dict_from_expr
 basic_from_dict = expr_from_dict
@@ -398,7 +439,7 @@ def _dict_reorder(rep, gens, new_gens):
     monoms = rep.keys()
     coeffs = rep.values()
 
-    new_monoms = [ [] for _ in range(len(rep)) ]
+    new_monoms = [[] for _ in range(len(rep))]
     used_indices = set()
 
     for gen in new_gens:
@@ -485,5 +526,5 @@ class PicklableWithSlots(object):
         for name, value in d.items():
             try:
                 setattr(self, name, value)
-            except AttributeError:    # This is needed in cases like Rational :> Half
+            except AttributeError:  # This is needed in cases like Rational :> Half
                 pass

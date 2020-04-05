@@ -20,54 +20,55 @@ from sympy.printing.precedence import precedence, PRECEDENCE
 # dictionary mapping sympy function to (argument_conditions, Javascript_function).
 # Used in JavascriptCodePrinter._print_Function(self)
 known_functions = {
-    'Abs': 'Math.abs',
-    'acos': 'Math.acos',
-    'acosh': 'Math.acosh',
-    'asin': 'Math.asin',
-    'asinh': 'Math.asinh',
-    'atan': 'Math.atan',
-    'atan2': 'Math.atan2',
-    'atanh': 'Math.atanh',
-    'ceiling': 'Math.ceil',
-    'cos': 'Math.cos',
-    'cosh': 'Math.cosh',
-    'exp': 'Math.exp',
-    'floor': 'Math.floor',
-    'log': 'Math.log',
-    'Max': 'Math.max',
-    'Min': 'Math.min',
-    'sign': 'Math.sign',
-    'sin': 'Math.sin',
-    'sinh': 'Math.sinh',
-    'tan': 'Math.tan',
-    'tanh': 'Math.tanh',
+    "Abs": "Math.abs",
+    "acos": "Math.acos",
+    "acosh": "Math.acosh",
+    "asin": "Math.asin",
+    "asinh": "Math.asinh",
+    "atan": "Math.atan",
+    "atan2": "Math.atan2",
+    "atanh": "Math.atanh",
+    "ceiling": "Math.ceil",
+    "cos": "Math.cos",
+    "cosh": "Math.cosh",
+    "exp": "Math.exp",
+    "floor": "Math.floor",
+    "log": "Math.log",
+    "Max": "Math.max",
+    "Min": "Math.min",
+    "sign": "Math.sign",
+    "sin": "Math.sin",
+    "sinh": "Math.sinh",
+    "tan": "Math.tan",
+    "tanh": "Math.tanh",
 }
 
 
 class JavascriptCodePrinter(CodePrinter):
     """"A Printer to convert python expressions to strings of javascript code
     """
-    printmethod = '_javascript'
-    language = 'Javascript'
+
+    printmethod = "_javascript"
+    language = "Javascript"
 
     _default_settings = {
-        'order': None,
-        'full_prec': 'auto',
-        'precision': 17,
-        'user_functions': {},
-        'human': True,
-        'allow_unknown_functions': False,
-        'contract': True,
+        "order": None,
+        "full_prec": "auto",
+        "precision": 17,
+        "user_functions": {},
+        "human": True,
+        "allow_unknown_functions": False,
+        "contract": True,
     }  # type: Dict[str, Any]
 
     def __init__(self, settings={}):
         CodePrinter.__init__(self, settings)
         self.known_functions = dict(known_functions)
-        userfuncs = settings.get('user_functions', {})
+        userfuncs = settings.get("user_functions", {})
         self.known_functions.update(userfuncs)
 
     def _rate_index_position(self, p):
-        return p*5
+        return p * 5
 
     def _get_statement(self, codestring):
         return "%s;" % codestring
@@ -76,7 +77,7 @@ class JavascriptCodePrinter(CodePrinter):
         return "// {0}".format(text)
 
     def _declare_number_const(self, name, value):
-        return "var {0} = {1};".format(name, value.evalf(self._settings['precision']))
+        return "var {0} = {1};".format(name, value.evalf(self._settings["precision"]))
 
     def _format_code(self, lines):
         return self.indent_code(lines)
@@ -91,28 +92,31 @@ class JavascriptCodePrinter(CodePrinter):
         loopstart = "for (var %(varble)s=%(start)s; %(varble)s<%(end)s; %(varble)s++){"
         for i in indices:
             # Javascript arrays start at 0 and end at dimension-1
-            open_lines.append(loopstart % {
-                'varble': self._print(i.label),
-                'start': self._print(i.lower),
-                'end': self._print(i.upper + 1)})
+            open_lines.append(
+                loopstart
+                % {
+                    "varble": self._print(i.label),
+                    "start": self._print(i.lower),
+                    "end": self._print(i.upper + 1),
+                }
+            )
             close_lines.append("}")
         return open_lines, close_lines
 
     def _print_Pow(self, expr):
         PREC = precedence(expr)
         if expr.exp == -1:
-            return '1/%s' % (self.parenthesize(expr.base, PREC))
+            return "1/%s" % (self.parenthesize(expr.base, PREC))
         elif expr.exp == 0.5:
-            return 'Math.sqrt(%s)' % self._print(expr.base)
-        elif expr.exp == S.One/3:
-            return 'Math.cbrt(%s)' % self._print(expr.base)
+            return "Math.sqrt(%s)" % self._print(expr.base)
+        elif expr.exp == S.One / 3:
+            return "Math.cbrt(%s)" % self._print(expr.base)
         else:
-            return 'Math.pow(%s, %s)' % (self._print(expr.base),
-                                 self._print(expr.exp))
+            return "Math.pow(%s, %s)" % (self._print(expr.base), self._print(expr.exp))
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)
-        return '%d/%d' % (p, q)
+        return "%d/%d" % (p, q)
 
     def _print_Relational(self, expr):
         lhs_code = self._print(expr.lhs)
@@ -126,7 +130,7 @@ class JavascriptCodePrinter(CodePrinter):
         elem = S.Zero
         offset = S.One
         for i in reversed(range(expr.rank)):
-            elem += expr.indices[i]*offset
+            elem += expr.indices[i] * offset
             offset *= dims[i]
         return "%s[%s]" % (self._print(expr.base.label), self._print(elem))
 
@@ -137,23 +141,25 @@ class JavascriptCodePrinter(CodePrinter):
         return "Math.E"
 
     def _print_Pi(self, expr):
-        return 'Math.PI'
+        return "Math.PI"
 
     def _print_Infinity(self, expr):
-        return 'Number.POSITIVE_INFINITY'
+        return "Number.POSITIVE_INFINITY"
 
     def _print_NegativeInfinity(self, expr):
-        return 'Number.NEGATIVE_INFINITY'
+        return "Number.NEGATIVE_INFINITY"
 
     def _print_Piecewise(self, expr):
         if expr.args[-1].cond != True:
             # We need the last conditional to be a True, otherwise the resulting
             # function may not return a result.
-            raise ValueError("All Piecewise expressions must contain an "
-                             "(expr, True) statement to be used as a default "
-                             "condition. Without one, the generated "
-                             "expression may not evaluate to anything under "
-                             "some condition.")
+            raise ValueError(
+                "All Piecewise expressions must contain an "
+                "(expr, True) statement to be used as a default "
+                "condition. Without one, the generated "
+                "expression may not evaluate to anything under "
+                "some condition."
+            )
         lines = []
         if expr.has(Assignment):
             for i, (e, c) in enumerate(expr.args):
@@ -172,41 +178,43 @@ class JavascriptCodePrinter(CodePrinter):
             # operators. This has the downside that inline operators will
             # not work for statements that span multiple lines (Matrix or
             # Indexed expressions).
-            ecpairs = ["((%s) ? (\n%s\n)\n" % (self._print(c), self._print(e))
-                    for e, c in expr.args[:-1]]
+            ecpairs = [
+                "((%s) ? (\n%s\n)\n" % (self._print(c), self._print(e))
+                for e, c in expr.args[:-1]
+            ]
             last_line = ": (\n%s\n)" % self._print(expr.args[-1].expr)
-            return ": ".join(ecpairs) + last_line + " ".join([")"*len(ecpairs)])
+            return ": ".join(ecpairs) + last_line + " ".join([")" * len(ecpairs)])
 
     def _print_MatrixElement(self, expr):
-        return "{0}[{1}]".format(self.parenthesize(expr.parent,
-            PRECEDENCE["Atom"], strict=True),
-            expr.j + expr.i*expr.parent.shape[1])
+        return "{0}[{1}]".format(
+            self.parenthesize(expr.parent, PRECEDENCE["Atom"], strict=True),
+            expr.j + expr.i * expr.parent.shape[1],
+        )
 
     def indent_code(self, code):
         """Accepts a string of code or a list of code lines"""
 
         if isinstance(code, str):
             code_lines = self.indent_code(code.splitlines(True))
-            return ''.join(code_lines)
+            return "".join(code_lines)
 
         tab = "   "
-        inc_token = ('{', '(', '{\n', '(\n')
-        dec_token = ('}', ')')
+        inc_token = ("{", "(", "{\n", "(\n")
+        dec_token = ("}", ")")
 
-        code = [ line.lstrip(' \t') for line in code ]
+        code = [line.lstrip(" \t") for line in code]
 
-        increase = [ int(any(map(line.endswith, inc_token))) for line in code ]
-        decrease = [ int(any(map(line.startswith, dec_token)))
-                     for line in code ]
+        increase = [int(any(map(line.endswith, inc_token))) for line in code]
+        decrease = [int(any(map(line.startswith, dec_token))) for line in code]
 
         pretty = []
         level = 0
         for n, line in enumerate(code):
-            if line == '' or line == '\n':
+            if line == "" or line == "\n":
                 pretty.append(line)
                 continue
             level -= decrease[n]
-            pretty.append("%s%s" % (tab*level, line))
+            pretty.append("%s%s" % (tab * level, line))
             level += increase[n]
         return pretty
 

@@ -8,13 +8,13 @@ from sympy import sympify
 
 
 def mathematica(s, additional_translations=None):
-    '''Users can add their own translation dictionary
+    """Users can add their own translation dictionary
     # Example
     In [1]: mathematica('Log3[9]', {'Log3[x]':'log(x,3)'})
     Out[1]: 2
     In [2]: mathematica('F[7,5,3]', {'F[*x]':'Max(*x)*Min(*x)'})
     Out[2]: 21
-    variable-length argument needs '*' character '''
+    variable-length argument needs '*' character """
 
     parser = MathematicaParser(additional_translations)
     return sympify(parser.parse(s))
@@ -27,101 +27,121 @@ def _deco(cls):
 
 @_deco
 class MathematicaParser(object):
-    '''An instance of this class converts a string of a basic Mathematica
-    expression to SymPy style. Output is string type.'''
+    """An instance of this class converts a string of a basic Mathematica
+    expression to SymPy style. Output is string type."""
 
     # left: Mathematica, right: SymPy
     CORRESPONDENCES = {
-        'Sqrt[x]': 'sqrt(x)',
-        'Exp[x]': 'exp(x)',
-        'Log[x]': 'log(x)',
-        'Log[x,y]': 'log(y,x)',
-        'Log2[x]': 'log(x,2)',
-        'Log10[x]': 'log(x,10)',
-        'Mod[x,y]': 'Mod(x,y)',
-        'Max[*x]': 'Max(*x)',
-        'Min[*x]': 'Min(*x)',
+        "Sqrt[x]": "sqrt(x)",
+        "Exp[x]": "exp(x)",
+        "Log[x]": "log(x)",
+        "Log[x,y]": "log(y,x)",
+        "Log2[x]": "log(x,2)",
+        "Log10[x]": "log(x,10)",
+        "Mod[x,y]": "Mod(x,y)",
+        "Max[*x]": "Max(*x)",
+        "Min[*x]": "Min(*x)",
     }
 
     # trigonometric, e.t.c.
-    for arc, tri, h in product(('', 'Arc'), (
-            'Sin', 'Cos', 'Tan', 'Cot', 'Sec', 'Csc'), ('', 'h')):
-        fm = arc + tri + h + '[x]'
+    for arc, tri, h in product(
+        ("", "Arc"), ("Sin", "Cos", "Tan", "Cot", "Sec", "Csc"), ("", "h")
+    ):
+        fm = arc + tri + h + "[x]"
         if arc:  # arc func
-            fs = 'a' + tri.lower() + h + '(x)'
-        else:    # non-arc func
-            fs = tri.lower() + h + '(x)'
+            fs = "a" + tri.lower() + h + "(x)"
+        else:  # non-arc func
+            fs = tri.lower() + h + "(x)"
         CORRESPONDENCES.update({fm: fs})
 
     REPLACEMENTS = {
-        ' ': '',
-        '^': '**',
-        '{': '[',
-        '}': ']',
+        " ": "",
+        "^": "**",
+        "{": "[",
+        "}": "]",
     }
 
     RULES = {
         # a single whitespace to '*'
-        'whitespace': (
-            re.compile(r'''
+        "whitespace": (
+            re.compile(
+                r"""
                 (?<=[a-zA-Z\d])     # a letter or a number
                 \                   # a whitespace
                 (?=[a-zA-Z\d])      # a letter or a number
-                ''', re.VERBOSE),
-            '*'),
-
+                """,
+                re.VERBOSE,
+            ),
+            "*",
+        ),
         # add omitted '*' character
-        'add*_1': (
-            re.compile(r'''
+        "add*_1": (
+            re.compile(
+                r"""
                 (?<=[])\d])         # ], ) or a number
                                     # ''
                 (?=[(a-zA-Z])       # ( or a single letter
-                ''', re.VERBOSE),
-            '*'),
-
+                """,
+                re.VERBOSE,
+            ),
+            "*",
+        ),
         # add omitted '*' character (variable letter preceding)
-        'add*_2': (
-            re.compile(r'''
+        "add*_2": (
+            re.compile(
+                r"""
                 (?<=[a-zA-Z])       # a letter
                 \(                  # ( as a character
                 (?=.)               # any characters
-                ''', re.VERBOSE),
-            '*('),
-
+                """,
+                re.VERBOSE,
+            ),
+            "*(",
+        ),
         # convert 'Pi' to 'pi'
-        'Pi': (
-            re.compile(r'''
+        "Pi": (
+            re.compile(
+                r"""
                 (?:
                 \A|(?<=[^a-zA-Z])
                 )
                 Pi                  # 'Pi' is 3.14159... in Mathematica
                 (?=[^a-zA-Z])
-                ''', re.VERBOSE),
-            'pi'),
+                """,
+                re.VERBOSE,
+            ),
+            "pi",
+        ),
     }
 
     # Mathematica function name pattern
-    FM_PATTERN = re.compile(r'''
+    FM_PATTERN = re.compile(
+        r"""
                 (?:
                 \A|(?<=[^a-zA-Z])   # at the top or a non-letter
                 )
                 [A-Z][a-zA-Z\d]*    # Function
                 (?=\[)              # [ as a character
-                ''', re.VERBOSE)
+                """,
+        re.VERBOSE,
+    )
 
     # list or matrix pattern (for future usage)
-    ARG_MTRX_PATTERN = re.compile(r'''
+    ARG_MTRX_PATTERN = re.compile(
+        r"""
                 \{.*\}
-                ''', re.VERBOSE)
+                """,
+        re.VERBOSE,
+    )
 
     # regex string for function argument pattern
-    ARGS_PATTERN_TEMPLATE = r'''
+    ARGS_PATTERN_TEMPLATE = r"""
                 (?:
                 \A|(?<=[^a-zA-Z])
                 )
                 {arguments}         # model argument like x, y,...
                 (?=[^a-zA-Z])
-                '''
+                """
 
     # will contain transformed CORRESPONDENCES dictionary
     TRANSLATIONS = {}  # type: Dict[Tuple[str, int], Dict[str, Any]]
@@ -150,7 +170,7 @@ class MathematicaParser(object):
         # check the latest added translations
         if self.__class__.cache_original != additional_translations:
             if not isinstance(additional_translations, dict):
-                raise ValueError('The argument must be dict type')
+                raise ValueError("The argument must be dict type")
 
             # get a transformed additional_translations dictionary
             d = self._compile_dictionary(additional_translations)
@@ -173,12 +193,12 @@ class MathematicaParser(object):
             cls._check_input(fs)
 
             # uncover '*' hiding behind a whitespace
-            fm = cls._apply_rules(fm, 'whitespace')
-            fs = cls._apply_rules(fs, 'whitespace')
+            fm = cls._apply_rules(fm, "whitespace")
+            fs = cls._apply_rules(fs, "whitespace")
 
             # remove whitespace(s)
-            fm = cls._replace(fm, ' ')
-            fs = cls._replace(fs, ' ')
+            fm = cls._replace(fm, " ")
+            fs = cls._replace(fs, " ")
 
             # search Mathematica function name
             m = cls.FM_PATTERN.search(fm)
@@ -200,18 +220,18 @@ class MathematicaParser(object):
                 raise ValueError(err)
 
             # check the last argument's 1st character
-            if args[-1][0] == '*':
-                key_arg = '*'
+            if args[-1][0] == "*":
+                key_arg = "*"
             else:
                 key_arg = len(args)
 
             key = (fm_name, key_arg)
 
             # convert '*x' to '\\*x' for regex
-            re_args = [x if x[0] != '*' else '\\' + x for x in args]
+            re_args = [x if x[0] != "*" else "\\" + x for x in args]
 
             # for regex. Example: (?:(x|y|z))
-            xyz = '(?:(' + '|'.join(re_args) + '))'
+            xyz = "(?:(" + "|".join(re_args) + "))"
 
             # string for regex compile
             patStr = cls.ARGS_PATTERN_TEMPLATE.format(arguments=xyz)
@@ -220,20 +240,20 @@ class MathematicaParser(object):
 
             # update dictionary
             d[key] = {}
-            d[key]['fs'] = fs  # SymPy function template
-            d[key]['args'] = args  # args are ['x', 'y'] for example
-            d[key]['pat'] = pat
+            d[key]["fs"] = fs  # SymPy function template
+            d[key]["args"] = args  # args are ['x', 'y'] for example
+            d[key]["pat"] = pat
 
         return d
 
     def _convert_function(self, s):
-        '''Parse Mathematica function to SymPy one'''
+        """Parse Mathematica function to SymPy one"""
 
         # compiled regex object
         pat = self.FM_PATTERN
 
-        scanned = ''                # converted string
-        cur = 0                     # position cursor
+        scanned = ""  # converted string
+        cur = 0  # position cursor
         while True:
             m = pat.search(s)
 
@@ -271,23 +291,23 @@ class MathematicaParser(object):
             key = (fm, len(args))
 
             # x, y,... model arguments
-            x_args = self.translations[key]['args']
+            x_args = self.translations[key]["args"]
 
             # make CORRESPONDENCES between model arguments and actual ones
             d = {k: v for k, v in zip(x_args, args)}
 
         # with variable-length argument
-        elif (fm, '*') in self.translations:
-            key = (fm, '*')
+        elif (fm, "*") in self.translations:
+            key = (fm, "*")
 
             # x, y,..*args (model arguments)
-            x_args = self.translations[key]['args']
+            x_args = self.translations[key]["args"]
 
             # make CORRESPONDENCES between model arguments and actual ones
             d = {}
             for i, x in enumerate(x_args):
-                if x[0] == '*':
-                    d[x] = ','.join(args[i:])
+                if x[0] == "*":
+                    d[x] = ",".join(args[i:])
                     break
                 d[x] = args[i]
 
@@ -297,12 +317,12 @@ class MathematicaParser(object):
             raise ValueError(err)
 
         # template string of converted function
-        template = self.translations[key]['fs']
+        template = self.translations[key]["fs"]
 
         # regex pattern for x_args
-        pat = self.translations[key]['pat']
+        pat = self.translations[key]["pat"]
 
-        scanned = ''
+        scanned = ""
         cur = 0
         while True:
             m = pat.search(template)
@@ -333,34 +353,34 @@ class MathematicaParser(object):
 
     @classmethod
     def _get_args(cls, m):
-        '''Get arguments of a Mathematica function'''
+        """Get arguments of a Mathematica function"""
 
-        s = m.string                # whole string
-        anc = m.end() + 1           # pointing the first letter of arguments
-        square, curly = [], []      # stack for brakets
+        s = m.string  # whole string
+        anc = m.end() + 1  # pointing the first letter of arguments
+        square, curly = [], []  # stack for brakets
         args = []
 
         # current cursor
         cur = anc
         for i, c in enumerate(s[anc:], anc):
             # extract one argument
-            if c == ',' and (not square) and (not curly):
-                args.append(s[cur:i])       # add an argument
-                cur = i + 1                 # move cursor
+            if c == "," and (not square) and (not curly):
+                args.append(s[cur:i])  # add an argument
+                cur = i + 1  # move cursor
 
             # handle list or matrix (for future usage)
-            if c == '{':
+            if c == "{":
                 curly.append(c)
-            elif c == '}':
+            elif c == "}":
                 curly.pop()
 
             # seek corresponding ']' with skipping irrevant ones
-            if c == '[':
+            if c == "[":
                 square.append(c)
-            elif c == ']':
+            elif c == "]":
                 if square:
                     square.pop()
-                else:   # empty stack
+                else:  # empty stack
                     args.append(s[cur:i])
                     break
 
@@ -382,12 +402,12 @@ class MathematicaParser(object):
 
     @classmethod
     def _check_input(cls, s):
-        for bracket in (('[', ']'), ('{', '}'), ('(', ')')):
+        for bracket in (("[", "]"), ("{", "}"), ("(", ")")):
             if s.count(bracket[0]) != s.count(bracket[1]):
                 err = "'{f}' function form is invalid.".format(f=s)
                 raise ValueError(err)
 
-        if '{' in s:
+        if "{" in s:
             err = "Currently list is not supported."
             raise ValueError(err)
 
@@ -396,26 +416,26 @@ class MathematicaParser(object):
         self._check_input(s)
 
         # uncover '*' hiding behind a whitespace
-        s = self._apply_rules(s, 'whitespace')
+        s = self._apply_rules(s, "whitespace")
 
         # remove whitespace(s)
-        s = self._replace(s, ' ')
+        s = self._replace(s, " ")
 
         # add omitted '*' character
-        s = self._apply_rules(s, 'add*_1')
-        s = self._apply_rules(s, 'add*_2')
+        s = self._apply_rules(s, "add*_1")
+        s = self._apply_rules(s, "add*_2")
 
         # translate function
         s = self._convert_function(s)
 
         # '^' to '**'
-        s = self._replace(s, '^')
+        s = self._replace(s, "^")
 
         # 'Pi' to 'pi'
-        s = self._apply_rules(s, 'Pi')
+        s = self._apply_rules(s, "Pi")
 
         # '{', '}' to '[', ']', respectively
-#        s = cls._replace(s, '{')   # currently list is not taken into account
-#        s = cls._replace(s, '}')
+        #        s = cls._replace(s, '{')   # currently list is not taken into account
+        #        s = cls._replace(s, '}')
 
         return s

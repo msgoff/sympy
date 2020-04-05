@@ -21,18 +21,25 @@ class Quantity(AtomicExpr):
     is_nonzero = True
     _diff_wrt = True
 
-    def __new__(cls, name, abbrev=None, dimension=None, scale_factor=None,
-                latex_repr=None, pretty_unicode_repr=None,
-                pretty_ascii_repr=None, mathml_presentation_repr=None,
-                **assumptions):
+    def __new__(
+        cls,
+        name,
+        abbrev=None,
+        dimension=None,
+        scale_factor=None,
+        latex_repr=None,
+        pretty_unicode_repr=None,
+        pretty_ascii_repr=None,
+        mathml_presentation_repr=None,
+        **assumptions
+    ):
 
         if not isinstance(name, Symbol):
             name = Symbol(name)
 
         # For Quantity(name, dim, scale, abbrev) to work like in the
         # old version of Sympy:
-        if not isinstance(abbrev, str) and not \
-                   isinstance(abbrev, Symbol):
+        if not isinstance(abbrev, str) and not isinstance(abbrev, Symbol):
             dimension, scale_factor, abbrev = abbrev, dimension, scale_factor
 
         if dimension is not None:
@@ -78,9 +85,12 @@ class Quantity(AtomicExpr):
             deprecated_since_version="1.5",
             issue=17765,
             feature="Moving method to UnitSystem class",
-            useinstead="unit_system.set_quantity_dimension or {}.set_global_relative_scale_factor".format(self),
+            useinstead="unit_system.set_quantity_dimension or {}.set_global_relative_scale_factor".format(
+                self
+            ),
         ).warn()
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_unit_system(unit_system)
         unit_system.set_quantity_dimension(self, dimension)
 
@@ -89,9 +99,12 @@ class Quantity(AtomicExpr):
             deprecated_since_version="1.5",
             issue=17765,
             feature="Moving method to UnitSystem class",
-            useinstead="unit_system.set_quantity_scale_factor or {}.set_global_relative_scale_factor".format(self),
+            useinstead="unit_system.set_quantity_scale_factor or {}.set_global_relative_scale_factor".format(
+                self
+            ),
         ).warn()
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_unit_system(unit_system)
         unit_system.set_quantity_scale_factor(self, scale_factor)
 
@@ -103,15 +116,20 @@ class Quantity(AtomicExpr):
         Setting a scale factor that is valid across all unit system.
         """
         from sympy.physics.units import UnitSystem
+
         scale_factor = sympify(scale_factor)
         # replace all prefixes by their ratio to canonical units:
         scale_factor = scale_factor.replace(
-            lambda x: isinstance(x, Prefix),
-            lambda x: x.scale_factor
+            lambda x: isinstance(x, Prefix), lambda x: x.scale_factor
         )
         scale_factor = sympify(scale_factor)
-        UnitSystem._quantity_scale_factors_global[self] = (scale_factor, reference_quantity)
-        UnitSystem._quantity_dimensional_equivalence_map_global[self] = reference_quantity
+        UnitSystem._quantity_scale_factors_global[self] = (
+            scale_factor,
+            reference_quantity,
+        )
+        UnitSystem._quantity_dimensional_equivalence_map_global[
+            self
+        ] = reference_quantity
 
     @property
     def name(self):
@@ -120,6 +138,7 @@ class Quantity(AtomicExpr):
     @property
     def dimension(self):
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_default_unit_system()
         return unit_system.get_quantity_dimension(self)
 
@@ -138,6 +157,7 @@ class Quantity(AtomicExpr):
         Overall magnitude of the quantity as compared to the canonical units.
         """
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_default_unit_system()
         return unit_system.get_quantity_scale_factor(self)
 
@@ -159,11 +179,12 @@ class Quantity(AtomicExpr):
         SymPyDeprecationWarning(
             deprecated_since_version="1.5",
             issue=17765,
-            feature="get_dimensional_expr() is now associated with UnitSystem objects. " \
-                "The dimensional relations depend on the unit system used.",
-            useinstead="unit_system.get_dimensional_expr"
+            feature="get_dimensional_expr() is now associated with UnitSystem objects. "
+            "The dimensional relations depend on the unit system used.",
+            useinstead="unit_system.get_dimensional_expr",
         ).warn()
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_unit_system(unit_system)
         return unit_system.get_dimensional_expr(expr)
 
@@ -177,6 +198,7 @@ class Quantity(AtomicExpr):
             useinstead="unit_system._collect_factor_and_dimension",
         ).warn()
         from sympy.physics.units import UnitSystem
+
         unit_system = UnitSystem.get_unit_system(unit_system)
         return unit_system._collect_factor_and_dimension(expr)
 
@@ -184,8 +206,9 @@ class Quantity(AtomicExpr):
         if self._latex_repr:
             return self._latex_repr
         else:
-            return r'\text{{{}}}'.format(self.args[1] \
-                          if len(self.args) >= 2 else self.args[0])
+            return r"\text{{{}}}".format(
+                self.args[1] if len(self.args) >= 2 else self.args[0]
+            )
 
     def convert_to(self, other, unit_system="SI"):
         """
@@ -205,6 +228,7 @@ class Quantity(AtomicExpr):
         meter**3/1000
         """
         from .util import convert_to
+
         return convert_to(self, other, unit_system)
 
     @property

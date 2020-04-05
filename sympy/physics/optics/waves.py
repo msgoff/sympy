@@ -8,15 +8,14 @@ This module has all the classes and functions related to waves in optics.
 
 from __future__ import print_function, division
 
-__all__ = ['TWave']
+__all__ = ["TWave"]
 
-from sympy import (sympify, pi, sin, cos, sqrt, Symbol, S,
-    symbols, Derivative, atan2)
+from sympy import sympify, pi, sin, cos, sqrt, Symbol, S, symbols, Derivative, atan2
 from sympy.core.expr import Expr
 from sympy.physics.units import speed_of_light, meter, second
 
 
-c = speed_of_light.convert_to(meter/second)
+c = speed_of_light.convert_to(meter / second)
 
 
 class TWave(Expr):
@@ -79,12 +78,8 @@ class TWave(Expr):
     """
 
     def __init__(
-            self,
-            amplitude,
-            frequency=None,
-            phase=S.Zero,
-            time_period=None,
-            n=Symbol('n')):
+        self, amplitude, frequency=None, phase=S.Zero, time_period=None, n=Symbol("n")
+    ):
         frequency = sympify(frequency)
         amplitude = sympify(amplitude)
         phase = sympify(phase)
@@ -96,11 +91,11 @@ class TWave(Expr):
         self._time_period = time_period
         self._n = n
         if time_period is not None:
-            self._frequency = 1/self._time_period
+            self._frequency = 1 / self._time_period
         if frequency is not None:
-            self._time_period = 1/self._frequency
+            self._time_period = 1 / self._frequency
             if time_period is not None:
-                if frequency != 1/time_period:
+                if frequency != 1 / time_period:
                     raise ValueError("frequency and time_period should be consistent.")
         if frequency is None and time_period is None:
             raise ValueError("Either frequency or time period is needed.")
@@ -158,7 +153,7 @@ class TWave(Expr):
         >>> w.wavelength
         299792458*meter/(second*f*n)
         """
-        return c/(self._frequency*self._n)
+        return c / (self._frequency * self._n)
 
     @property
     def amplitude(self):
@@ -212,7 +207,7 @@ class TWave(Expr):
         >>> w.speed
         299792458*meter/(second*n)
         """
-        return self.wavelength*self._frequency
+        return self.wavelength * self._frequency
 
     @property
     def angular_velocity(self):
@@ -230,7 +225,7 @@ class TWave(Expr):
         >>> w.angular_velocity
         2*pi*f
         """
-        return 2*pi*self._frequency
+        return 2 * pi * self._frequency
 
     @property
     def wavenumber(self):
@@ -248,11 +243,12 @@ class TWave(Expr):
         >>> w.wavenumber
         pi*second*f*n/(149896229*meter)
         """
-        return 2*pi/self.wavelength
+        return 2 * pi / self.wavelength
 
     def __str__(self):
         """String representation of a TWave."""
         from sympy.printing import sstr
+
         return type(self).__name__ + sstr(self.args)
 
     __repr__ = __str__
@@ -263,37 +259,66 @@ class TWave(Expr):
         The type of interference will depend on their phase angles.
         """
         if isinstance(other, TWave):
-            if self._frequency == other._frequency and self.wavelength == other.wavelength:
-                return TWave(sqrt(self._amplitude**2 + other._amplitude**2 + 2 *
-                                  self.amplitude*other.amplitude*cos(
-                                      self._phase - other.phase)),
-                             self.frequency,
-                             atan2(self._amplitude*cos(self._phase)
-                             +other._amplitude*cos(other._phase),
-                             self._amplitude*sin(self._phase)
-                             +other._amplitude*sin(other._phase))
-                             )
+            if (
+                self._frequency == other._frequency
+                and self.wavelength == other.wavelength
+            ):
+                return TWave(
+                    sqrt(
+                        self._amplitude ** 2
+                        + other._amplitude ** 2
+                        + 2
+                        * self.amplitude
+                        * other.amplitude
+                        * cos(self._phase - other.phase)
+                    ),
+                    self.frequency,
+                    atan2(
+                        self._amplitude * cos(self._phase)
+                        + other._amplitude * cos(other._phase),
+                        self._amplitude * sin(self._phase)
+                        + other._amplitude * sin(other._phase),
+                    ),
+                )
             else:
-                raise NotImplementedError("Interference of waves with different frequencies"
-                    " has not been implemented.")
+                raise NotImplementedError(
+                    "Interference of waves with different frequencies"
+                    " has not been implemented."
+                )
         else:
             raise TypeError(type(other).__name__ + " and TWave objects can't be added.")
 
     def _eval_rewrite_as_sin(self, *args, **kwargs):
-        return self._amplitude*sin(self.wavenumber*Symbol('x')
-            - self.angular_velocity*Symbol('t') + self._phase + pi/2, evaluate=False)
+        return self._amplitude * sin(
+            self.wavenumber * Symbol("x")
+            - self.angular_velocity * Symbol("t")
+            + self._phase
+            + pi / 2,
+            evaluate=False,
+        )
 
     def _eval_rewrite_as_cos(self, *args, **kwargs):
-        return self._amplitude*cos(self.wavenumber*Symbol('x')
-            - self.angular_velocity*Symbol('t') + self._phase)
+        return self._amplitude * cos(
+            self.wavenumber * Symbol("x")
+            - self.angular_velocity * Symbol("t")
+            + self._phase
+        )
 
     def _eval_rewrite_as_pde(self, *args, **kwargs):
         from sympy import Function
-        mu, epsilon, x, t = symbols('mu, epsilon, x, t')
-        E = Function('E')
-        return Derivative(E(x, t), x, 2) + mu*epsilon*Derivative(E(x, t), t, 2)
+
+        mu, epsilon, x, t = symbols("mu, epsilon, x, t")
+        E = Function("E")
+        return Derivative(E(x, t), x, 2) + mu * epsilon * Derivative(E(x, t), t, 2)
 
     def _eval_rewrite_as_exp(self, *args, **kwargs):
         from sympy import exp, I
-        return self._amplitude*exp(I*(self.wavenumber*Symbol('x')
-            - self.angular_velocity*Symbol('t') + self._phase))
+
+        return self._amplitude * exp(
+            I
+            * (
+                self.wavenumber * Symbol("x")
+                - self.angular_velocity * Symbol("t")
+                + self._phase
+            )
+        )

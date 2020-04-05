@@ -3,73 +3,112 @@
 from __future__ import print_function, division
 
 from sympy.polys.galoistools import (
-    gf_from_int_poly, gf_to_int_poly,
-    gf_lshift, gf_add_mul, gf_mul,
-    gf_div, gf_rem,
+    gf_from_int_poly,
+    gf_to_int_poly,
+    gf_lshift,
+    gf_add_mul,
+    gf_mul,
+    gf_div,
+    gf_rem,
     gf_gcdex,
     gf_sqf_p,
-    gf_factor_sqf, gf_factor)
+    gf_factor_sqf,
+    gf_factor,
+)
 
 from sympy.polys.densebasic import (
-    dup_LC, dmp_LC, dmp_ground_LC,
+    dup_LC,
+    dmp_LC,
+    dmp_ground_LC,
     dup_TC,
-    dup_convert, dmp_convert,
-    dup_degree, dmp_degree,
-    dmp_degree_in, dmp_degree_list,
+    dup_convert,
+    dmp_convert,
+    dup_degree,
+    dmp_degree,
+    dmp_degree_in,
+    dmp_degree_list,
     dmp_from_dict,
     dmp_zero_p,
     dmp_one,
-    dmp_nest, dmp_raise,
+    dmp_nest,
+    dmp_raise,
     dup_strip,
     dmp_ground,
     dup_inflate,
-    dmp_exclude, dmp_include,
-    dmp_inject, dmp_eject,
-    dup_terms_gcd, dmp_terms_gcd)
+    dmp_exclude,
+    dmp_include,
+    dmp_inject,
+    dmp_eject,
+    dup_terms_gcd,
+    dmp_terms_gcd,
+)
 
 from sympy.polys.densearith import (
-    dup_neg, dmp_neg,
-    dup_add, dmp_add,
-    dup_sub, dmp_sub,
-    dup_mul, dmp_mul,
+    dup_neg,
+    dmp_neg,
+    dup_add,
+    dmp_add,
+    dup_sub,
+    dmp_sub,
+    dup_mul,
+    dmp_mul,
     dup_sqr,
     dmp_pow,
-    dup_div, dmp_div,
-    dup_quo, dmp_quo,
+    dup_div,
+    dmp_div,
+    dup_quo,
+    dmp_quo,
     dmp_expand,
     dmp_add_mul,
-    dup_sub_mul, dmp_sub_mul,
+    dup_sub_mul,
+    dmp_sub_mul,
     dup_lshift,
-    dup_max_norm, dmp_max_norm,
+    dup_max_norm,
+    dmp_max_norm,
     dup_l1_norm,
-    dup_mul_ground, dmp_mul_ground,
-    dup_quo_ground, dmp_quo_ground)
+    dup_mul_ground,
+    dmp_mul_ground,
+    dup_quo_ground,
+    dmp_quo_ground,
+)
 
 from sympy.polys.densetools import (
-    dup_clear_denoms, dmp_clear_denoms,
-    dup_trunc, dmp_ground_trunc,
+    dup_clear_denoms,
+    dmp_clear_denoms,
+    dup_trunc,
+    dmp_ground_trunc,
     dup_content,
-    dup_monic, dmp_ground_monic,
-    dup_primitive, dmp_ground_primitive,
+    dup_monic,
+    dmp_ground_monic,
+    dup_primitive,
+    dmp_ground_primitive,
     dmp_eval_tail,
-    dmp_eval_in, dmp_diff_eval_in,
+    dmp_eval_in,
+    dmp_diff_eval_in,
     dmp_compose,
-    dup_shift, dup_mirror)
+    dup_shift,
+    dup_mirror,
+)
 
-from sympy.polys.euclidtools import (
-    dmp_primitive,
-    dup_inner_gcd, dmp_inner_gcd)
+from sympy.polys.euclidtools import dmp_primitive, dup_inner_gcd, dmp_inner_gcd
 
 from sympy.polys.sqfreetools import (
     dup_sqf_p,
-    dup_sqf_norm, dmp_sqf_norm,
-    dup_sqf_part, dmp_sqf_part)
+    dup_sqf_norm,
+    dmp_sqf_norm,
+    dup_sqf_part,
+    dmp_sqf_part,
+)
 
 from sympy.polys.polyutils import _sort_factors
 from sympy.polys.polyconfig import query
 
 from sympy.polys.polyerrors import (
-    ExtraneousFactors, DomainError, CoercionFailed, EvaluationFailed)
+    ExtraneousFactors,
+    DomainError,
+    CoercionFailed,
+    EvaluationFailed,
+)
 
 from sympy.ntheory import nextprime, isprime, factorint
 from sympy.utilities import subsets
@@ -129,7 +168,7 @@ def dup_zz_mignotte_bound(f, K):
     b = abs(dup_LC(f, K))
     n = dup_degree(f)
 
-    return K.sqrt(K(n + 1))*2**n*a*b
+    return K.sqrt(K(n + 1)) * 2 ** n * a * b
 
 
 def dmp_zz_mignotte_bound(f, u, K):
@@ -138,7 +177,7 @@ def dmp_zz_mignotte_bound(f, u, K):
     b = abs(dmp_ground_LC(f, u, K))
     n = sum(dmp_degree_list(f, u))
 
-    return K.sqrt(K(n + 1))*2**n*a*b
+    return K.sqrt(K(n + 1)) * 2 ** n * a * b
 
 
 def dup_zz_hensel_step(m, f, g, h, s, t, K):
@@ -169,7 +208,7 @@ def dup_zz_hensel_step(m, f, g, h, s, t, K):
     .. [1] [Gathen99]_
 
     """
-    M = m**2
+    M = m ** 2
 
     e = dup_sub_mul(f, g, h, K)
     e = dup_trunc(e, M, K)
@@ -225,8 +264,8 @@ def dup_zz_hensel_lift(p, f, f_list, l, K):
     lc = dup_LC(f, K)
 
     if r == 1:
-        F = dup_mul_ground(f, K.gcdex(lc, p**l)[0], K)
-        return [ dup_trunc(F, p**l, K) ]
+        F = dup_mul_ground(f, K.gcdex(lc, p ** l)[0], K)
+        return [dup_trunc(F, p ** l, K)]
 
     m = p
     k = r // 2
@@ -239,7 +278,7 @@ def dup_zz_hensel_lift(p, f, f_list, l, K):
 
     h = gf_from_int_poly(f_list[k], p)
 
-    for f_i in f_list[k + 1:]:
+    for f_i in f_list[k + 1 :]:
         h = gf_mul(h, gf_from_int_poly(f_i, p), p, K)
 
     s, t, _ = gf_gcdex(g, h, p, K)
@@ -250,10 +289,12 @@ def dup_zz_hensel_lift(p, f, f_list, l, K):
     t = gf_to_int_poly(t, p)
 
     for _ in range(1, d + 1):
-        (g, h, s, t), m = dup_zz_hensel_step(m, f, g, h, s, t, K), m**2
+        (g, h, s, t), m = dup_zz_hensel_step(m, f, g, h, s, t, K), m ** 2
 
-    return dup_zz_hensel_lift(p, g, f_list[:k], l, K) \
-        + dup_zz_hensel_lift(p, h, f_list[k:], l, K)
+    return dup_zz_hensel_lift(p, g, f_list[:k], l, K) + dup_zz_hensel_lift(
+        p, h, f_list[k:], l, K
+    )
+
 
 def _test_pl(fc, q, pl):
     if q > pl // 2:
@@ -261,6 +302,7 @@ def _test_pl(fc, q, pl):
     if not q:
         return True
     return fc % q == 0
+
 
 def dup_zz_zassenhaus(f, K):
     """Factor primitive square-free polynomials in `Z[x]`. """
@@ -272,10 +314,10 @@ def dup_zz_zassenhaus(f, K):
     fc = f[-1]
     A = dup_max_norm(f, K)
     b = dup_LC(f, K)
-    B = int(abs(K.sqrt(K(n + 1))*2**n*A*b))
-    C = int((n + 1)**(2*n)*A**(2*n - 1))
-    gamma = int(_ceil(2*_log(C, 2)))
-    bound = int(2*gamma*_log(gamma))
+    B = int(abs(K.sqrt(K(n + 1)) * 2 ** n * A * b))
+    C = int((n + 1) ** (2 * n) * A ** (2 * n - 1))
+    gamma = int(_ceil(2 * _log(C, 2)))
+    bound = int(2 * gamma * _log(gamma))
     a = []
     # choose a prime number `p` such that `f` be square free in Z_p
     # if there are many factors in Z_p, choose among a few different `p`
@@ -296,7 +338,7 @@ def dup_zz_zassenhaus(f, K):
             break
     p, fsqf = min(a, key=lambda x: len(x[1]))
 
-    l = int(_ceil(_log(2*B + 1, p)))
+    l = int(_ceil(_log(2 * B + 1, p)))
 
     modular = [gf_to_int_poly(ff, p) for ff in fsqf]
 
@@ -305,9 +347,9 @@ def dup_zz_zassenhaus(f, K):
     sorted_T = range(len(g))
     T = set(sorted_T)
     factors, s = [], 1
-    pl = p**l
+    pl = p ** l
 
-    while 2*s <= len(T):
+    while 2 * s <= len(T):
         for S in subsets(sorted_T, s):
             # lift the constant coefficient of the product `G` of the factors
             # in the subset `S`; if it is does not divide `fc`, `G` does
@@ -316,7 +358,7 @@ def dup_zz_zassenhaus(f, K):
             if b == 1:
                 q = 1
                 for i in S:
-                    q = q*g[i][-1]
+                    q = q * g[i][-1]
                 q = q % pl
                 if not _test_pl(fc, q, pl):
                     continue
@@ -348,7 +390,7 @@ def dup_zz_zassenhaus(f, K):
             G_norm = dup_l1_norm(G, K)
             H_norm = dup_l1_norm(H, K)
 
-            if G_norm*H_norm <= B:
+            if G_norm * H_norm <= B:
                 T = T_S
                 sorted_T = [i for i in sorted_T if i not in S]
 
@@ -376,7 +418,7 @@ def dup_zz_irreducible_p(f, K):
         e_ff = factorint(int(e_fc))
 
         for p in e_ff.keys():
-            if (lc % p) and (tc % p**2):
+            if (lc % p) and (tc % p ** 2):
                 return True
 
 
@@ -462,7 +504,7 @@ def dup_zz_cyclotomic_poly(n, K):
 
     for p, k in factorint(n).items():
         h = dup_quo(dup_inflate(h, p, K), h, K)
-        h = dup_inflate(h, p**(k - 1), K)
+        h = dup_inflate(h, p ** (k - 1), K)
 
     return h
 
@@ -471,11 +513,11 @@ def _dup_cyclotomic_decompose(n, K):
     H = [[K.one, -K.one]]
 
     for p, k in factorint(n).items():
-        Q = [ dup_quo(dup_inflate(h, p, K), h, K) for h in H ]
+        Q = [dup_quo(dup_inflate(h, p, K), h, K) for h in H]
         H.extend(Q)
 
         for i in range(1, k):
-            Q = [ dup_inflate(q, p, K) for q in Q ]
+            Q = [dup_inflate(q, p, K) for q in Q]
             H.extend(Q)
 
     return H
@@ -518,7 +560,7 @@ def dup_zz_cyclotomic_factor(f, K):
     else:
         H = []
 
-        for h in _dup_cyclotomic_decompose(2*n, K):
+        for h in _dup_cyclotomic_decompose(2 * n, K):
             if h not in F:
                 H.append(h)
 
@@ -539,13 +581,13 @@ def dup_zz_factor_sqf(f, K):
     elif n == 1:
         return cont, [g]
 
-    if query('USE_IRREDUCIBLE_IN_FACTOR'):
+    if query("USE_IRREDUCIBLE_IN_FACTOR"):
         if dup_zz_irreducible_p(g, K):
             return cont, [g]
 
     factors = None
 
-    if query('USE_CYCLOTOMIC_FACTOR'):
+    if query("USE_CYCLOTOMIC_FACTOR"):
         factors = dup_zz_cyclotomic_factor(g, K)
 
     if factors is None:
@@ -612,14 +654,14 @@ def dup_zz_factor(f, K):
     elif n == 1:
         return cont, [(g, 1)]
 
-    if query('USE_IRREDUCIBLE_IN_FACTOR'):
+    if query("USE_IRREDUCIBLE_IN_FACTOR"):
         if dup_zz_irreducible_p(g, K):
             return cont, [(g, 1)]
 
     g = dup_sqf_part(g, K)
     H = None
 
-    if query('USE_CYCLOTOMIC_FACTOR'):
+    if query("USE_CYCLOTOMIC_FACTOR"):
         H = dup_zz_cyclotomic_factor(g, K)
 
     if H is None:
@@ -631,7 +673,7 @@ def dup_zz_factor(f, K):
 
 def dmp_zz_wang_non_divisors(E, cs, ct, K):
     """Wang/EEZ: Compute a set of valid divisors.  """
-    result = [ cs*ct ]
+    result = [cs * ct]
 
     for q in E:
         q = abs(q)
@@ -652,12 +694,12 @@ def dmp_zz_wang_non_divisors(E, cs, ct, K):
 def dmp_zz_wang_test_points(f, T, ct, A, u, K):
     """Wang/EEZ: Test evaluation points for suitability. """
     if not dmp_eval_tail(dmp_LC(f, K), A, u - 1, K):
-        raise EvaluationFailed('no luck')
+        raise EvaluationFailed("no luck")
 
     g = dmp_eval_tail(f, A, u, K)
 
     if not dup_sqf_p(g, K):
-        raise EvaluationFailed('no luck')
+        raise EvaluationFailed("no luck")
 
     c, h = dup_primitive(g, K)
 
@@ -666,28 +708,28 @@ def dmp_zz_wang_test_points(f, T, ct, A, u, K):
 
     v = u - 1
 
-    E = [ dmp_eval_tail(t, A, v, K) for t, _ in T ]
+    E = [dmp_eval_tail(t, A, v, K) for t, _ in T]
     D = dmp_zz_wang_non_divisors(E, c, ct, K)
 
     if D is not None:
         return c, h, E
     else:
-        raise EvaluationFailed('no luck')
+        raise EvaluationFailed("no luck")
 
 
 def dmp_zz_wang_lead_coeffs(f, T, cs, E, H, A, u, K):
     """Wang/EEZ: Compute correct leading coefficients. """
-    C, J, v = [], [0]*len(E), u - 1
+    C, J, v = [], [0] * len(E), u - 1
 
     for h in H:
         c = dmp_one(v, K)
-        d = dup_LC(h, K)*cs
+        d = dup_LC(h, K) * cs
 
         for i in reversed(range(len(E))):
             k, e, (t, _) = 0, E[i], T[i]
 
             while not (d % e):
-                d, k = d//e, k + 1
+                d, k = d // e, k + 1
 
             if k != 0:
                 c, J[i] = dmp_mul(c, dmp_pow(t, k, v, K), v, K), 1
@@ -704,11 +746,11 @@ def dmp_zz_wang_lead_coeffs(f, T, cs, E, H, A, u, K):
         lc = dup_LC(h, K)
 
         if K.is_one(cs):
-            cc = lc//d
+            cc = lc // d
         else:
             g = K.gcd(lc, d)
-            d, cc = d//g, lc//g
-            h, cs = dup_mul_ground(h, d, K), cs//d
+            d, cc = d // g, lc // g
+            h, cs = dup_mul_ground(h, d, K), cs // d
 
         c = dmp_mul_ground(c, cc, v, K)
 
@@ -724,7 +766,7 @@ def dmp_zz_wang_lead_coeffs(f, T, cs, E, H, A, u, K):
         CCC.append(dmp_mul_ground(c, cs, v, K))
         HHH.append(dmp_mul_ground(h, cs, 0, K))
 
-    f = dmp_mul_ground(f, cs**(len(H) - 1), u, K)
+    f = dmp_mul_ground(f, cs ** (len(H) - 1), u, K)
 
     return f, HHH, CCC
 
@@ -780,7 +822,7 @@ def dup_zz_diophantine(F, m, p, K):
 def dmp_zz_diophantine(F, c, A, d, p, u, K):
     """Wang/EEZ: Solve multivariate Diophantine equations. """
     if not A:
-        S = [ [] for _ in F ]
+        S = [[] for _ in F]
         n = dup_degree(c)
 
         for i, coeff in enumerate(c):
@@ -808,7 +850,7 @@ def dmp_zz_diophantine(F, c, A, d, p, u, K):
         v = u - 1
 
         S = dmp_zz_diophantine(G, C, A, d, p, v, K)
-        S = [ dmp_raise(s, 1, v, K) for s in S ]
+        S = [dmp_raise(s, 1, v, K) for s in S]
 
         for s, b in zip(S, B):
             c = dmp_sub_mul(c, s, b, u, K)
@@ -840,7 +882,7 @@ def dmp_zz_diophantine(F, c, A, d, p, u, K):
 
                 c = dmp_ground_trunc(c, p, u, K)
 
-        S = [ dmp_ground_trunc(s, p, u, K) for s in S ]
+        S = [dmp_ground_trunc(s, p, u, K) for s in S]
 
     return S
 
@@ -860,7 +902,7 @@ def dmp_zz_wang_hensel_lifting(f, H, LC, A, p, u, K):
     for j, s, a in zip(range(2, n + 2), S, A):
         G, w = list(H), j - 1
 
-        I, J = A[:j - 2], A[j - 1:]
+        I, J = A[: j - 2], A[j - 1 :]
 
         for i, (h, lc) in enumerate(zip(H, LC)):
             lc = dmp_ground_trunc(dmp_eval_tail(lc, J, v, K), p, w - 1, K)
@@ -942,7 +984,7 @@ def dmp_zz_wang(f, u, K, mod=None, seed=None):
         else:
             mod = 1
 
-    history, configs, A, r = set([]), [], [K.zero]*u, None
+    history, configs, A, r = set([]), [], [K.zero] * u, None
 
     try:
         cs, s, E = dmp_zz_wang_test_points(f, T, ct, A, u, K)
@@ -958,13 +1000,13 @@ def dmp_zz_wang(f, u, K, mod=None, seed=None):
     except EvaluationFailed:
         pass
 
-    eez_num_configs = query('EEZ_NUMBER_OF_CONFIGS')
-    eez_num_tries = query('EEZ_NUMBER_OF_TRIES')
-    eez_mod_step = query('EEZ_MODULUS_STEP')
+    eez_num_configs = query("EEZ_NUMBER_OF_CONFIGS")
+    eez_num_tries = query("EEZ_NUMBER_OF_TRIES")
+    eez_mod_step = query("EEZ_MODULUS_STEP")
 
     while len(configs) < eez_num_configs:
         for _ in range(eez_num_tries):
-            A = [ K(randint(-mod, mod)) for _ in range(u) ]
+            A = [K(randint(-mod, mod)) for _ in range(u)]
 
             if tuple(A) not in history:
                 history.add(tuple(A))
@@ -1020,11 +1062,12 @@ def dmp_zz_wang(f, u, K, mod=None, seed=None):
         f, H, LC = dmp_zz_wang_lead_coeffs(f, T, cs, E, H, A, u, K)
         factors = dmp_zz_wang_hensel_lifting(f, H, LC, A, p, u, K)
     except ExtraneousFactors:  # pragma: no cover
-        if query('EEZ_RESTART_IF_NEEDED'):
+        if query("EEZ_RESTART_IF_NEEDED"):
             return dmp_zz_wang(orig_f, u, K, mod + 1)
         else:
             raise ExtraneousFactors(
-                "we need to restart algorithm with better parameters")
+                "we need to restart algorithm with better parameters"
+            )
 
     result = []
 
@@ -1121,9 +1164,9 @@ def dup_ext_factor(f, K):
     factors = dup_factor_list_include(r, K.dom)
 
     if len(factors) == 1:
-        return lc, [(f, n//dup_degree(f))]
+        return lc, [(f, n // dup_degree(f))]
 
-    H = s*K.unit
+    H = s * K.unit
 
     for i, (factor, _) in enumerate(factors):
         h = dup_convert(factor, K.dom, K)
@@ -1154,7 +1197,7 @@ def dmp_ext_factor(f, u, K):
     if len(factors) == 1:
         factors = [f]
     else:
-        H = dmp_raise([K.one, s*K.unit], u, 0, K)
+        H = dmp_raise([K.one, s * K.unit], u, 0, K)
 
         for i, (factor, _) in enumerate(factors):
             h = dmp_convert(factor, u, K.dom, K)
@@ -1179,7 +1222,7 @@ def dup_gf_factor(f, K):
 
 def dmp_gf_factor(f, u, K):
     """Factor multivariate polynomials over finite fields. """
-    raise NotImplementedError('multivariate polynomials over finite fields')
+    raise NotImplementedError("multivariate polynomials over finite fields")
 
 
 def dup_factor_list(f, K0):
@@ -1218,7 +1261,7 @@ def dup_factor_list(f, K0):
 
             coeff = K.convert(coeff, K.dom)
         else:  # pragma: no cover
-            raise DomainError('factorization not supported over %s' % K0)
+            raise DomainError("factorization not supported over %s" % K0)
 
         if K0.is_Field:
             for i, (f, k) in enumerate(factors):
@@ -1241,7 +1284,7 @@ def dup_factor_list(f, K0):
     if j:
         factors.insert(0, ([K0.one, K0.zero], j))
 
-    return coeff*cont, _sort_factors(factors)
+    return coeff * cont, _sort_factors(factors)
 
 
 def dup_factor_list_include(f, K):
@@ -1298,7 +1341,7 @@ def dmp_factor_list(f, u, K0):
 
             coeff = K.convert(coeff, K.dom)
         else:  # pragma: no cover
-            raise DomainError('factorization not supported over %s' % K0)
+            raise DomainError("factorization not supported over %s" % K0)
 
         if K0.is_Field:
             for i, (f, k) in enumerate(factors):
@@ -1322,10 +1365,10 @@ def dmp_factor_list(f, u, K0):
         if not j:
             continue
 
-        term = {(0,)*(u - i) + (1,) + (0,)*i: K0.one}
+        term = {(0,) * (u - i) + (1,) + (0,) * i: K0.one}
         factors.insert(0, (dmp_from_dict(term, u, K0), j))
 
-    return coeff*cont, _sort_factors(factors)
+    return coeff * cont, _sort_factors(factors)
 
 
 def dmp_factor_list_include(f, u, K):

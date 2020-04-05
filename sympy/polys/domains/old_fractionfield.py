@@ -10,6 +10,7 @@ from sympy.polys.polyerrors import GeneratorsNeeded
 from sympy.polys.polyutils import dict_from_basic, basic_from_dict, _dict_reorder
 from sympy.utilities import public
 
+
 @public
 class FractionField(Field, CharacteristicZero, CompositeDomain):
     """A class for representing rational function fields. """
@@ -37,20 +38,25 @@ class FractionField(Field, CharacteristicZero, CompositeDomain):
         return self.dtype(element, self.dom, len(self.gens) - 1, ring=self)
 
     def __str__(self):
-        return str(self.dom) + '(' + ','.join(map(str, self.gens)) + ')'
+        return str(self.dom) + "(" + ",".join(map(str, self.gens)) + ")"
 
     def __hash__(self):
         return hash((self.__class__.__name__, self.dtype, self.dom, self.gens))
 
     def __eq__(self, other):
         """Returns ``True`` if two domains are equivalent. """
-        return isinstance(other, FractionField) and \
-            self.dtype == other.dtype and self.dom == other.dom and self.gens == other.gens
+        return (
+            isinstance(other, FractionField)
+            and self.dtype == other.dtype
+            and self.dom == other.dom
+            and self.gens == other.gens
+        )
 
     def to_sympy(self, a):
         """Convert ``a`` to a SymPy object. """
-        return (basic_from_dict(a.numer().to_sympy_dict(), *self.gens) /
-                basic_from_dict(a.denom().to_sympy_dict(), *self.gens))
+        return basic_from_dict(a.numer().to_sympy_dict(), *self.gens) / basic_from_dict(
+            a.denom().to_sympy_dict(), *self.gens
+        )
 
     def from_sympy(self, a):
         """Convert SymPy's expression to ``dtype``. """
@@ -98,7 +104,7 @@ class FractionField(Field, CharacteristicZero, CompositeDomain):
             monoms, coeffs = _dict_reorder(a.to_dict(), K0.gens, K1.gens)
 
             if K1.dom != K0.dom:
-                coeffs = [ K1.dom.convert(c, K0.dom) for c in coeffs ]
+                coeffs = [K1.dom.convert(c, K0.dom) for c in coeffs]
 
             return K1(dict(zip(monoms, coeffs)))
 
@@ -126,32 +132,32 @@ class FractionField(Field, CharacteristicZero, CompositeDomain):
             if K1.dom == K0.dom:
                 return a
             else:
-                return K1((a.numer().convert(K1.dom).rep,
-                           a.denom().convert(K1.dom).rep))
+                return K1(
+                    (a.numer().convert(K1.dom).rep, a.denom().convert(K1.dom).rep)
+                )
         elif set(K0.gens).issubset(K1.gens):
-            nmonoms, ncoeffs = _dict_reorder(
-                a.numer().to_dict(), K0.gens, K1.gens)
-            dmonoms, dcoeffs = _dict_reorder(
-                a.denom().to_dict(), K0.gens, K1.gens)
+            nmonoms, ncoeffs = _dict_reorder(a.numer().to_dict(), K0.gens, K1.gens)
+            dmonoms, dcoeffs = _dict_reorder(a.denom().to_dict(), K0.gens, K1.gens)
 
             if K1.dom != K0.dom:
-                ncoeffs = [ K1.dom.convert(c, K0.dom) for c in ncoeffs ]
-                dcoeffs = [ K1.dom.convert(c, K0.dom) for c in dcoeffs ]
+                ncoeffs = [K1.dom.convert(c, K0.dom) for c in ncoeffs]
+                dcoeffs = [K1.dom.convert(c, K0.dom) for c in dcoeffs]
 
             return K1((dict(zip(nmonoms, ncoeffs)), dict(zip(dmonoms, dcoeffs))))
 
     def get_ring(self):
         """Returns a ring associated with ``self``. """
         from sympy.polys.domains import PolynomialRing
+
         return PolynomialRing(self.dom, *self.gens)
 
     def poly_ring(self, *gens):
         """Returns a polynomial ring, i.e. `K[X]`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def frac_field(self, *gens):
         """Returns a fraction field, i.e. `K(X)`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def is_positive(self, a):
         """Returns True if ``a`` is positive. """

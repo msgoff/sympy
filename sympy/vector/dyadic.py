@@ -1,7 +1,11 @@
 from typing import Type
 
-from sympy.vector.basisdependent import (BasisDependent, BasisDependentAdd,
-                                         BasisDependentMul, BasisDependentZero)
+from sympy.vector.basisdependent import (
+    BasisDependent,
+    BasisDependentAdd,
+    BasisDependentMul,
+    BasisDependentZero,
+)
 from sympy.core import S, Pow
 from sympy.core.expr import AtomicExpr
 from sympy import ImmutableMatrix as Matrix
@@ -87,8 +91,9 @@ class Dyadic(BasisDependent):
                     outdyad += vect_dot * v1 * v2 * outer_product
             return outdyad
         else:
-            raise TypeError("Inner product is not defined for " +
-                            str(type(other)) + " and Dyadics.")
+            raise TypeError(
+                "Inner product is not defined for " + str(type(other)) + " and Dyadics."
+            )
 
     def __and__(self, other):
         return self.dot(other)
@@ -128,8 +133,9 @@ class Dyadic(BasisDependent):
                 outdyad += v * outer
             return outdyad
         else:
-            raise TypeError(str(type(other)) + " not supported for " +
-                            "cross with dyadics")
+            raise TypeError(
+                str(type(other)) + " not supported for " + "cross with dyadics"
+            )
 
     def __xor__(self, other):
         return self.cross(other)
@@ -178,8 +184,9 @@ class Dyadic(BasisDependent):
         if second_system is None:
             second_system = system
 
-        return Matrix([i.dot(self).dot(j) for i in system for j in
-                       second_system]).reshape(3, 3)
+        return Matrix(
+            [i.dot(self).dot(j) for i in system for j in second_system]
+        ).reshape(3, 3)
 
     def _div_helper(one, other):
         """ Helper for division involving dyadics """
@@ -201,10 +208,10 @@ class BaseDyadic(Dyadic, AtomicExpr):
         BaseVector = sympy.vector.BaseVector
         VectorZero = sympy.vector.VectorZero
         # Verify arguments
-        if not isinstance(vector1, (BaseVector, VectorZero)) or \
-                not isinstance(vector2, (BaseVector, VectorZero)):
-            raise TypeError("BaseDyadic cannot be composed of non-base " +
-                            "vectors")
+        if not isinstance(vector1, (BaseVector, VectorZero)) or not isinstance(
+            vector2, (BaseVector, VectorZero)
+        ):
+            raise TypeError("BaseDyadic cannot be composed of non-base " + "vectors")
         # Handle special case of zero vector
         elif vector1 == Vector.zero or vector2 == Vector.zero:
             return Dyadic.zero
@@ -214,10 +221,10 @@ class BaseDyadic(Dyadic, AtomicExpr):
         obj._measure_number = 1
         obj._components = {obj: S.One}
         obj._sys = vector1._sys
-        obj._pretty_form = (u'(' + vector1._pretty_form + '|' +
-                             vector2._pretty_form + ')')
-        obj._latex_form = ('(' + vector1._latex_form + "{|}" +
-                           vector2._latex_form + ')')
+        obj._pretty_form = (
+            u"(" + vector1._pretty_form + "|" + vector2._pretty_form + ")"
+        )
+        obj._latex_form = "(" + vector1._latex_form + "{|}" + vector2._latex_form + ")"
 
         return obj
 
@@ -256,7 +263,7 @@ class DyadicAdd(BasisDependentAdd, Dyadic):
         return obj
 
     def __str__(self, printer=None):
-        ret_str = ''
+        ret_str = ""
         items = list(self.components.items())
         items.sort(key=lambda x: x[0].__str__())
         for k, v in items:
@@ -274,8 +281,8 @@ class DyadicZero(BasisDependentZero, Dyadic):
     """
 
     _op_priority = 13.1
-    _pretty_form = u'(0|0)'
-    _latex_form = r'(\mathbf{\hat{0}}|\mathbf{\hat{0}})'
+    _pretty_form = u"(0|0)"
+    _latex_form = r"(\mathbf{\hat{0}}|\mathbf{\hat{0}})"
 
     def __new__(cls):
         obj = BasisDependentZero.__new__(cls)

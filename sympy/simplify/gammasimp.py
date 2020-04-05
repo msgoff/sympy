@@ -58,7 +58,7 @@ def gammasimp(expr):
     """
 
     expr = expr.rewrite(gamma)
-    return _gammasimp(expr, as_comb = False)
+    return _gammasimp(expr, as_comb=False)
 
 
 def _gammasimp(expr, as_comb):
@@ -71,15 +71,12 @@ def _gammasimp(expr, as_comb):
     combsimp() in combsimp.py.
     """
 
-    expr = expr.replace(gamma,
-        lambda n: _rf(1, (n - 1).expand()))
+    expr = expr.replace(gamma, lambda n: _rf(1, (n - 1).expand()))
 
     if as_comb:
-        expr = expr.replace(_rf,
-            lambda a, b: gamma(b + 1))
+        expr = expr.replace(_rf, lambda a, b: gamma(b + 1))
     else:
-        expr = expr.replace(_rf,
-            lambda a, b: gamma(a + b)/gamma(a))
+        expr = expr.replace(_rf, lambda a, b: gamma(a + b) / gamma(a))
 
     def rule(n, k):
         coeff, rewrite = S.One, False
@@ -87,7 +84,7 @@ def _gammasimp(expr, as_comb):
         cn, _n = n.as_coeff_Add()
 
         if _n and cn.is_Integer and cn:
-            coeff *= _rf(_n + 1, cn)/_rf(_n - k + 1, cn)
+            coeff *= _rf(_n + 1, cn) / _rf(_n - k + 1, cn)
             rewrite = True
             n = _n
 
@@ -97,7 +94,7 @@ def _gammasimp(expr, as_comb):
         if k.is_Add:
             ck, _k = k.as_coeff_Add()
             if _k and ck.is_Integer and ck:
-                coeff *= _rf(n - ck - _k + 1, ck)/_rf(_k + 1, ck)
+                coeff *= _rf(n - ck - _k + 1, ck) / _rf(_k + 1, ck)
                 rewrite = True
                 k = _k
 
@@ -106,7 +103,7 @@ def _gammasimp(expr, as_comb):
             k = n - k
 
         if rewrite:
-            return coeff*binomial(n, k)
+            return coeff * binomial(n, k)
 
     expr = expr.replace(binomial, rule)
 
@@ -119,8 +116,12 @@ def _gammasimp(expr, as_comb):
         def gamma_rat(x):
             # helper to simplify ratios of gammas
             was = x.count(gamma)
-            xx = x.replace(gamma, lambda n: _rf(1, (n - 1).expand()
-                ).replace(_rf, lambda a, b: gamma(a + b)/gamma(a)))
+            xx = x.replace(
+                gamma,
+                lambda n: _rf(1, (n - 1).expand()).replace(
+                    _rf, lambda a, b: gamma(a + b) / gamma(a)
+                ),
+            )
             if xx.count(gamma) < was:
                 x = xx
             return x
@@ -149,7 +150,7 @@ def _gammasimp(expr, as_comb):
             if not args:
                 return expr
             if nc:
-                return rule_gamma(Mul._from_args(args), level + 1)*Mul._from_args(nc)
+                return rule_gamma(Mul._from_args(args), level + 1) * Mul._from_args(nc)
             level += 1
 
         # pure gamma handling, not factor absorption
@@ -163,17 +164,17 @@ def _gammasimp(expr, as_comb):
                 args = list(ordered(Mul.make_args(nd)))
                 for i, ni in enumerate(args):
                     if ni.is_Add:
-                        ni, dd = Add(*[
-                            rule_gamma(gamma_rat(a/dd), level + 1) for a in ni.args]
-                            ).as_numer_denom()
+                        ni, dd = Add(
+                            *[rule_gamma(gamma_rat(a / dd), level + 1) for a in ni.args]
+                        ).as_numer_denom()
                         args[i] = ni
                         if not dd.has(gamma):
                             break
                 nd = Mul(*args)
-                if ipass ==  0 and not gamma_factor(nd):
+                if ipass == 0 and not gamma_factor(nd):
                     break
                 nd, dd = dd, nd  # now process in reversed order
-            expr = gamma_ind*nd/dd
+            expr = gamma_ind * nd / dd
             if not (expr.is_Mul and (gamma_factor(dd) or gamma_factor(nd))):
                 return expr
             level += 1
@@ -190,15 +191,16 @@ def _gammasimp(expr, as_comb):
         denom_gammas = []
         numer_others = []
         denom_others = []
+
         def explicate(p):
             if p is S.One:
                 return None, []
             b, e = p.as_base_exp()
             if e.is_Integer:
                 if isinstance(b, gamma):
-                    return True, [b.args[0]]*e
+                    return True, [b.args[0]] * e
                 else:
-                    return False, [b]*e
+                    return False, [b] * e
             else:
                 return False, [p]
 
@@ -221,9 +223,10 @@ def _gammasimp(expr, as_comb):
         if not as_comb:
             # Try to reduce the number of gamma factors by applying the
             # reflection formula gamma(x)*gamma(1-x) = pi/sin(pi*x)
-            for gammas, numer, denom in [(
-                numer_gammas, numer_others, denom_others),
-                    (denom_gammas, denom_others, numer_others)]:
+            for gammas, numer, denom in [
+                (numer_gammas, numer_others, denom_others),
+                (denom_gammas, denom_others, numer_others),
+            ]:
                 new = []
                 while gammas:
                     g1 = gammas.pop()
@@ -235,7 +238,7 @@ def _gammasimp(expr, as_comb):
                         if not n.is_Integer:
                             continue
                         numer.append(S.Pi)
-                        denom.append(sin(S.Pi*g1))
+                        denom.append(sin(S.Pi * g1))
                         gammas.pop(i)
                         if n > 0:
                             for k in range(n):
@@ -254,15 +257,15 @@ def _gammasimp(expr, as_comb):
             # 2**(2*s + 1)/(4*sqrt(pi))*gamma(s + 1/2). Although this could
             # be done with higher argument ratios like gamma(3*x)/gamma(x),
             # this would not reduce the number of gammas as in this case.
-            for ng, dg, no, do in [(numer_gammas, denom_gammas, numer_others,
-                                    denom_others),
-                                   (denom_gammas, numer_gammas, denom_others,
-                                    numer_others)]:
+            for ng, dg, no, do in [
+                (numer_gammas, denom_gammas, numer_others, denom_others),
+                (denom_gammas, numer_gammas, denom_others, numer_others),
+            ]:
 
                 while True:
                     for x in ng:
                         for y in dg:
-                            n = x - 2*y
+                            n = x - 2 * y
                             if n.is_Integer:
                                 break
                         else:
@@ -274,12 +277,12 @@ def _gammasimp(expr, as_comb):
                     dg.remove(y)
                     if n > 0:
                         for k in range(n):
-                            no.append(2*y + k)
+                            no.append(2 * y + k)
                     elif n < 0:
                         for k in range(-n):
-                            do.append(2*y - 1 - k)
+                            do.append(2 * y - 1 - k)
                     ng.append(y + S.Half)
-                    no.append(2**(2*y - 1))
+                    no.append(2 ** (2 * y - 1))
                     do.append(sqrt(S.Pi))
 
             # Try to reduce the number of gamma factors by applying the
@@ -303,14 +306,14 @@ def _gammasimp(expr, as_comb):
                 # of t1, t2, ..., tn is 1/n
                 u = list(uniq(coeffs))
                 for i in range(len(u)):
-                    dj = ([((u[j] - u[i]) % 1, j) for j in range(i + 1, len(u))])
+                    dj = [((u[j] - u[i]) % 1, j) for j in range(i + 1, len(u))]
                     for one, j in dj:
                         if one.p == 1 and one.q != 1:
                             n = one.q
                             got = [i]
                             get = list(range(1, n))
                             for d, j in dj:
-                                m = n*d
+                                m = n * d
                                 if m.is_Integer and m in get:
                                     get.remove(m)
                                     got.append(j)
@@ -358,11 +361,10 @@ def _gammasimp(expr, as_comb):
                             for k in range(int(u - ui)):
                                 numer.append(con - k)
 
-                        con = n*(resid + ui)  # for (2) and (3)
+                        con = n * (resid + ui)  # for (2) and (3)
 
                         # (2)
-                        numer.append((2*S.Pi)**(S(n - 1)/2)*
-                                     n**(S.Half - con))
+                        numer.append((2 * S.Pi) ** (S(n - 1) / 2) * n ** (S.Half - con))
                         # (3)
                         new.append(con)
 
@@ -376,8 +378,10 @@ def _gammasimp(expr, as_comb):
                 # /!\ updating IN PLACE
                 gammas[:] = g
 
-            for l, numer, denom in [(numer_gammas, numer_others, denom_others),
-                                    (denom_gammas, denom_others, numer_others)]:
+            for l, numer, denom in [
+                (numer_gammas, numer_others, denom_others),
+                (denom_gammas, denom_others, numer_others),
+            ]:
                 _mult_thm(l, numer, denom)
 
         # =========== level >= 2 work: factor absorption =========
@@ -393,12 +397,13 @@ def _gammasimp(expr, as_comb):
                 S1, T1 = compute_ST(x)
                 for y in l:
                     S2, T2 = inv[y]
-                    if T1 != T2 or (not S1.intersection(S2) and
-                                    (S1 != set() or S2 != set())):
+                    if T1 != T2 or (
+                        not S1.intersection(S2) and (S1 != set() or S2 != set())
+                    ):
                         continue
                     # XXX we want some simplification (e.g. cancel or
                     # simplify) but no matter what it's slow.
-                    a = len(cancel(x/y).free_symbols)
+                    a = len(cancel(x / y).free_symbols)
                     b = len(x.free_symbols)
                     c = len(y.free_symbols)
                     # TODO is there a better heuristic?
@@ -416,17 +421,21 @@ def _gammasimp(expr, as_comb):
             def compute_ST(expr):
                 if expr in inv:
                     return inv[expr]
-                return (expr.free_symbols, expr.atoms(Function).union(
-                        set(e.exp for e in expr.atoms(Pow))))
+                return (
+                    expr.free_symbols,
+                    expr.atoms(Function).union(set(e.exp for e in expr.atoms(Pow))),
+                )
 
             def update_ST(expr):
                 inv[expr] = compute_ST(expr)
+
             for expr in numer_gammas + denom_gammas + numer_others + denom_others:
                 update_ST(expr)
 
-            for gammas, numer, denom in [(
-                numer_gammas, numer_others, denom_others),
-                    (denom_gammas, denom_others, numer_others)]:
+            for gammas, numer, denom in [
+                (numer_gammas, numer_others, denom_others),
+                (denom_gammas, denom_others, numer_others),
+            ]:
                 new = []
                 while gammas:
                     g = gammas.pop()
@@ -437,16 +446,16 @@ def _gammasimp(expr, as_comb):
                         if y is not None:
                             numer.remove(y)
                             if y != g:
-                                numer.append(y/g)
-                                update_ST(y/g)
+                                numer.append(y / g)
+                                update_ST(y / g)
                             g += 1
                             cont = True
                         y = find_fuzzy(denom, g - 1)
                         if y is not None:
                             denom.remove(y)
                             if y != g - 1:
-                                numer.append((g - 1)/y)
-                                update_ST((g - 1)/y)
+                                numer.append((g - 1) / y)
+                                update_ST((g - 1) / y)
                             g -= 1
                             cont = True
                     new.append(g)
@@ -455,9 +464,12 @@ def _gammasimp(expr, as_comb):
 
         # =========== rebuild expr ==================================
 
-        return Mul(*[gamma(g) for g in numer_gammas]) \
-            / Mul(*[gamma(g) for g in denom_gammas]) \
-            * Mul(*numer_others) / Mul(*denom_others)
+        return (
+            Mul(*[gamma(g) for g in numer_gammas])
+            / Mul(*[gamma(g) for g in denom_gammas])
+            * Mul(*numer_others)
+            / Mul(*denom_others)
+        )
 
     # (for some reason we cannot use Basic.replace in this case)
     was = factor(expr)
@@ -465,8 +477,9 @@ def _gammasimp(expr, as_comb):
     if expr != was:
         expr = factor(expr)
 
-    expr = expr.replace(gamma,
-        lambda n: expand_func(gamma(n)) if n.is_Rational else gamma(n))
+    expr = expr.replace(
+        gamma, lambda n: expand_func(gamma(n)) if n.is_Rational else gamma(n)
+    )
 
     return expr
 
@@ -489,22 +502,22 @@ class _rf(Function):
                 for i in range(1, -n + 1):
                     result *= a - i
 
-                return 1/result
+                return 1 / result
         else:
             if b.is_Add:
                 c, _b = b.as_coeff_Add()
 
                 if c.is_Integer:
                     if c > 0:
-                        return _rf(a, _b)*_rf(a + _b, c)
+                        return _rf(a, _b) * _rf(a + _b, c)
                     elif c < 0:
-                        return _rf(a, _b)/_rf(a + _b + c, -c)
+                        return _rf(a, _b) / _rf(a + _b + c, -c)
 
             if a.is_Add:
                 c, _a = a.as_coeff_Add()
 
                 if c.is_Integer:
                     if c > 0:
-                        return _rf(_a, b)*_rf(_a + b, c)/_rf(_a, c)
+                        return _rf(_a, b) * _rf(_a + b, c) / _rf(_a, c)
                     elif c < 0:
-                        return _rf(_a, b)*_rf(_a + c, -c)/_rf(_a + b + c, -c)
+                        return _rf(_a, b) * _rf(_a + c, -c) / _rf(_a + b + c, -c)

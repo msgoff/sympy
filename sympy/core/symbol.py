@@ -23,11 +23,12 @@ def _filter_assumptions(kwargs):
     Keys are taken as assumptions if they correspond to an
     entry in ``_assume_defined``.
     """
-    assumptions, nonassumptions = map(dict, sift(kwargs.items(),
-        lambda i: i[0] in _assume_defined,
-        binary=True))
+    assumptions, nonassumptions = map(
+        dict, sift(kwargs.items(), lambda i: i[0] in _assume_defined, binary=True)
+    )
     Symbol._sanitize(assumptions)
     return assumptions, nonassumptions
+
 
 def _symbol(s, matching_symbol=None, **assumptions):
     """Return s if s is a Symbol, else if s is a string, return either
@@ -93,7 +94,7 @@ def _symbol(s, matching_symbol=None, **assumptions):
     elif isinstance(s, Symbol):
         return s
     else:
-        raise ValueError('symbol must be string for symbol name or Symbol')
+        raise ValueError("symbol must be string for symbol name or Symbol")
 
 
 def _uniquely_named_symbol(xname, exprs=(), compare=str, modify=None, **assumptions):
@@ -132,7 +133,7 @@ def _uniquely_named_symbol(xname, exprs=(), compare=str, modify=None, **assumpti
         exprs = [exprs]
     syms = set().union(*[e.free_symbols for e in exprs])
     if modify is None:
-        modify = lambda s: '_' + s
+        modify = lambda s: "_" + s
     while any(x == compare(s) for s in syms):
         x = modify(x)
     return _symbol(x, default, **assumptions)
@@ -156,7 +157,7 @@ class Symbol(AtomicExpr, Boolean):
 
     is_comparable = False
 
-    __slots__ = ('name',)
+    __slots__ = ("name",)
 
     is_Symbol = True
     is_symbol = True
@@ -181,11 +182,10 @@ class Symbol(AtomicExpr, Boolean):
         """
 
         # be strict about commutativity: cannot be None
-        is_commutative = fuzzy_bool(assumptions.get('commutative', True))
+        is_commutative = fuzzy_bool(assumptions.get("commutative", True))
         if is_commutative is None:
-            whose = '%s ' % obj.__name__ if obj else ''
-            raise ValueError(
-                '%scommutativity must be True or False.' % whose)
+            whose = "%s " % obj.__name__ if obj else ""
+            raise ValueError("%scommutativity must be True or False." % whose)
 
         # sanitize other assumptions so 1 -> True and 0 -> False
         for key in list(assumptions.keys()):
@@ -200,10 +200,15 @@ class Symbol(AtomicExpr, Boolean):
         for k in set(assumptions) & set(base):
             if assumptions[k] != base[k]:
                 from sympy.utilities.misc import filldedent
-                raise ValueError(filldedent('''
+
+                raise ValueError(
+                    filldedent(
+                        """
                     non-matching assumptions for %s: existing value
-                    is %s and new value is %s''' % (
-                    k, base[k], assumptions[k])))
+                    is %s and new value is %s"""
+                        % (k, base[k], assumptions[k])
+                    )
+                )
         base.update(assumptions)
         return base
 
@@ -238,22 +243,20 @@ class Symbol(AtomicExpr, Boolean):
         tmp_asm_copy = assumptions.copy()
 
         # be strict about commutativity
-        is_commutative = fuzzy_bool(assumptions.get('commutative', True))
-        assumptions['commutative'] = is_commutative
+        is_commutative = fuzzy_bool(assumptions.get("commutative", True))
+        assumptions["commutative"] = is_commutative
         obj._assumptions = StdFactKB(assumptions)
         obj._assumptions._generator = tmp_asm_copy  # Issue #8873
         return obj
 
-    __xnew__ = staticmethod(
-        __new_stage2__)            # never cached (e.g. dummy)
-    __xnew_cached_ = staticmethod(
-        cacheit(__new_stage2__))   # symbols are always cached
+    __xnew__ = staticmethod(__new_stage2__)  # never cached (e.g. dummy)
+    __xnew_cached_ = staticmethod(cacheit(__new_stage2__))  # symbols are always cached
 
     def __getnewargs__(self):
         return (self.name,)
 
     def __getstate__(self):
-        return {'_assumptions': self._assumptions}
+        return {"_assumptions": self._assumptions}
 
     def _hashable_content(self):
         # Note: user-specified assumptions not hashed, just derived ones
@@ -261,13 +264,17 @@ class Symbol(AtomicExpr, Boolean):
 
     def _eval_subs(self, old, new):
         from sympy.core.power import Pow
+
         if old.is_Pow:
             return Pow(self, S.One, evaluate=False)._eval_subs(old, new)
 
     @property
     def assumptions0(self):
-        return dict((key, value) for key, value
-                in self._assumptions.items() if value is not None)
+        return dict(
+            (key, value)
+            for key, value in self._assumptions.items()
+            if value is not None
+        )
 
     @cacheit
     def sort_key(self, order=None):
@@ -278,13 +285,15 @@ class Symbol(AtomicExpr, Boolean):
 
     def as_real_imag(self, deep=True, **hints):
         from sympy import im, re
-        if hints.get('ignore') == self:
+
+        if hints.get("ignore") == self:
             return None
         else:
             return (re(self), im(self))
 
     def _sage_(self):
         import sage.all as sage
+
         return sage.var(self.name)
 
     def is_constant(self, *wrt, **flags):
@@ -331,15 +340,17 @@ class Dummy(Symbol):
 
     _count = 0
     _prng = random.Random()
-    _base_dummy_index = _prng.randint(10**6, 9*10**6)
+    _base_dummy_index = _prng.randint(10 ** 6, 9 * 10 ** 6)
 
-    __slots__ = ('dummy_index',)
+    __slots__ = ("dummy_index",)
 
     is_Dummy = True
 
     def __new__(cls, name=None, dummy_index=None, **assumptions):
         if dummy_index is not None:
-            assert name is not None, "If you specify a dummy_index, you must also provide a name"
+            assert (
+                name is not None
+            ), "If you specify a dummy_index, you must also provide a name"
 
         if name is None:
             name = "Dummy_" + str(Dummy._count)
@@ -356,12 +367,16 @@ class Dummy(Symbol):
         return obj
 
     def __getstate__(self):
-        return {'_assumptions': self._assumptions, 'dummy_index': self.dummy_index}
+        return {"_assumptions": self._assumptions, "dummy_index": self.dummy_index}
 
     @cacheit
     def sort_key(self, order=None):
-        return self.class_key(), (
-            2, (str(self), self.dummy_index)), S.One.sort_key(), S.One
+        return (
+            self.class_key(),
+            (2, (str(self), self.dummy_index)),
+            S.One.sort_key(),
+            S.One,
+        )
 
     def _hashable_content(self):
         return Symbol._hashable_content(self) + (self.dummy_index,)
@@ -454,9 +469,10 @@ class Wild(Symbol):
     {a_: 2, b_: x**3*y*z}
 
     """
+
     is_Wild = True
 
-    __slots__ = ('exclude', 'properties')
+    __slots__ = ("exclude", "properties")
 
     def __new__(cls, name, exclude=(), properties=(), **assumptions):
         exclude = tuple([sympify(x) for x in exclude])
@@ -489,7 +505,8 @@ class Wild(Symbol):
         return repl_dict
 
 
-_range = _re.compile('([0-9]*:[0-9]+|[a-zA-Z]?:[a-zA-Z])')
+_range = _re.compile("([0-9]*:[0-9]+|[a-zA-Z]?:[a-zA-Z])")
+
 
 def symbols(names, **args):
     r"""
@@ -611,7 +628,7 @@ def symbols(names, **args):
 
     if isinstance(names, str):
         marker = 0
-        literals = [r'\,', r'\:', r'\ ']
+        literals = [r"\,", r"\:", r"\ "]
         for i in range(len(literals)):
             lit = literals.pop(0)
             if lit in names:
@@ -621,6 +638,7 @@ def symbols(names, **args):
                 marker += 1
                 names = names.replace(lit, lit_char)
                 literals.append((lit_char, lit[1:]))
+
         def literal(s):
             if literals:
                 for c, l in literals:
@@ -628,28 +646,28 @@ def symbols(names, **args):
             return s
 
         names = names.strip()
-        as_seq = names.endswith(',')
+        as_seq = names.endswith(",")
         if as_seq:
             names = names[:-1].rstrip()
         if not names:
-            raise ValueError('no symbols given')
+            raise ValueError("no symbols given")
 
         # split on commas
-        names = [n.strip() for n in names.split(',')]
+        names = [n.strip() for n in names.split(",")]
         if not all(n for n in names):
-            raise ValueError('missing symbol between commas')
+            raise ValueError("missing symbol between commas")
         # split on spaces
         for i in range(len(names) - 1, -1, -1):
-            names[i: i + 1] = names[i].split()
+            names[i : i + 1] = names[i].split()
 
-        cls = args.pop('cls', Symbol)
-        seq = args.pop('seq', as_seq)
+        cls = args.pop("cls", Symbol)
+        seq = args.pop("seq", as_seq)
 
         for name in names:
             if not name:
-                raise ValueError('missing symbol')
+                raise ValueError("missing symbol")
 
-            if ':' not in name:
+            if ":" not in name:
                 symbol = cls(literal(name), **args)
                 result.append(symbol)
                 continue
@@ -657,25 +675,33 @@ def symbols(names, **args):
             split = _range.split(name)
             # remove 1 layer of bounding parentheses around ranges
             for i in range(len(split) - 1):
-                if i and ':' in split[i] and split[i] != ':' and \
-                        split[i - 1].endswith('(') and \
-                        split[i + 1].startswith(')'):
+                if (
+                    i
+                    and ":" in split[i]
+                    and split[i] != ":"
+                    and split[i - 1].endswith("(")
+                    and split[i + 1].startswith(")")
+                ):
                     split[i - 1] = split[i - 1][:-1]
                     split[i + 1] = split[i + 1][1:]
             for i, s in enumerate(split):
-                if ':' in s:
-                    if s[-1].endswith(':'):
-                        raise ValueError('missing end range')
-                    a, b = s.split(':')
+                if ":" in s:
+                    if s[-1].endswith(":"):
+                        raise ValueError("missing end range")
+                    a, b = s.split(":")
                     if b[-1] in string.digits:
                         a = 0 if not a else int(a)
                         b = int(b)
                         split[i] = [str(c) for c in range(a, b)]
                     else:
-                        a = a or 'a'
-                        split[i] = [string.ascii_letters[c] for c in range(
-                            string.ascii_letters.index(a),
-                            string.ascii_letters.index(b) + 1)]  # inclusive
+                        a = a or "a"
+                        split[i] = [
+                            string.ascii_letters[c]
+                            for c in range(
+                                string.ascii_letters.index(a),
+                                string.ascii_letters.index(b) + 1,
+                            )
+                        ]  # inclusive
                     if not split[i]:
                         break
                 else:
@@ -685,7 +711,7 @@ def symbols(names, **args):
                 if len(split) == 1:
                     names = split[0]
                 else:
-                    names = [''.join(s) for s in cartes(*split)]
+                    names = ["".join(s) for s in cartes(*split)]
                 if literals:
                     result.extend([cls(literal(s), **args) for s in names])
                 else:
@@ -736,6 +762,7 @@ def var(names, **args):
     arguments can be passed to :func:`var`.
 
     """
+
     def traverse(symbols, frame):
         """Recursively inject symbols to the global namespace. """
         for symbol in symbols:
@@ -747,6 +774,7 @@ def var(names, **args):
                 traverse(symbol, frame)
 
     from inspect import currentframe
+
     frame = currentframe().f_back
 
     try:
@@ -763,6 +791,7 @@ def var(names, **args):
         del frame  # break cyclic dependencies as stated in inspect docs
 
     return syms
+
 
 def disambiguate(*iter):
     """
@@ -805,11 +834,11 @@ def disambiguate(*iter):
 
     """
     new_iter = Tuple(*iter)
-    key = lambda x:tuple(sorted(x.assumptions0.items()))
+    key = lambda x: tuple(sorted(x.assumptions0.items()))
     syms = ordered(new_iter.free_symbols, keys=key)
     mapping = {}
     for s in syms:
-        mapping.setdefault(str(s).lstrip('_'), []).append(s)
+        mapping.setdefault(str(s).lstrip("_"), []).append(s)
     reps = {}
     for k in mapping:
         # the first or only symbol doesn't get subscripted but make

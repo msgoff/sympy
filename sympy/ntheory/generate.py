@@ -7,6 +7,7 @@ from __future__ import print_function, division
 import random
 from bisect import bisect
 from itertools import count
+
 # Using arrays for sieving instead of lists greatly reduces
 # memory consumption
 from array import array as _array
@@ -17,15 +18,15 @@ from .primetest import isprime
 
 
 def _azeros(n):
-    return _array('l', [0]*n)
+    return _array("l", [0] * n)
 
 
 def _aset(*v):
-    return _array('l', v)
+    return _array("l", v)
 
 
 def _arange(a, b):
-    return _array('l', range(a, b))
+    return _array("l", range(a, b))
 
 
 class Sieve:
@@ -48,24 +49,39 @@ class Sieve:
     # data shared (and updated) by all Sieve instances
     def __init__(self):
         self._n = 6
-        self._list = _aset(2, 3, 5, 7, 11, 13) # primes
-        self._tlist = _aset(0, 1, 1, 2, 2, 4) # totient
-        self._mlist = _aset(0, 1, -1, -1, 0, -1) # mobius
+        self._list = _aset(2, 3, 5, 7, 11, 13)  # primes
+        self._tlist = _aset(0, 1, 1, 2, 2, 4)  # totient
+        self._mlist = _aset(0, 1, -1, -1, 0, -1)  # mobius
         assert all(len(i) == self._n for i in (self._list, self._tlist, self._mlist))
 
     def __repr__(self):
-        return ("<%s sieve (%i): %i, %i, %i, ... %i, %i\n"
-             "%s sieve (%i): %i, %i, %i, ... %i, %i\n"
-             "%s sieve (%i): %i, %i, %i, ... %i, %i>") % (
-             'prime', len(self._list),
-                 self._list[0], self._list[1], self._list[2],
-                 self._list[-2], self._list[-1],
-             'totient', len(self._tlist),
-                 self._tlist[0], self._tlist[1],
-                 self._tlist[2], self._tlist[-2], self._tlist[-1],
-             'mobius', len(self._mlist),
-                 self._mlist[0], self._mlist[1],
-                 self._mlist[2], self._mlist[-2], self._mlist[-1])
+        return (
+            "<%s sieve (%i): %i, %i, %i, ... %i, %i\n"
+            "%s sieve (%i): %i, %i, %i, ... %i, %i\n"
+            "%s sieve (%i): %i, %i, %i, ... %i, %i>"
+        ) % (
+            "prime",
+            len(self._list),
+            self._list[0],
+            self._list[1],
+            self._list[2],
+            self._list[-2],
+            self._list[-1],
+            "totient",
+            len(self._tlist),
+            self._tlist[0],
+            self._tlist[1],
+            self._tlist[2],
+            self._tlist[-2],
+            self._tlist[-1],
+            "mobius",
+            len(self._mlist),
+            self._mlist[0],
+            self._mlist[1],
+            self._mlist[2],
+            self._mlist[-2],
+            self._mlist[-1],
+        )
 
     def _reset(self, prime=None, totient=None, mobius=None):
         """Reset all caches (default). To reset one or more set the
@@ -73,11 +89,11 @@ class Sieve:
         if all(i is None for i in (prime, totient, mobius)):
             prime = totient = mobius = True
         if prime:
-            self._list = self._list[:self._n]
+            self._list = self._list[: self._n]
         if totient:
-            self._tlist = self._tlist[:self._n]
+            self._tlist = self._tlist[: self._n]
         if mobius:
-            self._mlist = self._mlist[:self._n]
+            self._mlist = self._mlist[: self._n]
 
     def extend(self, n):
         """Grow the sieve to cover all primes <= n (a real number).
@@ -98,7 +114,7 @@ class Sieve:
         # We need to sieve against all bases up to sqrt(n).
         # This is a recursive call that will do nothing if there are enough
         # known bases already.
-        maxbase = int(n**0.5) + 1
+        maxbase = int(n ** 0.5) + 1
         self.extend(maxbase)
 
         # Create a new sieve starting from sqrt(n)
@@ -114,7 +130,7 @@ class Sieve:
                 newsieve[i] = 0
 
         # Merge the sieves
-        self._list += _array('l', [x for x in newsieve if x])
+        self._list += _array("l", [x for x in newsieve if x])
 
     def extend_to_no(self, i):
         """Extend to include the ith prime number.
@@ -318,7 +334,7 @@ class Sieve:
                 # sieve[:5] would be empty (starting at -1), let's
                 # just be explicit and raise.
                 raise IndexError("Sieve indices start at 1.")
-            return self._list[start - 1:n.stop - 1:n.step]
+            return self._list[start - 1 : n.stop - 1 : n.step]
         else:
             if n < 1:
                 # offset is one, so forbid explicit access to sieve[0]
@@ -327,6 +343,7 @@ class Sieve:
             n = as_int(n)
             self.extend_to_no(n)
             return self._list[n - 1]
+
 
 # Generate a global object for repeated use in trial division etc
 sieve = Sieve()
@@ -390,8 +407,8 @@ def prime(nth):
     from sympy.functions.special.error_functions import li
     from sympy.functions.elementary.exponential import log
 
-    a = 2 # Lower bound for binary search
-    b = int(n*(log(n) + log(log(n)))) # Upper bound for the search.
+    a = 2  # Lower bound for binary search
+    b = int(n * (log(n) + log(log(n))))  # Upper bound for the search.
 
     while a < b:
         mid = (a + b) >> 1
@@ -474,6 +491,7 @@ class primepi(Function):
         primerange : Generate all primes in a given range
         prime : Return the nth prime
     """
+
     @classmethod
     def eval(cls, n):
         if n is S.Infinity:
@@ -567,7 +585,7 @@ def nextprime(n, ith=1):
             return sieve[u + 1]
         else:
             return sieve[u]
-    nn = 6*(n//6)
+    nn = 6 * (n // 6)
     if nn == n:
         n += 1
         if isprime(n):
@@ -620,10 +638,10 @@ def prevprime(n):
     if n <= sieve._list[-1]:
         l, u = sieve.search(n)
         if l == u:
-            return sieve[l-1]
+            return sieve[l - 1]
         else:
             return sieve[l]
-    nn = 6*(n//6)
+    nn = 6 * (n // 6)
     if n - nn <= 1:
         n = nn - 1
         if isprime(n):
@@ -886,7 +904,7 @@ def cycle_length(f, x0, nmax=None, values=False):
     i = 0
     while tortoise != hare and (not nmax or i < nmax):
         i += 1
-        if power == lam:   # time to start a new power of two?
+        if power == lam:  # time to start a new power of two?
             tortoise = hare
             power *= 2
             lam = 0
@@ -961,8 +979,8 @@ def composite(nth):
     from sympy.functions.special.error_functions import li
     from sympy.functions.elementary.exponential import log
 
-    a = 4 # Lower bound for binary search
-    b = int(n*(log(n) + log(log(n)))) # Upper bound for the search.
+    a = 4  # Lower bound for binary search
+    b = int(n * (log(n) + log(log(n))))  # Upper bound for the search.
 
     while a < b:
         mid = (a + b) >> 1

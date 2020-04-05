@@ -20,18 +20,17 @@ https://stackoverflow.com/questions/22195382/how-to-check-if-a-module-library-pa
 """
 
 # These libraries will always be imported with SymPy
-hard_dependencies = ['mpmath']
+hard_dependencies = ["mpmath"]
 
 # These libraries are optional, but are always imported at SymPy import time
 # when they are installed. External libraries should only be added to this
 # list if they are required for core SymPy functionality.
-hard_optional_dependencies = ['gmpy', 'gmpy2', 'fastcache', 'pycosat']
+hard_optional_dependencies = ["gmpy", "gmpy2", "fastcache", "pycosat"]
 
 import sys
 import os
 
-stdlib = {p for p in sys.path if p.startswith(sys.prefix) and
-    'site-packages' not in p}
+stdlib = {p for p in sys.path if p.startswith(sys.prefix) and "site-packages" not in p}
 
 existing_modules = list(sys.modules.keys())
 
@@ -41,25 +40,28 @@ existing_modules = list(sys.modules.keys())
 this_path = os.path.abspath(__file__)
 this_dir = os.path.dirname(this_path)
 sympy_top = os.path.split(this_dir)[0]
-sympy_dir = os.path.join(sympy_top, 'sympy')
+sympy_dir = os.path.join(sympy_top, "sympy")
 
 if os.path.isdir(sympy_dir):
     sys.path.insert(0, sympy_top)
+
 
 def test_external_imports():
     exec("from sympy import *", {})
 
     bad = []
     for mod in sys.modules:
-        if '.' in mod and mod.split('.')[0] in sys.modules:
+        if "." in mod and mod.split(".")[0] in sys.modules:
             # Only worry about the top-level modules
             continue
 
         if mod in existing_modules:
             continue
 
-        if any(mod == i or mod.startswith(i + '.') for i in ['sympy'] +
-            hard_dependencies + hard_optional_dependencies):
+        if any(
+            mod == i or mod.startswith(i + ".")
+            for i in ["sympy"] + hard_dependencies + hard_optional_dependencies
+        ):
             continue
 
         if mod in sys.builtin_module_names:
@@ -70,7 +72,7 @@ def test_external_imports():
             bad.append(mod)
             continue
 
-        if fname.endswith(('__init__.py', '__init__.pyc', '__init__.pyo')):
+        if fname.endswith(("__init__.py", "__init__.pyc", "__init__.pyo")):
             fname = os.path.dirname(fname)
 
         if os.path.dirname(fname) in stdlib:
@@ -79,10 +81,14 @@ def test_external_imports():
         bad.append(mod)
 
     if bad:
-        raise RuntimeError("""Unexpected external modules found when running 'from sympy import *':
-    """ + '\n    '.join(bad))
+        raise RuntimeError(
+            """Unexpected external modules found when running 'from sympy import *':
+    """
+            + "\n    ".join(bad)
+        )
 
     print("No unexpected external modules were imported with 'from sympy import *'!")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_external_imports()

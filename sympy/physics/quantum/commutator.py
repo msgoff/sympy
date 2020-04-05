@@ -9,13 +9,11 @@ from sympy.physics.quantum.dagger import Dagger
 from sympy.physics.quantum.operator import Operator
 
 
-__all__ = [
-    'Commutator'
-]
+__all__ = ["Commutator"]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Commutator
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 class Commutator(Expr):
@@ -87,6 +85,7 @@ class Commutator(Expr):
 
     .. [1] https://en.wikipedia.org/wiki/Commutator
     """
+
     is_commutative = False
 
     def __new__(cls, A, B):
@@ -115,7 +114,7 @@ class Commutator(Expr):
         # Canonical ordering of arguments
         # The Commutator [A, B] is in canonical form if A < B.
         if a.compare(b) == 1:
-            return S.NegativeOne*cls(b, a)
+            return S.NegativeOne * cls(b, a)
 
     def _expand_pow(self, A, B, sign):
         exp = A.exp
@@ -124,14 +123,14 @@ class Commutator(Expr):
             return self
         base = A.base
         if exp.is_negative:
-            base = A.base**-1
+            base = A.base ** -1
             exp = -exp
         comm = Commutator(base, B).expand(commutator=True)
 
-        result = base**(exp - 1) * comm
+        result = base ** (exp - 1) * comm
         for i in range(1, exp):
-            result += base**(exp - 1 - i) * comm * base**i
-        return sign*result.expand()
+            result += base ** (exp - 1 - i) * comm * base ** i
+        return sign * result.expand()
 
     def _eval_expand_commutator(self, **hints):
         A = self.args[0]
@@ -202,20 +201,21 @@ class Commutator(Expr):
                 comm = A._eval_commutator(B, **hints)
             except NotImplementedError:
                 try:
-                    comm = -1*B._eval_commutator(A, **hints)
+                    comm = -1 * B._eval_commutator(A, **hints)
                 except NotImplementedError:
                     comm = None
             if comm is not None:
                 return comm.doit(**hints)
-        return (A*B - B*A).doit(**hints)
+        return (A * B - B * A).doit(**hints)
 
     def _eval_adjoint(self):
         return Commutator(Dagger(self.args[1]), Dagger(self.args[0]))
 
     def _sympyrepr(self, printer, *args):
         return "%s(%s,%s)" % (
-            self.__class__.__name__, printer._print(
-                self.args[0]), printer._print(self.args[1])
+            self.__class__.__name__,
+            printer._print(self.args[0]),
+            printer._print(self.args[1]),
         )
 
     def _sympystr(self, printer, *args):
@@ -223,11 +223,12 @@ class Commutator(Expr):
 
     def _pretty(self, printer, *args):
         pform = printer._print(self.args[0], *args)
-        pform = prettyForm(*pform.right((prettyForm(u','))))
+        pform = prettyForm(*pform.right((prettyForm(u","))))
         pform = prettyForm(*pform.right((printer._print(self.args[1], *args))))
-        pform = prettyForm(*pform.parens(left='[', right=']'))
+        pform = prettyForm(*pform.parens(left="[", right="]"))
         return pform
 
     def _latex(self, printer, *args):
-        return "\\left[%s,%s\\right]" % tuple([
-            printer._print(arg, *args) for arg in self.args])
+        return "\\left[%s,%s\\right]" % tuple(
+            [printer._print(arg, *args) for arg in self.args]
+        )

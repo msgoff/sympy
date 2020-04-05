@@ -11,8 +11,17 @@ from __future__ import division
 from sympy.physics.units import DimensionSystem
 from sympy.physics.units.definitions import c, eV, hbar
 from sympy.physics.units.definitions.dimension_definitions import (
-    action, energy, force, frequency, length, mass, momentum,
-    power, time, velocity)
+    action,
+    energy,
+    force,
+    frequency,
+    length,
+    mass,
+    momentum,
+    power,
+    time,
+    velocity,
+)
 from sympy.physics.units.prefixes import PREFIXES, prefix_unit
 from sympy.physics.units.unitsystem import UnitSystem
 
@@ -20,7 +29,7 @@ from sympy.physics.units.unitsystem import UnitSystem
 # dimension system
 _natural_dim = DimensionSystem(
     base_dims=(action, energy, velocity),
-    derived_dims=(length, mass, time, momentum, force, power, frequency)
+    derived_dims=(length, mass, time, momentum, force, power, frequency),
 )
 
 units = prefix_unit(eV, PREFIXES)

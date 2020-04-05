@@ -241,8 +241,8 @@ class Printer(object):
 
     @property
     def order(self):
-        if 'order' in self._settings:
-            return self._settings['order']
+        if "order" in self._settings:
+            return self._settings["order"]
         else:
             raise AttributeError("No order defined.")
 
@@ -263,8 +263,11 @@ class Printer(object):
             # If the printer defines a name for a printing method
             # (Printer.printmethod) and the object knows for itself how it
             # should be printed, use that method.
-            if (self.printmethod and hasattr(expr, self.printmethod)
-                    and not isinstance(expr, BasicMeta)):
+            if (
+                self.printmethod
+                and hasattr(expr, self.printmethod)
+                and not isinstance(expr, BasicMeta)
+            ):
                 return getattr(expr, self.printmethod)(self, **kwargs)
 
             # See if the class of expr is known, or if one of its super
@@ -273,25 +276,32 @@ class Printer(object):
             # Function('gamma') does not get dispatched to _print_gamma
             classes = type(expr).__mro__
             if AppliedUndef in classes:
-                classes = classes[classes.index(AppliedUndef):]
+                classes = classes[classes.index(AppliedUndef) :]
             if UndefinedFunction in classes:
-                classes = classes[classes.index(UndefinedFunction):]
+                classes = classes[classes.index(UndefinedFunction) :]
             # Another exception: if someone subclasses a known function, e.g.,
             # gamma, and changes the name, then ignore _print_gamma
             if Function in classes:
                 i = classes.index(Function)
-                classes = tuple(c for c in classes[:i] if \
-                    c.__name__ == classes[0].__name__ or \
-                    c.__name__.endswith("Base")) + classes[i:]
+                classes = (
+                    tuple(
+                        c
+                        for c in classes[:i]
+                        if c.__name__ == classes[0].__name__
+                        or c.__name__.endswith("Base")
+                    )
+                    + classes[i:]
+                )
             for cls in classes:
-                printmethod = '_print_' + cls.__name__
+                printmethod = "_print_" + cls.__name__
                 if hasattr(self, printmethod):
                     return getattr(self, printmethod)(expr, **kwargs)
             # Unknown object, fall back to the emptyPrinter. Checks what type of
             # decimal separator to print.
-            if (self.emptyPrinter == str) & \
-                (self._settings.get('decimal_separator', None) == 'comma'):
-                expr = str(expr).replace('.', '{,}')
+            if (self.emptyPrinter == str) & (
+                self._settings.get("decimal_separator", None) == "comma"
+            ):
+                expr = str(expr).replace(".", "{,}")
             return self.emptyPrinter(expr)
         finally:
             self._print_level -= 1
@@ -300,7 +310,7 @@ class Printer(object):
         """A compatibility function for ordering terms in Add. """
         order = order or self.order
 
-        if order == 'old':
+        if order == "old":
             return sorted(Add.make_args(expr), key=cmp_to_key(Basic._compare_pretty))
         else:
             return expr.as_ordered_terms(order=order)

@@ -33,7 +33,7 @@ def rescale(y, W, H, mi, ma):
             else:
                 # XXX There are some test failings because of the
                 # difference between the python 2 and 3 rounding.
-                rescaled = Float((normalized*H + H/2) * (H-1)/H).round()
+                rescaled = Float((normalized * H + H / 2) * (H - 1) / H).round()
                 rescaled = int(rescaled)
                 y_new.append(rescaled)
         else:
@@ -42,7 +42,7 @@ def rescale(y, W, H, mi, ma):
 
 
 def linspace(start, stop, num):
-    return [start + (stop - start) * x / (num-1) for x in range(num)]
+    return [start + (stop - start) * x / (num - 1) for x in range(num)]
 
 
 def textplot_str(expr, a, b, W=55, H=18):
@@ -50,8 +50,8 @@ def textplot_str(expr, a, b, W=55, H=18):
     free = expr.free_symbols
     if len(free) > 1:
         raise ValueError(
-            "The expression must have a single variable. (Got {})"
-            .format(free))
+            "The expression must have a single variable. (Got {})".format(free)
+        )
     x = free.pop() if free else Dummy()
     f = lambdify([x], expr)
     a = float(a)
@@ -74,7 +74,7 @@ def textplot_str(expr, a, b, W=55, H=18):
         mi = min(y_valid)
         if ma == mi:
             if ma:
-                mi, ma = sorted([0, 2*ma])
+                mi, ma = sorted([0, 2 * ma])
             else:
                 mi, ma = -1, 1
     else:
@@ -86,33 +86,35 @@ def textplot_str(expr, a, b, W=55, H=18):
     # Draw plot
     margin = 7
     for h in range(H - 1, -1, -1):
-        s = [' '] * W
+        s = [" "] * W
         for i in range(W):
             if y[i] == h:
                 if (i == 0 or y[i - 1] == h - 1) and (i == W - 1 or y[i + 1] == h + 1):
-                    s[i] = '/'
-                elif (i == 0 or y[i - 1] == h + 1) and (i == W - 1 or y[i + 1] == h - 1):
-                    s[i] = '\\'
+                    s[i] = "/"
+                elif (i == 0 or y[i - 1] == h + 1) and (
+                    i == W - 1 or y[i + 1] == h - 1
+                ):
+                    s[i] = "\\"
                 else:
-                    s[i] = '.'
+                    s[i] = "."
 
         # Print y values
-        if h in (0, H//2, H - 1):
+        if h in (0, H // 2, H - 1):
             prefix = ("%g" % y_bins[h]).rjust(margin)[:margin]
         else:
-            prefix = " "*margin
+            prefix = " " * margin
         s = "".join(s)
-        if h == H//2:
+        if h == H // 2:
             s = s.replace(" ", "-")
         yield prefix + " | " + s
 
     # Print x values
     bottom = " " * (margin + 3)
-    bottom += ("%g" % x[0]).ljust(W//2)
+    bottom += ("%g" % x[0]).ljust(W // 2)
     if W % 2 == 1:
-        bottom += ("%g" % x[W//2]).ljust(W//2)
+        bottom += ("%g" % x[W // 2]).ljust(W // 2)
     else:
-        bottom += ("%g" % x[W//2]).ljust(W//2-1)
+        bottom += ("%g" % x[W // 2]).ljust(W // 2 - 1)
     bottom += "%g" % x[-1]
     yield bottom
 

@@ -5,8 +5,7 @@ from __future__ import print_function, division
 from sympy.core import S
 from sympy.polys import Poly, groebner, roots
 from sympy.polys.polytools import parallel_poly_from_expr
-from sympy.polys.polyerrors import (ComputationFailed,
-    PolificationFailed, CoercionFailed)
+from sympy.polys.polyerrors import ComputationFailed, PolificationFailed, CoercionFailed
 from sympy.simplify import rcollect
 from sympy.utilities import default_sort_key, postfixes
 from sympy.utilities.misc import filldedent
@@ -33,7 +32,7 @@ def solve_poly_system(seq, *gens, **args):
     try:
         polys, opt = parallel_poly_from_expr(seq, *gens, **args)
     except PolificationFailed as exc:
-        raise ComputationFailed('solve_poly_system', len(seq), exc)
+        raise ComputationFailed("solve_poly_system", len(seq), exc)
 
     if len(polys) == len(opt.gens) == 2:
         f, g = polys
@@ -159,6 +158,7 @@ def solve_generic(polys, opt):
     >>> solve_generic([a, b], NewOption)
     [(0, 0), (1/4, -1/16)]
     """
+
     def _is_univariate(f):
         """Returns True if 'f' is univariate in its last variable. """
         for monom in f.monoms():
@@ -195,10 +195,14 @@ def solve_generic(polys, opt):
         if len(univariate) == 1:
             f = univariate.pop()
         else:
-            raise NotImplementedError(filldedent('''
+            raise NotImplementedError(
+                filldedent(
+                    """
                 only zero-dimensional systems supported
                 (finite number of solutions)
-                '''))
+                """
+                )
+            )
 
         gens = f.gens
         gen = gens[-1]
@@ -227,10 +231,14 @@ def solve_generic(polys, opt):
                 solutions.append(solution + (zero,))
 
         if solutions and len(solutions[0]) != len(gens):
-            raise NotImplementedError(filldedent('''
+            raise NotImplementedError(
+                filldedent(
+                    """
                 only zero-dimensional systems supported
                 (finite number of solutions)
-                '''))
+                """
+                )
+            )
         return solutions
 
     try:
@@ -274,7 +282,7 @@ def solve_triangulated(polys, *gens, **args):
     G = groebner(polys, gens, polys=True)
     G = list(reversed(G))
 
-    domain = args.get('domain')
+    domain = args.get("domain")
 
     if domain is not None:
         for i, g in enumerate(G):

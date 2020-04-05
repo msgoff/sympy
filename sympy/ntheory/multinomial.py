@@ -23,8 +23,8 @@ def binomial_coefficients(n):
     n = as_int(n)
     d = {(0, n): 1, (n, 0): 1}
     a = 1
-    for k in range(1, n//2 + 1):
-        a = (a * (n - k + 1))//k
+    for k in range(1, n // 2 + 1):
+        a = (a * (n - k + 1)) // k
         d[k, n - k] = d[n - k, k] = a
     return d
 
@@ -48,8 +48,8 @@ def binomial_coefficients_list(n):
     n = as_int(n)
     d = [1] * (n + 1)
     a = 1
-    for k in range(1, n//2 + 1):
-        a = (a * (n - k + 1))//k
+    for k in range(1, n // 2 + 1):
+        a = (a * (n - k + 1)) // k
         d[k] = d[n - k] = a
     return d
 
@@ -91,7 +91,7 @@ def multinomial_coefficients(m, n):
         return {(): 1}
     if m == 2:
         return binomial_coefficients(n)
-    if m >= 2*n and n > 1:
+    if m >= 2 * n and n > 1:
         return dict(multinomial_coefficients_iterator(m, n))
     t = [n] + [0] * (m - 1)
     r = {tuple(t): 1}
@@ -152,10 +152,10 @@ def multinomial_coefficients_iterator(m, n, _tuple=tuple):
     """
     m = as_int(m)
     n = as_int(n)
-    if m < 2*n or n == 1:
+    if m < 2 * n or n == 1:
         mc = multinomial_coefficients(m, n)
         for k, v in mc.items():
-            yield(k, v)
+            yield (k, v)
     else:
         mc = multinomial_coefficients(n, n)
         mc1 = {}

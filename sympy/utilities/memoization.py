@@ -20,7 +20,9 @@ def recurrence_memo(initial):
             for i in range(L, n + 1):
                 cache.append(f(i, cache))
             return cache[-1]
+
         return g
+
     return decorator
 
 
@@ -58,4 +60,5 @@ def assoc_recurrence_memo(base_seq):
             return cache[n][m]
 
         return g
+
     return decorator

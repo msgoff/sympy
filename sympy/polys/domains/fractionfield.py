@@ -7,6 +7,7 @@ from sympy.polys.domains.field import Field
 from sympy.polys.polyerrors import CoercionFailed, GeneratorsError
 from sympy.utilities import public
 
+
 @public
 class FractionField(Field, CompositeDomain):
     """A class for representing multivariate rational function fields. """
@@ -58,16 +59,20 @@ class FractionField(Field, CompositeDomain):
         return FractionField(self.domain.get_exact(), self.symbols)
 
     def __str__(self):
-        return str(self.domain) + '(' + ','.join(map(str, self.symbols)) + ')'
+        return str(self.domain) + "(" + ",".join(map(str, self.symbols)) + ")"
 
     def __hash__(self):
-        return hash((self.__class__.__name__, self.dtype.field, self.domain, self.symbols))
+        return hash(
+            (self.__class__.__name__, self.dtype.field, self.domain, self.symbols)
+        )
 
     def __eq__(self, other):
         """Returns `True` if two domains are equivalent. """
-        return isinstance(other, FractionField) and \
-            (self.dtype.field, self.domain, self.symbols) ==\
-            (other.dtype.field, other.domain, other.symbols)
+        return isinstance(other, FractionField) and (
+            self.dtype.field,
+            self.domain,
+            self.symbols,
+        ) == (other.dtype.field, other.domain, other.symbols)
 
     def to_sympy(self, a):
         """Convert `a` to a SymPy object. """

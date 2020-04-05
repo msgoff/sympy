@@ -94,19 +94,35 @@ from sympy.printing.julia import JuliaCodePrinter
 from sympy.printing.octave import OctaveCodePrinter
 from sympy.printing.rust import RustCodePrinter
 from sympy.tensor import Idx, Indexed, IndexedBase
-from sympy.matrices import (MatrixSymbol, ImmutableMatrix, MatrixBase,
-                            MatrixExpr, MatrixSlice)
+from sympy.matrices import (
+    MatrixSymbol,
+    ImmutableMatrix,
+    MatrixBase,
+    MatrixExpr,
+    MatrixSlice,
+)
 
 
 __all__ = [
     # description of routines
-    "Routine", "DataType", "default_datatypes", "get_default_datatype",
-    "Argument", "InputArgument", "OutputArgument", "Result",
+    "Routine",
+    "DataType",
+    "default_datatypes",
+    "get_default_datatype",
+    "Argument",
+    "InputArgument",
+    "OutputArgument",
+    "Result",
     # routines -> code
-    "CodeGen", "CCodeGen", "FCodeGen", "JuliaCodeGen", "OctaveCodeGen",
+    "CodeGen",
+    "CCodeGen",
+    "FCodeGen",
+    "JuliaCodeGen",
+    "OctaveCodeGen",
     "RustCodeGen",
     # friendly functions
-    "codegen", "make_routine",
+    "codegen",
+    "make_routine",
 ]
 
 
@@ -192,10 +208,13 @@ class Routine(object):
         # InputArguments/InOutArguments---subset because user could
         # specify additional (unused) InputArguments or local_vars.
         notcovered = symbols.difference(
-            input_symbols.union(local_symbols).union(global_vars))
+            input_symbols.union(local_symbols).union(global_vars)
+        )
         if notcovered != set([]):
-            raise ValueError("Symbols needed for output are not in input " +
-                             ", ".join([str(x) for x in notcovered]))
+            raise ValueError(
+                "Symbols needed for output are not in input "
+                + ", ".join([str(x) for x in notcovered])
+            )
 
         self.name = name
         self.arguments = arguments
@@ -204,7 +223,12 @@ class Routine(object):
         self.global_vars = global_vars
 
     def __str__(self):
-        return self.__class__.__name__ + "({name!r}, {arguments}, {results}, {local_vars}, {global_vars})".format(**self.__dict__)
+        return (
+            self.__class__.__name__
+            + "({name!r}, {arguments}, {results}, {local_vars}, {global_vars})".format(
+                **self.__dict__
+            )
+        )
 
     __repr__ = __str__
 
@@ -229,14 +253,18 @@ class Routine(object):
 
         If return values are present, they are at the end ot the list.
         """
-        args = [arg for arg in self.arguments if isinstance(
-            arg, (OutputArgument, InOutArgument))]
+        args = [
+            arg
+            for arg in self.arguments
+            if isinstance(arg, (OutputArgument, InOutArgument))
+        ]
         args.extend(self.results)
         return args
 
 
 class DataType(object):
     """Holds strings for a certain datatype in different languages."""
+
     def __init__(self, cname, fname, pyname, jlname, octname, rsname):
         self.cname = cname
         self.fname = fname
@@ -249,15 +277,17 @@ class DataType(object):
 default_datatypes = {
     "int": DataType("int", "INTEGER*4", "int", "", "", "i32"),
     "float": DataType("double", "REAL*8", "float", "", "", "f64"),
-    "complex": DataType("double", "COMPLEX*16", "complex", "", "", "float") #FIXME:
-       # complex is only supported in fortran, python, julia, and octave.
-       # So to not break c or rust code generation, we stick with double or
-       # float, respecitvely (but actually should raise an exception for
-       # explicitly complex variables (x.is_complex==True))
+    "complex": DataType("double", "COMPLEX*16", "complex", "", "", "float")  # FIXME:
+    # complex is only supported in fortran, python, julia, and octave.
+    # So to not break c or rust code generation, we stick with double or
+    # float, respecitvely (but actually should raise an exception for
+    # explicitly complex variables (x.is_complex==True))
 }
 
 
 COMPLEX_ALLOWED = False
+
+
 def get_default_datatype(expr, complex_allowed=None):
     """Derives an appropriate datatype based on the expression."""
     if complex_allowed is None:
@@ -271,7 +301,7 @@ def get_default_datatype(expr, complex_allowed=None):
     elif expr.is_real:
         return default_datatypes["float"]
     elif isinstance(expr, MatrixBase):
-        #check all entries
+        # check all entries
         dt = "int"
         for element in expr:
             if dt == "int" and not element.is_integer:
@@ -312,20 +342,21 @@ class Variable(object):
         if datatype is None:
             datatype = get_default_datatype(name)
         elif not isinstance(datatype, DataType):
-            raise TypeError("The (optional) `datatype' argument must be an "
-                            "instance of the DataType class.")
-        if dimensions and not isinstance(dimensions, (tuple, list)):
             raise TypeError(
-                "The dimension argument must be a sequence of tuples")
+                "The (optional) `datatype' argument must be an "
+                "instance of the DataType class."
+            )
+        if dimensions and not isinstance(dimensions, (tuple, list)):
+            raise TypeError("The dimension argument must be a sequence of tuples")
 
         self._name = name
         self._datatype = {
-            'C': datatype.cname,
-            'FORTRAN': datatype.fname,
-            'JULIA': datatype.jlname,
-            'OCTAVE': datatype.octname,
-            'PYTHON': datatype.pyname,
-            'RUST': datatype.rsname,
+            "C": datatype.cname,
+            "FORTRAN": datatype.fname,
+            "JULIA": datatype.jlname,
+            "OCTAVE": datatype.octname,
+            "PYTHON": datatype.pyname,
+            "RUST": datatype.rsname,
         }
         self.dimensions = dimensions
         self.precision = precision
@@ -357,8 +388,9 @@ class Variable(object):
         try:
             return self._datatype[language.upper()]
         except KeyError:
-            raise CodeGenError("Has datatypes for languages: %s" %
-                    ", ".join(self._datatype))
+            raise CodeGenError(
+                "Has datatypes for languages: %s" % ", ".join(self._datatype)
+            )
 
 
 class Argument(Variable):
@@ -367,6 +399,7 @@ class Argument(Variable):
     This structure is refined in the descendants below.
 
     """
+
     pass
 
 
@@ -382,13 +415,13 @@ class ResultBase(object):
     only if necessary.
 
     """
+
     def __init__(self, expr, result_var):
         self.expr = expr
         self.result_var = result_var
 
     def __str__(self):
-        return "%s(%r, %r)" % (self.__class__.__name__, self.expr,
-            self.result_var)
+        return "%s(%r, %r)" % (self.__class__.__name__, self.expr, self.result_var)
 
     __repr__ = __str__
 
@@ -396,7 +429,9 @@ class ResultBase(object):
 class OutputArgument(Argument, ResultBase):
     """OutputArgument are always initialized in the routine."""
 
-    def __init__(self, name, result_var, expr, datatype=None, dimensions=None, precision=None):
+    def __init__(
+        self, name, result_var, expr, datatype=None, dimensions=None, precision=None
+    ):
         """Return a new variable.
 
         Parameters
@@ -434,7 +469,12 @@ class OutputArgument(Argument, ResultBase):
         ResultBase.__init__(self, expr, result_var)
 
     def __str__(self):
-        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.result_var, self.expr)
+        return "%s(%r, %r, %r)" % (
+            self.__class__.__name__,
+            self.name,
+            self.result_var,
+            self.expr,
+        )
 
     __repr__ = __str__
 
@@ -442,17 +482,23 @@ class OutputArgument(Argument, ResultBase):
 class InOutArgument(Argument, ResultBase):
     """InOutArgument are never initialized in the routine."""
 
-    def __init__(self, name, result_var, expr, datatype=None, dimensions=None, precision=None):
+    def __init__(
+        self, name, result_var, expr, datatype=None, dimensions=None, precision=None
+    ):
         if not datatype:
             datatype = get_default_datatype(expr)
         Argument.__init__(self, name, datatype, dimensions, precision)
         ResultBase.__init__(self, expr, result_var)
+
     __init__.__doc__ = OutputArgument.__init__.__doc__
 
-
     def __str__(self):
-        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.expr,
-            self.result_var)
+        return "%s(%r, %r, %r)" % (
+            self.__class__.__name__,
+            self.name,
+            self.expr,
+            self.result_var,
+        )
 
     __repr__ = __str__
 
@@ -468,8 +514,15 @@ class Result(Variable, ResultBase):
 
     """
 
-    def __init__(self, expr, name=None, result_var=None, datatype=None,
-                 dimensions=None, precision=None):
+    def __init__(
+        self,
+        expr,
+        name=None,
+        result_var=None,
+        datatype=None,
+        dimensions=None,
+        precision=None,
+    ):
         """Initialize a return value.
 
         Parameters
@@ -506,10 +559,10 @@ class Result(Variable, ResultBase):
             raise TypeError("The first argument must be a sympy expression.")
 
         if name is None:
-            name = 'result_%d' % abs(hash(expr))
+            name = "result_%d" % abs(hash(expr))
 
         if datatype is None:
-            #try to infer data type from the expression
+            # try to infer data type from the expression
             datatype = get_default_datatype(expr)
 
         if isinstance(name, str):
@@ -521,13 +574,18 @@ class Result(Variable, ResultBase):
         if result_var is None:
             result_var = name
 
-        Variable.__init__(self, name, datatype=datatype,
-                          dimensions=dimensions, precision=precision)
+        Variable.__init__(
+            self, name, datatype=datatype, dimensions=dimensions, precision=precision
+        )
         ResultBase.__init__(self, expr, result_var)
 
     def __str__(self):
-        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.expr, self.name,
-            self.result_var)
+        return "%s(%r, %r, %r)" % (
+            self.__class__.__name__,
+            self.expr,
+            self.name,
+            self.result_var,
+        )
 
     __repr__ = __str__
 
@@ -535,6 +593,7 @@ class Result(Variable, ResultBase):
 #
 # Transformation of routine objects into code
 #
+
 
 class CodeGen(object):
     """Abstract class for the code generators."""
@@ -556,7 +615,7 @@ class CodeGen(object):
 
     def _get_symbol(self, s):
         """Returns the symbol as fcode prints it."""
-        if self.printer._settings['human']:
+        if self.printer._settings["human"]:
             expr_str = self.printer.doprint(s)
         else:
             constants, not_supported, expr_str = self.printer.doprint(s)
@@ -597,7 +656,11 @@ class CodeGen(object):
                     raise ValueError("No expression given")
                 for e in expr:
                     if not e.is_Equality:
-                        raise CodeGenError("Lists of expressions must all be Equalities. {} is not.".format(e))
+                        raise CodeGenError(
+                            "Lists of expressions must all be Equalities. {} is not.".format(
+                                e
+                            )
+                        )
 
                 # create a list of right hand sides and simplify them
                 rhs = [e.rhs for e in expr]
@@ -609,15 +672,15 @@ class CodeGen(object):
                 rhs = [expr]
 
                 if isinstance(expr, Equality):
-                    common, simplified = cse(expr.rhs) #, ignore=in_out_args)
+                    common, simplified = cse(expr.rhs)  # , ignore=in_out_args)
                     expr = Equality(expr.lhs, simplified[0])
                 else:
                     common, simplified = cse(expr)
                     expr = simplified
 
-            local_vars = [Result(b,a) for a,b in common]
-            local_symbols = set([a for a,_ in common])
-            local_expressions = Tuple(*[b for _,b in common])
+            local_vars = [Result(b, a) for a, b in common]
+            local_symbols = set([a for a, _ in common])
+            local_expressions = Tuple(*[b for _, b in common])
         else:
             local_expressions = Tuple()
 
@@ -630,7 +693,9 @@ class CodeGen(object):
 
         if self.cse:
             if {i.label for i in expressions.atoms(Idx)} != set():
-                raise CodeGenError("CSE and Indexed expressions do not play well together yet")
+                raise CodeGenError(
+                    "CSE and Indexed expressions do not play well together yet"
+                )
         else:
             # local variables for indexed expressions
             local_vars = {i.label for i in expressions.atoms(Idx)}
@@ -640,7 +705,11 @@ class CodeGen(object):
         global_vars = set() if global_vars is None else set(global_vars)
 
         # symbols that should be arguments
-        symbols = (expressions.free_symbols | local_expressions.free_symbols) - local_symbols - global_vars
+        symbols = (
+            (expressions.free_symbols | local_expressions.free_symbols)
+            - local_symbols
+            - global_vars
+        )
         new_symbols = set([])
         new_symbols.update(symbols)
 
@@ -660,24 +729,28 @@ class CodeGen(object):
                 out_arg = expr.lhs
                 expr = expr.rhs
                 if isinstance(out_arg, Indexed):
-                    dims = tuple([ (S.Zero, dim - 1) for dim in out_arg.shape])
+                    dims = tuple([(S.Zero, dim - 1) for dim in out_arg.shape])
                     symbol = out_arg.base.label
                 elif isinstance(out_arg, Symbol):
                     dims = []
                     symbol = out_arg
                 elif isinstance(out_arg, MatrixSymbol):
-                    dims = tuple([ (S.Zero, dim - 1) for dim in out_arg.shape])
+                    dims = tuple([(S.Zero, dim - 1) for dim in out_arg.shape])
                     symbol = out_arg
                 else:
-                    raise CodeGenError("Only Indexed, Symbol, or MatrixSymbol "
-                                       "can define output arguments.")
+                    raise CodeGenError(
+                        "Only Indexed, Symbol, or MatrixSymbol "
+                        "can define output arguments."
+                    )
 
                 if expr.has(symbol):
                     output_args.append(
-                        InOutArgument(symbol, out_arg, expr, dimensions=dims))
+                        InOutArgument(symbol, out_arg, expr, dimensions=dims)
+                    )
                 else:
                     output_args.append(
-                        OutputArgument(symbol, out_arg, expr, dimensions=dims))
+                        OutputArgument(symbol, out_arg, expr, dimensions=dims)
+                    )
 
                 # remove duplicate arguments when they are not local variables
                 if symbol not in local_vars:
@@ -685,10 +758,11 @@ class CodeGen(object):
                     symbols.remove(symbol)
             elif isinstance(expr, (ImmutableMatrix, MatrixSlice)):
                 # Create a "dummy" MatrixSymbol to use as the Output arg
-                out_arg = MatrixSymbol('out_%s' % abs(hash(expr)), *expr.shape)
+                out_arg = MatrixSymbol("out_%s" % abs(hash(expr)), *expr.shape)
                 dims = tuple([(S.Zero, dim - 1) for dim in out_arg.shape])
                 output_args.append(
-                    OutputArgument(out_arg, out_arg, expr, dimensions=dims))
+                    OutputArgument(out_arg, out_arg, expr, dimensions=dims)
+                )
             else:
                 return_val.append(Result(expr))
 
@@ -703,13 +777,15 @@ class CodeGen(object):
         array_symbols = {}
         for array in expressions.atoms(Indexed) | local_expressions.atoms(Indexed):
             array_symbols[array.base.label] = array
-        for array in expressions.atoms(MatrixSymbol) | local_expressions.atoms(MatrixSymbol):
+        for array in expressions.atoms(MatrixSymbol) | local_expressions.atoms(
+            MatrixSymbol
+        ):
             array_symbols[array] = array
 
         for symbol in sorted(symbols, key=str):
             if symbol in array_symbols:
                 array = array_symbols[symbol]
-                metadata = {'dimensions': dimensions(array)}
+                metadata = {"dimensions": dimensions(array)}
             else:
                 metadata = {}
 
@@ -742,7 +818,7 @@ class CodeGen(object):
                     new_args.append(name_arg_dict[symbol])
                 except KeyError:
                     if isinstance(symbol, (IndexedBase, MatrixSymbol)):
-                        metadata = {'dimensions': dimensions(symbol)}
+                        metadata = {"dimensions": dimensions(symbol)}
                     else:
                         metadata = {}
                     new_args.append(InputArgument(symbol, **metadata))
@@ -838,10 +914,10 @@ class CodeGen(object):
                 code_lines.append("\n")
             code_lines.extend(self._get_routine_ending(routine))
 
-        code_lines = self._indent_code(''.join(code_lines))
+        code_lines = self._indent_code("".join(code_lines))
 
         if header:
-            code_lines = ''.join(self._get_header() + [code_lines])
+            code_lines = "".join(self._get_header() + [code_lines])
 
         if code_lines:
             f.write(code_lines)
@@ -875,26 +951,26 @@ class CCodeGen(CodeGen):
 
     code_extension = "c"
     interface_extension = "h"
-    standard = 'c99'
+    standard = "c99"
 
-    def __init__(self, project="project", printer=None,
-                 preprocessor_statements=None, cse=False):
+    def __init__(
+        self, project="project", printer=None, preprocessor_statements=None, cse=False
+    ):
         super(CCodeGen, self).__init__(project=project, cse=cse)
         self.printer = printer or c_code_printers[self.standard.lower()]()
 
         self.preprocessor_statements = preprocessor_statements
         if preprocessor_statements is None:
-            self.preprocessor_statements = ['#include <math.h>']
+            self.preprocessor_statements = ["#include <math.h>"]
 
     def _get_header(self):
         """Writes a common header for the generated files."""
         code_lines = []
-        code_lines.append("/" + "*"*78 + '\n')
-        tmp = header_comment % {"version": sympy_version,
-                                "project": self.project}
+        code_lines.append("/" + "*" * 78 + "\n")
+        tmp = header_comment % {"version": sympy_version, "project": self.project}
         for line in tmp.splitlines():
             code_lines.append(" *%s*\n" % line.center(76))
-        code_lines.append(" " + "*"*78 + "/\n")
+        code_lines.append(" " + "*" * 78 + "/\n")
         return code_lines
 
     def get_prototype(self, routine):
@@ -909,7 +985,7 @@ class CCodeGen(CodeGen):
         if len(routine.results) > 1:
             raise CodeGenError("C only supports a single or no return value.")
         elif len(routine.results) == 1:
-            ctype = routine.results[0].get_datatype('C')
+            ctype = routine.results[0].get_datatype("C")
         else:
             ctype = "void"
 
@@ -917,17 +993,17 @@ class CCodeGen(CodeGen):
         for arg in routine.arguments:
             name = self.printer.doprint(arg.name)
             if arg.dimensions or isinstance(arg, ResultBase):
-                type_args.append((arg.get_datatype('C'), "*%s" % name))
+                type_args.append((arg.get_datatype("C"), "*%s" % name))
             else:
-                type_args.append((arg.get_datatype('C'), name))
-        arguments = ", ".join([ "%s %s" % t for t in type_args])
+                type_args.append((arg.get_datatype("C"), name))
+        arguments = ", ".join(["%s %s" % t for t in type_args])
         return "%s %s(%s)" % (ctype, routine.name, arguments)
 
     def _preprocessor_statements(self, prefix):
         code_lines = []
         code_lines.append('#include "{}.h"'.format(os.path.basename(prefix)))
         code_lines.extend(self.preprocessor_statements)
-        code_lines = ['{}\n'.format(l) for l in code_lines]
+        code_lines = ["{}\n".format(l) for l in code_lines]
         return code_lines
 
     def _get_routine_opening(self, routine):
@@ -961,21 +1037,30 @@ class CCodeGen(CodeGen):
                 continue
 
             if result.name != result.result_var:
-                raise CodeGen("Result variable and name should match: {}".format(result))
+                raise CodeGen(
+                    "Result variable and name should match: {}".format(result)
+                )
             assign_to = result.name
-            t = result.get_datatype('c')
+            t = result.get_datatype("c")
             if isinstance(result.expr, (MatrixBase, MatrixExpr)):
                 dims = result.expr.shape
                 if dims[1] != 1:
-                    raise CodeGenError("Only column vectors are supported in local variabels. Local result {} has dimensions {}".format(result, dims))
+                    raise CodeGenError(
+                        "Only column vectors are supported in local variabels. Local result {} has dimensions {}".format(
+                            result, dims
+                        )
+                    )
                 code_lines.append("{0} {1}[{2}];\n".format(t, str(assign_to), dims[0]))
                 prefix = ""
             else:
                 prefix = "const {0} ".format(t)
 
             constants, not_c, c_expr = self._printer_method_with_settings(
-                'doprint', dict(human=False, dereference=dereference),
-                result.expr, assign_to=assign_to)
+                "doprint",
+                dict(human=False, dereference=dereference),
+                result.expr,
+                assign_to=assign_to,
+            )
 
             for name, value in sorted(constants, key=str):
                 code_lines.append("double const %s = %s;\n" % (name, value))
@@ -999,7 +1084,7 @@ class CCodeGen(CodeGen):
         for result in routine.result_variables:
             if isinstance(result, Result):
                 assign_to = routine.name + "_result"
-                t = result.get_datatype('c')
+                t = result.get_datatype("c")
                 code_lines.append("{0} {1};\n".format(t, str(assign_to)))
                 return_val = assign_to
             else:
@@ -1007,15 +1092,22 @@ class CCodeGen(CodeGen):
 
             try:
                 constants, not_c, c_expr = self._printer_method_with_settings(
-                    'doprint', dict(human=False, dereference=dereference),
-                    result.expr, assign_to=assign_to)
+                    "doprint",
+                    dict(human=False, dereference=dereference),
+                    result.expr,
+                    assign_to=assign_to,
+                )
             except AssignmentError:
                 assign_to = result.result_var
                 code_lines.append(
-                    "%s %s;\n" % (result.get_datatype('c'), str(assign_to)))
+                    "%s %s;\n" % (result.get_datatype("c"), str(assign_to))
+                )
                 constants, not_c, c_expr = self._printer_method_with_settings(
-                    'doprint', dict(human=False, dereference=dereference),
-                    result.expr, assign_to=assign_to)
+                    "doprint",
+                    dict(human=False, dereference=dereference),
+                    result.expr,
+                    assign_to=assign_to,
+                )
 
             for name, value in sorted(constants, key=str):
                 code_lines.append("double const %s = %s;\n" % (name, value))
@@ -1030,6 +1122,7 @@ class CCodeGen(CodeGen):
 
     def dump_c(self, routines, f, prefix, header=True, empty=True):
         self.dump_code(routines, f, prefix, header, empty)
+
     dump_c.extension = code_extension  # type: ignore
     dump_c.__doc__ = CodeGen.dump_code.__doc__
 
@@ -1061,9 +1154,11 @@ class CCodeGen(CodeGen):
 
         """
         if header:
-            print(''.join(self._get_header()), file=f)
-        guard_name = "%s__%s__H" % (self.project.replace(
-            " ", "_").upper(), prefix.replace("/", "_").upper())
+            print("".join(self._get_header()), file=f)
+        guard_name = "%s__%s__H" % (
+            self.project.replace(" ", "_").upper(),
+            prefix.replace("/", "_").upper(),
+        )
         # include guards
         if empty:
             print(file=f)
@@ -1081,17 +1176,21 @@ class CCodeGen(CodeGen):
         print("#endif", file=f)
         if empty:
             print(file=f)
+
     dump_h.extension = interface_extension  # type: ignore
 
     # This list of dump functions is used by CodeGen.write to know which dump
     # functions it has to call.
     dump_fns = [dump_c, dump_h]
 
+
 class C89CodeGen(CCodeGen):
-    standard = 'C89'
+    standard = "C89"
+
 
 class C99CodeGen(CCodeGen):
-    standard = 'C99'
+    standard = "C99"
+
 
 class FCodeGen(CodeGen):
     """Generator for Fortran 95 code
@@ -1104,19 +1203,18 @@ class FCodeGen(CodeGen):
     code_extension = "f90"
     interface_extension = "h"
 
-    def __init__(self, project='project', printer=None):
+    def __init__(self, project="project", printer=None):
         super(FCodeGen, self).__init__(project)
         self.printer = printer or FCodePrinter()
 
     def _get_header(self):
         """Writes a common header for the generated files."""
         code_lines = []
-        code_lines.append("!" + "*"*78 + '\n')
-        tmp = header_comment % {"version": sympy_version,
-            "project": self.project}
+        code_lines.append("!" + "*" * 78 + "\n")
+        tmp = header_comment % {"version": sympy_version, "project": self.project}
         for line in tmp.splitlines():
             code_lines.append("!*%s*\n" % line.center(76))
-        code_lines.append("!" + "*"*78 + '\n')
+        code_lines.append("!" + "*" * 78 + "\n")
         return code_lines
 
     def _preprocessor_statements(self, prefix):
@@ -1126,27 +1224,26 @@ class FCodeGen(CodeGen):
         """Returns the opening statements of the fortran routine."""
         code_list = []
         if len(routine.results) > 1:
-            raise CodeGenError(
-                "Fortran only supports a single or no return value.")
+            raise CodeGenError("Fortran only supports a single or no return value.")
         elif len(routine.results) == 1:
             result = routine.results[0]
-            code_list.append(result.get_datatype('fortran'))
+            code_list.append(result.get_datatype("fortran"))
             code_list.append("function")
         else:
             code_list.append("subroutine")
 
-        args = ", ".join("%s" % self._get_symbol(arg.name)
-                        for arg in routine.arguments)
+        args = ", ".join("%s" % self._get_symbol(arg.name) for arg in routine.arguments)
 
         call_sig = "{0}({1})\n".format(routine.name, args)
         # Fortran 95 requires all lines be less than 132 characters, so wrap
         # this line before appending.
-        call_sig = ' &\n'.join(textwrap.wrap(call_sig,
-                                             width=60,
-                                             break_long_words=False)) + '\n'
+        call_sig = (
+            " &\n".join(textwrap.wrap(call_sig, width=60, break_long_words=False))
+            + "\n"
+        )
         code_list.append(call_sig)
-        code_list = [' '.join(code_list)]
-        code_list.append('implicit none\n')
+        code_list = [" ".join(code_list)]
+        code_list.append("implicit none\n")
         return code_list
 
     def _declare_arguments(self, routine):
@@ -1157,11 +1254,11 @@ class FCodeGen(CodeGen):
         for arg in routine.arguments:
 
             if isinstance(arg, InputArgument):
-                typeinfo = "%s, intent(in)" % arg.get_datatype('fortran')
+                typeinfo = "%s, intent(in)" % arg.get_datatype("fortran")
             elif isinstance(arg, InOutArgument):
-                typeinfo = "%s, intent(inout)" % arg.get_datatype('fortran')
+                typeinfo = "%s, intent(inout)" % arg.get_datatype("fortran")
             elif isinstance(arg, OutputArgument):
-                typeinfo = "%s, intent(out)" % arg.get_datatype('fortran')
+                typeinfo = "%s, intent(out)" % arg.get_datatype("fortran")
             else:
                 raise CodeGenError("Unknown Argument type: %s" % type(arg))
 
@@ -1169,9 +1266,12 @@ class FCodeGen(CodeGen):
 
             if arg.dimensions:
                 # fortran arrays start at 1
-                dimstr = ", ".join(["%s:%s" % (
-                    fprint(dim[0] + 1), fprint(dim[1] + 1))
-                    for dim in arg.dimensions])
+                dimstr = ", ".join(
+                    [
+                        "%s:%s" % (fprint(dim[0] + 1), fprint(dim[1] + 1))
+                        for dim in arg.dimensions
+                    ]
+                )
                 typeinfo += ", dimension(%s)" % dimstr
                 array_list.append("%s :: %s\n" % (typeinfo, fprint(arg.name)))
             else:
@@ -1192,8 +1292,7 @@ class FCodeGen(CodeGen):
         code_list = []
         for var in sorted(routine.local_vars, key=str):
             typeinfo = get_default_datatype(var)
-            code_list.append("%s :: %s\n" % (
-                typeinfo.fname, self._get_symbol(var)))
+            code_list.append("%s :: %s\n" % (typeinfo.fname, self._get_symbol(var)))
         return code_list
 
     def _get_routine_ending(self, routine):
@@ -1213,7 +1312,7 @@ class FCodeGen(CodeGen):
         See: https://en.wikipedia.org/wiki/Function_prototype
 
         """
-        prototype = [ "interface\n" ]
+        prototype = ["interface\n"]
         prototype.extend(self._get_routine_opening(routine))
         prototype.extend(self._declare_arguments(routine))
         prototype.extend(self._get_routine_ending(routine))
@@ -1231,13 +1330,15 @@ class FCodeGen(CodeGen):
                 assign_to = result.result_var
 
             constants, not_fortran, f_expr = self._printer_method_with_settings(
-                'doprint', dict(human=False, source_format='free', standard=95),
-                result.expr, assign_to=assign_to)
+                "doprint",
+                dict(human=False, source_format="free", standard=95),
+                result.expr,
+                assign_to=assign_to,
+            )
 
             for obj, v in sorted(constants, key=str):
                 t = get_default_datatype(obj)
-                declarations.append(
-                    "%s, parameter :: %s = %s\n" % (t.fname, obj, v))
+                declarations.append("%s, parameter :: %s = %s\n" % (t.fname, obj, v))
             for obj in sorted(not_fortran, key=str):
                 t = get_default_datatype(obj)
                 if isinstance(obj, Function):
@@ -1251,7 +1352,8 @@ class FCodeGen(CodeGen):
 
     def _indent_code(self, codelines):
         return self._printer_method_with_settings(
-            'indent_code', dict(human=False, source_format='free'), codelines)
+            "indent_code", dict(human=False, source_format="free"), codelines
+        )
 
     def dump_f95(self, routines, f, prefix, header=True, empty=True):
         # check that symbols are unique with ignorecase
@@ -1259,9 +1361,12 @@ class FCodeGen(CodeGen):
             lowercase = {str(x).lower() for x in r.variables}
             orig_case = {str(x) for x in r.variables}
             if len(lowercase) < len(orig_case):
-                raise CodeGenError("Fortran ignores case. Got symbols: %s" %
-                        (", ".join([str(var) for var in r.variables])))
+                raise CodeGenError(
+                    "Fortran ignores case. Got symbols: %s"
+                    % (", ".join([str(var) for var in r.variables]))
+                )
         self.dump_code(routines, f, prefix, header, empty)
+
     dump_f95.extension = code_extension  # type: ignore
     dump_f95.__doc__ = CodeGen.dump_code.__doc__
 
@@ -1292,7 +1397,7 @@ class FCodeGen(CodeGen):
 
         """
         if header:
-            print(''.join(self._get_header()), file=f)
+            print("".join(self._get_header()), file=f)
         if empty:
             print(file=f)
         # declaration of the function prototypes
@@ -1301,6 +1406,7 @@ class FCodeGen(CodeGen):
             f.write(prototype)
         if empty:
             print(file=f)
+
     dump_h.extension = interface_extension  # type: ignore
 
     # This list of dump functions is used by CodeGen.write to know which dump
@@ -1318,7 +1424,7 @@ class JuliaCodeGen(CodeGen):
 
     code_extension = "jl"
 
-    def __init__(self, project='project', printer=None):
+    def __init__(self, project="project", printer=None):
         super(JuliaCodeGen, self).__init__(project)
         self.printer = printer or JuliaCodePrinter()
 
@@ -1356,12 +1462,16 @@ class JuliaCodeGen(CodeGen):
                 expr = expr.rhs
                 symbol = out_arg
                 if isinstance(out_arg, Indexed):
-                    dims = tuple([ (S.One, dim) for dim in out_arg.shape])
+                    dims = tuple([(S.One, dim) for dim in out_arg.shape])
                     symbol = out_arg.base.label
-                    output_args.append(InOutArgument(symbol, out_arg, expr, dimensions=dims))
+                    output_args.append(
+                        InOutArgument(symbol, out_arg, expr, dimensions=dims)
+                    )
                 if not isinstance(out_arg, (Indexed, Symbol, MatrixSymbol)):
-                    raise CodeGenError("Only Indexed, Symbol, or MatrixSymbol "
-                                       "can define output arguments.")
+                    raise CodeGenError(
+                        "Only Indexed, Symbol, or MatrixSymbol "
+                        "can define output arguments."
+                    )
 
                 return_vals.append(Result(expr, name=symbol, result_var=out_arg))
                 if not expr.has(symbol):
@@ -1371,7 +1481,7 @@ class JuliaCodeGen(CodeGen):
 
             else:
                 # we have no name for this output
-                return_vals.append(Result(expr, name='out%d' % (i+1)))
+                return_vals.append(Result(expr, name="out%d" % (i + 1)))
 
         # setup input argument list
         output_args.sort(key=lambda x: str(x.name))
@@ -1416,10 +1526,9 @@ class JuliaCodeGen(CodeGen):
     def _get_header(self):
         """Writes a common header for the generated files."""
         code_lines = []
-        tmp = header_comment % {"version": sympy_version,
-            "project": self.project}
+        tmp = header_comment % {"version": sympy_version, "project": self.project}
         for line in tmp.splitlines():
-            if line == '':
+            if line == "":
                 code_lines.append("#\n")
             else:
                 code_lines.append("#   %s\n" % line)
@@ -1437,13 +1546,14 @@ class JuliaCodeGen(CodeGen):
         args = []
         for i, arg in enumerate(routine.arguments):
             if isinstance(arg, OutputArgument):
-                raise CodeGenError("Julia: invalid argument of type %s" %
-                                   str(type(arg)))
+                raise CodeGenError(
+                    "Julia: invalid argument of type %s" % str(type(arg))
+                )
             if isinstance(arg, (InputArgument, InOutArgument)):
                 args.append("%s" % self._get_symbol(arg.name))
         args = ", ".join(args)
         code_list.append("%s(%s)\n" % (routine.name, args))
-        code_list = [ "".join(code_list) ]
+        code_list = ["".join(code_list)]
 
         return code_list
 
@@ -1477,25 +1587,24 @@ class JuliaCodeGen(CodeGen):
                 raise CodeGenError("unexpected object in Routine results")
 
             constants, not_supported, jl_expr = self._printer_method_with_settings(
-                'doprint', dict(human=False), result.expr, assign_to=assign_to)
+                "doprint", dict(human=False), result.expr, assign_to=assign_to
+            )
 
             for obj, v in sorted(constants, key=str):
-                declarations.append(
-                    "%s = %s\n" % (obj, v))
+                declarations.append("%s = %s\n" % (obj, v))
             for obj in sorted(not_supported, key=str):
                 if isinstance(obj, Function):
                     name = obj.func
                 else:
                     name = obj
-                declarations.append(
-                    "# unsupported: %s\n" % (name))
+                declarations.append("# unsupported: %s\n" % (name))
             code_lines.append("%s\n" % (jl_expr))
         return declarations + code_lines
 
     def _indent_code(self, codelines):
         # Note that indenting seems to happen twice, first
         # statement-by-statement by JuliaPrinter then again here.
-        p = JuliaCodePrinter({'human': False})
+        p = JuliaCodePrinter({"human": False})
         return p.indent_code(codelines)
 
     def dump_jl(self, routines, f, prefix, header=True, empty=True):
@@ -1527,7 +1636,7 @@ class OctaveCodeGen(CodeGen):
 
     code_extension = "m"
 
-    def __init__(self, project='project', printer=None):
+    def __init__(self, project="project", printer=None):
         super(OctaveCodeGen, self).__init__(project)
         self.printer = printer or OctaveCodePrinter()
 
@@ -1569,8 +1678,10 @@ class OctaveCodeGen(CodeGen):
                 if isinstance(out_arg, Indexed):
                     symbol = out_arg.base.label
                 if not isinstance(out_arg, (Indexed, Symbol, MatrixSymbol)):
-                    raise CodeGenError("Only Indexed, Symbol, or MatrixSymbol "
-                                       "can define output arguments.")
+                    raise CodeGenError(
+                        "Only Indexed, Symbol, or MatrixSymbol "
+                        "can define output arguments."
+                    )
 
                 return_vals.append(Result(expr, name=symbol, result_var=out_arg))
                 if not expr.has(symbol):
@@ -1580,7 +1691,7 @@ class OctaveCodeGen(CodeGen):
 
             else:
                 # we have no name for this output
-                return_vals.append(Result(expr, name='out%d' % (i+1)))
+                return_vals.append(Result(expr, name="out%d" % (i + 1)))
 
         # setup input argument list
         arg_list = []
@@ -1624,10 +1735,9 @@ class OctaveCodeGen(CodeGen):
     def _get_header(self):
         """Writes a common header for the generated files."""
         code_lines = []
-        tmp = header_comment % {"version": sympy_version,
-            "project": self.project}
+        tmp = header_comment % {"version": sympy_version, "project": self.project}
         for line in tmp.splitlines():
-            if line == '':
+            if line == "":
                 code_lines.append("%\n")
             else:
                 code_lines.append("%%   %s\n" % line)
@@ -1660,13 +1770,14 @@ class OctaveCodeGen(CodeGen):
         args = []
         for i, arg in enumerate(routine.arguments):
             if isinstance(arg, (OutputArgument, InOutArgument)):
-                raise CodeGenError("Octave: invalid argument of type %s" %
-                                   str(type(arg)))
+                raise CodeGenError(
+                    "Octave: invalid argument of type %s" % str(type(arg))
+                )
             if isinstance(arg, InputArgument):
                 args.append("%s" % self._get_symbol(arg.name))
         args = ", ".join(args)
         code_list.append("%s(%s)\n" % (routine.name, args))
-        code_list = [ "".join(code_list) ]
+        code_list = ["".join(code_list)]
 
         return code_list
 
@@ -1695,24 +1806,24 @@ class OctaveCodeGen(CodeGen):
                 raise CodeGenError("unexpected object in Routine results")
 
             constants, not_supported, oct_expr = self._printer_method_with_settings(
-                'doprint', dict(human=False), result.expr, assign_to=assign_to)
+                "doprint", dict(human=False), result.expr, assign_to=assign_to
+            )
 
             for obj, v in sorted(constants, key=str):
-                declarations.append(
-                    "  %s = %s;  %% constant\n" % (obj, v))
+                declarations.append("  %s = %s;  %% constant\n" % (obj, v))
             for obj in sorted(not_supported, key=str):
                 if isinstance(obj, Function):
                     name = obj.func
                 else:
                     name = obj
-                declarations.append(
-                    "  %% unsupported: %s\n" % (name))
+                declarations.append("  %% unsupported: %s\n" % (name))
             code_lines.append("%s\n" % (oct_expr))
         return declarations + code_lines
 
     def _indent_code(self, codelines):
         return self._printer_method_with_settings(
-            'indent_code', dict(human=False), codelines)
+            "indent_code", dict(human=False), codelines
+        )
 
     def dump_m(self, routines, f, prefix, header=True, empty=True, inline=True):
         # Note used to call self.dump_code() but we need more control for header
@@ -1726,11 +1837,12 @@ class OctaveCodeGen(CodeGen):
             code_lines.extend(self._get_routine_opening(routine))
             if i == 0:
                 if routine.name != prefix:
-                    raise ValueError('Octave function name should match prefix')
+                    raise ValueError("Octave function name should match prefix")
                 if header:
-                    code_lines.append("%" + prefix.upper() +
-                                      "  Autogenerated by sympy\n")
-                    code_lines.append(''.join(self._get_header()))
+                    code_lines.append(
+                        "%" + prefix.upper() + "  Autogenerated by sympy\n"
+                    )
+                    code_lines.append("".join(self._get_header()))
             code_lines.extend(self._declare_arguments(routine))
             code_lines.extend(self._declare_globals(routine))
             code_lines.extend(self._declare_locals(routine))
@@ -1741,7 +1853,7 @@ class OctaveCodeGen(CodeGen):
                 code_lines.append("\n")
             code_lines.extend(self._get_routine_ending(routine))
 
-        code_lines = self._indent_code(''.join(code_lines))
+        code_lines = self._indent_code("".join(code_lines))
 
         if code_lines:
             f.write(code_lines)
@@ -1752,6 +1864,7 @@ class OctaveCodeGen(CodeGen):
     # This list of dump functions is used by CodeGen.write to know which dump
     # functions it has to call.
     dump_fns = [dump_m]
+
 
 class RustCodeGen(CodeGen):
     """Generator for Rust code.
@@ -1784,7 +1897,12 @@ class RustCodeGen(CodeGen):
         global_vars = set() if global_vars is None else set(global_vars)
 
         # symbols that should be arguments
-        symbols = expressions.free_symbols - local_vars - global_vars - expressions.atoms(Indexed)
+        symbols = (
+            expressions.free_symbols
+            - local_vars
+            - global_vars
+            - expressions.atoms(Indexed)
+        )
 
         # Rust supports multiple return values
         return_vals = []
@@ -1795,12 +1913,16 @@ class RustCodeGen(CodeGen):
                 expr = expr.rhs
                 symbol = out_arg
                 if isinstance(out_arg, Indexed):
-                    dims = tuple([ (S.One, dim) for dim in out_arg.shape])
+                    dims = tuple([(S.One, dim) for dim in out_arg.shape])
                     symbol = out_arg.base.label
-                    output_args.append(InOutArgument(symbol, out_arg, expr, dimensions=dims))
+                    output_args.append(
+                        InOutArgument(symbol, out_arg, expr, dimensions=dims)
+                    )
                 if not isinstance(out_arg, (Indexed, Symbol, MatrixSymbol)):
-                    raise CodeGenError("Only Indexed, Symbol, or MatrixSymbol "
-                                       "can define output arguments.")
+                    raise CodeGenError(
+                        "Only Indexed, Symbol, or MatrixSymbol "
+                        "can define output arguments."
+                    )
 
                 return_vals.append(Result(expr, name=symbol, result_var=out_arg))
                 if not expr.has(symbol):
@@ -1810,7 +1932,7 @@ class RustCodeGen(CodeGen):
 
             else:
                 # we have no name for this output
-                return_vals.append(Result(expr, name='out%d' % (i+1)))
+                return_vals.append(Result(expr, name="out%d" % (i + 1)))
 
         # setup input argument list
         output_args.sort(key=lambda x: str(x.name))
@@ -1852,13 +1974,11 @@ class RustCodeGen(CodeGen):
 
         return Routine(name, arg_list, return_vals, local_vars, global_vars)
 
-
     def _get_header(self):
         """Writes a common header for the generated files."""
         code_lines = []
         code_lines.append("/*\n")
-        tmp = header_comment % {"version": sympy_version,
-                                "project": self.project}
+        tmp = header_comment % {"version": sympy_version, "project": self.project}
         for line in tmp.splitlines():
             code_lines.append((" *%s" % line.center(76)).rstrip() + "\n")
         code_lines.append(" */\n")
@@ -1873,7 +1993,7 @@ class RustCodeGen(CodeGen):
         See: https://en.wikipedia.org/wiki/Function_prototype
 
         """
-        results = [i.get_datatype('Rust') for i in routine.results]
+        results = [i.get_datatype("Rust") for i in routine.results]
 
         if len(results) == 1:
             rstype = " -> " + results[0]
@@ -1886,10 +2006,10 @@ class RustCodeGen(CodeGen):
         for arg in routine.arguments:
             name = self.printer.doprint(arg.name)
             if arg.dimensions or isinstance(arg, ResultBase):
-                type_args.append(("*%s" % name, arg.get_datatype('Rust')))
+                type_args.append(("*%s" % name, arg.get_datatype("Rust")))
             else:
-                type_args.append((name, arg.get_datatype('Rust')))
-        arguments = ", ".join([ "%s: %s" % t for t in type_args])
+                type_args.append((name, arg.get_datatype("Rust")))
+        arguments = ", ".join(["%s: %s" % t for t in type_args])
         return "fn %s(%s)%s" % (routine.name, arguments, rstype)
 
     def _preprocessor_statements(self, prefix):
@@ -1935,7 +2055,8 @@ class RustCodeGen(CodeGen):
                 raise CodeGenError("unexpected object in Routine results")
 
             constants, not_supported, rs_expr = self._printer_method_with_settings(
-                'doprint', dict(human=False), result.expr, assign_to=assign_to)
+                "doprint", dict(human=False), result.expr, assign_to=assign_to
+            )
 
             for name, value in sorted(constants, key=str):
                 declarations.append("const %s: f64 = %s;\n" % (name, value))
@@ -1947,12 +2068,12 @@ class RustCodeGen(CodeGen):
                     name = obj
                 declarations.append("// unsupported: %s\n" % (name))
 
-            code_lines.append("let %s\n" % rs_expr);
+            code_lines.append("let %s\n" % rs_expr)
 
         if len(returns) > 1:
-            returns = ['(' + ', '.join(returns) + ')']
+            returns = ["(" + ", ".join(returns) + ")"]
 
-        returns.append('\n')
+        returns.append("\n")
 
         return declarations + code_lines + returns
 
@@ -1970,20 +2091,23 @@ class RustCodeGen(CodeGen):
     dump_fns = [dump_rs]
 
 
-
-
-def get_code_generator(language, project=None, standard=None, printer = None):
-    if language == 'C':
+def get_code_generator(language, project=None, standard=None, printer=None):
+    if language == "C":
         if standard is None:
             pass
-        elif standard.lower() == 'c89':
-            language = 'C89'
-        elif standard.lower() == 'c99':
-            language = 'C99'
-    CodeGenClass = {"C": CCodeGen, "C89": C89CodeGen, "C99": C99CodeGen,
-                    "F95": FCodeGen, "JULIA": JuliaCodeGen,
-                    "OCTAVE": OctaveCodeGen,
-                    "RUST": RustCodeGen}.get(language.upper())
+        elif standard.lower() == "c89":
+            language = "C89"
+        elif standard.lower() == "c99":
+            language = "C99"
+    CodeGenClass = {
+        "C": CCodeGen,
+        "C89": C89CodeGen,
+        "C99": C99CodeGen,
+        "F95": FCodeGen,
+        "JULIA": JuliaCodeGen,
+        "OCTAVE": OctaveCodeGen,
+        "RUST": RustCodeGen,
+    }.get(language.upper())
     if CodeGenClass is None:
         raise ValueError("Language '%s' is not supported." % language)
     return CodeGenClass(project, printer)
@@ -1994,9 +2118,20 @@ def get_code_generator(language, project=None, standard=None, printer = None):
 #
 
 
-def codegen(name_expr, language=None, prefix=None, project="project",
-            to_files=False, header=True, empty=True, argument_sequence=None,
-            global_vars=None, standard=None, code_gen=None, printer = None):
+def codegen(
+    name_expr,
+    language=None,
+    prefix=None,
+    project="project",
+    to_files=False,
+    header=True,
+    empty=True,
+    argument_sequence=None,
+    global_vars=None,
+    standard=None,
+    code_gen=None,
+    printer=None,
+):
     """Generate source code for expressions in a given language.
 
     Parameters
@@ -2142,15 +2277,13 @@ def codegen(name_expr, language=None, prefix=None, project="project",
     # Construct Routines appropriate for this code_gen from (name, expr) pairs.
     routines = []
     for name, expr in name_expr:
-        routines.append(code_gen.routine(name, expr, argument_sequence,
-                                         global_vars))
+        routines.append(code_gen.routine(name, expr, argument_sequence, global_vars))
 
     # Write the code.
     return code_gen.write(routines, prefix, to_files, header, empty)
 
 
-def make_routine(name, expr, argument_sequence=None,
-                 global_vars=None, language="F95"):
+def make_routine(name, expr, argument_sequence=None, global_vars=None, language="F95"):
     """A factory that makes an appropriate Routine from an expression.
 
     Parameters

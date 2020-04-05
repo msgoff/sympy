@@ -176,24 +176,30 @@ def finite_diff_weights(order, x_list, x0=S.One):
         raise ValueError("Non-integer order illegal")
     M = order
     N = len(x_list) - 1
-    delta = [[[0 for nu in range(N+1)] for n in range(N+1)] for
-             m in range(M+1)]
+    delta = [[[0 for nu in range(N + 1)] for n in range(N + 1)] for m in range(M + 1)]
     delta[0][0][0] = S.One
     c1 = S.One
-    for n in range(1, N+1):
+    for n in range(1, N + 1):
         c2 = S.One
         for nu in range(0, n):
-            c3 = x_list[n]-x_list[nu]
+            c3 = x_list[n] - x_list[nu]
             c2 = c2 * c3
             if n <= M:
-                delta[n][n-1][nu] = 0
-            for m in range(0, min(n, M)+1):
-                delta[m][n][nu] = (x_list[n]-x0)*delta[m][n-1][nu] -\
-                    m*delta[m-1][n-1][nu]
+                delta[n][n - 1][nu] = 0
+            for m in range(0, min(n, M) + 1):
+                delta[m][n][nu] = (x_list[n] - x0) * delta[m][n - 1][nu] - m * delta[
+                    m - 1
+                ][n - 1][nu]
                 delta[m][n][nu] /= c3
-        for m in range(0, min(n, M)+1):
-            delta[m][n][n] = c1/c2*(m*delta[m-1][n-1][n-1] -
-                                    (x_list[n-1]-x0)*delta[m][n-1][n-1])
+        for m in range(0, min(n, M) + 1):
+            delta[m][n][n] = (
+                c1
+                / c2
+                * (
+                    m * delta[m - 1][n - 1][n - 1]
+                    - (x_list[n - 1] - x0) * delta[m][n - 1][n - 1]
+                )
+            )
         c1 = c2
     return delta
 
@@ -282,7 +288,7 @@ def apply_finite_diff(order, x_list, y_list, x0=S.Zero):
 
     derivative = 0
     for nu in range(0, len(x_list)):
-        derivative += delta[order][N][nu]*y_list[nu]
+        derivative += delta[order][N][nu] * y_list[nu]
     return derivative
 
 
@@ -372,8 +378,9 @@ def _as_finite_diff(derivative, points=1, x0=None, wrt=None):
         return derivative
     else:
         return derivative.fromiter(
-            [_as_finite_diff(ar, points, x0, wrt) for ar
-             in derivative.args], **derivative.assumptions0)
+            [_as_finite_diff(ar, points, x0, wrt) for ar in derivative.args],
+            **derivative.assumptions0
+        )
 
     if wrt is None:
         old = None
@@ -390,42 +397,48 @@ def _as_finite_diff(derivative, points=1, x0=None, wrt=None):
         x0 = wrt
 
     if not iterable(points):
-        if getattr(points, 'is_Function', False) and wrt in points.args:
+        if getattr(points, "is_Function", False) and wrt in points.args:
             points = points.subs(wrt, x0)
         # points is simply the step-size, let's make it a
         # equidistant sequence centered around x0
         if order % 2 == 0:
             # even order => odd number of points, grid point included
-            points = [x0 + points*i for i
-                      in range(-order//2, order//2 + 1)]
+            points = [x0 + points * i for i in range(-order // 2, order // 2 + 1)]
         else:
             # odd order => even number of points, half-way wrt grid point
-            points = [x0 + points*S(i)/2 for i
-                      in range(-order, order + 1, 2)]
+            points = [x0 + points * S(i) / 2 for i in range(-order, order + 1, 2)]
     others = [wrt, 0]
     for v in set(derivative.variables):
         if v == wrt:
             continue
         others += [v, derivative.variables.count(v)]
-    if len(points) < order+1:
+    if len(points) < order + 1:
         raise ValueError("Too few points for order %d" % order)
-    return apply_finite_diff(order, points, [
-        Derivative(derivative.expr.subs({wrt: x}), *others) for
-        x in points], x0)
+    return apply_finite_diff(
+        order,
+        points,
+        [Derivative(derivative.expr.subs({wrt: x}), *others) for x in points],
+        x0,
+    )
 
 
 as_finite_diff = deprecated(
     useinstead="Derivative.as_finite_difference",
-    deprecated_since_version="1.1", issue=11410)(_as_finite_diff)
+    deprecated_since_version="1.1",
+    issue=11410,
+)(_as_finite_diff)
 
 as_finite_diff.__doc__ = """
     Deprecated function. Use Diff.as_finite_difference instead.
     """
 
 
-def differentiate_finite(expr, *symbols,
-                         # points=1, x0=None, wrt=None, evaluate=True, #Py2:
-                         **kwargs):
+def differentiate_finite(
+    expr,
+    *symbols,
+    # points=1, x0=None, wrt=None, evaluate=True, #Py2:
+    **kwargs
+):
     r""" Differentiate expr and replace Derivatives with finite differences.
 
     Parameters
@@ -470,14 +483,15 @@ def differentiate_finite(expr, *symbols,
 
     """
     # Key-word only arguments only available in Python 3
-    points = kwargs.pop('points', 1)
-    x0 = kwargs.pop('x0', None)
-    wrt = kwargs.pop('wrt', None)
-    evaluate = kwargs.pop('evaluate', False)
+    points = kwargs.pop("points", 1)
+    x0 = kwargs.pop("x0", None)
+    wrt = kwargs.pop("wrt", None)
+    evaluate = kwargs.pop("evaluate", False)
     if kwargs:
         raise ValueError("Unknown kwargs: %s" % kwargs)
 
     Dexpr = expr.diff(*symbols, evaluate=evaluate)
     return Dexpr.replace(
         lambda arg: arg.is_Derivative,
-        lambda arg: arg.as_finite_difference(points=points, x0=x0, wrt=wrt))
+        lambda arg: arg.as_finite_difference(points=points, x0=x0, wrt=wrt),
+    )

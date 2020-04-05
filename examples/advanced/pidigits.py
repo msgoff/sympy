@@ -18,13 +18,13 @@ def display_fraction(digits, skip=0, colwidth=10, columns=5):
     perline = colwidth * columns
     printed = 0
     for linecount in range((len(digits) - skip) // (colwidth * columns)):
-        line = digits[skip + linecount*perline:skip + (linecount + 1)*perline]
+        line = digits[skip + linecount * perline : skip + (linecount + 1) * perline]
         for i in range(columns):
-            print(line[i*colwidth: (i + 1)*colwidth],)
-        print(":", (linecount + 1)*perline)
+            print(line[i * colwidth : (i + 1) * colwidth],)
+        print(":", (linecount + 1) * perline)
         if (linecount + 1) % 10 == 0:
             print
-        printed += colwidth*columns
+        printed += colwidth * columns
     rem = (len(digits) - skip) % (colwidth * columns)
     if rem:
         buf = digits[-rem:]
@@ -32,7 +32,7 @@ def display_fraction(digits, skip=0, colwidth=10, columns=5):
         for i in range(columns):
             s += buf[:colwidth].ljust(colwidth + 1, " ")
             buf = buf[colwidth:]
-        print(s + ":", printed + colwidth*columns)
+        print(s + ":", printed + colwidth * columns)
 
 
 def calculateit(func, base, n, tofile):
@@ -44,7 +44,7 @@ def calculateit(func, base, n, tofile):
     else:
         skip = len(intpart)
     print("Step 1 of 2: calculating binary value...")
-    prec = int(n*math.log(base, 2)) + 10
+    prec = int(n * math.log(base, 2)) + 10
     t = clock()
     a = func(prec)
     step1_time = clock() - t
@@ -62,8 +62,10 @@ def calculateit(func, base, n, tofile):
     display_fraction(d, skip, colwidth=10, columns=5)
     if tofile:
         sys.stdout = out_
-    print("\nFinished in %f seconds (%f calc, %f convert)" % \
-        ((step1_time + step2_time), step1_time, step2_time))
+    print(
+        "\nFinished in %f seconds (%f calc, %f convert)"
+        % ((step1_time + step2_time), step1_time, step2_time)
+    )
 
 
 def interactive():
@@ -71,7 +73,9 @@ def interactive():
     print("Compute digits of pi with SymPy\n")
     base = int(input("Which base? (2-36, 10 for decimal) \n> "))
     digits = int(input("How many digits? (enter a big number, say, 10000)\n> "))
-    tofile = input("Output to file? (enter a filename, or just press enter\nto print directly to the screen) \n> ")
+    tofile = input(
+        "Output to file? (enter a filename, or just press enter\nto print directly to the screen) \n> "
+    )
     if tofile:
         tofile = open(tofile, "w")
     calculateit(pi, base, digits, tofile)
@@ -83,6 +87,7 @@ def main():
     digits = 500
     tofile = None
     calculateit(pi, base, digits, tofile)
+
 
 if __name__ == "__main__":
     interactive()

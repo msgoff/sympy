@@ -20,8 +20,10 @@ from sympy.utilities import sift
 
 from collections import OrderedDict
 
+
 class IndexConformanceException(Exception):
     pass
+
 
 def _unique_and_repeated(inds):
     """
@@ -42,6 +44,7 @@ def _unique_and_repeated(inds):
         else:
             uniq[i] = 1
     return sift(uniq, lambda x: uniq[x], binary=True)
+
 
 def _remove_repeated(inds):
     """
@@ -266,7 +269,6 @@ def get_indices(expr):
     elif expr.is_Atom:
         return set(), {}
 
-
     # recurse via specialized functions
     else:
         if expr.is_Mul:
@@ -293,7 +295,8 @@ def get_indices(expr):
         elif not expr.has(Indexed):
             return set(), {}
         raise NotImplementedError(
-            "FIXME: No specialized handling of type %s" % type(expr))
+            "FIXME: No specialized handling of type %s" % type(expr)
+        )
 
 
 def get_contraction_structure(expr):
@@ -466,5 +469,4 @@ def get_contraction_structure(expr):
     # this test is expensive, so it should be at the end
     elif not expr.has(Indexed):
         return {None: {expr}}
-    raise NotImplementedError(
-        "FIXME: No specialized handling of type %s" % type(expr))
+    raise NotImplementedError("FIXME: No specialized handling of type %s" % type(expr))

@@ -14,15 +14,18 @@ from sympy.polys.polyerrors import (
     GeneratorsError,
     CoercionFailed,
     NotInvertible,
-    DomainError)
+    DomainError,
+)
 from sympy.polys.polyutils import illegal
 
 from sympy.testing.pytest import raises
 
 ALG = QQ.algebraic_field(sqrt(2), sqrt(3))
 
+
 def unify(K0, K1):
     return K0.unify(K1)
+
 
 def test_Domain_unify():
     F3 = GF(3)
@@ -107,6 +110,7 @@ def test_Domain_unify():
     assert unify(EX, ZZ[x]) == EX
     assert unify(EX, ZZ.frac_field(x)) == EX
     assert unify(EX, EX) == EX
+
 
 def test_Domain_unify_composite():
     assert unify(ZZ.poly_ring(x), ZZ) == ZZ.poly_ring(x)
@@ -229,6 +233,7 @@ def test_Domain_unify_composite():
     assert unify(QQ.frac_field(x, y), ZZ.poly_ring(x, z)) == ZZ.frac_field(x, y, z)
     assert unify(QQ.frac_field(x, y), QQ.poly_ring(x, z)) == QQ.frac_field(x, y, z)
 
+
 def test_Domain_unify_algebraic():
     sqrt5 = QQ.algebraic_field(sqrt(5))
     sqrt7 = QQ.algebraic_field(sqrt(7))
@@ -248,9 +253,11 @@ def test_Domain_unify_algebraic():
     assert sqrt5.unify(sqrt7.frac_field(x, y)) == sqrt57.frac_field(x, y)
     assert sqrt5.frac_field(x, y).unify(sqrt7) == sqrt57.frac_field(x, y)
 
+
 def test_Domain_unify_with_symbols():
     raises(UnificationFailed, lambda: ZZ[x, y].unify_with_symbols(ZZ, (y, z)))
     raises(UnificationFailed, lambda: ZZ.unify_with_symbols(ZZ[x, y], (y, z)))
+
 
 def test_Domain__contains__():
     assert (0 in EX) is True
@@ -343,15 +350,15 @@ def test_Domain__contains__():
     assert (sqrt(7) in QQ[x, y]) is False
     assert (sqrt(7) in RR[x, y]) is True
 
-    assert (2*sqrt(3) + 1 in EX) is True
-    assert (2*sqrt(3) + 1 in ZZ) is False
-    assert (2*sqrt(3) + 1 in QQ) is False
-    assert (2*sqrt(3) + 1 in RR) is True
-    assert (2*sqrt(3) + 1 in CC) is True
-    assert (2*sqrt(3) + 1 in ALG) is True
-    assert (2*sqrt(3) + 1 in ZZ[x, y]) is False
-    assert (2*sqrt(3) + 1 in QQ[x, y]) is False
-    assert (2*sqrt(3) + 1 in RR[x, y]) is True
+    assert (2 * sqrt(3) + 1 in EX) is True
+    assert (2 * sqrt(3) + 1 in ZZ) is False
+    assert (2 * sqrt(3) + 1 in QQ) is False
+    assert (2 * sqrt(3) + 1 in RR) is True
+    assert (2 * sqrt(3) + 1 in CC) is True
+    assert (2 * sqrt(3) + 1 in ALG) is True
+    assert (2 * sqrt(3) + 1 in ZZ[x, y]) is False
+    assert (2 * sqrt(3) + 1 in QQ[x, y]) is False
+    assert (2 * sqrt(3) + 1 in RR[x, y]) is True
 
     assert (sin(1) in EX) is True
     assert (sin(1) in ZZ) is False
@@ -363,33 +370,33 @@ def test_Domain__contains__():
     assert (sin(1) in QQ[x, y]) is False
     assert (sin(1) in RR[x, y]) is True
 
-    assert (x**2 + 1 in EX) is True
-    assert (x**2 + 1 in ZZ) is False
-    assert (x**2 + 1 in QQ) is False
-    assert (x**2 + 1 in RR) is False
-    assert (x**2 + 1 in CC) is False
-    assert (x**2 + 1 in ALG) is False
-    assert (x**2 + 1 in ZZ[x]) is True
-    assert (x**2 + 1 in QQ[x]) is True
-    assert (x**2 + 1 in RR[x]) is True
-    assert (x**2 + 1 in ZZ[x, y]) is True
-    assert (x**2 + 1 in QQ[x, y]) is True
-    assert (x**2 + 1 in RR[x, y]) is True
+    assert (x ** 2 + 1 in EX) is True
+    assert (x ** 2 + 1 in ZZ) is False
+    assert (x ** 2 + 1 in QQ) is False
+    assert (x ** 2 + 1 in RR) is False
+    assert (x ** 2 + 1 in CC) is False
+    assert (x ** 2 + 1 in ALG) is False
+    assert (x ** 2 + 1 in ZZ[x]) is True
+    assert (x ** 2 + 1 in QQ[x]) is True
+    assert (x ** 2 + 1 in RR[x]) is True
+    assert (x ** 2 + 1 in ZZ[x, y]) is True
+    assert (x ** 2 + 1 in QQ[x, y]) is True
+    assert (x ** 2 + 1 in RR[x, y]) is True
 
-    assert (x**2 + y**2 in EX) is True
-    assert (x**2 + y**2 in ZZ) is False
-    assert (x**2 + y**2 in QQ) is False
-    assert (x**2 + y**2 in RR) is False
-    assert (x**2 + y**2 in CC) is False
-    assert (x**2 + y**2 in ALG) is False
-    assert (x**2 + y**2 in ZZ[x]) is False
-    assert (x**2 + y**2 in QQ[x]) is False
-    assert (x**2 + y**2 in RR[x]) is False
-    assert (x**2 + y**2 in ZZ[x, y]) is True
-    assert (x**2 + y**2 in QQ[x, y]) is True
-    assert (x**2 + y**2 in RR[x, y]) is True
+    assert (x ** 2 + y ** 2 in EX) is True
+    assert (x ** 2 + y ** 2 in ZZ) is False
+    assert (x ** 2 + y ** 2 in QQ) is False
+    assert (x ** 2 + y ** 2 in RR) is False
+    assert (x ** 2 + y ** 2 in CC) is False
+    assert (x ** 2 + y ** 2 in ALG) is False
+    assert (x ** 2 + y ** 2 in ZZ[x]) is False
+    assert (x ** 2 + y ** 2 in QQ[x]) is False
+    assert (x ** 2 + y ** 2 in RR[x]) is False
+    assert (x ** 2 + y ** 2 in ZZ[x, y]) is True
+    assert (x ** 2 + y ** 2 in QQ[x, y]) is True
+    assert (x ** 2 + y ** 2 in RR[x, y]) is True
 
-    assert (Rational(3, 2)*x/(y + 1) - z in QQ[x, y, z]) is False
+    assert (Rational(3, 2) * x / (y + 1) - z in QQ[x, y, z]) is False
 
 
 def test_Domain_get_ring():
@@ -465,7 +472,10 @@ def test_Domain_get_exact():
 
 
 def test_Domain_convert():
-    assert QQ.convert(10e-52) == QQ(1684996666696915, 1684996666696914987166688442938726917102321526408785780068975640576)
+    assert QQ.convert(10e-52) == QQ(
+        1684996666696915,
+        1684996666696914987166688442938726917102321526408785780068975640576,
+    )
 
     R, x = ring("x", ZZ)
     assert ZZ.convert(x - x) == 0
@@ -473,12 +483,12 @@ def test_Domain_convert():
 
 
 def test_PolynomialRing__init():
-    R, = ring("", ZZ)
+    (R,) = ring("", ZZ)
     assert ZZ.poly_ring() == R.to_domain()
 
 
 def test_FractionField__init():
-    F, = field("", ZZ)
+    (F,) = field("", ZZ)
     assert ZZ.frac_field() == F.to_domain()
 
 
@@ -517,50 +527,57 @@ def test_Domain___eq__():
 
 def test_Domain__algebraic_field():
     alg = ZZ.algebraic_field(sqrt(2))
-    assert alg.ext.minpoly == Poly(x**2 - 2)
+    assert alg.ext.minpoly == Poly(x ** 2 - 2)
     assert alg.dom == QQ
 
     alg = QQ.algebraic_field(sqrt(2))
-    assert alg.ext.minpoly == Poly(x**2 - 2)
+    assert alg.ext.minpoly == Poly(x ** 2 - 2)
     assert alg.dom == QQ
 
     alg = alg.algebraic_field(sqrt(3))
-    assert alg.ext.minpoly == Poly(x**4 - 10*x**2 + 1)
+    assert alg.ext.minpoly == Poly(x ** 4 - 10 * x ** 2 + 1)
     assert alg.dom == QQ
 
 
 def test_PolynomialRing_from_FractionField():
-    F, x,y = field("x,y", ZZ)
-    R, X,Y = ring("x,y", ZZ)
+    F, x, y = field("x,y", ZZ)
+    R, X, Y = ring("x,y", ZZ)
 
-    f = (x**2 + y**2)/(x + 1)
-    g = (x**2 + y**2)/4
-    h =  x**2 + y**2
-
-    assert R.to_domain().from_FractionField(f, F.to_domain()) is None
-    assert R.to_domain().from_FractionField(g, F.to_domain()) == X**2/4 + Y**2/4
-    assert R.to_domain().from_FractionField(h, F.to_domain()) == X**2 + Y**2
-
-    F, x,y = field("x,y", QQ)
-    R, X,Y = ring("x,y", QQ)
-
-    f = (x**2 + y**2)/(x + 1)
-    g = (x**2 + y**2)/4
-    h =  x**2 + y**2
+    f = (x ** 2 + y ** 2) / (x + 1)
+    g = (x ** 2 + y ** 2) / 4
+    h = x ** 2 + y ** 2
 
     assert R.to_domain().from_FractionField(f, F.to_domain()) is None
-    assert R.to_domain().from_FractionField(g, F.to_domain()) == X**2/4 + Y**2/4
-    assert R.to_domain().from_FractionField(h, F.to_domain()) == X**2 + Y**2
+    assert R.to_domain().from_FractionField(g, F.to_domain()) == X ** 2 / 4 + Y ** 2 / 4
+    assert R.to_domain().from_FractionField(h, F.to_domain()) == X ** 2 + Y ** 2
+
+    F, x, y = field("x,y", QQ)
+    R, X, Y = ring("x,y", QQ)
+
+    f = (x ** 2 + y ** 2) / (x + 1)
+    g = (x ** 2 + y ** 2) / 4
+    h = x ** 2 + y ** 2
+
+    assert R.to_domain().from_FractionField(f, F.to_domain()) is None
+    assert R.to_domain().from_FractionField(g, F.to_domain()) == X ** 2 / 4 + Y ** 2 / 4
+    assert R.to_domain().from_FractionField(h, F.to_domain()) == X ** 2 + Y ** 2
+
 
 def test_FractionField_from_PolynomialRing():
-    R, x,y = ring("x,y", QQ)
-    F, X,Y = field("x,y", ZZ)
+    R, x, y = ring("x,y", QQ)
+    F, X, Y = field("x,y", ZZ)
 
-    f = 3*x**2 + 5*y**2
-    g = x**2/3 + y**2/5
+    f = 3 * x ** 2 + 5 * y ** 2
+    g = x ** 2 / 3 + y ** 2 / 5
 
-    assert F.to_domain().from_PolynomialRing(f, R.to_domain()) == 3*X**2 + 5*Y**2
-    assert F.to_domain().from_PolynomialRing(g, R.to_domain()) == (5*X**2 + 3*Y**2)/15
+    assert (
+        F.to_domain().from_PolynomialRing(f, R.to_domain()) == 3 * X ** 2 + 5 * Y ** 2
+    )
+    assert (
+        F.to_domain().from_PolynomialRing(g, R.to_domain())
+        == (5 * X ** 2 + 3 * Y ** 2) / 15
+    )
+
 
 def test_FF_of_type():
     assert FF(3).of_type(FF(3)(1)) is True
@@ -582,8 +599,7 @@ def test_RealField_from_sympy():
 
 
 def test_not_in_any_domain():
-    check = illegal + [x] + [
-        float(i) for i in illegal if i != S.ComplexInfinity]
+    check = illegal + [x] + [float(i) for i in illegal if i != S.ComplexInfinity]
     for dom in (ZZ, QQ, RR, CC, EX):
         for i in check:
             if i == x and dom == EX:
@@ -640,22 +656,22 @@ def test_ModularInteger():
     a = F3(3) - F3(2)
     assert isinstance(a, F3.dtype) and a == 1
 
-    a = 2*F3(2)
+    a = 2 * F3(2)
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)*2
+    a = F3(2) * 2
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)*F3(2)
+    a = F3(2) * F3(2)
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)*F3(2)
+    a = F3(2) * F3(2)
     assert isinstance(a, F3.dtype) and a == 1
 
-    a = 2/F3(2)
+    a = 2 / F3(2)
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)/2
+    a = F3(2) / 2
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)/F3(2)
+    a = F3(2) / F3(2)
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)/F3(2)
+    a = F3(2) / F3(2)
     assert isinstance(a, F3.dtype) and a == 1
 
     a = 1 % F3(2)
@@ -667,20 +683,20 @@ def test_ModularInteger():
     a = F3(1) % F3(2)
     assert isinstance(a, F3.dtype) and a == 1
 
-    a = F3(2)**0
+    a = F3(2) ** 0
     assert isinstance(a, F3.dtype) and a == 1
-    a = F3(2)**1
+    a = F3(2) ** 1
     assert isinstance(a, F3.dtype) and a == 2
-    a = F3(2)**2
+    a = F3(2) ** 2
     assert isinstance(a, F3.dtype) and a == 1
 
     F7 = FF(7)
 
-    a = F7(3)**100000000000
+    a = F7(3) ** 100000000000
     assert isinstance(a, F7.dtype) and a == 4
-    a = F7(3)**-100000000000
+    a = F7(3) ** -100000000000
     assert isinstance(a, F7.dtype) and a == 2
-    a = F7(3)**S(2)
+    a = F7(3) ** S(2)
     assert isinstance(a, F7.dtype) and a == 2
 
     assert bool(F3(3)) is False
@@ -688,13 +704,13 @@ def test_ModularInteger():
 
     F5 = FF(5)
 
-    a = F5(1)**(-1)
+    a = F5(1) ** (-1)
     assert isinstance(a, F5.dtype) and a == 1
-    a = F5(2)**(-1)
+    a = F5(2) ** (-1)
     assert isinstance(a, F5.dtype) and a == 3
-    a = F5(3)**(-1)
+    a = F5(3) ** (-1)
     assert isinstance(a, F5.dtype) and a == 2
-    a = F5(4)**(-1)
+    a = F5(4) ** (-1)
     assert isinstance(a, F5.dtype) and a == 4
 
     assert (F5(1) < F5(2)) is True
@@ -737,15 +753,17 @@ def test_ModularInteger():
     assert (F5(3) > 7) is True
     assert (F5(3) >= 7) is True
 
-    raises(NotInvertible, lambda: F5(0)**(-1))
-    raises(NotInvertible, lambda: F5(5)**(-1))
+    raises(NotInvertible, lambda: F5(0) ** (-1))
+    raises(NotInvertible, lambda: F5(5) ** (-1))
 
     raises(ValueError, lambda: FF(0))
     raises(ValueError, lambda: FF(2.1))
 
+
 def test_QQ_int():
-    assert int(QQ(2**2000, 3**1250)) == 455431
-    assert int(QQ(2**100, 3)) == 422550200076076467165567735125
+    assert int(QQ(2 ** 2000, 3 ** 1250)) == 455431
+    assert int(QQ(2 ** 100, 3)) == 422550200076076467165567735125
+
 
 def test_RR_double():
     assert RR(3.14) > 1e-50
@@ -755,17 +773,19 @@ def test_RR_double():
     assert RR(1e-20) > 1e-50
     assert RR(1e-40) > 1e-50
 
+
 def test_RR_Float():
     f1 = Float("1.01")
     f2 = Float("1.0000000000000000000001")
     assert f1._prec == 53
     assert f2._prec == 80
-    assert RR(f1)-1 > 1e-50
-    assert RR(f2)-1 < 1e-50 # RR's precision is lower than f2's
+    assert RR(f1) - 1 > 1e-50
+    assert RR(f2) - 1 < 1e-50  # RR's precision is lower than f2's
 
     RR2 = RealField(prec=f2._prec)
-    assert RR2(f1)-1 > 1e-50
-    assert RR2(f2)-1 > 1e-50 # RR's precision is equal to f2's
+    assert RR2(f1) - 1 > 1e-50
+    assert RR2(f2) - 1 > 1e-50  # RR's precision is equal to f2's
+
 
 def test_CC_double():
     assert CC(3.14).real > 1e-50
@@ -782,6 +802,7 @@ def test_CC_double():
     assert CC(1e-20j).imag > 1e-50
     assert CC(1e-40j).imag > 1e-50
 
+
 def test_issue_18278():
-    assert str(RR(2).parent()) == 'RR'
-    assert str(CC(2).parent()) == 'CC'
+    assert str(RR(2).parent()) == "RR"
+    assert str(CC(2).parent()) == "CC"

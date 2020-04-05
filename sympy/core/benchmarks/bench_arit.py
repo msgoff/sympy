@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 from sympy.core import Add, Mul, symbols
 
-x, y, z = symbols('x,y,z')
+x, y, z = symbols("x,y,z")
 
 
 def timeit_neg():
@@ -30,7 +30,7 @@ def timeit_Add_xyz():
 
 
 def timeit_Mul_xy():
-    x*y
+    x * y
 
 
 def timeit_Mul_xyz():
@@ -38,8 +38,8 @@ def timeit_Mul_xyz():
 
 
 def timeit_Div_xy():
-    x/y
+    x / y
 
 
 def timeit_Div_2y():
-    2/y
+    2 / y

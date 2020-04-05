@@ -21,16 +21,17 @@ class RoundFunction(Function):
     @classmethod
     def eval(cls, arg):
         from sympy import im
+
         v = cls._eval_number(arg)
         if v is not None:
             return v
 
         if arg.is_integer or arg.is_finite is False:
             return arg
-        if arg.is_imaginary or (S.ImaginaryUnit*arg).is_real:
+        if arg.is_imaginary or (S.ImaginaryUnit * arg).is_real:
             i = im(arg)
             if not i.has(S.ImaginaryUnit):
-                return cls(i)*S.ImaginaryUnit
+                return cls(i) * S.ImaginaryUnit
             return cls(arg, evaluate=False)
 
         # Integral, numerical, symbolic part
@@ -52,13 +53,15 @@ class RoundFunction(Function):
 
         # Evaluate npart numerically if independent of spart
         if npart and (
-            not spart or
-            npart.is_real and (spart.is_imaginary or (S.ImaginaryUnit*spart).is_real) or
-                npart.is_imaginary and spart.is_real):
+            not spart
+            or npart.is_real
+            and (spart.is_imaginary or (S.ImaginaryUnit * spart).is_real)
+            or npart.is_imaginary
+            and spart.is_real
+        ):
             try:
-                r, i = get_integer_part(
-                    npart, cls._dir, {}, return_ints=True)
-                ipart += Integer(r) + Integer(i)*S.ImaginaryUnit
+                r, i = get_integer_part(npart, cls._dir, {}, return_ints=True)
+                ipart += Integer(r) + Integer(i) * S.ImaginaryUnit
                 npart = S.Zero
             except (PrecisionExhausted, NotImplementedError):
                 pass
@@ -66,8 +69,8 @@ class RoundFunction(Function):
         spart += npart
         if not spart:
             return ipart
-        elif spart.is_imaginary or (S.ImaginaryUnit*spart).is_real:
-            return ipart + cls(im(spart), evaluate=False)*S.ImaginaryUnit
+        elif spart.is_imaginary or (S.ImaginaryUnit * spart).is_real:
+            return ipart + cls(im(spart), evaluate=False) * S.ImaginaryUnit
         else:
             return ipart + cls(spart, evaluate=False)
 
@@ -117,14 +120,14 @@ class floor(RoundFunction):
     .. [2] http://mathworld.wolfram.com/FloorFunction.html
 
     """
+
     _dir = -1
 
     @classmethod
     def _eval_number(cls, arg):
         if arg.is_Number:
             return arg.floor()
-        elif any(isinstance(i, j)
-                for i in (arg, -arg) for j in (floor, ceiling)):
+        elif any(isinstance(i, j) for i in (arg, -arg) for j in (floor, ceiling)):
             return arg
         if arg.is_NumberSymbol:
             return arg.approximation_interval(Integer)[0]
@@ -156,8 +159,7 @@ class floor(RoundFunction):
 
     def _eval_Eq(self, other):
         if isinstance(self, floor):
-            if (self.rewrite(ceiling) == other) or \
-                    (self.rewrite(frac) == other):
+            if (self.rewrite(ceiling) == other) or (self.rewrite(frac) == other):
                 return S.true
 
     def __le__(self, other):
@@ -216,6 +218,7 @@ class floor(RoundFunction):
 
         return Lt(self, other, evaluate=False)
 
+
 class ceiling(RoundFunction):
     """
     Ceiling is a univariate function which returns the smallest integer
@@ -252,14 +255,14 @@ class ceiling(RoundFunction):
     .. [2] http://mathworld.wolfram.com/CeilingFunction.html
 
     """
+
     _dir = 1
 
     @classmethod
     def _eval_number(cls, arg):
         if arg.is_Number:
             return arg.ceiling()
-        elif any(isinstance(i, j)
-                for i in (arg, -arg) for j in (floor, ceiling)):
+        elif any(isinstance(i, j) for i in (arg, -arg) for j in (floor, ceiling)):
             return arg
         if arg.is_NumberSymbol:
             return arg.approximation_interval(Integer)[1]
@@ -291,8 +294,7 @@ class ceiling(RoundFunction):
 
     def _eval_Eq(self, other):
         if isinstance(self, ceiling):
-            if (self.rewrite(floor) == other) or \
-                    (self.rewrite(frac) == other):
+            if (self.rewrite(floor) == other) or (self.rewrite(frac) == other):
                 return S.true
 
     def __lt__(self, other):
@@ -351,6 +353,7 @@ class ceiling(RoundFunction):
 
         return Le(self, other, evaluate=False)
 
+
 class frac(Function):
     r"""Represents the fractional part of x
 
@@ -400,6 +403,7 @@ class frac(Function):
     .. [2] http://mathworld.wolfram.com/FractionalPart.html
 
     """
+
     @classmethod
     def eval(cls, arg):
         from sympy import AccumBounds, im
@@ -423,7 +427,7 @@ class frac(Function):
         for t in terms:
             # Two checks are needed for complex arguments
             # see issue-7649 for details
-            if t.is_imaginary or (S.ImaginaryUnit*t).is_real:
+            if t.is_imaginary or (S.ImaginaryUnit * t).is_real:
                 i = im(t)
                 if not i.has(S.ImaginaryUnit):
                     imag += i
@@ -434,7 +438,7 @@ class frac(Function):
 
         real = _eval(real)
         imag = _eval(imag)
-        return real + S.ImaginaryUnit*imag
+        return real + S.ImaginaryUnit * imag
 
     def _eval_rewrite_as_floor(self, arg, **kwargs):
         return arg - floor(arg)
@@ -444,8 +448,7 @@ class frac(Function):
 
     def _eval_Eq(self, other):
         if isinstance(self, frac):
-            if (self.rewrite(floor) == other) or \
-                    (self.rewrite(ceiling) == other):
+            if (self.rewrite(floor) == other) or (self.rewrite(ceiling) == other):
                 return S.true
             # Check if other < 0
             if other.is_extended_negative:
@@ -482,7 +485,7 @@ class frac(Function):
             # Check if other >= 1
             res = self._value_one_or_more(other)
             if res is not None:
-                return not(res)
+                return not (res)
         return Ge(self, other, evaluate=False)
 
     def __gt__(self, other):
@@ -491,7 +494,7 @@ class frac(Function):
             # Check if other < 0
             res = self._value_one_or_more(other)
             if res is not None:
-                return not(res)
+                return not (res)
             # Check if other >= 1
             if other.is_extended_negative:
                 return S.true

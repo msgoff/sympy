@@ -58,14 +58,18 @@ def tensorproduct(*args):
     a, b = map(_arrayfy, args)
 
     if not isinstance(a, NDimArray) or not isinstance(b, NDimArray):
-        return a*b
+        return a * b
 
     if isinstance(a, SparseNDimArray) and isinstance(b, SparseNDimArray):
         lp = len(b)
-        new_array = {k1*lp + k2: v1*v2 for k1, v1 in a._sparse_array.items() for k2, v2 in b._sparse_array.items()}
+        new_array = {
+            k1 * lp + k2: v1 * v2
+            for k1, v1 in a._sparse_array.items()
+            for k2, v2 in b._sparse_array.items()
+        }
         return ImmutableSparseNDimArray(new_array, a.shape + b.shape)
 
-    product_list = [i*j for i in Flatten(a) for j in Flatten(b)]
+    product_list = [i * j for i in Flatten(a) for j in Flatten(b)]
     return ImmutableDenseNDimArray(product_list, a.shape + b.shape)
 
 
@@ -123,7 +127,7 @@ def tensorcontraction(array, *contraction_axes):
     rank = array.rank()
 
     remaining_shape = [dim for i, dim in enumerate(array.shape) if i not in taken_dims]
-    cum_shape = [0]*rank
+    cum_shape = [0] * rank
     _cumul = 1
     for i in range(rank):
         cum_shape[rank - i - 1] = _cumul
@@ -136,8 +140,11 @@ def tensorcontraction(array, *contraction_axes):
     # positions to a class method.
 
     # Determine absolute positions of the uncontracted indices:
-    remaining_indices = [[cum_shape[i]*j for j in range(array.shape[i])]
-                         for i in range(rank) if i not in taken_dims]
+    remaining_indices = [
+        [cum_shape[i] * j for j in range(array.shape[i])]
+        for i in range(rank)
+        if i not in taken_dims
+    ]
 
     # Determine absolute positions of the contracted indices:
     summed_deltas = []
@@ -197,6 +204,7 @@ def derive_by_array(expr, dx):
     """
     from sympy.matrices import MatrixBase
     from sympy.tensor.array import SparseNDimArray
+
     array_types = (Iterable, MatrixBase, NDimArray)
 
     if isinstance(dx, array_types):
@@ -214,9 +222,11 @@ def derive_by_array(expr, dx):
         if isinstance(dx, array_types):
             if isinstance(expr, SparseNDimArray):
                 lp = len(expr)
-                new_array = {k + i*lp: v
-                             for i, x in enumerate(Flatten(dx))
-                             for k, v in expr.diff(x)._sparse_array.items()}
+                new_array = {
+                    k + i * lp: v
+                    for i, x in enumerate(Flatten(dx))
+                    for k, v in expr.diff(x)._sparse_array.items()
+                }
             else:
                 new_array = [[y.diff(x) for y in Flatten(expr)] for x in Flatten(dx)]
             return type(expr)(new_array, dx.shape + expr.shape)
@@ -224,7 +234,9 @@ def derive_by_array(expr, dx):
             return expr.diff(dx)
     else:
         if isinstance(dx, array_types):
-            return ImmutableDenseNDimArray([expr.diff(i) for i in Flatten(dx)], dx.shape)
+            return ImmutableDenseNDimArray(
+                [expr.diff(i) for i in Flatten(dx)], dx.shape
+            )
         else:
             return diff(expr, dx)
 
@@ -274,6 +286,7 @@ def permutedims(expr, perm):
         raise TypeError("expression has to be an N-dim array")
 
     from sympy.combinatorics import Permutation
+
     if not isinstance(perm, Permutation):
         perm = Permutation(list(perm))
 
@@ -285,12 +298,17 @@ def permutedims(expr, perm):
     new_shape = perm(expr.shape)
 
     if isinstance(expr, SparseNDimArray):
-        return type(expr)({tuple(perm(expr._get_tuple_index(k))): v
-                           for k, v in expr._sparse_array.items()}, new_shape)
+        return type(expr)(
+            {
+                tuple(perm(expr._get_tuple_index(k))): v
+                for k, v in expr._sparse_array.items()
+            },
+            new_shape,
+        )
 
     indices_span = perm([range(i) for i in expr.shape])
 
-    new_array = [None]*len(expr)
+    new_array = [None] * len(expr)
     for i, idx in enumerate(itertools.product(*indices_span)):
         t = iperm(idx)
         new_array[i] = expr[t]
@@ -299,7 +317,7 @@ def permutedims(expr, perm):
 
 
 class Flatten(Basic):
-    '''
+    """
     Flatten an iterable object to a list in a lazy-evaluation way.
 
     Notes
@@ -319,7 +337,8 @@ class Flatten(Basic):
     Flatten([[0, 1, 2], [3, 4, 5]])
     >>> [i for i in Flatten(A)]
     [0, 1, 2, 3, 4, 5]
-    '''
+    """
+
     def __init__(self, iterable):
         from sympy.matrices.matrices import MatrixBase
         from sympy.tensor.array import NDimArray
@@ -352,7 +371,7 @@ class Flatten(Basic):
             elif isinstance(self._iter, MatrixBase):
                 result = self._iter[self._idx]
 
-            elif hasattr(self._iter, '__next__'):
+            elif hasattr(self._iter, "__next__"):
                 result = next(self._iter)
 
             else:

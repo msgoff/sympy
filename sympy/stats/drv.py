@@ -1,15 +1,39 @@
 from __future__ import print_function, division
 
-from sympy import (Basic, sympify, symbols, Dummy, Lambda, summation,
-                   Piecewise, S, cacheit, Sum, exp, I, Ne, Eq, poly,
-                   series, factorial, And)
+from sympy import (
+    Basic,
+    sympify,
+    symbols,
+    Dummy,
+    Lambda,
+    summation,
+    Piecewise,
+    S,
+    cacheit,
+    Sum,
+    exp,
+    I,
+    Ne,
+    Eq,
+    poly,
+    series,
+    factorial,
+    And,
+)
 
 from sympy.polys.polyerrors import PolynomialError
 from sympy.solvers.solveset import solveset
 from sympy.stats.crv import reduce_rational_inequalities_wrap
-from sympy.stats.rv import (NamedArgsMixin, SinglePSpace, SingleDomain,
-                            random_symbols, PSpace, ConditionalDomain, RandomDomain,
-                            ProductDomain)
+from sympy.stats.rv import (
+    NamedArgsMixin,
+    SinglePSpace,
+    SingleDomain,
+    random_symbols,
+    PSpace,
+    ConditionalDomain,
+    RandomDomain,
+    ProductDomain,
+)
 from sympy.stats.symbolic_probability import Probability
 from sympy.functions.elementary.integers import floor
 from sympy.sets.fancysets import Range, FiniteSet
@@ -60,8 +84,8 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
 
         Used by sample
         """
-        x = Dummy('x', positive=True, integer=True)
-        z = Dummy('z', positive=True)
+        x = Dummy("x", positive=True, integer=True)
+        z = Dummy("z", positive=True)
         cdf_temp = self.cdf(x)
         # Invert CDF
         try:
@@ -78,7 +102,7 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
 
         Returns a Lambda
         """
-        x, z = symbols('x, z', integer=True, cls=Dummy)
+        x, z = symbols("x, z", integer=True, cls=Dummy)
         left_bound = self.set.inf
 
         # CDF is integral of PDF from left bound to z
@@ -105,9 +129,9 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
 
         Returns a Lambda
         """
-        x, t = symbols('x, t', real=True, cls=Dummy)
+        x, t = symbols("x, t", real=True, cls=Dummy)
         pdf = self.pdf(x)
-        cf = summation(exp(I*t*x)*pdf, (x, self.set.inf, self.set.sup))
+        cf = summation(exp(I * t * x) * pdf, (x, self.set.inf, self.set.sup))
         return Lambda(t, cf)
 
     def _characteristic_function(self, t):
@@ -123,10 +147,10 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
 
     @cacheit
     def compute_moment_generating_function(self, **kwargs):
-        t = Dummy('t', real=True)
-        x = Dummy('x', integer=True)
+        t = Dummy("t", real=True)
+        x = Dummy("x", integer=True)
         pdf = self.pdf(x)
-        mgf = summation(exp(t*x)*pdf, (x, self.set.inf, self.set.sup))
+        mgf = summation(exp(t * x) * pdf, (x, self.set.inf, self.set.sup))
         return Lambda(t, mgf)
 
     def _moment_generating_function(self, t):
@@ -145,12 +169,12 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
 
         Returns a Lambda
         """
-        x = Dummy('x', integer=True)
-        p = Dummy('p', real=True)
+        x = Dummy("x", integer=True)
+        p = Dummy("p", real=True)
         left_bound = self.set.inf
         pdf = self.pdf(x)
         cdf = summation(pdf, (x, left_bound, x), **kwargs)
-        set = ((x, p <= cdf), )
+        set = ((x, p <= cdf),)
         return Lambda(p, Piecewise(*set))
 
     def _quantile(self, x):
@@ -172,31 +196,37 @@ class SingleDiscreteDistribution(DiscreteDistribution, NamedArgsMixin):
             try:
                 p = poly(expr, var)
 
-                t = Dummy('t', real=True)
+                t = Dummy("t", real=True)
 
                 mgf = self.moment_generating_function(t)
                 deg = p.degree()
                 taylor = poly(series(mgf, t, 0, deg + 1).removeO(), t)
                 result = 0
-                for k in range(deg+1):
-                    result += p.coeff_monomial(var ** k) * taylor.coeff_monomial(t ** k) * factorial(k)
+                for k in range(deg + 1):
+                    result += (
+                        p.coeff_monomial(var ** k)
+                        * taylor.coeff_monomial(t ** k)
+                        * factorial(k)
+                    )
 
                 return result
 
             except PolynomialError:
-                return summation(expr * self.pdf(var),
-                                 (var, self.set.inf, self.set.sup), **kwargs)
+                return summation(
+                    expr * self.pdf(var), (var, self.set.inf, self.set.sup), **kwargs
+                )
 
         else:
-            return Sum(expr * self.pdf(var),
-                         (var, self.set.inf, self.set.sup), **kwargs)
+            return Sum(
+                expr * self.pdf(var), (var, self.set.inf, self.set.sup), **kwargs
+            )
 
     def __call__(self, *args):
         return self.pdf(*args)
 
 
 class DiscreteDistributionHandmade(SingleDiscreteDistribution):
-    _argnames = ('pdf',)
+    _argnames = ("pdf",)
 
     @property
     def set(self):
@@ -205,12 +235,15 @@ class DiscreteDistributionHandmade(SingleDiscreteDistribution):
     def __new__(cls, pdf, set=S.Integers):
         return Basic.__new__(cls, pdf, set)
 
+
 class DiscreteDomain(RandomDomain):
     """
     A domain with discrete support with step size one.
     Represented using symbols and Range.
     """
+
     is_Discrete = True
+
 
 class SingleDiscreteDomain(DiscreteDomain, SingleDomain):
     def as_boolean(self):
@@ -222,15 +255,21 @@ class ConditionalDiscreteDomain(DiscreteDomain, ConditionalDomain):
     Domain with discrete support of step size one, that is restricted by
     some condition.
     """
+
     @property
     def set(self):
         rv = self.symbols
         if len(self.symbols) > 1:
-            raise NotImplementedError(filldedent('''
-                Multivariate conditional domains are not yet implemented.'''))
+            raise NotImplementedError(
+                filldedent(
+                    """
+                Multivariate conditional domains are not yet implemented."""
+                )
+            )
         rv = list(rv)[0]
-        return reduce_rational_inequalities_wrap(self.condition,
-            rv).intersect(self.fulldomain.set)
+        return reduce_rational_inequalities_wrap(self.condition, rv).intersect(
+            self.fulldomain.set
+        )
 
 
 class DiscretePSpace(PSpace):
@@ -245,10 +284,13 @@ class DiscretePSpace(PSpace):
         rvs = random_symbols(condition)
         assert all(r.symbol in self.symbols for r in rvs)
         if len(rvs) > 1:
-            raise NotImplementedError(filldedent('''Multivariate discrete
-            random variables are not yet supported.'''))
-        conditional_domain = reduce_rational_inequalities_wrap(condition,
-            rvs[0])
+            raise NotImplementedError(
+                filldedent(
+                    """Multivariate discrete
+            random variables are not yet supported."""
+                )
+            )
+        conditional_domain = reduce_rational_inequalities_wrap(condition, rvs[0])
         conditional_domain = conditional_domain.intersect(self.domain.set)
         return SingleDiscreteDomain(rvs[0].symbol, conditional_domain)
 
@@ -265,11 +307,12 @@ class DiscretePSpace(PSpace):
             prob = self.eval_prob(_domain)
         except NotImplementedError:
             from sympy.stats.rv import density
+
             expr = condition.lhs - condition.rhs
             dens = density(expr)
             if not isinstance(dens, DiscreteDistribution):
                 dens = DiscreteDistributionHandmade(dens)
-            z = Dummy('z', real=True)
+            z = Dummy("z", real=True)
             space = SingleDiscretePSpace(z, dens)
             prob = space.probability(condition.__class__(space.value, 0))
         if prob is None:
@@ -279,12 +322,10 @@ class DiscretePSpace(PSpace):
     def eval_prob(self, _domain):
         sym = list(self.symbols)[0]
         if isinstance(_domain, Range):
-            n = symbols('n', integer=True)
+            n = symbols("n", integer=True)
             inf, sup, step = (r for r in _domain.args)
-            summand = ((self.pdf).replace(
-              sym, n*step))
-            rv = summation(summand,
-                (n, inf/step, (sup)/step - 1)).doit()
+            summand = (self.pdf).replace(sym, n * step)
+            rv = summation(summand, (n, inf / step, (sup) / step - 1)).doit()
             return rv
         elif isinstance(_domain, FiniteSet):
             pdf = Lambda(sym, self.pdf)
@@ -297,17 +338,20 @@ class DiscretePSpace(PSpace):
     def conditional_space(self, condition):
         # XXX: Converting from set to tuple. The order matters to Lambda
         # though so we should be starting with a set...
-        density = Lambda(tuple(self.symbols), self.pdf/self.probability(condition))
+        density = Lambda(tuple(self.symbols), self.pdf / self.probability(condition))
         condition = condition.xreplace(dict((rv, rv.symbol) for rv in self.values))
         domain = ConditionalDiscreteDomain(self.domain, condition)
         return DiscretePSpace(domain, density)
 
+
 class ProductDiscreteDomain(ProductDomain, DiscreteDomain):
-     def as_boolean(self):
+    def as_boolean(self):
         return And(*[domain.as_boolean for domain in self.domains])
+
 
 class SingleDiscretePSpace(DiscretePSpace, SinglePSpace):
     """ Discrete probability space over a single univariate variable """
+
     is_real = True
 
     @property
@@ -336,11 +380,9 @@ class SingleDiscretePSpace(DiscretePSpace, SinglePSpace):
 
         x = self.value.symbol
         try:
-            return self.distribution.expectation(expr, x, evaluate=evaluate,
-                    **kwargs)
+            return self.distribution.expectation(expr, x, evaluate=evaluate, **kwargs)
         except NotImplementedError:
-            return Sum(expr * self.pdf, (x, self.set.inf, self.set.sup),
-                    **kwargs)
+            return Sum(expr * self.pdf, (x, self.set.inf, self.set.sup), **kwargs)
 
     def compute_cdf(self, expr, **kwargs):
         if expr == self.value:

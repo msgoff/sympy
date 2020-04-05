@@ -1,9 +1,8 @@
 from sympy.core.backend import sympify, Add, ImmutableMatrix as Matrix
 from sympy.core.compatibility import unicode
-from .printing import (VectorLatexPrinter, VectorPrettyPrinter,
-                       VectorStrPrinter)
+from .printing import VectorLatexPrinter, VectorPrettyPrinter, VectorStrPrinter
 
-__all__ = ['Dyadic']
+__all__ = ["Dyadic"]
 
 
 class Dyadic(object):
@@ -38,10 +37,14 @@ class Dyadic(object):
         while len(inlist) != 0:
             added = 0
             for i, v in enumerate(self.args):
-                if ((str(inlist[0][1]) == str(self.args[i][1])) and
-                        (str(inlist[0][2]) == str(self.args[i][2]))):
-                    self.args[i] = (self.args[i][0] + inlist[0][0],
-                                    inlist[0][1], inlist[0][2])
+                if (str(inlist[0][1]) == str(self.args[i][1])) and (
+                    str(inlist[0][2]) == str(self.args[i][2])
+                ):
+                    self.args[i] = (
+                        self.args[i][0] + inlist[0][0],
+                        inlist[0][1],
+                        inlist[0][2],
+                    )
                     inlist.remove(inlist[0])
                     added = 1
                     break
@@ -51,8 +54,7 @@ class Dyadic(object):
         i = 0
         # This code is to remove empty parts from the list
         while i < len(self.args):
-            if ((self.args[i][0] == 0) | (self.args[i][1] == 0) |
-                    (self.args[i][2] == 0)):
+            if (self.args[i][0] == 0) | (self.args[i][1] == 0) | (self.args[i][2] == 0):
                 self.args.remove(self.args[i])
                 i -= 1
             i += 1
@@ -85,6 +87,7 @@ class Dyadic(object):
 
         """
         from sympy.physics.vector.vector import Vector, _check_vector
+
         if isinstance(other, Dyadic):
             other = _check_dyadic(other)
             ol = Dyadic(0)
@@ -142,8 +145,7 @@ class Dyadic(object):
 
         newlist = [v for v in self.args]
         for i, v in enumerate(newlist):
-            newlist[i] = (sympify(other) * newlist[i][0], newlist[i][1],
-                          newlist[i][2])
+            newlist[i] = (sympify(other) * newlist[i][0], newlist[i][1], newlist[i][2])
         return Dyadic(newlist)
 
     def __ne__(self, other):
@@ -161,31 +163,36 @@ class Dyadic(object):
         for i, v in enumerate(ar):
             # if the coef of the dyadic is 1, we skip the 1
             if ar[i][0] == 1:
-                ol.append(' + ' + mlp.doprint(ar[i][1]) + r"\otimes " +
-                          mlp.doprint(ar[i][2]))
+                ol.append(
+                    " + " + mlp.doprint(ar[i][1]) + r"\otimes " + mlp.doprint(ar[i][2])
+                )
             # if the coef of the dyadic is -1, we skip the 1
             elif ar[i][0] == -1:
-                ol.append(' - ' +
-                          mlp.doprint(ar[i][1]) +
-                          r"\otimes " +
-                          mlp.doprint(ar[i][2]))
+                ol.append(
+                    " - " + mlp.doprint(ar[i][1]) + r"\otimes " + mlp.doprint(ar[i][2])
+                )
             # If the coefficient of the dyadic is not 1 or -1,
             # we might wrap it in parentheses, for readability.
             elif ar[i][0] != 0:
                 arg_str = mlp.doprint(ar[i][0])
                 if isinstance(ar[i][0], Add):
-                    arg_str = '(%s)' % arg_str
-                if arg_str.startswith('-'):
+                    arg_str = "(%s)" % arg_str
+                if arg_str.startswith("-"):
                     arg_str = arg_str[1:]
-                    str_start = ' - '
+                    str_start = " - "
                 else:
-                    str_start = ' + '
-                ol.append(str_start + arg_str + mlp.doprint(ar[i][1]) +
-                          r"\otimes " + mlp.doprint(ar[i][2]))
-        outstr = ''.join(ol)
-        if outstr.startswith(' + '):
+                    str_start = " + "
+                ol.append(
+                    str_start
+                    + arg_str
+                    + mlp.doprint(ar[i][1])
+                    + r"\otimes "
+                    + mlp.doprint(ar[i][2])
+                )
+        outstr = "".join(ol)
+        if outstr.startswith(" + "):
             outstr = outstr[3:]
-        elif outstr.startswith(' '):
+        elif outstr.startswith(" "):
             outstr = outstr[1:]
         return outstr
 
@@ -202,7 +209,9 @@ class Dyadic(object):
                     use_unicode = printer._use_unicode
                 else:
                     from sympy.printing.pretty.pretty_symbology import (
-                        pretty_use_unicode)
+                        pretty_use_unicode,
+                    )
+
                     use_unicode = pretty_use_unicode()
                 mpp = printer if printer else VectorPrettyPrinter(settings)
                 if len(ar) == 0:
@@ -212,24 +221,21 @@ class Dyadic(object):
                 for i, v in enumerate(ar):
                     # if the coef of the dyadic is 1, we skip the 1
                     if ar[i][0] == 1:
-                        ol.extend([u" + ",
-                                  mpp.doprint(ar[i][1]),
-                                  bar,
-                                  mpp.doprint(ar[i][2])])
+                        ol.extend(
+                            [u" + ", mpp.doprint(ar[i][1]), bar, mpp.doprint(ar[i][2])]
+                        )
 
                     # if the coef of the dyadic is -1, we skip the 1
                     elif ar[i][0] == -1:
-                        ol.extend([u" - ",
-                                  mpp.doprint(ar[i][1]),
-                                  bar,
-                                  mpp.doprint(ar[i][2])])
+                        ol.extend(
+                            [u" - ", mpp.doprint(ar[i][1]), bar, mpp.doprint(ar[i][2])]
+                        )
 
                     # If the coefficient of the dyadic is not 1 or -1,
                     # we might wrap it in parentheses, for readability.
                     elif ar[i][0] != 0:
                         if isinstance(ar[i][0], Add):
-                            arg_str = mpp._print(
-                                ar[i][0]).parens()[0]
+                            arg_str = mpp._print(ar[i][0]).parens()[0]
                         else:
                             arg_str = mpp.doprint(ar[i][0])
                         if arg_str.startswith(u"-"):
@@ -237,10 +243,16 @@ class Dyadic(object):
                             str_start = u" - "
                         else:
                             str_start = u" + "
-                        ol.extend([str_start, arg_str, u" ",
-                                  mpp.doprint(ar[i][1]),
-                                  bar,
-                                  mpp.doprint(ar[i][2])])
+                        ol.extend(
+                            [
+                                str_start,
+                                arg_str,
+                                u" ",
+                                mpp.doprint(ar[i][1]),
+                                bar,
+                                mpp.doprint(ar[i][2]),
+                            ]
+                        )
 
                 outstr = u"".join(ol)
                 if outstr.startswith(u" + "):
@@ -248,6 +260,7 @@ class Dyadic(object):
                 elif outstr.startswith(" "):
                     outstr = outstr[1:]
                 return outstr
+
         return Fake()
 
     def __rand__(self, other):
@@ -273,6 +286,7 @@ class Dyadic(object):
         """
 
         from sympy.physics.vector.vector import Vector, _check_vector
+
         other = _check_vector(other)
         ol = Vector(0)
         for i, v in enumerate(self.args):
@@ -303,6 +317,7 @@ class Dyadic(object):
         """
 
         from sympy.physics.vector.vector import _check_vector
+
         other = _check_vector(other)
         ol = Dyadic(0)
         for i, v in enumerate(self.args):
@@ -318,27 +333,34 @@ class Dyadic(object):
         for i, v in enumerate(ar):
             # if the coef of the dyadic is 1, we skip the 1
             if ar[i][0] == 1:
-                ol.append(' + (' + str(ar[i][1]) + '|' + str(ar[i][2]) + ')')
+                ol.append(" + (" + str(ar[i][1]) + "|" + str(ar[i][2]) + ")")
             # if the coef of the dyadic is -1, we skip the 1
             elif ar[i][0] == -1:
-                ol.append(' - (' + str(ar[i][1]) + '|' + str(ar[i][2]) + ')')
+                ol.append(" - (" + str(ar[i][1]) + "|" + str(ar[i][2]) + ")")
             # If the coefficient of the dyadic is not 1 or -1,
             # we might wrap it in parentheses, for readability.
             elif ar[i][0] != 0:
                 arg_str = VectorStrPrinter().doprint(ar[i][0])
                 if isinstance(ar[i][0], Add):
                     arg_str = "(%s)" % arg_str
-                if arg_str[0] == '-':
+                if arg_str[0] == "-":
                     arg_str = arg_str[1:]
-                    str_start = ' - '
+                    str_start = " - "
                 else:
-                    str_start = ' + '
-                ol.append(str_start + arg_str + '*(' + str(ar[i][1]) +
-                          '|' + str(ar[i][2]) + ')')
-        outstr = ''.join(ol)
-        if outstr.startswith(' + '):
+                    str_start = " + "
+                ol.append(
+                    str_start
+                    + arg_str
+                    + "*("
+                    + str(ar[i][1])
+                    + "|"
+                    + str(ar[i][2])
+                    + ")"
+                )
+        outstr = "".join(ol)
+        if outstr.startswith(" + "):
             outstr = outstr[3:]
-        elif outstr.startswith(' '):
+        elif outstr.startswith(" "):
             outstr = outstr[1:]
         return outstr
 
@@ -367,6 +389,7 @@ class Dyadic(object):
         """
 
         from sympy.physics.vector.vector import _check_vector
+
         other = _check_vector(other)
         ol = Dyadic(0)
         for i, v in enumerate(self.args):
@@ -387,7 +410,8 @@ class Dyadic(object):
         SymPy objects, like lists and dictionaries of expressions.
         """
         from sympy.printing.latex import latex
-        s = latex(self, mode='plain')
+
+        s = latex(self, mode="plain")
         return "$\\displaystyle %s$" % s
 
     _repr_latex_orig = _repr_latex_
@@ -429,6 +453,7 @@ class Dyadic(object):
 
         """
         from sympy.physics.vector.functions import express
+
         return express(self, frame1, frame2)
 
     def to_matrix(self, reference_frame, second_reference_frame=None):
@@ -478,13 +503,19 @@ class Dyadic(object):
         if second_reference_frame is None:
             second_reference_frame = reference_frame
 
-        return Matrix([i.dot(self).dot(j) for i in reference_frame for j in
-                      second_reference_frame]).reshape(3, 3)
+        return Matrix(
+            [
+                i.dot(self).dot(j)
+                for i in reference_frame
+                for j in second_reference_frame
+            ]
+        ).reshape(3, 3)
 
     def doit(self, **hints):
         """Calls .doit() on each term in the Dyadic"""
-        return sum([Dyadic([(v[0].doit(**hints), v[1], v[2])])
-                    for v in self.args], Dyadic(0))
+        return sum(
+            [Dyadic([(v[0].doit(**hints), v[1], v[2])]) for v in self.args], Dyadic(0)
+        )
 
     def dt(self, frame):
         """Take the time derivative of this Dyadic in a frame.
@@ -510,6 +541,7 @@ class Dyadic(object):
 
         """
         from sympy.physics.vector.functions import time_derivative
+
         return time_derivative(self, frame)
 
     def simplify(self):
@@ -535,8 +567,10 @@ class Dyadic(object):
 
         """
 
-        return sum([Dyadic([(v[0].subs(*args, **kwargs), v[1], v[2])])
-                    for v in self.args], Dyadic(0))
+        return sum(
+            [Dyadic([(v[0].subs(*args, **kwargs), v[1], v[2])]) for v in self.args],
+            Dyadic(0),
+        )
 
     def applyfunc(self, f):
         """Apply a function to each component of a Dyadic."""
@@ -545,7 +579,7 @@ class Dyadic(object):
 
         out = Dyadic(0)
         for a, b, c in self.args:
-            out += f(a) * (b|c)
+            out += f(a) * (b | c)
         return out
 
     dot = __and__
@@ -554,5 +588,5 @@ class Dyadic(object):
 
 def _check_dyadic(other):
     if not isinstance(other, Dyadic):
-        raise TypeError('A Dyadic must be supplied')
+        raise TypeError("A Dyadic must be supplied")
     return other

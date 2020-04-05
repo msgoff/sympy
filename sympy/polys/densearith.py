@@ -4,13 +4,21 @@ from __future__ import print_function, division
 
 from sympy.polys.densebasic import (
     dup_slice,
-    dup_LC, dmp_LC,
-    dup_degree, dmp_degree,
-    dup_strip, dmp_strip,
-    dmp_zero_p, dmp_zero,
-    dmp_one_p, dmp_one,
-    dmp_ground, dmp_zeros)
-from sympy.polys.polyerrors import (ExactQuotientFailed, PolynomialDivisionFailed)
+    dup_LC,
+    dmp_LC,
+    dup_degree,
+    dmp_degree,
+    dup_strip,
+    dmp_strip,
+    dmp_zero_p,
+    dmp_zero,
+    dmp_one_p,
+    dmp_one,
+    dmp_ground,
+    dmp_zeros,
+)
+from sympy.polys.polyerrors import ExactQuotientFailed, PolynomialDivisionFailed
+
 
 def dup_add_term(f, c, i, K):
     """
@@ -36,9 +44,9 @@ def dup_add_term(f, c, i, K):
         return dup_strip([f[0] + c] + f[1:])
     else:
         if i >= n:
-            return [c] + [K.zero]*(i - n) + f
+            return [c] + [K.zero] * (i - n) + f
         else:
-            return f[:m] + [f[m] + c] + f[m + 1:]
+            return f[:m] + [f[m] + c] + f[m + 1 :]
 
 
 def dmp_add_term(f, c, i, u, K):
@@ -72,7 +80,7 @@ def dmp_add_term(f, c, i, u, K):
         if i >= n:
             return [c] + dmp_zeros(i - n, v, K) + f
         else:
-            return f[:m] + [dmp_add(f[m], c, v, K)] + f[m + 1:]
+            return f[:m] + [dmp_add(f[m], c, v, K)] + f[m + 1 :]
 
 
 def dup_sub_term(f, c, i, K):
@@ -99,9 +107,9 @@ def dup_sub_term(f, c, i, K):
         return dup_strip([f[0] - c] + f[1:])
     else:
         if i >= n:
-            return [-c] + [K.zero]*(i - n) + f
+            return [-c] + [K.zero] * (i - n) + f
         else:
-            return f[:m] + [f[m] - c] + f[m + 1:]
+            return f[:m] + [f[m] - c] + f[m + 1 :]
 
 
 def dmp_sub_term(f, c, i, u, K):
@@ -135,7 +143,7 @@ def dmp_sub_term(f, c, i, u, K):
         if i >= n:
             return [dmp_neg(c, v, K)] + dmp_zeros(i - n, v, K) + f
         else:
-            return f[:m] + [dmp_sub(f[m], c, v, K)] + f[m + 1:]
+            return f[:m] + [dmp_sub(f[m], c, v, K)] + f[m + 1 :]
 
 
 def dup_mul_term(f, c, i, K):
@@ -155,7 +163,7 @@ def dup_mul_term(f, c, i, K):
     if not c or not f:
         return []
     else:
-        return [ cf * c for cf in f ] + [K.zero]*i
+        return [cf * c for cf in f] + [K.zero] * i
 
 
 def dmp_mul_term(f, c, i, u, K):
@@ -182,7 +190,7 @@ def dmp_mul_term(f, c, i, u, K):
     if dmp_zero_p(c, v):
         return dmp_zero(u)
     else:
-        return [ dmp_mul(cf, c, v, K) for cf in f ] + dmp_zeros(i, v, K)
+        return [dmp_mul(cf, c, v, K) for cf in f] + dmp_zeros(i, v, K)
 
 
 def dup_add_ground(f, c, K):
@@ -270,7 +278,7 @@ def dup_mul_ground(f, c, K):
     if not c or not f:
         return []
     else:
-        return [ cf * c for cf in f ]
+        return [cf * c for cf in f]
 
 
 def dmp_mul_ground(f, c, u, K):
@@ -292,7 +300,7 @@ def dmp_mul_ground(f, c, u, K):
 
     v = u - 1
 
-    return [ dmp_mul_ground(cf, c, v, K) for cf in f ]
+    return [dmp_mul_ground(cf, c, v, K) for cf in f]
 
 
 def dup_quo_ground(f, c, K):
@@ -314,14 +322,14 @@ def dup_quo_ground(f, c, K):
 
     """
     if not c:
-        raise ZeroDivisionError('polynomial division')
+        raise ZeroDivisionError("polynomial division")
     if not f:
         return f
 
     if K.is_Field:
-        return [ K.quo(cf, c) for cf in f ]
+        return [K.quo(cf, c) for cf in f]
     else:
-        return [ cf // c for cf in f ]
+        return [cf // c for cf in f]
 
 
 def dmp_quo_ground(f, c, u, K):
@@ -347,7 +355,7 @@ def dmp_quo_ground(f, c, u, K):
 
     v = u - 1
 
-    return [ dmp_quo_ground(cf, c, v, K) for cf in f ]
+    return [dmp_quo_ground(cf, c, v, K) for cf in f]
 
 
 def dup_exquo_ground(f, c, K):
@@ -365,11 +373,11 @@ def dup_exquo_ground(f, c, K):
 
     """
     if not c:
-        raise ZeroDivisionError('polynomial division')
+        raise ZeroDivisionError("polynomial division")
     if not f:
         return f
 
-    return [ K.exquo(cf, c) for cf in f ]
+    return [K.exquo(cf, c) for cf in f]
 
 
 def dmp_exquo_ground(f, c, u, K):
@@ -391,7 +399,7 @@ def dmp_exquo_ground(f, c, u, K):
 
     v = u - 1
 
-    return [ dmp_exquo_ground(cf, c, v, K) for cf in f ]
+    return [dmp_exquo_ground(cf, c, v, K) for cf in f]
 
 
 def dup_lshift(f, n, K):
@@ -411,7 +419,7 @@ def dup_lshift(f, n, K):
     if not f:
         return f
     else:
-        return f + [K.zero]*n
+        return f + [K.zero] * n
 
 
 def dup_rshift(f, n, K):
@@ -447,7 +455,7 @@ def dup_abs(f, K):
     x**2 + 1
 
     """
-    return [ K.abs(coeff) for coeff in f ]
+    return [K.abs(coeff) for coeff in f]
 
 
 def dmp_abs(f, u, K):
@@ -469,7 +477,7 @@ def dmp_abs(f, u, K):
 
     v = u - 1
 
-    return [ dmp_abs(cf, v, K) for cf in f ]
+    return [dmp_abs(cf, v, K) for cf in f]
 
 
 def dup_neg(f, K):
@@ -486,7 +494,7 @@ def dup_neg(f, K):
     -x**2 + 1
 
     """
-    return [ -coeff for coeff in f ]
+    return [-coeff for coeff in f]
 
 
 def dmp_neg(f, u, K):
@@ -508,7 +516,7 @@ def dmp_neg(f, u, K):
 
     v = u - 1
 
-    return [ dmp_neg(cf, v, K) for cf in f ]
+    return [dmp_neg(cf, v, K) for cf in f]
 
 
 def dup_add(f, g, K):
@@ -534,7 +542,7 @@ def dup_add(f, g, K):
     dg = dup_degree(g)
 
     if df == dg:
-        return dup_strip([ a + b for a, b in zip(f, g) ])
+        return dup_strip([a + b for a, b in zip(f, g)])
     else:
         k = abs(df - dg)
 
@@ -543,7 +551,7 @@ def dup_add(f, g, K):
         else:
             h, g = g[:k], g[k:]
 
-        return h + [ a + b for a, b in zip(f, g) ]
+        return h + [a + b for a, b in zip(f, g)]
 
 
 def dmp_add(f, g, u, K):
@@ -576,7 +584,7 @@ def dmp_add(f, g, u, K):
     v = u - 1
 
     if df == dg:
-        return dmp_strip([ dmp_add(a, b, v, K) for a, b in zip(f, g) ], u)
+        return dmp_strip([dmp_add(a, b, v, K) for a, b in zip(f, g)], u)
     else:
         k = abs(df - dg)
 
@@ -585,7 +593,7 @@ def dmp_add(f, g, u, K):
         else:
             h, g = g[:k], g[k:]
 
-        return h + [ dmp_add(a, b, v, K) for a, b in zip(f, g) ]
+        return h + [dmp_add(a, b, v, K) for a, b in zip(f, g)]
 
 
 def dup_sub(f, g, K):
@@ -611,7 +619,7 @@ def dup_sub(f, g, K):
     dg = dup_degree(g)
 
     if df == dg:
-        return dup_strip([ a - b for a, b in zip(f, g) ])
+        return dup_strip([a - b for a, b in zip(f, g)])
     else:
         k = abs(df - dg)
 
@@ -620,7 +628,7 @@ def dup_sub(f, g, K):
         else:
             h, g = dup_neg(g[:k], K), g[k:]
 
-        return h + [ a - b for a, b in zip(f, g) ]
+        return h + [a - b for a, b in zip(f, g)]
 
 
 def dmp_sub(f, g, u, K):
@@ -653,7 +661,7 @@ def dmp_sub(f, g, u, K):
     v = u - 1
 
     if df == dg:
-        return dmp_strip([ dmp_sub(a, b, v, K) for a, b in zip(f, g) ], u)
+        return dmp_strip([dmp_sub(a, b, v, K) for a, b in zip(f, g)], u)
     else:
         k = abs(df - dg)
 
@@ -662,7 +670,7 @@ def dmp_sub(f, g, u, K):
         else:
             h, g = dmp_neg(g[:k], u, K), g[k:]
 
-        return h + [ dmp_sub(a, b, v, K) for a, b in zip(f, g) ]
+        return h + [dmp_sub(a, b, v, K) for a, b in zip(f, g)]
 
 
 def dup_add_mul(f, g, h, K):
@@ -765,7 +773,7 @@ def dup_mul(f, g, K):
             coeff = K.zero
 
             for j in range(max(0, i - dg), min(df, i) + 1):
-                coeff += f[j]*g[i - j]
+                coeff += f[j] * g[i - j]
 
             h.append(coeff)
 
@@ -774,7 +782,7 @@ def dup_mul(f, g, K):
         # Use Karatsuba's algorithm (divide and conquer), see e.g.:
         # Joris van der Hoeven, Relax But Don't Be Too Lazy,
         # J. Symbolic Computation, 11 (2002), section 3.1.1.
-        n2 = n//2
+        n2 = n // 2
 
         fl, gl = dup_slice(f, 0, n2, K), dup_slice(g, 0, n2, K)
 
@@ -786,8 +794,9 @@ def dup_mul(f, g, K):
         mid = dup_mul(dup_add(fl, fh, K), dup_add(gl, gh, K), K)
         mid = dup_sub(mid, dup_add(lo, hi, K), K)
 
-        return dup_add(dup_add(lo, dup_lshift(mid, n2, K), K),
-                       dup_lshift(hi, 2*n2, K), K)
+        return dup_add(
+            dup_add(lo, dup_lshift(mid, n2, K), K), dup_lshift(hi, 2 * n2, K), K
+        )
 
 
 def dmp_mul(f, g, u, K):
@@ -849,7 +858,7 @@ def dup_sqr(f, K):
     """
     df, h = len(f) - 1, []
 
-    for i in range(0, 2*df + 1):
+    for i in range(0, 2 * df + 1):
         c = K.zero
 
         jmin = max(0, i - df)
@@ -860,13 +869,13 @@ def dup_sqr(f, K):
         jmax = jmin + n // 2 - 1
 
         for j in range(jmin, jmax + 1):
-            c += f[j]*f[i - j]
+            c += f[j] * f[i - j]
 
         c += c
 
         if n & 1:
             elem = f[jmax + 1]
-            c += elem**2
+            c += elem ** 2
 
         h.append(c)
 
@@ -897,7 +906,7 @@ def dmp_sqr(f, u, K):
 
     h, v = [], u - 1
 
-    for i in range(0, 2*df + 1):
+    for i in range(0, 2 * df + 1):
         c = dmp_zero(v)
 
         jmin = max(0, i - df)
@@ -945,7 +954,7 @@ def dup_pow(f, n, K):
     g = [K.one]
 
     while True:
-        n, m = n//2, n
+        n, m = n // 2, n
 
         if m % 2:
             g = dup_mul(g, f, K)
@@ -985,7 +994,7 @@ def dmp_pow(f, n, u, K):
     g = dmp_one(u, K)
 
     while True:
-        n, m = n//2, n
+        n, m = n // 2, n
 
         if m & 1:
             g = dmp_mul(g, f, u, K)
@@ -1043,7 +1052,7 @@ def dup_pdiv(f, g, K):
         elif not (dr < _dr):
             raise PolynomialDivisionFailed(f, g, K)
 
-    c = lc_g**N
+    c = lc_g ** N
 
     q = dup_mul_ground(q, c, K)
     r = dup_mul_ground(r, c, K)
@@ -1093,7 +1102,7 @@ def dup_prem(f, g, K):
         elif not (dr < _dr):
             raise PolynomialDivisionFailed(f, g, K)
 
-    return dup_mul_ground(r, lc_g**N, K)
+    return dup_mul_ground(r, lc_g ** N, K)
 
 
 def dup_pquo(f, g, K):
@@ -1742,7 +1751,7 @@ def dmp_max_norm(f, u, K):
 
     v = u - 1
 
-    return max([ dmp_max_norm(c, v, K) for c in f ])
+    return max([dmp_max_norm(c, v, K) for c in f])
 
 
 def dup_l1_norm(f, K):
@@ -1784,7 +1793,7 @@ def dmp_l1_norm(f, u, K):
 
     v = u - 1
 
-    return sum([ dmp_l1_norm(c, v, K) for c in f ])
+    return sum([dmp_l1_norm(c, v, K) for c in f])
 
 
 def dup_expand(polys, K):

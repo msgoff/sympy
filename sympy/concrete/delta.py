@@ -29,9 +29,9 @@ def _expand_delta(expr, index):
         if delta is None and h.is_Add and _has_simple_delta(h, index):
             delta = True
             func = h.func
-            terms = [terms[0]*t for t in h.args]
+            terms = [terms[0] * t for t in h.args]
         else:
-            terms = [t*h for t in terms]
+            terms = [t * h for t in terms]
     return func(*terms)
 
 
@@ -119,6 +119,7 @@ def _remove_multiple_delta(expr):
     Evaluate products of KroneckerDelta's.
     """
     from sympy.solvers import solve
+
     if expr.is_Add:
         return expr.func(*list(map(_remove_multiple_delta, expr.args)))
     if not expr.is_Mul:
@@ -150,12 +151,14 @@ def _simplify_delta(expr):
     Rewrite a KroneckerDelta's indices in its simplest form.
     """
     from sympy.solvers import solve
+
     if isinstance(expr, KroneckerDelta):
         try:
             slns = solve(expr.args[0] - expr.args[1], dict=True)
             if slns and len(slns) == 1:
-                return Mul(*[KroneckerDelta(*(key, value))
-                            for key, value in slns[0].items()])
+                return Mul(
+                    *[KroneckerDelta(*(key, value)) for key, value in slns[0].items()]
+                )
         except NotImplementedError:
             pass
     return expr
@@ -193,18 +196,21 @@ def deltaproduct(f, limit):
         newexpr = f.func(*terms)
         k = Dummy("kprime", integer=True)
         if isinstance(limit[1], int) and isinstance(limit[2], int):
-            result = deltaproduct(newexpr, limit) + sum([
-                deltaproduct(newexpr, (limit[0], limit[1], ik - 1)) *
-                delta.subs(limit[0], ik) *
-                deltaproduct(newexpr, (limit[0], ik + 1, limit[2])) for ik in range(int(limit[1]), int(limit[2] + 1))]
+            result = deltaproduct(newexpr, limit) + sum(
+                [
+                    deltaproduct(newexpr, (limit[0], limit[1], ik - 1))
+                    * delta.subs(limit[0], ik)
+                    * deltaproduct(newexpr, (limit[0], ik + 1, limit[2]))
+                    for ik in range(int(limit[1]), int(limit[2] + 1))
+                ]
             )
         else:
             result = deltaproduct(newexpr, limit) + deltasummation(
-                deltaproduct(newexpr, (limit[0], limit[1], k - 1)) *
-                delta.subs(limit[0], k) *
-                deltaproduct(newexpr, (limit[0], k + 1, limit[2])),
+                deltaproduct(newexpr, (limit[0], limit[1], k - 1))
+                * delta.subs(limit[0], k)
+                * deltaproduct(newexpr, (limit[0], k + 1, limit[2])),
                 (k, limit[1], limit[2]),
-                no_piecewise=_has_simple_delta(newexpr, limit[0])
+                no_piecewise=_has_simple_delta(newexpr, limit[0]),
             )
         return _remove_multiple_delta(result)
 
@@ -214,14 +220,16 @@ def deltaproduct(f, limit):
         g = _expand_delta(f, limit[0])
         if f != g:
             from sympy import factor
+
             try:
                 return factor(deltaproduct(g, limit))
             except AssertionError:
                 return deltaproduct(g, limit)
         return product(f, limit)
 
-    return _remove_multiple_delta(f.subs(limit[0], limit[1])*KroneckerDelta(limit[2], limit[1])) + \
-        S.One*_simplify_delta(KroneckerDelta(limit[2], limit[1] - 1))
+    return _remove_multiple_delta(
+        f.subs(limit[0], limit[1]) * KroneckerDelta(limit[2], limit[1])
+    ) + S.One * _simplify_delta(KroneckerDelta(limit[2], limit[1] - 1))
 
 
 @cacheit
@@ -303,7 +311,8 @@ def deltasummation(f, limit, no_piecewise=False):
     g = _expand_delta(f, x)
     if g.is_Add:
         return piecewise_fold(
-            g.func(*[deltasummation(h, limit, no_piecewise) for h in g.args]))
+            g.func(*[deltasummation(h, limit, no_piecewise) for h in g.args])
+        )
 
     # try to extract a simple KroneckerDelta term
     delta, expr = _extract_delta(g, x)
@@ -321,11 +330,12 @@ def deltasummation(f, limit, no_piecewise=False):
         return S.Zero
     elif len(solns) != 1:
         from sympy.concrete.summations import Sum
+
         return Sum(f, limit)
     value = solns[0]
     if no_piecewise:
         return expr.subs(x, value)
     return Piecewise(
         (expr.subs(x, value), Interval(*limit[1:3]).as_relational(value)),
-        (S.Zero, True)
+        (S.Zero, True),
     )

@@ -203,9 +203,24 @@ from sympy.core.symbol import Dummy
 from sympy.core.sympify import sympify
 from sympy.functions.combinatorial.factorials import binomial
 from sympy.functions.elementary.hyperbolic import (
-    cosh, sinh, tanh, coth, sech, csch, HyperbolicFunction)
+    cosh,
+    sinh,
+    tanh,
+    coth,
+    sech,
+    csch,
+    HyperbolicFunction,
+)
 from sympy.functions.elementary.trigonometric import (
-    cos, sin, tan, cot, sec, csc, sqrt, TrigonometricFunction)
+    cos,
+    sin,
+    tan,
+    cot,
+    sec,
+    csc,
+    sqrt,
+    TrigonometricFunction,
+)
 from sympy.ntheory.factor_ import perfect_power
 from sympy.polys.polytools import factor
 from sympy.simplify.simplify import bottom_up
@@ -242,10 +257,10 @@ def TR1(rv):
     def f(rv):
         if isinstance(rv, sec):
             a = rv.args[0]
-            return S.One/cos(a)
+            return S.One / cos(a)
         elif isinstance(rv, csc):
             a = rv.args[0]
-            return S.One/sin(a)
+            return S.One / sin(a)
         return rv
 
     return bottom_up(rv, f)
@@ -272,10 +287,10 @@ def TR2(rv):
     def f(rv):
         if isinstance(rv, tan):
             a = rv.args[0]
-            return sin(a)/cos(a)
+            return sin(a) / cos(a)
         elif isinstance(rv, cot):
             a = rv.args[0]
-            return cos(a)/sin(a)
+            return cos(a) / sin(a)
         return rv
 
     return bottom_up(rv, f)
@@ -319,13 +334,21 @@ def TR2i(rv, half=False):
 
         def ok(k, e):
             # initial filtering of factors
-            return (
-                (e.is_integer or k.is_positive) and (
-                k.func in (sin, cos) or (half and
-                k.is_Add and
-                len(k.args) >= 2 and
-                any(any(isinstance(ai, cos) or ai.is_Pow and ai.base is cos
-                for ai in Mul.make_args(a)) for a in k.args))))
+            return (e.is_integer or k.is_positive) and (
+                k.func in (sin, cos)
+                or (
+                    half
+                    and k.is_Add
+                    and len(k.args) >= 2
+                    and any(
+                        any(
+                            isinstance(ai, cos) or ai.is_Pow and ai.base is cos
+                            for ai in Mul.make_args(a)
+                        )
+                        for a in k.args
+                    )
+                )
+            )
 
         n = n.as_powers_dict()
         ndone = [(k, n.pop(k)) for k in list(n.keys()) if not ok(k, n[k])]
@@ -358,6 +381,7 @@ def TR2i(rv, half=False):
                     else:
                         ddone.append((k, v))
                 del newk
+
         factorize(n, ndone)
         factorize(d, ddone)
 
@@ -367,30 +391,31 @@ def TR2i(rv, half=False):
             if isinstance(k, sin):
                 a = cos(k.args[0], evaluate=False)
                 if a in d and d[a] == n[k]:
-                    t.append(tan(k.args[0])**n[k])
+                    t.append(tan(k.args[0]) ** n[k])
                     n[k] = d[a] = None
                 elif half:
                     a1 = 1 + a
                     if a1 in d and d[a1] == n[k]:
-                        t.append((tan(k.args[0]/2))**n[k])
+                        t.append((tan(k.args[0] / 2)) ** n[k])
                         n[k] = d[a1] = None
             elif isinstance(k, cos):
                 a = sin(k.args[0], evaluate=False)
                 if a in d and d[a] == n[k]:
-                    t.append(tan(k.args[0])**-n[k])
+                    t.append(tan(k.args[0]) ** -n[k])
                     n[k] = d[a] = None
-            elif half and k.is_Add and k.args[0] is S.One and \
-                    isinstance(k.args[1], cos):
+            elif (
+                half and k.is_Add and k.args[0] is S.One and isinstance(k.args[1], cos)
+            ):
                 a = sin(k.args[1].args[0], evaluate=False)
-                if a in d and d[a] == n[k] and (d[a].is_integer or \
-                        a.is_positive):
-                    t.append(tan(a.args[0]/2)**-n[k])
+                if a in d and d[a] == n[k] and (d[a].is_integer or a.is_positive):
+                    t.append(tan(a.args[0] / 2) ** -n[k])
                     n[k] = d[a] = None
 
         if t:
-            rv = Mul(*(t + [b**e for b, e in n.items() if e]))/\
-                Mul(*[b**e for b, e in d.items() if e])
-            rv *= Mul(*[b**e for b, e in ndone])/Mul(*[b**e for b, e in ddone])
+            rv = Mul(*(t + [b ** e for b, e in n.items() if e])) / Mul(
+                *[b ** e for b, e in d.items() if e]
+            )
+            rv *= Mul(*[b ** e for b, e in ndone]) / Mul(*[b ** e for b, e in ddone])
 
         return rv
 
@@ -431,9 +456,13 @@ def TR3(rv):
         rv = rv.func(signsimp(rv.args[0]))
         if not isinstance(rv, TrigonometricFunction):
             return rv
-        if (rv.args[0] - S.Pi/4).is_positive is (S.Pi/2 - rv.args[0]).is_positive is True:
+        if (
+            (rv.args[0] - S.Pi / 4).is_positive
+            is (S.Pi / 2 - rv.args[0]).is_positive
+            is True
+        ):
             fmap = {cos: sin, sin: cos, tan: cot, cot: tan, sec: csc, csc: sec}
-            rv = fmap[rv.func](S.Pi/2 - rv.args[0])
+            rv = fmap[rv.func](S.Pi / 2 - rv.args[0])
         return rv
 
     return bottom_up(rv, f)
@@ -508,20 +537,20 @@ def _TR56(rv, f, g, h, max, pow):
         if (rv.exp > max) == True:
             return rv
         if rv.exp == 2:
-            return h(g(rv.base.args[0])**2)
+            return h(g(rv.base.args[0]) ** 2)
         else:
             if rv.exp == 4:
                 e = 2
             elif not pow:
                 if rv.exp % 2:
                     return rv
-                e = rv.exp//2
+                e = rv.exp // 2
             else:
                 p = perfect_power(rv.exp)
                 if not p:
                     return rv
-                e = rv.exp//2
-            return h(g(rv.base.args[0])**2)**e
+                e = rv.exp // 2
+            return h(g(rv.base.args[0]) ** 2) ** e
 
     return bottom_up(rv, _f)
 
@@ -587,7 +616,7 @@ def TR7(rv):
     def f(rv):
         if not (rv.is_Pow and rv.base.func == cos and rv.exp == 2):
             return rv
-        return (1 + cos(2*rv.base.args[0]))/2
+        return (1 + cos(2 * rv.base.args[0])) / 2
 
     return bottom_up(rv, f)
 
@@ -611,10 +640,11 @@ def TR8(rv, first=True):
 
     def f(rv):
         if not (
-            rv.is_Mul or
-            rv.is_Pow and
-            rv.base.func in (cos, sin) and
-            (rv.exp.is_integer or rv.base.is_positive)):
+            rv.is_Mul
+            or rv.is_Pow
+            and rv.base.func in (cos, sin)
+            and (rv.exp.is_integer or rv.base.is_positive)
+        ):
             return rv
 
         if first:
@@ -622,9 +652,13 @@ def TR8(rv, first=True):
             newn = TR8(n, first=False)
             newd = TR8(d, first=False)
             if newn != n or newd != d:
-                rv = gcd_terms(newn/newd)
-                if rv.is_Mul and rv.args[0].is_Rational and \
-                        len(rv.args) == 2 and rv.args[1].is_Add:
+                rv = gcd_terms(newn / newd)
+                if (
+                    rv.is_Mul
+                    and rv.args[0].is_Rational
+                    and len(rv.args) == 2
+                    and rv.args[1].is_Add
+                ):
                     rv = Mul(*rv.as_coeff_Mul())
             return rv
 
@@ -632,11 +666,15 @@ def TR8(rv, first=True):
         for a in ordered(Mul.make_args(rv)):
             if a.func in (cos, sin):
                 args[a.func].append(a.args[0])
-            elif (a.is_Pow and a.exp.is_Integer and a.exp > 0 and \
-                    a.base.func in (cos, sin)):
+            elif (
+                a.is_Pow
+                and a.exp.is_Integer
+                and a.exp > 0
+                and a.base.func in (cos, sin)
+            ):
                 # XXX this is ok but pathological expression could be handled
                 # more efficiently as in TRmorrie
-                args[a.base.func].extend([a.base.args[0]]*a.exp)
+                args[a.base.func].extend([a.base.args[0]] * a.exp)
             else:
                 args[None].append(a)
         c = args[cos]
@@ -649,17 +687,17 @@ def TR8(rv, first=True):
         for i in range(n):
             a1 = s.pop()
             a2 = c.pop()
-            args.append((sin(a1 + a2) + sin(a1 - a2))/2)
+            args.append((sin(a1 + a2) + sin(a1 - a2)) / 2)
         while len(c) > 1:
             a1 = c.pop()
             a2 = c.pop()
-            args.append((cos(a1 + a2) + cos(a1 - a2))/2)
+            args.append((cos(a1 + a2) + cos(a1 - a2)) / 2)
         if c:
             args.append(cos(c.pop()))
         while len(s) > 1:
             a1 = s.pop()
             a2 = s.pop()
-            args.append((-cos(a1 + a2) + cos(a1 - a2))/2)
+            args.append((-cos(a1 + a2) + cos(a1 - a2)) / 2)
         if s:
             args.append(sin(s.pop()))
         return TR8(expand_mul(Mul(*args)))
@@ -745,16 +783,16 @@ def TR9(rv):
             # application of rule if possible
             if iscos:
                 if n1 == n2:
-                    return gcd*n1*2*cos((a + b)/2)*cos((a - b)/2)
+                    return gcd * n1 * 2 * cos((a + b) / 2) * cos((a - b) / 2)
                 if n1 < 0:
                     a, b = b, a
-                return -2*gcd*sin((a + b)/2)*sin((a - b)/2)
+                return -2 * gcd * sin((a + b) / 2) * sin((a - b) / 2)
             else:
                 if n1 == n2:
-                    return gcd*n1*2*sin((a + b)/2)*cos((a - b)/2)
+                    return gcd * n1 * 2 * sin((a + b) / 2) * cos((a - b) / 2)
                 if n1 < 0:
                     a, b = b, a
-                return 2*gcd*cos((a + b)/2)*sin((a - b)/2)
+                return 2 * gcd * cos((a + b) / 2) * sin((a - b) / 2)
 
         return process_common_addends(rv, do)  # DON'T sift by free symbols
 
@@ -794,16 +832,18 @@ def TR10(rv, first=True):
             b = Add._from_args(args)
             if b.is_Add:
                 if f == sin:
-                    return sin(a)*TR10(cos(b), first=False) + \
-                        cos(a)*TR10(sin(b), first=False)
+                    return sin(a) * TR10(cos(b), first=False) + cos(a) * TR10(
+                        sin(b), first=False
+                    )
                 else:
-                    return cos(a)*TR10(cos(b), first=False) - \
-                        sin(a)*TR10(sin(b), first=False)
+                    return cos(a) * TR10(cos(b), first=False) - sin(a) * TR10(
+                        sin(b), first=False
+                    )
             else:
                 if f == sin:
-                    return sin(a)*cos(b) + cos(a)*sin(b)
+                    return sin(a) * cos(b) + cos(a) * sin(b)
                 else:
-                    return cos(a)*cos(b) - sin(a)*sin(b)
+                    return cos(a) * cos(b) - sin(a) * sin(b)
         return rv
 
     return bottom_up(rv, f)
@@ -881,18 +921,17 @@ def TR10i(rv):
 
             # identify and get c1 to be cos then apply rule if possible
             if same:  # coscos, sinsin
-                gcd = n1*gcd
+                gcd = n1 * gcd
                 if n1 == n2:
-                    return gcd*cos(a - b)
-                return gcd*cos(a + b)
-            else:  #cossin, cossin
-                gcd = n1*gcd
+                    return gcd * cos(a - b)
+                return gcd * cos(a + b)
+            else:  # cossin, cossin
+                gcd = n1 * gcd
                 if n1 == n2:
-                    return gcd*sin(a + b)
-                return gcd*sin(b - a)
+                    return gcd * sin(a + b)
+                return gcd * sin(b - a)
 
-        rv = process_common_addends(
-            rv, do, lambda x: tuple(ordered(x.free_symbols)))
+        rv = process_common_addends(rv, do, lambda x: tuple(ordered(x.free_symbols)))
 
         # need to check for inducible pairs in ratio of sqrt(3):1 that
         # appeared in different lists when sorting by coefficient
@@ -902,8 +941,7 @@ def TR10i(rv):
                 hit = 0
                 if a.is_Mul:
                     for ai in a.args:
-                        if ai.is_Pow and ai.exp is S.Half and \
-                                ai.base.is_Integer:
+                        if ai.is_Pow and ai.exp is S.Half and ai.base.is_Integer:
                             byrad[ai].append(a)
                             hit = 1
                             break
@@ -914,7 +952,7 @@ def TR10i(rv):
             # that have the right ratio
             args = []
             for a in byrad:
-                for b in [_ROOT3*a, _invROOT3]:
+                for b in [_ROOT3 * a, _invROOT3]:
                     if b in byrad:
                         for i in range(len(byrad[a])):
                             if byrad[a][i] is None:
@@ -930,8 +968,9 @@ def TR10i(rv):
                                     byrad[b][j] = None
                                     break
             if args:
-                rv = Add(*(args + [Add(*[_f for _f in v if _f])
-                    for v in byrad.values()]))
+                rv = Add(
+                    *(args + [Add(*[_f for _f in v if _f]) for v in byrad.values()])
+                )
             else:
                 rv = do(rv)  # final pass to resolve any new inducible pairs
                 break
@@ -989,7 +1028,7 @@ def TR11(rv, base=None):
 
         if base:
             f = rv.func
-            t = f(base*2)
+            t = f(base * 2)
             co = S.One
             if t.is_Mul:
                 co, t = t.as_coeff_Mul()
@@ -999,9 +1038,9 @@ def TR11(rv, base=None):
                 c = cos(base)
                 s = sin(base)
                 if f is cos:
-                    return (c**2 - s**2)/co
+                    return (c ** 2 - s ** 2) / co
                 else:
-                    return 2*c*s/co
+                    return 2 * c * s / co
             return rv
 
         elif not rv.args[0].is_Number:
@@ -1009,13 +1048,13 @@ def TR11(rv, base=None):
             # divisible by 2
             c, m = rv.args[0].as_coeff_Mul(rational=True)
             if c.p % 2 == 0:
-                arg = c.p//2*m/c.q
+                arg = c.p // 2 * m / c.q
                 c = TR11(cos(arg))
                 s = TR11(sin(arg))
                 if rv.func == sin:
-                    rv = 2*s*c
+                    rv = 2 * s * c
                 else:
-                    rv = c**2 - s**2
+                    rv = c ** 2 - s ** 2
         return rv
 
     return bottom_up(rv, f)
@@ -1051,7 +1090,7 @@ def TR12(rv, first=True):
                 tb = TR12(tan(b), first=False)
             else:
                 tb = tan(b)
-            return (tan(a) + tb)/(1 - tan(a)*tb)
+            return (tan(a) + tb) / (1 - tan(a) * tb)
         return rv
 
     return bottom_up(rv, f)
@@ -1094,8 +1133,12 @@ def TR12i(rv):
             m = as_f_sign_1(di)
             if m:
                 g, f, s = m
-                if s is S.NegativeOne and f.is_Mul and len(f.args) == 2 and \
-                        all(isinstance(fi, tan) for fi in f.args):
+                if (
+                    s is S.NegativeOne
+                    and f.is_Mul
+                    and len(f.args) == 2
+                    and all(isinstance(fi, tan) for fi in f.args)
+                ):
                     return g, f
 
         d_args = list(Mul.make_args(d))
@@ -1118,7 +1161,7 @@ def TR12i(rv):
                     g, t = m
                     s = Add(*[_.args[0] for _ in t.args])
                     dok[s] = di.exp
-                    d_args[i] = g**di.exp
+                    d_args[i] = g ** di.exp
                 else:
                     di = factor(di)
                     if di.is_Mul:
@@ -1132,6 +1175,7 @@ def TR12i(rv):
                 a, b = ni.args
                 if isinstance(a, tan) and isinstance(b, tan):
                     return a, b
+
         n_args = list(Mul.make_args(factor_terms(n)))
         hit = False
         for i, ni in enumerate(n_args):
@@ -1147,8 +1191,7 @@ def TR12i(rv):
                             n_args.extend(ni.args)
                             n_args[i] = S.One
                         continue
-                    elif ni.is_Pow and (
-                            ni.exp.is_integer or ni.base.is_positive):
+                    elif ni.is_Pow and (ni.exp.is_integer or ni.base.is_positive):
                         m = ok(ni.base)
                         if m:
                             n_args[i] = S.One
@@ -1174,8 +1217,13 @@ def TR12i(rv):
             n_args[i] *= -tan(s)
 
         if hit:
-            rv = Mul(*n_args)/Mul(*d_args)/Mul(*[(Add(*[
-                tan(a) for a in i.args]) - 1)**e for i, e in dok.items()])
+            rv = (
+                Mul(*n_args)
+                / Mul(*d_args)
+                / Mul(
+                    *[(Add(*[tan(a) for a in i.args]) - 1) ** e for i, e in dok.items()]
+                )
+            )
 
         return rv
 
@@ -1215,13 +1263,13 @@ def TR13(rv):
         while len(t) > 1:
             t1 = t.pop()
             t2 = t.pop()
-            args.append(1 - (tan(t1)/tan(t1 + t2) + tan(t2)/tan(t1 + t2)))
+            args.append(1 - (tan(t1) / tan(t1 + t2) + tan(t2) / tan(t1 + t2)))
         if t:
             args.append(tan(t.pop()))
         while len(c) > 1:
             t1 = c.pop()
             t2 = c.pop()
-            args.append(1 + cot(t1)*cot(t1 + t2) + cot(t2)*cot(t1 + t2))
+            args.append(1 + cot(t1) * cot(t1 + t2) + cot(t2) * cot(t1 + t2))
         if c:
             args.append(cot(c.pop()))
         return Mul(*args)
@@ -1293,7 +1341,7 @@ def TRmorrie(rv):
             return rv
         if first:
             n, d = rv.as_numer_denom()
-            return f(n, 0)/f(d, 0)
+            return f(n, 0) / f(d, 0)
 
         args = defaultdict(list)
         coss = {}
@@ -1319,30 +1367,35 @@ def TRmorrie(rv):
                     k += 1
                     cc *= 2
                 if k > 1:
-                    newarg = sin(2**k*ci*a)/2**k/sin(ci*a)
+                    newarg = sin(2 ** k * ci * a) / 2 ** k / sin(ci * a)
                     # see how many times this can be taken
                     take = None
                     ccs = []
                     for i in range(k):
                         cc /= 2
-                        key = cos(a*cc, evaluate=False)
+                        key = cos(a * cc, evaluate=False)
                         ccs.append(cc)
                         take = min(coss[key], take or coss[key])
                     # update exponent counts
                     for i in range(k):
                         cc = ccs.pop()
-                        key = cos(a*cc, evaluate=False)
+                        key = cos(a * cc, evaluate=False)
                         coss[key] -= take
                         if not coss[key]:
                             c.remove(cc)
-                    new.append(newarg**take)
+                    new.append(newarg ** take)
                 else:
                     no.append(c.pop(0))
             c[:] = no
 
         if new:
-            rv = Mul(*(new + other + [
-                cos(k*a, evaluate=False) for a in args for k in args[a]]))
+            rv = Mul(
+                *(
+                    new
+                    + other
+                    + [cos(k * a, evaluate=False) for a in args for k in args[a]]
+                )
+            )
 
         return rv
 
@@ -1383,7 +1436,7 @@ def TR14(rv, first=True):
                 newn = TR14(n, first=False)
                 newd = TR14(d, first=False)
                 if newn != n or newd != d:
-                    rv = newn/newd
+                    rv = newn / newd
                 return rv
 
         other = []
@@ -1402,7 +1455,7 @@ def TR14(rv, first=True):
                 if e is S.One:
                     other.append(a)
                 else:
-                    other.append(a**e)
+                    other.append(a ** e)
                 continue
             g, f, si = m
             process.append((g, e.is_Number, e, f, si, a))
@@ -1443,7 +1496,7 @@ def TR14(rv, first=True):
                                 t = sin
                             else:
                                 t = cos
-                            other.append((-A[g]*B[g]*t(A[f].args[0])**2)**take)
+                            other.append((-A[g] * B[g] * t(A[f].args[0]) ** 2) ** take)
                             continue
 
                 elif A[e] == B[e]:
@@ -1456,11 +1509,11 @@ def TR14(rv, first=True):
                                 t = sin
                             else:
                                 t = cos
-                            other.append((-A[g]*B[g]*t(A[f].args[0])**2)**take)
+                            other.append((-A[g] * B[g] * t(A[f].args[0]) ** 2) ** take)
                             continue
 
             # either we are done or neither condition above applied
-            other.append(A[a]**A[e])
+            other.append(A[a] ** A[e])
 
         if len(other) != nother:
             rv = Mul(*other)
@@ -1490,7 +1543,7 @@ def TR15(rv, max=4, pow=False):
         if not (isinstance(rv, Pow) and isinstance(rv.base, sin)):
             return rv
 
-        ia = 1/rv
+        ia = 1 / rv
         a = _TR56(ia, sin, cot, lambda x: 1 + x, max=max, pow=pow)
         if a != ia:
             rv = a
@@ -1519,7 +1572,7 @@ def TR16(rv, max=4, pow=False):
         if not (isinstance(rv, Pow) and isinstance(rv.base, cos)):
             return rv
 
-        ia = 1/rv
+        ia = 1 / rv
         a = _TR56(ia, cos, tan, lambda x: 1 + x, max=max, pow=pow)
         if a != ia:
             rv = a
@@ -1545,16 +1598,17 @@ def TR111(rv):
 
     def f(rv):
         if not (
-            isinstance(rv, Pow) and
-            (rv.base.is_positive or rv.exp.is_integer and rv.exp.is_negative)):
+            isinstance(rv, Pow)
+            and (rv.base.is_positive or rv.exp.is_integer and rv.exp.is_negative)
+        ):
             return rv
 
         if isinstance(rv.base, tan):
-            return cot(rv.base.args[0])**-rv.exp
+            return cot(rv.base.args[0]) ** -rv.exp
         elif isinstance(rv.base, sin):
-            return csc(rv.base.args[0])**-rv.exp
+            return csc(rv.base.args[0]) ** -rv.exp
         elif isinstance(rv.base, cos):
-            return sec(rv.base.args[0])**-rv.exp
+            return sec(rv.base.args[0]) ** -rv.exp
         return rv
 
     return bottom_up(rv, f)
@@ -1617,19 +1671,37 @@ def TRpower(rv):
         x = b.args[0]
         if n.is_Integer and n.is_positive:
             if n.is_odd and isinstance(b, cos):
-                rv = 2**(1-n)*Add(*[binomial(n, k)*cos((n - 2*k)*x)
-                    for k in range((n + 1)/2)])
+                rv = 2 ** (1 - n) * Add(
+                    *[binomial(n, k) * cos((n - 2 * k) * x) for k in range((n + 1) / 2)]
+                )
             elif n.is_odd and isinstance(b, sin):
-                rv = 2**(1-n)*(-1)**((n-1)/2)*Add(*[binomial(n, k)*
-                    (-1)**k*sin((n - 2*k)*x) for k in range((n + 1)/2)])
+                rv = (
+                    2 ** (1 - n)
+                    * (-1) ** ((n - 1) / 2)
+                    * Add(
+                        *[
+                            binomial(n, k) * (-1) ** k * sin((n - 2 * k) * x)
+                            for k in range((n + 1) / 2)
+                        ]
+                    )
+                )
             elif n.is_even and isinstance(b, cos):
-                rv = 2**(1-n)*Add(*[binomial(n, k)*cos((n - 2*k)*x)
-                    for k in range(n/2)])
+                rv = 2 ** (1 - n) * Add(
+                    *[binomial(n, k) * cos((n - 2 * k) * x) for k in range(n / 2)]
+                )
             elif n.is_even and isinstance(b, sin):
-                rv = 2**(1-n)*(-1)**(n/2)*Add(*[binomial(n, k)*
-                    (-1)**k*cos((n - 2*k)*x) for k in range(n/2)])
+                rv = (
+                    2 ** (1 - n)
+                    * (-1) ** (n / 2)
+                    * Add(
+                        *[
+                            binomial(n, k) * (-1) ** k * cos((n - 2 * k) * x)
+                            for k in range(n / 2)
+                        ]
+                    )
+                )
             if n.is_even:
-                rv += 2**(-n)*binomial(n, n/2)
+                rv += 2 ** (-n) * binomial(n, n / 2)
         return rv
 
     return bottom_up(rv, f)
@@ -1653,11 +1725,58 @@ def L(rv):
 # ============== end of basic Fu-like tools =====================
 
 if SYMPY_DEBUG:
-    (TR0, TR1, TR2, TR3, TR4, TR5, TR6, TR7, TR8, TR9, TR10, TR11, TR12, TR13,
-    TR2i, TRmorrie, TR14, TR15, TR16, TR12i, TR111, TR22
-    )= list(map(debug,
-    (TR0, TR1, TR2, TR3, TR4, TR5, TR6, TR7, TR8, TR9, TR10, TR11, TR12, TR13,
-    TR2i, TRmorrie, TR14, TR15, TR16, TR12i, TR111, TR22)))
+    (
+        TR0,
+        TR1,
+        TR2,
+        TR3,
+        TR4,
+        TR5,
+        TR6,
+        TR7,
+        TR8,
+        TR9,
+        TR10,
+        TR11,
+        TR12,
+        TR13,
+        TR2i,
+        TRmorrie,
+        TR14,
+        TR15,
+        TR16,
+        TR12i,
+        TR111,
+        TR22,
+    ) = list(
+        map(
+            debug,
+            (
+                TR0,
+                TR1,
+                TR2,
+                TR3,
+                TR4,
+                TR5,
+                TR6,
+                TR7,
+                TR8,
+                TR9,
+                TR10,
+                TR11,
+                TR12,
+                TR13,
+                TR2i,
+                TRmorrie,
+                TR14,
+                TR15,
+                TR16,
+                TR12i,
+                TR111,
+                TR22,
+            ),
+        )
+    )
 
 
 # tuples are chains  --  (f, g) -> lambda x: g(f(x))
@@ -1684,7 +1803,7 @@ RL2 = [
     (TR5, TR7, TR11, TR4),
     (CTR3, CTR1, TR9, CTR2, TR4, TR9, TR9, CTR4),
     identity,
-    ]
+]
 
 
 def fu(rv, measure=lambda x: (L(x), x.count_ops())):
@@ -1767,7 +1886,7 @@ def fu(rv, measure=lambda x: (L(x), x.count_ops())):
     rv = TR1(rv)
     if rv.has(tan, cot):
         rv1 = fRL1(rv)
-        if (measure(rv1) < measure(rv)):
+        if measure(rv1) < measure(rv):
             rv = rv1
         if rv.has(tan, cot):
             rv = TR2(rv)
@@ -1798,7 +1917,7 @@ def process_common_addends(rv, do, key2=None, key1=True):
         for a in rv.args:
             absc[(S.One, key2(a))].append(a)
     else:
-        raise ValueError('must have at least one key')
+        raise ValueError("must have at least one key")
 
     args = []
     hit = False
@@ -1811,26 +1930,28 @@ def process_common_addends(rv, do, key2=None, key1=True):
             if new != e:
                 e = new
                 hit = True
-            args.append(c*e)
+            args.append(c * e)
         else:
-            args.append(c*v[0])
+            args.append(c * v[0])
     if hit:
         rv = Add(*args)
 
     return rv
 
 
-fufuncs = '''
+fufuncs = """
     TR0 TR1 TR2 TR3 TR4 TR5 TR6 TR7 TR8 TR9 TR10 TR10i TR11
     TR12 TR13 L TR2i TRmorrie TR12i
-    TR14 TR15 TR16 TR111 TR22'''.split()
+    TR14 TR15 TR16 TR111 TR22""".split()
 FU = dict(list(zip(fufuncs, list(map(locals().get, fufuncs)))))
 
 
 def _roots():
     global _ROOT2, _ROOT3, _invROOT3
     _ROOT2, _ROOT3 = sqrt(2), sqrt(3)
-    _invROOT3 = 1/_ROOT3
+    _invROOT3 = 1 / _ROOT3
+
+
 _ROOT2 = None
 
 
@@ -1987,15 +2108,21 @@ def trig_split(a, b, two=False):
         return gcd, n1, n2, c.args[0], s.args[0], isinstance(c, cos)
     else:
         if not coa and not cob:
-            if (ca and cb and sa and sb):
+            if ca and cb and sa and sb:
                 if isinstance(ca, sa.func) is not isinstance(cb, sb.func):
                     return
                 args = {j.args for j in (ca, sa)}
                 if not all(i.args in args for i in (cb, sb)):
                     return
                 return gcd, n1, n2, ca.args[0], sa.args[0], isinstance(ca, sa.func)
-        if ca and sa or cb and sb or \
-            two and (ca is None and sa is None or cb is None and sb is None):
+        if (
+            ca
+            and sa
+            or cb
+            and sb
+            or two
+            and (ca is None and sa is None or cb is None and sb is None)
+        ):
             return
         c = ca or sa
         s = cb or sb
@@ -2007,13 +2134,13 @@ def trig_split(a, b, two=False):
             cob = S.One
         if coa is cob:
             gcd *= _ROOT2
-            return gcd, n1, n2, c.args[0], pi/4, False
-        elif coa/cob == _ROOT3:
-            gcd *= 2*cob
-            return gcd, n1, n2, c.args[0], pi/3, False
-        elif coa/cob == _invROOT3:
-            gcd *= 2*coa
-            return gcd, n1, n2, c.args[0], pi/6, False
+            return gcd, n1, n2, c.args[0], pi / 4, False
+        elif coa / cob == _ROOT3:
+            gcd *= 2 * cob
+            return gcd, n1, n2, c.args[0], pi / 3, False
+        elif coa / cob == _invROOT3:
+            gcd *= 2 * coa
+            return gcd, n1, n2, c.args[0], pi / 6, False
 
 
 def as_f_sign_1(e):
@@ -2094,21 +2221,21 @@ def _osborne(e, d):
         if not isinstance(rv, HyperbolicFunction):
             return rv
         a = rv.args[0]
-        a = a*d if not a.is_Add else Add._from_args([i*d for i in a.args])
+        a = a * d if not a.is_Add else Add._from_args([i * d for i in a.args])
         if isinstance(rv, sinh):
-            return I*sin(a)
+            return I * sin(a)
         elif isinstance(rv, cosh):
             return cos(a)
         elif isinstance(rv, tanh):
-            return I*tan(a)
+            return I * tan(a)
         elif isinstance(rv, coth):
-            return cot(a)/I
+            return cot(a) / I
         elif isinstance(rv, sech):
             return sec(a)
         elif isinstance(rv, csch):
-            return csc(a)/I
+            return csc(a) / I
         else:
-            raise NotImplementedError('unhandled %s' % rv.func)
+            raise NotImplementedError("unhandled %s" % rv.func)
 
     return bottom_up(e, f)
 
@@ -2133,21 +2260,21 @@ def _osbornei(e, d):
         if not isinstance(rv, TrigonometricFunction):
             return rv
         const, x = rv.args[0].as_independent(d, as_Add=True)
-        a = x.xreplace({d: S.One}) + const*I
+        a = x.xreplace({d: S.One}) + const * I
         if isinstance(rv, sin):
-            return sinh(a)/I
+            return sinh(a) / I
         elif isinstance(rv, cos):
             return cosh(a)
         elif isinstance(rv, tan):
-            return tanh(a)/I
+            return tanh(a) / I
         elif isinstance(rv, cot):
-            return coth(a)*I
+            return coth(a) * I
         elif isinstance(rv, sec):
             return sech(a)
         elif isinstance(rv, csc):
-            return csch(a)*I
+            return csch(a) * I
         else:
-            raise NotImplementedError('unhandled %s' % rv.func)
+            raise NotImplementedError("unhandled %s" % rv.func)
 
     return bottom_up(e, f)
 
@@ -2191,8 +2318,12 @@ def hyper_as_trig(rv):
 
     d = Dummy()
 
-    return _osborne(masked, d), lambda x: collect(signsimp(
-        _osbornei(x, d).xreplace(dict(reps))), S.ImaginaryUnit)
+    return (
+        _osborne(masked, d),
+        lambda x: collect(
+            signsimp(_osbornei(x, d).xreplace(dict(reps))), S.ImaginaryUnit
+        ),
+    )
 
 
 def sincos_to_sum(expr):

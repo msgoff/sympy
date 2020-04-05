@@ -127,8 +127,8 @@ from sympy.simplify.powsimp import powsimp, powdenest
 
 from sympy.utilities.misc import debug_decorator as debug
 from sympy.utilities.timeutils import timethis
-timeit = timethis('gruntz')
 
+timeit = timethis("gruntz")
 
 
 def compare(a, b, x):
@@ -140,7 +140,7 @@ def compare(a, b, x):
     if isinstance(b, Basic) and isinstance(b, exp):
         lb = b.args[0]
 
-    c = limitinf(la/lb, x)
+    c = limitinf(la / lb, x)
     if c == 0:
         return "<"
     elif c.is_infinite:
@@ -193,11 +193,12 @@ class SubsSet(dict):
 
         exp(-w)/w + 1/w + x.
     """
+
     def __init__(self):
         self.rewrites = {}
 
     def __repr__(self):
-        return super(SubsSet, self).__repr__() + ', ' + self.rewrites.__repr__()
+        return super(SubsSet, self).__repr__() + ", " + self.rewrites.__repr__()
 
     def __getitem__(self, key):
         if not key in self:
@@ -242,7 +243,7 @@ class SubsSet(dict):
 def mrv(e, x):
     """Returns a SubsSet of most rapidly varying (mrv) subexpressions of 'e',
        and e rewritten in terms of these"""
-    e = powsimp(e, deep=True, combine='exp')
+    e = powsimp(e, deep=True, combine="exp")
     if not isinstance(e, Basic):
         raise TypeError("e should be an instance of Basic")
     if not e.has(x):
@@ -267,7 +268,7 @@ def mrv(e, x):
             return mrv(exp(e * log(b)), x)
         else:
             s, expr = mrv(b, x)
-            return s, expr**e
+            return s, expr ** e
     elif isinstance(e, log):
         s, expr = mrv(e.args[0], x)
         return s, log(expr)
@@ -295,17 +296,19 @@ def mrv(e, x):
         l2 = [s for (s, _) in l if s != SubsSet()]
         if len(l2) != 1:
             # e.g. something like BesselJ(x, x)
-            raise NotImplementedError("MRV set computation for functions in"
-                                      " several variables not implemented.")
+            raise NotImplementedError(
+                "MRV set computation for functions in"
+                " several variables not implemented."
+            )
         s, ss = l2[0], SubsSet()
         args = [ss.do_subs(x[1]) for x in l]
         return s, e.func(*args)
     elif e.is_Derivative:
-        raise NotImplementedError("MRV set computation for derviatives"
-                                  " not implemented yet.")
+        raise NotImplementedError(
+            "MRV set computation for derviatives" " not implemented yet."
+        )
         return mrv(e.args[0], x)
-    raise NotImplementedError(
-        "Don't know how to calculate the mrv of '%s'" % e)
+    raise NotImplementedError("Don't know how to calculate the mrv of '%s'" % e)
 
 
 def mrv_max3(f, expsf, g, expsg, union, expsboth, x):
@@ -344,8 +347,7 @@ def mrv_max1(f, g, exps, x):
     Also returns exps, with the appropriate substitutions made.
     """
     u, b = f.union(g, exps)
-    return mrv_max3(f, g.do_subs(exps), g, f.do_subs(exps),
-                    u, b, x)
+    return mrv_max3(f, g.do_subs(exps), g, f.do_subs(exps), u, b, x)
 
 
 @debug
@@ -369,6 +371,7 @@ def sign(e, x):
     the same thing as the sign of e.]
     """
     from sympy import sign as _sign
+
     if not isinstance(e, Basic):
         raise TypeError("e should be an instance of Basic")
 
@@ -396,7 +399,7 @@ def sign(e, x):
         if s == 1:
             return 1
         if e.exp.is_Integer:
-            return s**e.exp
+            return s ** e.exp
     elif isinstance(e, log):
         return sign(e.args[0] - 1, x)
 
@@ -416,7 +419,7 @@ def limitinf(e, x, leadsimp=False):
     ``e`` cannot be simplified.
     """
     # rewrite e in terms of tractable functions only
-    e = e.rewrite('tractable', deep=True)
+    e = e.rewrite("tractable", deep=True)
 
     if not e.has(x):
         return e  # e is a constant
@@ -426,7 +429,7 @@ def limitinf(e, x, leadsimp=False):
         # We make sure that x.is_positive is True so we
         # get all the correct mathematical behavior from the expression.
         # We need a fresh variable.
-        p = Dummy('p', positive=True, finite=True)
+        p = Dummy("p", positive=True, finite=True)
         e = e.subs(x, p)
         x = p
     c0, e0 = mrv_leadterm(e, x)
@@ -434,13 +437,13 @@ def limitinf(e, x, leadsimp=False):
     if sig == 1:
         return S.Zero  # e0>0: lim f = 0
     elif sig == -1:  # e0<0: lim f = +-oo (the sign depends on the sign of c0)
-        if c0.match(I*Wild("a", exclude=[I])):
-            return c0*oo
+        if c0.match(I * Wild("a", exclude=[I])):
+            return c0 * oo
         s = sign(c0, x)
         # the leading term shouldn't be 0:
         if s == 0:
             raise ValueError("Leading term should not be 0")
-        return s*oo
+        return s * oo
     elif sig == 0:
         if leadsimp:
             c0 = c0.simplify()
@@ -537,10 +540,11 @@ def build_expression_tree(Omega, rewrites):
 
     This function builds the tree, rewrites then sorts the nodes.
     """
+
     class Node:
         def ht(self):
-            return reduce(lambda x, y: x + y,
-                          [x.ht() for x in self.before], 1)
+            return reduce(lambda x, y: x + y, [x.ht() for x in self.before], 1)
+
     nodes = {}
     for expr, v in Omega:
         n = Node()
@@ -570,6 +574,7 @@ def rewrite(e, Omega, x, wsym):
     for examples and correct results.
     """
     from sympy import ilcm
+
     if not isinstance(Omega, SubsSet):
         raise TypeError("Omega should be an instance of SubsSet")
     if len(Omega) == 0:
@@ -589,14 +594,14 @@ def rewrite(e, Omega, x, wsym):
     for g, _ in Omega:
         sig = sign(g.args[0], x)
         if sig != 1 and sig != -1:
-            raise NotImplementedError('Result depends on the sign of %s' % sig)
+            raise NotImplementedError("Result depends on the sign of %s" % sig)
     if sig == 1:
-        wsym = 1/wsym  # if g goes to oo, substitute 1/w
+        wsym = 1 / wsym  # if g goes to oo, substitute 1/w
     # O2 is a list, which results by rewriting each item in Omega using "w"
     O2 = []
     denominators = []
     for f, var in Omega:
-        c = limitinf(f.args[0]/g.args[0], x)
+        c = limitinf(f.args[0] / g.args[0], x)
         if c.is_Rational:
             denominators.append(c.q)
         arg = f.args[0]
@@ -604,7 +609,7 @@ def rewrite(e, Omega, x, wsym):
             if not isinstance(rewrites[var], exp):
                 raise ValueError("Value should be exp")
             arg = rewrites[var].args[0]
-        O2.append((var, exp((arg - c*g.args[0]).expand())*wsym**c))
+        O2.append((var, exp((arg - c * g.args[0]).expand()) * wsym ** c))
 
     # Remember that Omega contains subexpressions of "e". So now we find
     # them in "e" and substitute them for our rewriting, stored in O2
@@ -612,7 +617,7 @@ def rewrite(e, Omega, x, wsym):
     # the following powsimp is necessary to automatically combine exponentials,
     # so that the .xreplace() below succeeds:
     # TODO this should not be necessary
-    f = powsimp(e, deep=True, combine='exp')
+    f = powsimp(e, deep=True, combine="exp")
     for a, b in O2:
         f = f.xreplace({a: b})
 
@@ -627,7 +632,7 @@ def rewrite(e, Omega, x, wsym):
     # Some parts of sympy have difficulty computing series expansions with
     # non-integral exponents. The following heuristic improves the situation:
     exponent = reduce(ilcm, denominators, 1)
-    f = f.xreplace({wsym: wsym**exponent})
+    f = f.xreplace({wsym: wsym ** exponent})
     logw /= exponent
 
     return f, logw
@@ -658,9 +663,9 @@ def gruntz(e, z, z0, dir="+"):
         e0 = e.subs(z, -z)
     else:
         if str(dir) == "-":
-            e0 = e.subs(z, z0 - 1/z)
+            e0 = e.subs(z, z0 - 1 / z)
         elif str(dir) == "+":
-            e0 = e.subs(z, z0 + 1/z)
+            e0 = e.subs(z, z0 + 1 / z)
         else:
             raise NotImplementedError("dir must be '+' or '-'")
 
@@ -673,4 +678,4 @@ def gruntz(e, z, z0, dir="+"):
     # tractable functions in terms of familiar intractable ones.
     # It might be nicer to rewrite the exactly to what they were initially,
     # but that would take some work to implement.
-    return r.rewrite('intractable', deep=True)
+    return r.rewrite("intractable", deep=True)

@@ -16,26 +16,26 @@ from sympy.physics.quantum.operator import DifferentialOperator, HermitianOperat
 from sympy.physics.quantum.state import Ket, Bra, State
 
 __all__ = [
-    'XOp',
-    'YOp',
-    'ZOp',
-    'PxOp',
-    'X',
-    'Y',
-    'Z',
-    'Px',
-    'XKet',
-    'XBra',
-    'PxKet',
-    'PxBra',
-    'PositionState3D',
-    'PositionKet3D',
-    'PositionBra3D'
+    "XOp",
+    "YOp",
+    "ZOp",
+    "PxOp",
+    "X",
+    "Y",
+    "Z",
+    "Px",
+    "XKet",
+    "XBra",
+    "PxKet",
+    "PxBra",
+    "PositionState3D",
+    "PositionKet3D",
+    "PositionBra3D",
 ]
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Position operators
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 class XOp(HermitianOperator):
@@ -50,13 +50,13 @@ class XOp(HermitianOperator):
         return L2(Interval(S.NegativeInfinity, S.Infinity))
 
     def _eval_commutator_PxOp(self, other):
-        return I*hbar
+        return I * hbar
 
     def _apply_operator_XKet(self, ket):
-        return ket.position*ket
+        return ket.position * ket
 
     def _apply_operator_PositionKet3D(self, ket):
-        return ket.position_x*ket
+        return ket.position_x * ket
 
     def _represent_PxKet(self, basis, **options):
         index = options.pop("index", 1)
@@ -67,7 +67,7 @@ class XOp(HermitianOperator):
         d = DifferentialOperator(coord1)
         delta = DiracDelta(coord1 - coord2)
 
-        return I*hbar*(d*delta)
+        return I * hbar * (d * delta)
 
 
 class YOp(HermitianOperator):
@@ -82,7 +82,7 @@ class YOp(HermitianOperator):
         return L2(Interval(S.NegativeInfinity, S.Infinity))
 
     def _apply_operator_PositionKet3D(self, ket):
-        return ket.position_y*ket
+        return ket.position_y * ket
 
 
 class ZOp(HermitianOperator):
@@ -97,11 +97,12 @@ class ZOp(HermitianOperator):
         return L2(Interval(S.NegativeInfinity, S.Infinity))
 
     def _apply_operator_PositionKet3D(self, ket):
-        return ket.position_z*ket
+        return ket.position_z * ket
 
-#-------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
 # Momentum operators
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 class PxOp(HermitianOperator):
@@ -116,7 +117,7 @@ class PxOp(HermitianOperator):
         return L2(Interval(S.NegativeInfinity, S.Infinity))
 
     def _apply_operator_PxKet(self, ket):
-        return ket.momentum*ket
+        return ket.momentum * ket
 
     def _represent_XKet(self, basis, **options):
         index = options.pop("index", 1)
@@ -127,16 +128,17 @@ class PxOp(HermitianOperator):
         d = DifferentialOperator(coord1)
         delta = DiracDelta(coord1 - coord2)
 
-        return -I*hbar*(d*delta)
+        return -I * hbar * (d * delta)
 
-X = XOp('X')
-Y = YOp('Y')
-Z = ZOp('Z')
-Px = PxOp('Px')
 
-#-------------------------------------------------------------------------
+X = XOp("X")
+Y = YOp("Y")
+Z = ZOp("Z")
+Px = PxOp("Px")
+
+# -------------------------------------------------------------------------
 # Position eigenstates
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 class XKet(Ket):
@@ -147,8 +149,7 @@ class XKet(Ket):
         return self.__new__(self, *_lowercase_labels(op), **options)
 
     def _state_to_operators(self, op_class, **options):
-        return op_class.__new__(op_class,
-                                *_uppercase_labels(self), **options)
+        return op_class.__new__(op_class, *_uppercase_labels(self), **options)
 
     @classmethod
     def default_args(self):
@@ -170,7 +171,7 @@ class XKet(Ket):
         return DiracDelta(self.position - bra.position)
 
     def _eval_innerproduct_PxBra(self, bra, **hints):
-        return exp(-I*self.position*bra.momentum/hbar)/sqrt(2*pi*hbar)
+        return exp(-I * self.position * bra.momentum / hbar) / sqrt(2 * pi * hbar)
 
 
 class XBra(Bra):
@@ -198,8 +199,7 @@ class PositionState3D(State):
         return self.__new__(self, *_lowercase_labels(op), **options)
 
     def _state_to_operators(self, op_class, **options):
-        return op_class.__new__(op_class,
-                                *_uppercase_labels(self), **options)
+        return op_class.__new__(op_class, *_uppercase_labels(self), **options)
 
     @classmethod
     def default_args(self):
@@ -229,7 +229,7 @@ class PositionKet3D(Ket, PositionState3D):
         y_diff = self.position_y - bra.position_y
         z_diff = self.position_z - bra.position_z
 
-        return DiracDelta(x_diff)*DiracDelta(y_diff)*DiracDelta(z_diff)
+        return DiracDelta(x_diff) * DiracDelta(y_diff) * DiracDelta(z_diff)
 
     @classmethod
     def dual_class(self):
@@ -246,9 +246,10 @@ class PositionBra3D(Bra, PositionState3D):  # type: ignore
     def dual_class(self):
         return PositionKet3D
 
-#-------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
 # Momentum eigenstates
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 class PxKet(Ket):
@@ -259,8 +260,7 @@ class PxKet(Ket):
         return self.__new__(self, *_lowercase_labels(op), **options)
 
     def _state_to_operators(self, op_class, **options):
-        return op_class.__new__(op_class,
-                                *_uppercase_labels(self), **options)
+        return op_class.__new__(op_class, *_uppercase_labels(self), **options)
 
     @classmethod
     def default_args(self):
@@ -279,7 +279,7 @@ class PxKet(Ket):
         return _enumerate_continuous_1D(self, *args, **options)
 
     def _eval_innerproduct_XBra(self, bra, **hints):
-        return exp(I*self.momentum*bra.position/hbar)/sqrt(2*pi*hbar)
+        return exp(I * self.momentum * bra.position / hbar) / sqrt(2 * pi * hbar)
 
     def _eval_innerproduct_PxBra(self, bra, **hints):
         return DiracDelta(self.momentum - bra.momentum)
@@ -301,19 +301,20 @@ class PxBra(Bra):
         """The momentum of the state."""
         return self.label[0]
 
-#-------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------
 # Global helper functions
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 
 def _enumerate_continuous_1D(*args, **options):
     state = args[0]
     num_states = args[1]
     state_class = state.__class__
-    index_list = options.pop('index_list', [])
+    index_list = options.pop("index_list", [])
 
     if len(index_list) == 0:
-        start_index = options.pop('start_index', 1)
+        start_index = options.pop("start_index", 1)
         index_list = list(range(start_index, start_index + num_states))
 
     enum_states = [0 for i in range(len(index_list))]
@@ -336,7 +337,6 @@ def _uppercase_labels(ops):
     if not isinstance(ops, set):
         ops = [ops]
 
-    new_args = [str(arg.label[0])[0].upper() +
-                str(arg.label[0])[1:] for arg in ops]
+    new_args = [str(arg.label[0])[0].upper() + str(arg.label[0])[1:] for arg in ops]
 
     return new_args

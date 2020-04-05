@@ -4,6 +4,7 @@ from .cache import clear_cache
 from contextlib import contextmanager
 from threading import local
 
+
 class _global_parameters(local):
     """
     Thread-local global parameters.
@@ -57,6 +58,7 @@ class _global_parameters(local):
     .. [1] https://docs.python.org/3/library/threading.html
 
     """
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -65,7 +67,9 @@ class _global_parameters(local):
             clear_cache()
         return super(_global_parameters, self).__setattr__(name, value)
 
+
 global_parameters = _global_parameters(evaluate=True, distribute=True)
+
 
 @contextmanager
 def evaluate(x):

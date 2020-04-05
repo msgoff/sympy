@@ -5,7 +5,7 @@ from sympy.core.compatibility import SYMPY_INTS
 from sympy.core.function import Function
 from sympy.core.logic import fuzzy_not
 from sympy.core.mul import prod
-from sympy.utilities.iterables import (has_dups, default_sort_key)
+from sympy.utilities.iterables import has_dups, default_sort_key
 
 ###############################################################################
 ###################### Kronecker Delta, Levi-Civita etc. ######################
@@ -30,10 +30,12 @@ def Eijk(*args, **kwargs):
 def eval_levicivita(*args):
     """Evaluate Levi-Civita symbol."""
     from sympy import factorial
+
     n = len(args)
     return prod(
-        prod(args[j] - args[i] for j in range(i + 1, n))
-        / factorial(i) for i in range(n))
+        prod(args[j] - args[i] for j in range(i + 1, n)) / factorial(i)
+        for i in range(n)
+    )
     # converting factorial(i) to int is slightly faster
 
 
@@ -182,11 +184,9 @@ class KroneckerDelta(Function):
         elif fuzzy_not(diff.is_zero):
             return S.Zero
 
-        if i.assumptions0.get("below_fermi") and \
-                j.assumptions0.get("above_fermi"):
+        if i.assumptions0.get("below_fermi") and j.assumptions0.get("above_fermi"):
             return S.Zero
-        if j.assumptions0.get("below_fermi") and \
-                i.assumptions0.get("above_fermi"):
+        if j.assumptions0.get("below_fermi") and i.assumptions0.get("above_fermi"):
             return S.Zero
         # to make KroneckerDelta canonical
         # following lines will check if inputs are in order
@@ -206,7 +206,7 @@ class KroneckerDelta(Function):
         if expt.is_positive:
             return self
         if expt.is_negative and not -expt is S.One:
-            return 1/self
+            return 1 / self
 
     @property
     def is_above_fermi(self):
@@ -301,10 +301,10 @@ class KroneckerDelta(Function):
         is_above_fermi, is_below_fermi, is_only_below_fermi
 
         """
-        return ( self.args[0].assumptions0.get("above_fermi")
-                or
-                self.args[1].assumptions0.get("above_fermi")
-                ) or False
+        return (
+            self.args[0].assumptions0.get("above_fermi")
+            or self.args[1].assumptions0.get("above_fermi")
+        ) or False
 
     @property
     def is_only_below_fermi(self):
@@ -333,10 +333,10 @@ class KroneckerDelta(Function):
         is_above_fermi, is_below_fermi, is_only_above_fermi
 
         """
-        return ( self.args[0].assumptions0.get("below_fermi")
-                or
-                self.args[1].assumptions0.get("below_fermi")
-                ) or False
+        return (
+            self.args[0].assumptions0.get("below_fermi")
+            or self.args[1].assumptions0.get("below_fermi")
+        ) or False
 
     @property
     def indices_contain_equal_information(self):
@@ -360,11 +360,13 @@ class KroneckerDelta(Function):
         False
 
         """
-        if (self.args[0].assumptions0.get("below_fermi") and
-                self.args[1].assumptions0.get("below_fermi")):
+        if self.args[0].assumptions0.get("below_fermi") and self.args[
+            1
+        ].assumptions0.get("below_fermi"):
             return True
-        if (self.args[0].assumptions0.get("above_fermi")
-                and self.args[1].assumptions0.get("above_fermi")):
+        if self.args[0].assumptions0.get("above_fermi") and self.args[
+            1
+        ].assumptions0.get("above_fermi"):
             return True
 
         # if both indices are general we are True, else false
@@ -476,10 +478,12 @@ class KroneckerDelta(Function):
 
     def _sage_(self):
         import sage.all as sage
+
         return sage.kronecker_delta(self.args[0]._sage_(), self.args[1]._sage_())
 
     def _eval_rewrite_as_Piecewise(self, *args, **kwargs):
         from sympy.functions.elementary.piecewise import Piecewise
         from sympy.core.relational import Ne
+
         i, j = args
         return Piecewise((0, Ne(i, j)), (1, True))

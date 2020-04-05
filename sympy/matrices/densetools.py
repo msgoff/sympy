@@ -7,9 +7,9 @@ The dense matrix is stored as a list of lists
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
 SymPyDeprecationWarning(
-    feature="densetools",
-    issue=12695,
-    deprecated_since_version="1.1").warn()
+    feature="densetools", issue=12695, deprecated_since_version="1.1"
+).warn()
+
 
 def trace(matlist, K):
     """
@@ -96,7 +96,7 @@ def conjugate_row(row, K):
     """
     result = []
     for r in row:
-        conj = getattr(r, 'conjugate', None)
+        conj = getattr(r, "conjugate", None)
         if conj is not None:
             conjrow = conj()
         else:
@@ -164,7 +164,7 @@ def eye(n, K):
     for i in range(n):
         result.append([])
         for j in range(n):
-            if (i == j):
+            if i == j:
                 result[i].append(K(1))
             else:
                 result[i].append(K.zero)
@@ -219,21 +219,21 @@ def rowswap(matlist, index1, index2, K):
     return matlist
 
 
-def rowmul(matlist, index, k,  K):
+def rowmul(matlist, index, k, K):
     """
     Multiplies index row with k
     """
     for i in range(len(matlist[index])):
-        matlist[index][i] = k*matlist[index][i]
+        matlist[index][i] = k * matlist[index][i]
     return matlist
 
 
-def rowadd(matlist, index1, index2 , k, K):
+def rowadd(matlist, index1, index2, k, K):
     """
     Adds the index1 row with index2 row which in turn is multiplied by k
     """
     for i in range(len(matlist[index1])):
-        matlist[index1][i] = (matlist[index1][i] + k*matlist[index2][i])
+        matlist[index1][i] = matlist[index1][i] + k * matlist[index2][i]
     return matlist
 
 

@@ -16,6 +16,7 @@ def pprint_nodes(subtrees):
     +-c
 
     """
+
     def indent(s, type=1):
         x = s.split("\n")
         r = "+-%s\n" % x[0]
@@ -27,6 +28,7 @@ def pprint_nodes(subtrees):
             else:
                 r += "  %s\n" % a
         return r
+
     if not subtrees:
         return ""
     f = ""

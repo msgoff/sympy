@@ -24,20 +24,11 @@ def msigma(i):
     [1, 0]])
     """
     if i == 1:
-        mat = ( (
-            (0, 1),
-            (1, 0)
-        ) )
+        mat = ((0, 1), (1, 0))
     elif i == 2:
-        mat = ( (
-            (0, -I),
-            (I, 0)
-        ) )
+        mat = ((0, -I), (I, 0))
     elif i == 3:
-        mat = ( (
-            (1, 0),
-            (0, -1)
-        ) )
+        mat = ((1, 0), (0, -1))
     else:
         raise IndexError("Invalid Pauli index")
     return Matrix(mat)
@@ -61,16 +52,18 @@ def pat_matrix(m, dx, dy, dz):
     [0, 0, 2]])
 
     """
-    dxdy = -dx*dy
-    dydz = -dy*dz
-    dzdx = -dz*dx
-    dxdx = dx**2
-    dydy = dy**2
-    dzdz = dz**2
-    mat = ((dydy + dzdz, dxdy, dzdx),
-           (dxdy, dxdx + dzdz, dydz),
-           (dzdx, dydz, dydy + dxdx))
-    return m*Matrix(mat)
+    dxdy = -dx * dy
+    dydz = -dy * dz
+    dzdx = -dz * dx
+    dxdx = dx ** 2
+    dydy = dy ** 2
+    dzdz = dz ** 2
+    mat = (
+        (dydy + dzdz, dxdy, dzdx),
+        (dxdy, dxdx + dzdz, dydz),
+        (dzdx, dydz, dydy + dxdx),
+    )
+    return m * Matrix(mat)
 
 
 def mgamma(mu, lower=False):
@@ -104,54 +97,26 @@ def mgamma(mu, lower=False):
     if not mu in [0, 1, 2, 3, 5]:
         raise IndexError("Invalid Dirac index")
     if mu == 0:
-        mat = (
-            (1, 0, 0, 0),
-            (0, 1, 0, 0),
-            (0, 0, -1, 0),
-            (0, 0, 0, -1)
-        )
+        mat = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (0, 0, 0, -1))
     elif mu == 1:
-        mat = (
-            (0, 0, 0, 1),
-            (0, 0, 1, 0),
-            (0, -1, 0, 0),
-            (-1, 0, 0, 0)
-        )
+        mat = ((0, 0, 0, 1), (0, 0, 1, 0), (0, -1, 0, 0), (-1, 0, 0, 0))
     elif mu == 2:
-        mat = (
-            (0, 0, 0, -I),
-            (0, 0, I, 0),
-            (0, I, 0, 0),
-            (-I, 0, 0, 0)
-        )
+        mat = ((0, 0, 0, -I), (0, 0, I, 0), (0, I, 0, 0), (-I, 0, 0, 0))
     elif mu == 3:
-        mat = (
-            (0, 0, 1, 0),
-            (0, 0, 0, -1),
-            (-1, 0, 0, 0),
-            (0, 1, 0, 0)
-        )
+        mat = ((0, 0, 1, 0), (0, 0, 0, -1), (-1, 0, 0, 0), (0, 1, 0, 0))
     elif mu == 5:
-        mat = (
-            (0, 0, 1, 0),
-            (0, 0, 0, 1),
-            (1, 0, 0, 0),
-            (0, 1, 0, 0)
-        )
+        mat = ((0, 0, 1, 0), (0, 0, 0, 1), (1, 0, 0, 0), (0, 1, 0, 0))
     m = Matrix(mat)
     if lower:
         if mu in [1, 2, 3, 5]:
             m = -m
     return m
 
-#Minkowski tensor using the convention (+,-,-,-) used in the Quantum Field
-#Theory
-minkowski_tensor = Matrix( (
-    (1, 0, 0, 0),
-    (0, -1, 0, 0),
-    (0, 0, -1, 0),
-    (0, 0, 0, -1)
-))
+
+# Minkowski tensor using the convention (+,-,-,-) used in the Quantum Field
+# Theory
+minkowski_tensor = Matrix(((1, 0, 0, 0), (0, -1, 0, 0), (0, 0, -1, 0), (0, 0, 0, -1)))
+
 
 def mdft(n):
     r"""
@@ -174,11 +139,11 @@ def mdft(n):
     [sqrt(3)/3,  sqrt(3)*exp(2*I*pi/3)/3, sqrt(3)*exp(-2*I*pi/3)/3]])
     """
     mat = [[None for x in range(n)] for y in range(n)]
-    base = exp(-2*pi*I/n)
-    mat[0] = [1]*n
+    base = exp(-2 * pi * I / n)
+    mat[0] = [1] * n
     for i in range(n):
         mat[i][0] = 1
     for i in range(1, n):
         for j in range(i, n):
-            mat[i][j] = mat[j][i] = base**(i*j)
-    return (1/sqrt(n))*Matrix(mat)
+            mat[i][j] = mat[j][i] = base ** (i * j)
+    return (1 / sqrt(n)) * Matrix(mat)

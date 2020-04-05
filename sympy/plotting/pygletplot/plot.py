@@ -6,8 +6,9 @@ from threading import RLock
 try:
     import pyglet.gl as pgl
 except ImportError:
-    raise ImportError("pyglet is required for plotting.\n "
-                      "visit http://www.pyglet.org/")
+    raise ImportError(
+        "pyglet is required for plotting.\n " "visit http://www.pyglet.org/"
+    )
 
 from sympy.core.compatibility import is_sequence, SYMPY_INTS
 from sympy.core.numbers import Integer
@@ -24,7 +25,8 @@ from os import getcwd, listdir
 
 import ctypes
 
-@doctest_depends_on(modules=('pyglet',))
+
+@doctest_depends_on(modules=("pyglet",))
 class PygletPlot(object):
     """
     Plot Examples
@@ -154,7 +156,7 @@ class PygletPlot(object):
 
     """
 
-    @doctest_depends_on(modules=('pyglet',))
+    @doctest_depends_on(modules=("pyglet",))
     def __init__(self, *fargs, **win_args):
         """
         Positional Arguments
@@ -225,7 +227,7 @@ class PygletPlot(object):
 
         """
         # Register the plot modes
-        from . import plot_modes # noqa
+        from . import plot_modes  # noqa
 
         self._win_args = win_args
         self._window = None
@@ -236,12 +238,12 @@ class PygletPlot(object):
         self._pobjects = []
         self._screenshot = ScreenShot(self)
 
-        axe_options = parse_option_string(win_args.pop('axes', ''))
+        axe_options = parse_option_string(win_args.pop("axes", ""))
         self.axes = PlotAxes(**axe_options)
         self._pobjects.append(self.axes)
 
         self[0] = fargs
-        if win_args.get('visible', True):
+        if win_args.get("visible", True):
             self.show()
 
     ## Window Interfaces
@@ -254,10 +256,10 @@ class PygletPlot(object):
         if self._window and not self._window.has_exit:
             self._window.activate()
         else:
-            self._win_args['visible'] = True
+            self._win_args["visible"] = True
             self.axes.reset_resources()
 
-            #if hasattr(self, '_doctest_depends_on'):
+            # if hasattr(self, '_doctest_depends_on'):
             #    self._win_args['runfromdoctester'] = True
 
             self._window = PlotWindow(self, **self._win_args)
@@ -269,7 +271,7 @@ class PygletPlot(object):
         if self._window:
             self._window.close()
 
-    def saveimage(self, outfile=None, format='', size=(600, 500)):
+    def saveimage(self, outfile=None, format="", size=(600, 500)):
         """
         Saves a screen capture of the plot window to an
         image file.
@@ -306,8 +308,7 @@ class PygletPlot(object):
         list.
         """
         if not (isinstance(i, (SYMPY_INTS, Integer)) and i >= 0):
-            raise ValueError("Function index must "
-                             "be an integer >= 0.")
+            raise ValueError("Function index must " "be an integer >= 0.")
 
         if isinstance(args, PlotObject):
             f = args
@@ -324,8 +325,7 @@ class PygletPlot(object):
             self._functions[i] = f
             self._render_lock.release()
         else:
-            raise ValueError("Failed to parse '%s'."
-                    % ', '.join(str(a) for a in args))
+            raise ValueError("Failed to parse '%s'." % ", ".join(str(a) for a in args))
 
     def __delitem__(self, i):
         """
@@ -380,8 +380,12 @@ class PygletPlot(object):
             s += "<blank plot>"
         else:
             self._render_lock.acquire()
-            s += "\n".join(["%s[%i]: %s" % ("", i, str(self._functions[i]))
-                            for i in self._functions])
+            s += "\n".join(
+                [
+                    "%s[%i]: %s" % ("", i, str(self._functions[i]))
+                    for i in self._functions
+                ]
+            )
             self._render_lock.release()
         return s
 
@@ -402,12 +406,13 @@ class PygletPlot(object):
                 sleep(0)
         self._render_lock.release()
 
+
 class ScreenShot:
     def __init__(self, plot):
         self._plot = plot
         self.screenshot_requested = False
         self.outfile = None
-        self.format = ''
+        self.format = ""
         self.invisibleMode = False
         self.flag = 0
 
@@ -422,12 +427,12 @@ class ScreenShot:
             return
 
         size_x, size_y = self._plot._window.get_size()
-        size = size_x*size_y*4*ctypes.sizeof(ctypes.c_ubyte)
+        size = size_x * size_y * 4 * ctypes.sizeof(ctypes.c_ubyte)
         image = ctypes.create_string_buffer(size)
         pgl.glReadPixels(0, 0, size_x, size_y, pgl.GL_RGBA, pgl.GL_UNSIGNED_BYTE, image)
         from PIL import Image
-        im = Image.frombuffer('RGBA', (size_x, size_y),
-                              image.raw, 'raw', 'RGBA', 0, 1)
+
+        im = Image.frombuffer("RGBA", (size_x, size_y), image.raw, "raw", "RGBA", 0, 1)
         im.transpose(Image.FLIP_TOP_BOTTOM).save(self.outfile, self.format)
 
         self.flag = 0
@@ -435,17 +440,17 @@ class ScreenShot:
         if self.invisibleMode:
             self._plot._window.close()
 
-    def save(self, outfile=None, format='', size=(600, 500)):
+    def save(self, outfile=None, format="", size=(600, 500)):
         self.outfile = outfile
         self.format = format
         self.size = size
         self.screenshot_requested = True
 
         if not self._plot._window or self._plot._window.has_exit:
-            self._plot._win_args['visible'] = False
+            self._plot._win_args["visible"] = False
 
-            self._plot._win_args['width'] = size[0]
-            self._plot._win_args['height'] = size[1]
+            self._plot._win_args["width"] = size[0]
+            self._plot._win_args["height"] = size[1]
 
             self._plot.axes.reset_resources()
             self._plot._window = PlotWindow(self._plot, **self._plot._win_args)
@@ -458,11 +463,11 @@ class ScreenShot:
     def _create_unique_path(self):
         cwd = getcwd()
         l = listdir(cwd)
-        path = ''
+        path = ""
         i = 0
         while True:
-            if not 'plot_%s.png' % i in l:
-                path = cwd + '/plot_%s.png' % i
+            if not "plot_%s.png" % i in l:
+                path = cwd + "/plot_%s.png" % i
                 break
             i += 1
         return path

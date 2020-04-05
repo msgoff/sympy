@@ -12,7 +12,8 @@ from sympy.functions.special.tensor_functions import KroneckerDelta
 from sympy.physics.quantum.hilbert import ComplexSpace
 from sympy.physics.quantum.matrixutils import matrix_zeros
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 class SHOOp(Operator):
     """A base class for the SHO Operators.
@@ -32,6 +33,7 @@ class SHOOp(Operator):
     @classmethod
     def _eval_hilbert_space(cls, label):
         return ComplexSpace(S.Infinity)
+
 
 class RaisingOp(SHOOp):
     """The Raising Operator or a^dagger.
@@ -103,8 +105,9 @@ class RaisingOp(SHOOp):
     """
 
     def _eval_rewrite_as_xp(self, *args, **kwargs):
-        return (Integer(1)/sqrt(Integer(2)*hbar*m*omega))*(
-            Integer(-1)*I*Px + m*omega*X)
+        return (Integer(1) / sqrt(Integer(2) * hbar * m * omega)) * (
+            Integer(-1) * I * Px + m * omega * X
+        )
 
     def _eval_adjoint(self):
         return LoweringOp(*self.args)
@@ -113,11 +116,11 @@ class RaisingOp(SHOOp):
         return Integer(-1)
 
     def _eval_commutator_NumberOp(self, other):
-        return Integer(-1)*self
+        return Integer(-1) * self
 
     def _apply_operator_SHOKet(self, ket):
         temp = ket.n + Integer(1)
-        return sqrt(temp)*SHOKet(temp)
+        return sqrt(temp) * SHOKet(temp)
 
     def _represent_default_basis(self, **options):
         return self._represent_NumberOp(None, **options)
@@ -128,38 +131,40 @@ class RaisingOp(SHOOp):
         # temp = self.rewrite('xp').doit()
         # result = represent(temp, basis=X)
         # return result
-        raise NotImplementedError('Position representation is not implemented')
+        raise NotImplementedError("Position representation is not implemented")
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format','sympy')
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
         matrix = matrix_zeros(ndim_info, ndim_info, **options)
         for i in range(ndim_info - 1):
             value = sqrt(i + 1)
-            if format == 'scipy.sparse':
+            if format == "scipy.sparse":
                 value = float(value)
             matrix[i + 1, i] = value
-        if format == 'scipy.sparse':
+        if format == "scipy.sparse":
             matrix = matrix.tocsr()
         return matrix
 
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     # Printing Methods
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
 
     def _print_contents(self, printer, *args):
         arg0 = printer._print(self.args[0], *args)
-        return '%s(%s)' % (self.__class__.__name__, arg0)
+        return "%s(%s)" % (self.__class__.__name__, arg0)
 
     def _print_contents_pretty(self, printer, *args):
         from sympy.printing.pretty.stringpict import prettyForm
+
         pform = printer._print(self.args[0], *args)
-        pform = pform**prettyForm(u'\N{DAGGER}')
+        pform = pform ** prettyForm(u"\N{DAGGER}")
         return pform
 
     def _print_contents_latex(self, printer, *args):
         arg = printer._print(self.args[0])
-        return '%s^{\\dagger}' % arg
+        return "%s^{\\dagger}" % arg
+
 
 class LoweringOp(SHOOp):
     """The Lowering Operator or 'a'.
@@ -241,8 +246,9 @@ class LoweringOp(SHOOp):
     """
 
     def _eval_rewrite_as_xp(self, *args, **kwargs):
-        return (Integer(1)/sqrt(Integer(2)*hbar*m*omega))*(
-            I*Px + m*omega*X)
+        return (Integer(1) / sqrt(Integer(2) * hbar * m * omega)) * (
+            I * Px + m * omega * X
+        )
 
     def _eval_adjoint(self):
         return RaisingOp(*self.args)
@@ -251,14 +257,14 @@ class LoweringOp(SHOOp):
         return Integer(1)
 
     def _eval_commutator_NumberOp(self, other):
-        return Integer(1)*self
+        return Integer(1) * self
 
     def _apply_operator_SHOKet(self, ket):
         temp = ket.n - Integer(1)
         if ket.n == Integer(0):
             return Integer(0)
         else:
-            return sqrt(ket.n)*SHOKet(temp)
+            return sqrt(ket.n) * SHOKet(temp)
 
     def _represent_default_basis(self, **options):
         return self._represent_NumberOp(None, **options)
@@ -269,18 +275,18 @@ class LoweringOp(SHOOp):
         # temp = self.rewrite('xp').doit()
         # result = represent(temp, basis=X)
         # return result
-        raise NotImplementedError('Position representation is not implemented')
+        raise NotImplementedError("Position representation is not implemented")
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format', 'sympy')
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
         matrix = matrix_zeros(ndim_info, ndim_info, **options)
         for i in range(ndim_info - 1):
             value = sqrt(i + 1)
-            if format == 'scipy.sparse':
+            if format == "scipy.sparse":
                 value = float(value)
-            matrix[i,i + 1] = value
-        if format == 'scipy.sparse':
+            matrix[i, i + 1] = value
+        if format == "scipy.sparse":
             matrix = matrix.tocsr()
         return matrix
 
@@ -359,17 +365,18 @@ class NumberOp(SHOOp):
     """
 
     def _eval_rewrite_as_a(self, *args, **kwargs):
-        return ad*a
+        return ad * a
 
     def _eval_rewrite_as_xp(self, *args, **kwargs):
-        return (Integer(1)/(Integer(2)*m*hbar*omega))*(Px**2 + (
-            m*omega*X)**2) - Integer(1)/Integer(2)
+        return (Integer(1) / (Integer(2) * m * hbar * omega)) * (
+            Px ** 2 + (m * omega * X) ** 2
+        ) - Integer(1) / Integer(2)
 
     def _eval_rewrite_as_H(self, *args, **kwargs):
-        return H/(hbar*omega) - Integer(1)/Integer(2)
+        return H / (hbar * omega) - Integer(1) / Integer(2)
 
     def _apply_operator_SHOKet(self, ket):
-        return ket.n*ket
+        return ket.n * ket
 
     def _eval_commutator_Hamiltonian(self, other):
         return Integer(0)
@@ -378,7 +385,7 @@ class NumberOp(SHOOp):
         return other
 
     def _eval_commutator_LoweringOp(self, other):
-        return Integer(-1)*other
+        return Integer(-1) * other
 
     def _represent_default_basis(self, **options):
         return self._represent_NumberOp(None, **options)
@@ -389,18 +396,18 @@ class NumberOp(SHOOp):
         # temp = self.rewrite('xp').doit()
         # result = represent(temp, basis=X)
         # return result
-        raise NotImplementedError('Position representation is not implemented')
+        raise NotImplementedError("Position representation is not implemented")
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format', 'sympy')
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
         matrix = matrix_zeros(ndim_info, ndim_info, **options)
         for i in range(ndim_info):
             value = i
-            if format == 'scipy.sparse':
+            if format == "scipy.sparse":
                 value = float(value)
-            matrix[i,i] = value
-        if format == 'scipy.sparse':
+            matrix[i, i] = value
+        if format == "scipy.sparse":
             matrix = matrix.tocsr()
         return matrix
 
@@ -472,16 +479,16 @@ class Hamiltonian(SHOOp):
     """
 
     def _eval_rewrite_as_a(self, *args, **kwargs):
-        return hbar*omega*(ad*a + Integer(1)/Integer(2))
+        return hbar * omega * (ad * a + Integer(1) / Integer(2))
 
     def _eval_rewrite_as_xp(self, *args, **kwargs):
-        return (Integer(1)/(Integer(2)*m))*(Px**2 + (m*omega*X)**2)
+        return (Integer(1) / (Integer(2) * m)) * (Px ** 2 + (m * omega * X) ** 2)
 
     def _eval_rewrite_as_N(self, *args, **kwargs):
-        return hbar*omega*(N + Integer(1)/Integer(2))
+        return hbar * omega * (N + Integer(1) / Integer(2))
 
     def _apply_operator_SHOKet(self, ket):
-        return (hbar*omega*(ket.n + Integer(1)/Integer(2)))*ket
+        return (hbar * omega * (ket.n + Integer(1) / Integer(2))) * ket
 
     def _eval_commutator_NumberOp(self, other):
         return Integer(0)
@@ -495,22 +502,24 @@ class Hamiltonian(SHOOp):
         # temp = self.rewrite('xp').doit()
         # result = represent(temp, basis=X)
         # return result
-        raise NotImplementedError('Position representation is not implemented')
+        raise NotImplementedError("Position representation is not implemented")
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format', 'sympy')
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
         matrix = matrix_zeros(ndim_info, ndim_info, **options)
         for i in range(ndim_info):
-            value = i + Integer(1)/Integer(2)
-            if format == 'scipy.sparse':
+            value = i + Integer(1) / Integer(2)
+            if format == "scipy.sparse":
                 value = float(value)
-            matrix[i,i] = value
-        if format == 'scipy.sparse':
+            matrix[i, i] = value
+        if format == "scipy.sparse":
             matrix = matrix.tocsr()
-        return hbar*omega*matrix
+        return hbar * omega * matrix
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+
 
 class SHOState(State):
     """State class for SHO states"""
@@ -587,17 +596,17 @@ class SHOKet(SHOState, Ket):
         return self._represent_NumberOp(None, **options)
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format', 'sympy')
-        options['spmatrix'] = 'lil'
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
+        options["spmatrix"] = "lil"
         vector = matrix_zeros(ndim_info, 1, **options)
         if isinstance(self.n, Integer):
             if self.n >= ndim_info:
                 return ValueError("N-Dimension too small")
-            if format == 'scipy.sparse':
+            if format == "scipy.sparse":
                 vector[int(self.n), 0] = 1.0
                 vector = vector.tocsr()
-            elif format == 'numpy':
+            elif format == "numpy":
                 vector[int(self.n), 0] = 1.0
             else:
                 vector[self.n, 0] = Integer(1)
@@ -651,17 +660,17 @@ class SHOBra(SHOState, Bra):
         return self._represent_NumberOp(None, **options)
 
     def _represent_NumberOp(self, basis, **options):
-        ndim_info = options.get('ndim', 4)
-        format = options.get('format', 'sympy')
-        options['spmatrix'] = 'lil'
+        ndim_info = options.get("ndim", 4)
+        format = options.get("format", "sympy")
+        options["spmatrix"] = "lil"
         vector = matrix_zeros(1, ndim_info, **options)
         if isinstance(self.n, Integer):
             if self.n >= ndim_info:
                 return ValueError("N-Dimension too small")
-            if format == 'scipy.sparse':
+            if format == "scipy.sparse":
                 vector[0, int(self.n)] = 1.0
                 vector = vector.tocsr()
-            elif format == 'numpy':
+            elif format == "numpy":
                 vector[0, int(self.n)] = 1.0
             else:
                 vector[0, self.n] = Integer(1)
@@ -670,9 +679,9 @@ class SHOBra(SHOState, Bra):
             return ValueError("Not Numerical State")
 
 
-ad = RaisingOp('a')
-a = LoweringOp('a')
-H = Hamiltonian('H')
-N = NumberOp('N')
-omega = Symbol('omega')
-m = Symbol('m')
+ad = RaisingOp("a")
+a = LoweringOp("a")
+H = Hamiltonian("H")
+N = NumberOp("N")
+omega = Symbol("omega")
+m = Symbol("m")

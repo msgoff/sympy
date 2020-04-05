@@ -62,8 +62,7 @@ class PermutationMatrix(MatrixExpr):
 
         perm = _sympify(perm)
         if not isinstance(perm, Permutation):
-            raise ValueError(
-                "{} must be a SymPy Permutation instance.".format(perm))
+            raise ValueError("{} must be a SymPy Permutation instance.".format(perm))
 
         return super(PermutationMatrix, cls).__new__(cls, perm)
 
@@ -130,7 +129,7 @@ class PermutationMatrix(MatrixExpr):
                         temp.append(cycle)
                         cycles_picks.append(temp)
                         flag = False
-                        a = m+1
+                        a = m + 1
                     else:
                         b = m
                         temp.append(cycle)
@@ -140,7 +139,7 @@ class PermutationMatrix(MatrixExpr):
                         temp.append(cycle)
                         cycles_picks.append(temp)
                         flag = False
-                        a = b+1
+                        a = b + 1
                     else:
                         temp.append(cycle)
                         c += l
@@ -215,13 +214,13 @@ class MatrixPermute(MatrixExpr):
 
     sympy.matrices.common.MatrixCommon.permute
     """
+
     def __new__(cls, mat, perm, axis=S.Zero):
         from sympy.combinatorics.permutations import Permutation
 
         mat = _sympify(mat)
         if not mat.is_Matrix:
-            raise ValueError(
-                "{} must be a SymPy matrix instance.".format(perm))
+            raise ValueError("{} must be a SymPy matrix instance.".format(perm))
 
         perm = _sympify(perm)
         if isinstance(perm, PermutationMatrix):
@@ -229,8 +228,9 @@ class MatrixPermute(MatrixExpr):
 
         if not isinstance(perm, Permutation):
             raise ValueError(
-                "{} must be a SymPy Permutation or a PermutationMatrix " \
-                "instance".format(perm))
+                "{} must be a SymPy Permutation or a PermutationMatrix "
+                "instance".format(perm)
+            )
 
         axis = _sympify(axis)
         if axis not in (0, 1):
@@ -244,8 +244,8 @@ class MatrixPermute(MatrixExpr):
                 raise ValueError(
                     "Size does not match between the permutation {} "
                     "and the matrix {} threaded over the axis {} "
-                    "and cannot be converted."
-                    .format(perm, mat, axis))
+                    "and cannot be converted.".format(perm, mat, axis)
+                )
 
         return super(MatrixPermute, cls).__new__(cls, mat, perm, axis)
 
@@ -263,7 +263,7 @@ class MatrixPermute(MatrixExpr):
             if axis is S.Zero:
                 return PermutationMatrix(perm)
             elif axis is S.One:
-                return PermutationMatrix(perm**-1)
+                return PermutationMatrix(perm ** -1)
 
         if isinstance(mat, (ZeroMatrix, OneMatrix)):
             return mat
@@ -298,4 +298,4 @@ class MatrixPermute(MatrixExpr):
         if axis == 0:
             return MatMul(PermutationMatrix(perm), mat)
         elif axis == 1:
-            return MatMul(mat, PermutationMatrix(perm**-1))
+            return MatMul(mat, PermutationMatrix(perm ** -1))

@@ -13,9 +13,12 @@ from sympy.matrices.sparse import MutableSparseMatrix, SparseMatrix
 
 def sympify_matrix(arg):
     return arg.as_immutable()
+
+
 sympify_converter[MatrixBase] = sympify_matrix
 
-class ImmutableDenseMatrix(DenseMatrix, MatrixExpr): # type: ignore
+
+class ImmutableDenseMatrix(DenseMatrix, MatrixExpr):  # type: ignore
     """Create an immutable version of a matrix.
 
     Examples
@@ -49,13 +52,15 @@ class ImmutableDenseMatrix(DenseMatrix, MatrixExpr): # type: ignore
     def _new(cls, *args, **kwargs):
         if len(args) == 1 and isinstance(args[0], ImmutableDenseMatrix):
             return args[0]
-        if kwargs.get('copy', True) is False:
+        if kwargs.get("copy", True) is False:
             if len(args) != 3:
-                raise TypeError("'copy=False' requires a matrix be initialized as rows,cols,[list]")
+                raise TypeError(
+                    "'copy=False' requires a matrix be initialized as rows,cols,[list]"
+                )
             rows, cols, flat_list = args
         else:
             rows, cols, flat_list = cls._handle_creation_inputs(*args, **kwargs)
-            flat_list = list(flat_list) # create a shallow copy
+            flat_list = list(flat_list)  # create a shallow copy
         rows = Integer(rows)
         cols = Integer(cols)
         if not isinstance(flat_list, Tuple):
@@ -86,10 +91,11 @@ class ImmutableDenseMatrix(DenseMatrix, MatrixExpr): # type: ignore
         Returning None triggers default handling of Equalities.
 
         """
-        if not hasattr(other, 'shape') or self.shape != other.shape:
+        if not hasattr(other, "shape") or self.shape != other.shape:
             return S.false
         if isinstance(other, MatrixExpr) and not isinstance(
-                other, ImmutableDenseMatrix):
+            other, ImmutableDenseMatrix
+        ):
             return None
         diff = (self - other).is_zero_matrix
         if diff is True:
@@ -103,8 +109,12 @@ class ImmutableDenseMatrix(DenseMatrix, MatrixExpr): # type: ignore
         mat = self._mat
         cols = self.cols
         indices = (i * cols + j for i in rowsList for j in colsList)
-        return self._new(len(rowsList), len(colsList),
-                         Tuple(*(mat[i] for i in indices), sympify=False), copy=False)
+        return self._new(
+            len(rowsList),
+            len(colsList),
+            Tuple(*(mat[i] for i in indices), sympify=False),
+            copy=False,
+        )
 
     @property
     def cols(self):
@@ -123,7 +133,9 @@ class ImmutableDenseMatrix(DenseMatrix, MatrixExpr): # type: ignore
 
     def is_diagonalizable(self, reals_only=False, **kwargs):
         return super(ImmutableDenseMatrix, self).is_diagonalizable(
-            reals_only=reals_only, **kwargs)
+            reals_only=reals_only, **kwargs
+        )
+
     is_diagonalizable.__doc__ = DenseMatrix.is_diagonalizable.__doc__
     is_diagonalizable = cacheit(is_diagonalizable)
 
@@ -154,6 +166,7 @@ class ImmutableSparseMatrix(SparseMatrix, Basic):
     >>> _.shape
     (3, 3)
     """
+
     is_Matrix = True
     _class_priority = 9
 
@@ -185,6 +198,8 @@ class ImmutableSparseMatrix(SparseMatrix, Basic):
 
     def is_diagonalizable(self, reals_only=False, **kwargs):
         return super(ImmutableSparseMatrix, self).is_diagonalizable(
-            reals_only=reals_only, **kwargs)
+            reals_only=reals_only, **kwargs
+        )
+
     is_diagonalizable.__doc__ = SparseMatrix.is_diagonalizable.__doc__
     is_diagonalizable = cacheit(is_diagonalizable)

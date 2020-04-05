@@ -3,7 +3,8 @@ from sympy.utilities.decorator import doctest_depends_on
 
 from .errors import LaTeXParsingError  # noqa
 
-@doctest_depends_on(modules=('antlr4',))
+
+@doctest_depends_on(modules=("antlr4",))
 def parse_latex(s):
     r"""Converts the string ``s`` to a SymPy ``Expr``
 
@@ -28,8 +29,8 @@ def parse_latex(s):
     """
 
     _latex = import_module(
-        'sympy.parsing.latex._parse_latex_antlr',
-        import_kwargs={'fromlist': ['X']})
+        "sympy.parsing.latex._parse_latex_antlr", import_kwargs={"fromlist": ["X"]}
+    )
 
     if _latex is not None:
         return _latex.parse_latex(s)

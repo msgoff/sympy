@@ -8,13 +8,14 @@ from sympy.polys.domains.compositedomain import CompositeDomain
 from sympy.polys.polyerrors import CoercionFailed, GeneratorsError
 from sympy.utilities import public
 
+
 @public
 class PolynomialRing(Ring, CompositeDomain):
     """A class for representing multivariate polynomial rings. """
 
     is_PolynomialRing = is_Poly = True
 
-    has_assoc_Ring  = True
+    has_assoc_Ring = True
     has_assoc_Field = True
 
     def __init__(self, domain_or_ring, symbols=None, order=None):
@@ -33,9 +34,8 @@ class PolynomialRing(Ring, CompositeDomain):
         self.symbols = ring.symbols
         self.domain = ring.domain
 
-
         if symbols:
-            if ring.domain.is_Field and ring.domain.is_Exact and len(symbols)==1:
+            if ring.domain.is_Field and ring.domain.is_Exact and len(symbols) == 1:
                 self.is_PID = True
 
         # TODO: remove this
@@ -57,16 +57,20 @@ class PolynomialRing(Ring, CompositeDomain):
         return self.ring.order
 
     def __str__(self):
-        return str(self.domain) + '[' + ','.join(map(str, self.symbols)) + ']'
+        return str(self.domain) + "[" + ",".join(map(str, self.symbols)) + "]"
 
     def __hash__(self):
-        return hash((self.__class__.__name__, self.dtype.ring, self.domain, self.symbols))
+        return hash(
+            (self.__class__.__name__, self.dtype.ring, self.domain, self.symbols)
+        )
 
     def __eq__(self, other):
         """Returns `True` if two domains are equivalent. """
-        return isinstance(other, PolynomialRing) and \
-            (self.dtype.ring, self.domain, self.symbols) == \
-            (other.dtype.ring, other.domain, other.symbols)
+        return isinstance(other, PolynomialRing) and (
+            self.dtype.ring,
+            self.domain,
+            self.symbols,
+        ) == (other.dtype.ring, other.domain, other.symbols)
 
     def to_sympy(self, a):
         """Convert `a` to a SymPy object. """

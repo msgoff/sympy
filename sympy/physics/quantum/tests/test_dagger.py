@@ -6,31 +6,30 @@ from sympy.testing.pytest import skip
 
 
 def test_scalars():
-    x = symbols('x', complex=True)
+    x = symbols("x", complex=True)
     assert Dagger(x) == conjugate(x)
-    assert Dagger(I*x) == -I*conjugate(x)
+    assert Dagger(I * x) == -I * conjugate(x)
 
-    i = symbols('i', real=True)
+    i = symbols("i", real=True)
     assert Dagger(i) == i
 
-    p = symbols('p')
+    p = symbols("p")
     assert isinstance(Dagger(p), adjoint)
 
     i = Integer(3)
     assert Dagger(i) == i
 
-    A = symbols('A', commutative=False)
+    A = symbols("A", commutative=False)
     assert Dagger(A).is_commutative is False
 
 
 def test_matrix():
-    x = symbols('x')
-    m = Matrix([[I, x*I], [2, 4]])
+    x = symbols("x")
+    m = Matrix([[I, x * I], [2, 4]])
     assert Dagger(m) == m.H
 
 
 class Foo(Expr):
-
     def _eval_adjoint(self):
         return I
 
@@ -40,7 +39,8 @@ def test_eval_adjoint():
     d = Dagger(f)
     assert d == I
 
-np = import_module('numpy')
+
+np = import_module("numpy")
 
 
 def test_numpy_dagger():
@@ -52,7 +52,7 @@ def test_numpy_dagger():
     assert (Dagger(a) == adag).all()
 
 
-scipy = import_module('scipy', import_kwargs={'fromlist': ['sparse']})
+scipy = import_module("scipy", import_kwargs={"fromlist": ["sparse"]})
 
 
 def test_scipy_sparse_dagger():

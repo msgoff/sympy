@@ -6,8 +6,15 @@ as a SymPy function for symbolic manipulation.
 """
 
 from sympy.codegen.ast import (
-    Attribute, CodeBlock, FunctionCall, Node, none, String,
-    Token, _mk_Tuple, Variable
+    Attribute,
+    CodeBlock,
+    FunctionCall,
+    Node,
+    none,
+    String,
+    Token,
+    _mk_Tuple,
+    Variable,
 )
 from sympy.core.basic import Basic
 from sympy.core.containers import Tuple
@@ -19,15 +26,15 @@ from sympy.logic import true, false
 from sympy.utilities.iterables import iterable
 
 
+pure = Attribute("pure")
+elemental = Attribute("elemental")  # (all elemental procedures are also pure)
 
-pure = Attribute('pure')
-elemental = Attribute('elemental')  # (all elemental procedures are also pure)
+intent_in = Attribute("intent_in")
+intent_out = Attribute("intent_out")
+intent_inout = Attribute("intent_inout")
 
-intent_in = Attribute('intent_in')
-intent_out = Attribute('intent_out')
-intent_inout = Attribute('intent_inout')
+allocatable = Attribute("allocatable")
 
-allocatable = Attribute('allocatable')
 
 class Program(Token):
     """ Represents a 'program' block in Fortran
@@ -44,7 +51,8 @@ class Program(Token):
         print *, 42
     end program
     """
-    __slots__ = ('name', 'body')
+
+    __slots__ = ("name", "body")
     _construct_name = String
     _construct_body = staticmethod(lambda body: CodeBlock(*body))
 
@@ -64,15 +72,18 @@ class use_rename(Token):
     >>> print(fcode(full, source_format='free'))
     use signallib, only: snr, thingy => convolution2d
     """
-    __slots__ = ('local', 'original')
+
+    __slots__ = ("local", "original")
     _construct_local = String
     _construct_original = String
 
+
 def _name(arg):
-    if hasattr(arg, 'name'):
+    if hasattr(arg, "name"):
         return arg.name
     else:
         return String(arg)
+
 
 class use(Token):
     """ Represents a use statement in Fortran
@@ -89,11 +100,20 @@ class use(Token):
     >>> fcode(use('signallib', only=['snr', 'convolution2d']), source_format='free')
     'use signallib, only: snr, convolution2d'
     """
-    __slots__ = ('namespace', 'rename', 'only')
-    defaults = {'rename': none, 'only': none}
+
+    __slots__ = ("namespace", "rename", "only")
+    defaults = {"rename": none, "only": none}
     _construct_namespace = staticmethod(_name)
-    _construct_rename = staticmethod(lambda args: Tuple(*[arg if isinstance(arg, use_rename) else use_rename(*arg) for arg in args]))
-    _construct_only = staticmethod(lambda args: Tuple(*[arg if isinstance(arg, use_rename) else _name(arg) for arg in args]))
+    _construct_rename = staticmethod(
+        lambda args: Tuple(
+            *[arg if isinstance(arg, use_rename) else use_rename(*arg) for arg in args]
+        )
+    )
+    _construct_only = staticmethod(
+        lambda args: Tuple(
+            *[arg if isinstance(arg, use_rename) else _name(arg) for arg in args]
+        )
+    )
 
 
 class Module(Token):
@@ -114,8 +134,9 @@ class Module(Token):
     end module
 
     """
-    __slots__ = ('name', 'declarations', 'definitions')
-    defaults = {'declarations': Tuple()}
+
+    __slots__ = ("name", "declarations", "definitions")
+    defaults = {"declarations": Tuple()}
     _construct_name = String
     _construct_declarations = staticmethod(lambda arg: CodeBlock(*arg))
     _construct_definitions = staticmethod(lambda arg: CodeBlock(*arg))
@@ -140,9 +161,12 @@ class Subroutine(Node):
     print *, x**2 + y**2, x*y
     end subroutine
     """
-    __slots__ = ('name', 'parameters', 'body', 'attrs')
+
+    __slots__ = ("name", "parameters", "body", "attrs")
     _construct_name = String
-    _construct_parameters = staticmethod(lambda params: Tuple(*map(Variable.deduced, params)))
+    _construct_parameters = staticmethod(
+        lambda params: Tuple(*map(Variable.deduced, params))
+    )
 
     @classmethod
     def _construct_body(cls, itr):
@@ -150,6 +174,7 @@ class Subroutine(Node):
             return itr
         else:
             return CodeBlock(*itr)
+
 
 class SubroutineCall(Token):
     """ Represents a call to a subroutine in Fortran
@@ -162,7 +187,8 @@ class SubroutineCall(Token):
     >>> fcode(SubroutineCall('mysub', 'x y'.split()))
     '       call mysub(x, y)'
     """
-    __slots__ = ('name', 'subroutine_args')
+
+    __slots__ = ("name", "subroutine_args")
     _construct_name = staticmethod(_name)
     _construct_subroutine_args = staticmethod(_mk_Tuple)
 
@@ -194,8 +220,8 @@ class Do(Token):
     end do
     """
 
-    __slots__ = ('body', 'counter', 'first', 'last', 'step', 'concurrent')
-    defaults = {'step': Integer(1), 'concurrent': false}
+    __slots__ = ("body", "counter", "first", "last", "step", "concurrent")
+    defaults = {"step": Integer(1), "concurrent": false}
     _construct_body = staticmethod(lambda body: CodeBlock(*body))
     _construct_counter = staticmethod(sympify)
     _construct_first = staticmethod(sympify)
@@ -219,7 +245,8 @@ class ArrayConstructor(Token):
     '[1, 2, 3]'
 
     """
-    __slots__ = ('elements',)
+
+    __slots__ = ("elements",)
     _construct_elements = staticmethod(_mk_Tuple)
 
 
@@ -238,8 +265,9 @@ class ImpliedDoLoop(Token):
     '[-28, (i**3, i = -3, 3, 2), 28]'
 
     """
-    __slots__ = ('expr', 'counter', 'first', 'last', 'step')
-    defaults = {'step': Integer(1)}
+
+    __slots__ = ("expr", "counter", "first", "last", "step")
+    defaults = {"step": Integer(1)}
     _construct_expr = staticmethod(sympify)
     _construct_counter = staticmethod(sympify)
     _construct_first = staticmethod(sympify)
@@ -266,21 +294,23 @@ class Extent(Basic):
     'real*8, dimension(-3:3, -3:3), intent(out) :: x'
 
     """
+
     def __new__(cls, *args):
         if len(args) == 2:
             low, high = args
             return Basic.__new__(cls, sympify(low), sympify(high))
-        elif len(args) == 0 or (len(args) == 1 and args[0] in (':', None)):
+        elif len(args) == 0 or (len(args) == 1 and args[0] in (":", None)):
             return Basic.__new__(cls)  # assumed shape
         else:
             raise ValueError("Expected 0 or 2 args (or one argument == None or ':')")
 
     def _sympystr(self, printer):
         if len(self.args) == 0:
-            return ':'
-        return '%d:%d' % self.args
+            return ":"
+        return "%d:%d" % self.args
 
-assumed_extent = Extent() # or Extent(':'), Extent(None)
+
+assumed_extent = Extent()  # or Extent(':'), Extent(None)
 
 
 def dimension(*args):
@@ -305,7 +335,7 @@ def dimension(*args):
         if isinstance(arg, Extent):
             parameters.append(arg)
         elif isinstance(arg, str):
-            if arg == ':':
+            if arg == ":":
                 parameters.append(Extent())
             else:
                 parameters.append(String(arg))
@@ -315,10 +345,11 @@ def dimension(*args):
             parameters.append(sympify(arg))
     if len(args) == 0:
         raise ValueError("Need at least one dimension")
-    return Attribute('dimension', parameters)
+    return Attribute("dimension", parameters)
 
 
-assumed_size = dimension('*')
+assumed_size = dimension("*")
+
 
 def array(symbol, dim, intent=None, **kwargs):
     """ Convenience function for creating a Variable instance for a Fortran array
@@ -349,22 +380,25 @@ def array(symbol, dim, intent=None, **kwargs):
     real*8, dimension(3, :, :), intent(out) :: x = 1
     """
     if isinstance(dim, Attribute):
-        if str(dim.name) != 'dimension':
-            raise ValueError("Got an unexpected Attribute argument as dim: %s" % str(dim))
+        if str(dim.name) != "dimension":
+            raise ValueError(
+                "Got an unexpected Attribute argument as dim: %s" % str(dim)
+            )
     else:
         dim = dimension(*dim)
 
-    attrs = list(kwargs.pop('attrs', [])) + [dim]
+    attrs = list(kwargs.pop("attrs", [])) + [dim]
     if intent is not None:
         if intent not in (intent_in, intent_out, intent_inout):
-            intent = {'in': intent_in, 'out': intent_out, 'inout': intent_inout}[intent]
+            intent = {"in": intent_in, "out": intent_out, "inout": intent_inout}[intent]
         attrs.append(intent)
-    value = kwargs.pop('value', None)
-    type_ = kwargs.pop('type', None)
+    value = kwargs.pop("value", None)
+    type_ = kwargs.pop("type", None)
     if type_ is None:
         return Variable.deduced(symbol, value=value, attrs=attrs)
     else:
         return Variable(symbol, type_, value=value, attrs=attrs)
+
 
 def _printable(arg):
     return String(arg) if isinstance(arg, str) else sympify(arg)
@@ -382,7 +416,7 @@ def allocated(array):
     >>> fcode(alloc, source_format='free')
     'allocated(x)'
     """
-    return FunctionCall('allocated', [_printable(array)])
+    return FunctionCall("allocated", [_printable(array)])
 
 
 def lbound(array, dim=None, kind=None):
@@ -405,19 +439,19 @@ def lbound(array, dim=None, kind=None):
     'lbound(arr, 2)'
     """
     return FunctionCall(
-        'lbound',
-        [_printable(array)] +
-        ([_printable(dim)] if dim else []) +
-        ([_printable(kind)] if kind else [])
+        "lbound",
+        [_printable(array)]
+        + ([_printable(dim)] if dim else [])
+        + ([_printable(kind)] if kind else []),
     )
 
 
 def ubound(array, dim=None, kind=None):
     return FunctionCall(
-        'ubound',
-        [_printable(array)] +
-        ([_printable(dim)] if dim else []) +
-        ([_printable(kind)] if kind else [])
+        "ubound",
+        [_printable(array)]
+        + ([_printable(dim)] if dim else [])
+        + ([_printable(kind)] if kind else []),
     )
 
 
@@ -440,9 +474,7 @@ def shape(source, kind=None):
     'shape(x)'
     """
     return FunctionCall(
-        'shape',
-        [_printable(source)] +
-        ([_printable(kind)] if kind else [])
+        "shape", [_printable(source)] + ([_printable(kind)] if kind else [])
     )
 
 
@@ -468,10 +500,10 @@ def size(array, dim=None, kind=None):
 
     """
     return FunctionCall(
-        'size',
-        [_printable(array)] +
-        ([_printable(dim)] if dim else []) +
-        ([_printable(kind)] if kind else [])
+        "size",
+        [_printable(array)]
+        + ([_printable(dim)] if dim else [])
+        + ([_printable(kind)] if kind else []),
     )
 
 
@@ -485,10 +517,10 @@ def reshape(source, shape, pad=None, order=None):
     shape : ArrayExpr
     """
     return FunctionCall(
-        'reshape',
-        [_printable(source), _printable(shape)] +
-        ([_printable(pad)] if pad else []) +
-        ([_printable(order)] if pad else [])
+        "reshape",
+        [_printable(source), _printable(shape)]
+        + ([_printable(pad)] if pad else [])
+        + ([_printable(order)] if pad else []),
     )
 
 
@@ -519,7 +551,8 @@ def bind_C(name=None):
     rms = sqrt(sum(a**2)/s)
     end function
     """
-    return Attribute('bind_C', [String(name)] if name else [])
+    return Attribute("bind_C", [String(name)] if name else [])
+
 
 class GoTo(Token):
     """ Represents a goto statement in Fortran
@@ -533,8 +566,9 @@ class GoTo(Token):
     >>> fcode(go, source_format='free')
     'go to (10, 20, 30), i'
     """
-    __slots__ = ('labels', 'expr')
-    defaults = {'expr': none}
+
+    __slots__ = ("labels", "expr")
+    defaults = {"expr": none}
     _construct_labels = staticmethod(_mk_Tuple)
     _construct_expr = staticmethod(sympify)
 
@@ -556,8 +590,9 @@ class FortranReturn(Token):
     >>> fcode(FortranReturn('x'))
     '       return x'
     """
-    __slots__ = ('return_value',)
-    defaults = {'return_value': none}
+
+    __slots__ = ("return_value",)
+    defaults = {"return_value": none}
     _construct_return_value = staticmethod(sympify)
 
 
@@ -566,10 +601,11 @@ class FFunction(Function):
 
     def _fcode(self, printer):
         name = self.__class__.__name__
-        if printer._settings['standard'] < self._required_standard:
-            raise NotImplementedError("%s requires Fortran %d or newer" %
-                                      (name, self._required_standard))
-        return '{0}({1})'.format(name, ', '.join(map(printer._print, self.args)))
+        if printer._settings["standard"] < self._required_standard:
+            raise NotImplementedError(
+                "%s requires Fortran %d or newer" % (name, self._required_standard)
+            )
+        return "{0}({1})".format(name, ", ".join(map(printer._print, self.args)))
 
 
 class F95Function(FFunction):
@@ -578,26 +614,31 @@ class F95Function(FFunction):
 
 class isign(FFunction):
     """ Fortran sign intrinsic for integer arguments. """
+
     nargs = 2
 
 
 class dsign(FFunction):
     """ Fortran sign intrinsic for double precision arguments. """
+
     nargs = 2
 
 
 class cmplx(FFunction):
     """ Fortran complex conversion function. """
+
     nargs = 2  # may be extended to (2, 3) at a later point
 
 
 class kind(FFunction):
     """ Fortran kind function. """
+
     nargs = 1
 
 
 class merge(F95Function):
     """ Fortran merge function """
+
     nargs = 3
 
 
@@ -606,34 +647,36 @@ class _literal(Float):
     _decimals = None  # type: int
 
     def _fcode(self, printer, *args, **kwargs):
-        mantissa, sgnd_ex = ('%.{0}e'.format(self._decimals) % self).split('e')
-        mantissa = mantissa.strip('0').rstrip('.')
-        ex_sgn, ex_num = sgnd_ex[0], sgnd_ex[1:].lstrip('0')
-        ex_sgn = '' if ex_sgn == '+' else ex_sgn
-        return (mantissa or '0') + self._token + ex_sgn + (ex_num or '0')
+        mantissa, sgnd_ex = ("%.{0}e".format(self._decimals) % self).split("e")
+        mantissa = mantissa.strip("0").rstrip(".")
+        ex_sgn, ex_num = sgnd_ex[0], sgnd_ex[1:].lstrip("0")
+        ex_sgn = "" if ex_sgn == "+" else ex_sgn
+        return (mantissa or "0") + self._token + ex_sgn + (ex_num or "0")
 
 
 class literal_sp(_literal):
     """ Fortran single precision real literal """
-    _token = 'e'
+
+    _token = "e"
     _decimals = 9
 
 
 class literal_dp(_literal):
     """ Fortran double precision real literal """
-    _token = 'd'
+
+    _token = "d"
     _decimals = 17
 
 
 class sum_(Token, Expr):
-    __slots__ = ('array', 'dim', 'mask')
-    defaults = {'dim': none, 'mask': none}
+    __slots__ = ("array", "dim", "mask")
+    defaults = {"dim": none, "mask": none}
     _construct_array = staticmethod(sympify)
     _construct_dim = staticmethod(sympify)
 
 
 class product_(Token, Expr):
-    __slots__ = ('array', 'dim', 'mask')
-    defaults = {'dim': none, 'mask': none}
+    __slots__ = ("array", "dim", "mask")
+    defaults = {"dim": none, "mask": none}
     _construct_array = staticmethod(sympify)
     _construct_dim = staticmethod(sympify)

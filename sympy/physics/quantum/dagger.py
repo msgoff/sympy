@@ -5,9 +5,7 @@ from __future__ import print_function, division
 from sympy.core import Expr
 from sympy.functions.elementary.complexes import adjoint
 
-__all__ = [
-    'Dagger'
-]
+__all__ = ["Dagger"]
 
 
 class Dagger(adjoint):
@@ -77,13 +75,14 @@ class Dagger(adjoint):
     """
 
     def __new__(cls, arg):
-        if hasattr(arg, 'adjoint'):
+        if hasattr(arg, "adjoint"):
             obj = arg.adjoint()
-        elif hasattr(arg, 'conjugate') and hasattr(arg, 'transpose'):
+        elif hasattr(arg, "conjugate") and hasattr(arg, "transpose"):
             obj = arg.conjugate().transpose()
         if obj is not None:
             return obj
         return Expr.__new__(cls, arg)
+
 
 adjoint.__name__ = "Dagger"
 adjoint._sympyrepr = lambda a, b: "Dagger(%s)" % b._print(a.args[0])

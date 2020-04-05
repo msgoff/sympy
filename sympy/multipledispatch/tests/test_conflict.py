@@ -1,10 +1,23 @@
-from sympy.multipledispatch.conflict import (supercedes, ordering, ambiguities,
-        ambiguous, super_signature, consistent)
+from sympy.multipledispatch.conflict import (
+    supercedes,
+    ordering,
+    ambiguities,
+    ambiguous,
+    super_signature,
+    consistent,
+)
 
 
-class A(object): pass
-class B(A): pass
-class C(object): pass
+class A(object):
+    pass
+
+
+class B(A):
+    pass
+
+
+class C(object):
+    pass
 
 
 def test_supercedes():

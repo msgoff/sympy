@@ -58,71 +58,103 @@ import random
 
 from sympy import beta as beta_fn
 from sympy import cos, sin, tan, atan, exp, besseli, besselj, besselk
-from sympy import (log, sqrt, pi, S, Dummy, Interval, sympify, gamma, sign,
-                   Piecewise, And, Eq, binomial, factorial, Sum, floor, Abs,
-                   Lambda, Basic, lowergamma, erf, erfc, erfi, erfinv, I,
-                   hyper, uppergamma, sinh, Ne, expint, Rational)
+from sympy import (
+    log,
+    sqrt,
+    pi,
+    S,
+    Dummy,
+    Interval,
+    sympify,
+    gamma,
+    sign,
+    Piecewise,
+    And,
+    Eq,
+    binomial,
+    factorial,
+    Sum,
+    floor,
+    Abs,
+    Lambda,
+    Basic,
+    lowergamma,
+    erf,
+    erfc,
+    erfi,
+    erfinv,
+    I,
+    hyper,
+    uppergamma,
+    sinh,
+    Ne,
+    expint,
+    Rational,
+)
 from sympy.external import import_module
 from sympy.matrices import MatrixBase, MatrixExpr
-from sympy.stats.crv import (SingleContinuousPSpace, SingleContinuousDistribution,
-                             ContinuousDistributionHandmade)
+from sympy.stats.crv import (
+    SingleContinuousPSpace,
+    SingleContinuousDistribution,
+    ContinuousDistributionHandmade,
+)
 from sympy.stats.joint_rv import JointPSpace, CompoundDistribution
 from sympy.stats.joint_rv_types import multivariate_rv
 from sympy.stats.rv import _value_check, RandomSymbol
 
 oo = S.Infinity
 
-__all__ = ['ContinuousRV',
-'Arcsin',
-'Benini',
-'Beta',
-'BetaNoncentral',
-'BetaPrime',
-'Cauchy',
-'Chi',
-'ChiNoncentral',
-'ChiSquared',
-'Dagum',
-'Erlang',
-'ExGaussian',
-'Exponential',
-'ExponentialPower',
-'FDistribution',
-'FisherZ',
-'Frechet',
-'Gamma',
-'GammaInverse',
-'Gompertz',
-'Gumbel',
-'Kumaraswamy',
-'Laplace',
-'Levy',
-'Logistic',
-'LogLogistic',
-'LogNormal',
-'Maxwell',
-'Moyal',
-'Nakagami',
-'Normal',
-'GaussianInverse',
-'Pareto',
-'PowerFunction',
-'QuadraticU',
-'RaisedCosine',
-'Rayleigh',
-'Reciprocal',
-'StudentT',
-'ShiftedGompertz',
-'Trapezoidal',
-'Triangular',
-'Uniform',
-'UniformSum',
-'VonMises',
-'Wald',
-'Weibull',
-'WignerSemicircle',
+__all__ = [
+    "ContinuousRV",
+    "Arcsin",
+    "Benini",
+    "Beta",
+    "BetaNoncentral",
+    "BetaPrime",
+    "Cauchy",
+    "Chi",
+    "ChiNoncentral",
+    "ChiSquared",
+    "Dagum",
+    "Erlang",
+    "ExGaussian",
+    "Exponential",
+    "ExponentialPower",
+    "FDistribution",
+    "FisherZ",
+    "Frechet",
+    "Gamma",
+    "GammaInverse",
+    "Gompertz",
+    "Gumbel",
+    "Kumaraswamy",
+    "Laplace",
+    "Levy",
+    "Logistic",
+    "LogLogistic",
+    "LogNormal",
+    "Maxwell",
+    "Moyal",
+    "Nakagami",
+    "Normal",
+    "GaussianInverse",
+    "Pareto",
+    "PowerFunction",
+    "QuadraticU",
+    "RaisedCosine",
+    "Rayleigh",
+    "Reciprocal",
+    "StudentT",
+    "ShiftedGompertz",
+    "Trapezoidal",
+    "Triangular",
+    "Uniform",
+    "UniformSum",
+    "VonMises",
+    "Wald",
+    "Weibull",
+    "WignerSemicircle",
 ]
-
 
 
 def ContinuousRV(symbol, density, set=Interval(-oo, oo)):
@@ -169,30 +201,33 @@ def rv(symbol, cls, args):
         pspace = JointPSpace(symbol, CompoundDistribution(dist))
     return pspace.value
 
+
 ########################################
 # Continuous Probability Distributions #
 ########################################
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Arcsin distribution ----------------------------------------------------------
 
 
 class ArcsinDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b')
+    _argnames = ("a", "b")
 
     def set(self):
         return Interval(self.a, self.b)
 
     def pdf(self, x):
-        return 1/(pi*sqrt((x - self.a)*(self.b - x)))
+        return 1 / (pi * sqrt((x - self.a) * (self.b - x)))
 
     def _cdf(self, x):
         from sympy import asin
+
         a, b = self.a, self.b
         return Piecewise(
             (S.Zero, x < a),
-            (2*asin(sqrt((x - a)/(b - a)))/pi, x <= b),
-            (S.One, True))
+            (2 * asin(sqrt((x - a) / (b - a))) / pi, x <= b),
+            (S.One, True),
+        )
 
 
 def Arcsin(name, a=0, b=1):
@@ -247,12 +282,13 @@ def Arcsin(name, a=0, b=1):
 
     return rv(name, ArcsinDistribution, (a, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Benini distribution ----------------------------------------------------------
 
 
 class BeniniDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta', 'sigma')
+    _argnames = ("alpha", "beta", "sigma")
 
     @staticmethod
     def check(alpha, beta, sigma):
@@ -266,12 +302,16 @@ class BeniniDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         alpha, beta, sigma = self.alpha, self.beta, self.sigma
-        return (exp(-alpha*log(x/sigma) - beta*log(x/sigma)**2)
-               *(alpha/x + 2*beta*log(x/sigma)/x))
+        return exp(-alpha * log(x / sigma) - beta * log(x / sigma) ** 2) * (
+            alpha / x + 2 * beta * log(x / sigma) / x
+        )
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('The moment generating function of the '
-                                  'Benini distribution does not exist.')
+        raise NotImplementedError(
+            "The moment generating function of the "
+            "Benini distribution does not exist."
+        )
+
 
 def Benini(name, alpha, beta, sigma):
     r"""
@@ -335,12 +375,13 @@ def Benini(name, alpha, beta, sigma):
 
     return rv(name, BeniniDistribution, (alpha, beta, sigma))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Beta distribution ------------------------------------------------------------
 
 
 class BetaDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta')
+    _argnames = ("alpha", "beta")
 
     set = Interval(0, 1)
 
@@ -351,16 +392,17 @@ class BetaDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         alpha, beta = self.alpha, self.beta
-        return x**(alpha - 1) * (1 - x)**(beta - 1) / beta_fn(alpha, beta)
+        return x ** (alpha - 1) * (1 - x) ** (beta - 1) / beta_fn(alpha, beta)
 
     def sample(self):
         return random.betavariate(self.alpha, self.beta)
 
     def _characteristic_function(self, t):
-        return hyper((self.alpha,), (self.alpha + self.beta,), I*t)
+        return hyper((self.alpha,), (self.alpha + self.beta,), I * t)
 
     def _moment_generating_function(self, t):
         return hyper((self.alpha,), (self.alpha + self.beta,), t)
+
 
 def Beta(name, alpha, beta):
     r"""
@@ -419,12 +461,13 @@ def Beta(name, alpha, beta):
 
     return rv(name, BetaDistribution, (alpha, beta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Noncentral Beta distribution ------------------------------------------------------------
 
 
 class BetaNoncentralDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta', 'lamda')
+    _argnames = ("alpha", "beta", "lamda")
 
     set = Interval(0, 1)
 
@@ -437,8 +480,15 @@ class BetaNoncentralDistribution(SingleContinuousDistribution):
     def pdf(self, x):
         alpha, beta, lamda = self.alpha, self.beta, self.lamda
         k = Dummy("k")
-        return Sum(exp(-lamda / 2) * (lamda / 2)**k * x**(alpha + k - 1) *(
-            1 - x)**(beta - 1) / (factorial(k) * beta_fn(alpha + k, beta)), (k, 0, oo))
+        return Sum(
+            exp(-lamda / 2)
+            * (lamda / 2) ** k
+            * x ** (alpha + k - 1)
+            * (1 - x) ** (beta - 1)
+            / (factorial(k) * beta_fn(alpha + k, beta)),
+            (k, 0, oo),
+        )
+
 
 def BetaNoncentral(name, alpha, beta, lamda):
     r"""
@@ -510,12 +560,12 @@ def BetaNoncentral(name, alpha, beta, lamda):
     return rv(name, BetaNoncentralDistribution, (alpha, beta, lamda))
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Beta prime distribution ------------------------------------------------------
 
 
 class BetaPrimeDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta')
+    _argnames = ("alpha", "beta")
 
     @staticmethod
     def check(alpha, beta):
@@ -526,7 +576,8 @@ class BetaPrimeDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         alpha, beta = self.alpha, self.beta
-        return x**(alpha - 1)*(1 + x)**(-alpha - beta)/beta_fn(alpha, beta)
+        return x ** (alpha - 1) * (1 + x) ** (-alpha - beta) / beta_fn(alpha, beta)
+
 
 def BetaPrime(name, alpha, beta):
     r"""
@@ -579,33 +630,37 @@ def BetaPrime(name, alpha, beta):
 
     return rv(name, BetaPrimeDistribution, (alpha, beta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Cauchy distribution ----------------------------------------------------------
 
 
 class CauchyDistribution(SingleContinuousDistribution):
-    _argnames = ('x0', 'gamma')
+    _argnames = ("x0", "gamma")
 
     @staticmethod
     def check(x0, gamma):
         _value_check(gamma > 0, "Scale parameter Gamma must be positive.")
 
     def pdf(self, x):
-        return 1/(pi*self.gamma*(1 + ((x - self.x0)/self.gamma)**2))
+        return 1 / (pi * self.gamma * (1 + ((x - self.x0) / self.gamma) ** 2))
 
     def _cdf(self, x):
         x0, gamma = self.x0, self.gamma
-        return (1/pi)*atan((x - x0)/gamma) + S.Half
+        return (1 / pi) * atan((x - x0) / gamma) + S.Half
 
     def _characteristic_function(self, t):
-        return exp(self.x0 * I * t -  self.gamma * Abs(t))
+        return exp(self.x0 * I * t - self.gamma * Abs(t))
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError("The moment generating function for the "
-                                  "Cauchy distribution does not exist.")
+        raise NotImplementedError(
+            "The moment generating function for the "
+            "Cauchy distribution does not exist."
+        )
 
     def _quantile(self, p):
-        return self.x0 + self.gamma*tan(pi*(p - S.Half))
+        return self.x0 + self.gamma * tan(pi * (p - S.Half))
+
 
 def Cauchy(name, x0, gamma):
     r"""
@@ -652,30 +707,38 @@ def Cauchy(name, x0, gamma):
 
     return rv(name, CauchyDistribution, (x0, gamma))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Chi distribution -------------------------------------------------------------
 
 
 class ChiDistribution(SingleContinuousDistribution):
-    _argnames = ('k',)
+    _argnames = ("k",)
 
     @staticmethod
     def check(k):
         _value_check(k > 0, "Number of degrees of freedom (k) must be positive.")
-        _value_check(k.is_integer, "Number of degrees of freedom (k) must be an integer.")
+        _value_check(
+            k.is_integer, "Number of degrees of freedom (k) must be an integer."
+        )
 
     set = Interval(0, oo)
 
     def pdf(self, x):
-        return 2**(1 - self.k/2)*x**(self.k - 1)*exp(-x**2/2)/gamma(self.k/2)
+        return (
+            2 ** (1 - self.k / 2)
+            * x ** (self.k - 1)
+            * exp(-(x ** 2) / 2)
+            / gamma(self.k / 2)
+        )
 
     def _characteristic_function(self, t):
         k = self.k
 
-        part_1 = hyper((k/2,), (S.Half,), -t**2/2)
-        part_2 = I*t*sqrt(2)*gamma((k+1)/2)/gamma(k/2)
-        part_3 = hyper(((k+1)/2,), (Rational(3, 2),), -t**2/2)
-        return part_1 + part_2*part_3
+        part_1 = hyper((k / 2,), (S.Half,), -(t ** 2) / 2)
+        part_2 = I * t * sqrt(2) * gamma((k + 1) / 2) / gamma(k / 2)
+        part_3 = hyper(((k + 1) / 2,), (Rational(3, 2),), -(t ** 2) / 2)
+        return part_1 + part_2 * part_3
 
     def _moment_generating_function(self, t):
         k = self.k
@@ -684,6 +747,7 @@ class ChiDistribution(SingleContinuousDistribution):
         part_2 = t * sqrt(2) * gamma((k + 1) / 2) / gamma(k / 2)
         part_3 = hyper(((k + 1) / 2,), (S(3) / 2,), t ** 2 / 2)
         return part_1 + part_2 * part_3
+
 
 def Chi(name, k):
     r"""
@@ -733,24 +797,34 @@ def Chi(name, k):
 
     return rv(name, ChiDistribution, (k,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Non-central Chi distribution -------------------------------------------------
 
 
 class ChiNoncentralDistribution(SingleContinuousDistribution):
-    _argnames = ('k', 'l')
+    _argnames = ("k", "l")
 
     @staticmethod
     def check(k, l):
         _value_check(k > 0, "Number of degrees of freedom (k) must be positive.")
-        _value_check(k.is_integer, "Number of degrees of freedom (k) must be an integer.")
+        _value_check(
+            k.is_integer, "Number of degrees of freedom (k) must be an integer."
+        )
         _value_check(l > 0, "Shift parameter Lambda must be positive.")
 
     set = Interval(0, oo)
 
     def pdf(self, x):
         k, l = self.k, self.l
-        return exp(-(x**2+l**2)/2)*x**k*l / (l*x)**(k/2) * besseli(k/2-1, l*x)
+        return (
+            exp(-(x ** 2 + l ** 2) / 2)
+            * x ** k
+            * l
+            / (l * x) ** (k / 2)
+            * besseli(k / 2 - 1, l * x)
+        )
+
 
 def ChiNoncentral(name, k, l):
     r"""
@@ -799,36 +873,39 @@ def ChiNoncentral(name, k, l):
 
     return rv(name, ChiNoncentralDistribution, (k, l))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Chi squared distribution -----------------------------------------------------
 
 
 class ChiSquaredDistribution(SingleContinuousDistribution):
-    _argnames = ('k',)
+    _argnames = ("k",)
 
     @staticmethod
     def check(k):
         _value_check(k > 0, "Number of degrees of freedom (k) must be positive.")
-        _value_check(k.is_integer, "Number of degrees of freedom (k) must be an integer.")
+        _value_check(
+            k.is_integer, "Number of degrees of freedom (k) must be an integer."
+        )
 
     set = Interval(0, oo)
 
     def pdf(self, x):
         k = self.k
-        return 1/(2**(k/2)*gamma(k/2))*x**(k/2 - 1)*exp(-x/2)
+        return 1 / (2 ** (k / 2) * gamma(k / 2)) * x ** (k / 2 - 1) * exp(-x / 2)
 
     def _cdf(self, x):
         k = self.k
         return Piecewise(
-                (S.One/gamma(k/2)*lowergamma(k/2, x/2), x >= 0),
-                (0, True)
+            (S.One / gamma(k / 2) * lowergamma(k / 2, x / 2), x >= 0), (0, True)
         )
 
     def _characteristic_function(self, t):
-        return (1 - 2*I*t)**(-self.k/2)
+        return (1 - 2 * I * t) ** (-self.k / 2)
 
-    def  _moment_generating_function(self, t):
-        return (1 - 2*t)**(-self.k/2)
+    def _moment_generating_function(self, t):
+        return (1 - 2 * t) ** (-self.k / 2)
+
 
 def ChiSquared(name, k):
     r"""
@@ -882,14 +959,15 @@ def ChiSquared(name, k):
     .. [2] http://mathworld.wolfram.com/Chi-SquaredDistribution.html
     """
 
-    return rv(name, ChiSquaredDistribution, (k, ))
+    return rv(name, ChiSquaredDistribution, (k,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Dagum distribution -----------------------------------------------------------
 
 
 class DagumDistribution(SingleContinuousDistribution):
-    _argnames = ('p', 'a', 'b')
+    _argnames = ("p", "a", "b")
 
     set = Interval(0, oo)
 
@@ -901,12 +979,12 @@ class DagumDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         p, a, b = self.p, self.a, self.b
-        return a*p/x*((x/b)**(a*p)/(((x/b)**a + 1)**(p + 1)))
+        return a * p / x * ((x / b) ** (a * p) / (((x / b) ** a + 1) ** (p + 1)))
 
     def _cdf(self, x):
         p, a, b = self.p, self.a, self.b
-        return Piecewise(((S.One + (S(x)/b)**-a)**-p, x>=0),
-                    (S.Zero, True))
+        return Piecewise(((S.One + (S(x) / b) ** -a) ** -p, x >= 0), (S.Zero, True))
+
 
 def Dagum(name, p, a, b):
     r"""
@@ -961,7 +1039,8 @@ def Dagum(name, p, a, b):
 
     return rv(name, DagumDistribution, (p, a, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Erlang distribution ----------------------------------------------------------
 
 
@@ -1029,51 +1108,52 @@ def Erlang(name, k, l):
 
     """
 
-    return rv(name, GammaDistribution, (k, S.One/l))
+    return rv(name, GammaDistribution, (k, S.One / l))
+
 
 # -------------------------------------------------------------------------------
 # ExGaussian distribution -----------------------------------------------------
 
 
 class ExGaussianDistribution(SingleContinuousDistribution):
-    _argnames = ('mean', 'std', 'rate')
+    _argnames = ("mean", "std", "rate")
 
     set = Interval(-oo, oo)
 
     @staticmethod
     def check(mean, std, rate):
-        _value_check(
-            std > 0, "Standard deviation of ExGaussian must be positive.")
+        _value_check(std > 0, "Standard deviation of ExGaussian must be positive.")
         _value_check(rate > 0, "Rate of ExGaussian must be positive.")
 
     def pdf(self, x):
         mean, std, rate = self.mean, self.std, self.rate
-        term1 = rate/2
-        term2 = exp(rate * (2 * mean + rate * std**2 - 2*x)/2)
-        term3 = erfc((mean + rate*std**2 - x)/(sqrt(2)*std))
-        return term1*term2*term3
+        term1 = rate / 2
+        term2 = exp(rate * (2 * mean + rate * std ** 2 - 2 * x) / 2)
+        term3 = erfc((mean + rate * std ** 2 - x) / (sqrt(2) * std))
+        return term1 * term2 * term3
 
     def _cdf(self, x):
         from sympy.stats import cdf
-        mean, std, rate = self.mean, self.std, self.rate
-        u = rate*(x - mean)
-        v = rate*std
-        GaussianCDF1 = cdf(Normal('x', 0, v))(u)
-        GaussianCDF2 = cdf(Normal('x', v**2, v))(u)
 
-        return GaussianCDF1 - exp(-u + (v**2/2) + log(GaussianCDF2))
+        mean, std, rate = self.mean, self.std, self.rate
+        u = rate * (x - mean)
+        v = rate * std
+        GaussianCDF1 = cdf(Normal("x", 0, v))(u)
+        GaussianCDF2 = cdf(Normal("x", v ** 2, v))(u)
+
+        return GaussianCDF1 - exp(-u + (v ** 2 / 2) + log(GaussianCDF2))
 
     def _characteristic_function(self, t):
         mean, std, rate = self.mean, self.std, self.rate
-        term1 = (1 - I*t/rate)**(-1)
-        term2 = exp(I*mean*t - std**2*t**2/2)
+        term1 = (1 - I * t / rate) ** (-1)
+        term2 = exp(I * mean * t - std ** 2 * t ** 2 / 2)
         return term1 * term2
 
     def _moment_generating_function(self, t):
         mean, std, rate = self.mean, self.std, self.rate
-        term1 = (1 - t/rate)**(-1)
-        term2 = exp(mean*t + std**2*t**2/2)
-        return term1*term2
+        term1 = (1 - t / rate) ** (-1)
+        term2 = exp(mean * t + std ** 2 * t ** 2 / 2)
+        return term1 * term2
 
 
 def ExGaussian(name, mean, std, rate):
@@ -1145,41 +1225,40 @@ def ExGaussian(name, mean, std, rate):
     """
     return rv(name, ExGaussianDistribution, (mean, std, rate))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Exponential distribution -----------------------------------------------------
 
 
 class ExponentialDistribution(SingleContinuousDistribution):
-    _argnames = ('rate',)
+    _argnames = ("rate",)
 
-    set  = Interval(0, oo)
+    set = Interval(0, oo)
 
     @staticmethod
     def check(rate):
         _value_check(rate > 0, "Rate must be positive.")
 
     def pdf(self, x):
-        return self.rate * exp(-self.rate*x)
+        return self.rate * exp(-self.rate * x)
 
     def sample(self):
         return random.expovariate(self.rate)
 
     def _cdf(self, x):
-        return Piecewise(
-                (S.One - exp(-self.rate*x), x >= 0),
-                (0, True),
-        )
+        return Piecewise((S.One - exp(-self.rate * x), x >= 0), (0, True),)
 
     def _characteristic_function(self, t):
         rate = self.rate
-        return rate / (rate - I*t)
+        return rate / (rate - I * t)
 
     def _moment_generating_function(self, t):
         rate = self.rate
         return rate / (rate - t)
 
     def _quantile(self, p):
-        return -log(1-p)/self.rate
+        return -log(1 - p) / self.rate
+
 
 def Exponential(name, rate):
     r"""
@@ -1251,14 +1330,15 @@ def Exponential(name, rate):
 
     """
 
-    return rv(name, ExponentialDistribution, (rate, ))
+    return rv(name, ExponentialDistribution, (rate,))
 
 
 # -------------------------------------------------------------------------------
 # Exponential Power distribution -----------------------------------------------------
 
+
 class ExponentialPowerDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'alpha', 'beta')
+    _argnames = ("mu", "alpha", "beta")
 
     set = Interval(-oo, oo)
 
@@ -1269,15 +1349,15 @@ class ExponentialPowerDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, alpha, beta = self.mu, self.alpha, self.beta
-        num = beta*exp(-(Abs(x - mu)/alpha)**beta)
-        den = 2*alpha*gamma(1/beta)
-        return num/den
+        num = beta * exp(-((Abs(x - mu) / alpha) ** beta))
+        den = 2 * alpha * gamma(1 / beta)
+        return num / den
 
     def _cdf(self, x):
         mu, alpha, beta = self.mu, self.alpha, self.beta
-        num = lowergamma(1/beta, (Abs(x - mu) / alpha)**beta)
-        den = 2*gamma(1/beta)
-        return sign(x - mu)*num/den + S.Half
+        num = lowergamma(1 / beta, (Abs(x - mu) / alpha) ** beta)
+        den = 2 * gamma(1 / beta)
+        return sign(x - mu) * num / den + S.Half
 
 
 def ExponentialPower(name, mu, alpha, beta):
@@ -1339,30 +1419,35 @@ def ExponentialPower(name, mu, alpha, beta):
     return rv(name, ExponentialPowerDistribution, (mu, alpha, beta))
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # F distribution ---------------------------------------------------------------
 
 
 class FDistributionDistribution(SingleContinuousDistribution):
-    _argnames = ('d1', 'd2')
+    _argnames = ("d1", "d2")
 
     set = Interval(0, oo)
 
     @staticmethod
     def check(d1, d2):
-        _value_check((d1 > 0, d1.is_integer),
-            "Degrees of freedom d1 must be positive integer.")
-        _value_check((d2 > 0, d2.is_integer),
-            "Degrees of freedom d2 must be positive integer.")
+        _value_check(
+            (d1 > 0, d1.is_integer), "Degrees of freedom d1 must be positive integer."
+        )
+        _value_check(
+            (d2 > 0, d2.is_integer), "Degrees of freedom d2 must be positive integer."
+        )
 
     def pdf(self, x):
         d1, d2 = self.d1, self.d2
-        return (sqrt((d1*x)**d1*d2**d2 / (d1*x+d2)**(d1+d2))
-               / (x * beta_fn(d1/2, d2/2)))
+        return sqrt((d1 * x) ** d1 * d2 ** d2 / (d1 * x + d2) ** (d1 + d2)) / (
+            x * beta_fn(d1 / 2, d2 / 2)
+        )
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('The moment generating function for the '
-                                  'F-distribution does not exist.')
+        raise NotImplementedError(
+            "The moment generating function for the " "F-distribution does not exist."
+        )
+
 
 def FDistribution(name, d1, d2):
     r"""
@@ -1421,11 +1506,13 @@ def FDistribution(name, d1, d2):
 
     return rv(name, FDistributionDistribution, (d1, d2))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Fisher Z distribution --------------------------------------------------------
 
+
 class FisherZDistribution(SingleContinuousDistribution):
-    _argnames = ('d1', 'd2')
+    _argnames = ("d1", "d2")
 
     set = Interval(-oo, oo)
 
@@ -1436,8 +1523,15 @@ class FisherZDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         d1, d2 = self.d1, self.d2
-        return (2*d1**(d1/2)*d2**(d2/2) / beta_fn(d1/2, d2/2) *
-               exp(d1*x) / (d1*exp(2*x)+d2)**((d1+d2)/2))
+        return (
+            2
+            * d1 ** (d1 / 2)
+            * d2 ** (d2 / 2)
+            / beta_fn(d1 / 2, d2 / 2)
+            * exp(d1 * x)
+            / (d1 * exp(2 * x) + d2) ** ((d1 + d2) / 2)
+        )
+
 
 def FisherZ(name, d1, d2):
     r"""
@@ -1497,11 +1591,13 @@ def FisherZ(name, d1, d2):
 
     return rv(name, FisherZDistribution, (d1, d2))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Frechet distribution ---------------------------------------------------------
 
+
 class FrechetDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 's', 'm')
+    _argnames = ("a", "s", "m")
 
     set = Interval(0, oo)
 
@@ -1516,12 +1612,12 @@ class FrechetDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         a, s, m = self.a, self.s, self.m
-        return a/s * ((x-m)/s)**(-1-a) * exp(-((x-m)/s)**(-a))
+        return a / s * ((x - m) / s) ** (-1 - a) * exp(-(((x - m) / s) ** (-a)))
 
     def _cdf(self, x):
         a, s, m = self.a, self.s, self.m
-        return Piecewise((exp(-((x-m)/s)**(-a)), x >= m),
-                        (S.Zero, True))
+        return Piecewise((exp(-(((x - m) / s) ** (-a))), x >= m), (S.Zero, True))
+
 
 def Frechet(name, a, s=1, m=0):
     r"""
@@ -1575,12 +1671,13 @@ def Frechet(name, a, s=1, m=0):
 
     return rv(name, FrechetDistribution, (a, s, m))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Gamma distribution -----------------------------------------------------------
 
 
 class GammaDistribution(SingleContinuousDistribution):
-    _argnames = ('k', 'theta')
+    _argnames = ("k", "theta")
 
     set = Interval(0, oo)
 
@@ -1591,7 +1688,7 @@ class GammaDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         k, theta = self.k, self.theta
-        return x**(k - 1) * exp(-x/theta) / (gamma(k)*theta**k)
+        return x ** (k - 1) * exp(-x / theta) / (gamma(k) * theta ** k)
 
     def sample(self):
         return random.gammavariate(self.k, self.theta)
@@ -1599,14 +1696,15 @@ class GammaDistribution(SingleContinuousDistribution):
     def _cdf(self, x):
         k, theta = self.k, self.theta
         return Piecewise(
-                    (lowergamma(k, S(x)/theta)/gamma(k), x > 0),
-                    (S.Zero, True))
+            (lowergamma(k, S(x) / theta) / gamma(k), x > 0), (S.Zero, True)
+        )
 
     def _characteristic_function(self, t):
-        return (1 - self.theta*I*t)**(-self.k)
+        return (1 - self.theta * I * t) ** (-self.k)
 
     def _moment_generating_function(self, t):
-        return (1- self.theta*t)**(-self.k)
+        return (1 - self.theta * t) ** (-self.k)
+
 
 def Gamma(name, k, theta):
     r"""
@@ -1680,12 +1778,13 @@ def Gamma(name, k, theta):
 
     return rv(name, GammaDistribution, (k, theta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Inverse Gamma distribution ---------------------------------------------------
 
 
 class GammaInverseDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b')
+    _argnames = ("a", "b")
 
     set = Interval(0, oo)
 
@@ -1696,28 +1795,33 @@ class GammaInverseDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         a, b = self.a, self.b
-        return b**a/gamma(a) * x**(-a-1) * exp(-b/x)
+        return b ** a / gamma(a) * x ** (-a - 1) * exp(-b / x)
 
     def _cdf(self, x):
         a, b = self.a, self.b
-        return Piecewise((uppergamma(a,b/x)/gamma(a), x > 0),
-                        (S.Zero, True))
+        return Piecewise((uppergamma(a, b / x) / gamma(a), x > 0), (S.Zero, True))
 
     def sample(self):
-        scipy = import_module('scipy')
+        scipy = import_module("scipy")
         if scipy:
             from scipy.stats import invgamma
+
             return invgamma.rvs(float(self.a), 0, float(self.b))
         else:
-            raise NotImplementedError('Sampling the Inverse Gamma Distribution requires Scipy.')
+            raise NotImplementedError(
+                "Sampling the Inverse Gamma Distribution requires Scipy."
+            )
 
     def _characteristic_function(self, t):
         a, b = self.a, self.b
-        return 2 * (-I*b*t)**(a/2) * besselk(sqrt(-4*I*b*t)) / gamma(a)
+        return 2 * (-I * b * t) ** (a / 2) * besselk(sqrt(-4 * I * b * t)) / gamma(a)
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('The moment generating function for the '
-                                  'gamma inverse distribution does not exist.')
+        raise NotImplementedError(
+            "The moment generating function for the "
+            "gamma inverse distribution does not exist."
+        )
+
 
 def GammaInverse(name, a, b):
     r"""
@@ -1777,12 +1881,12 @@ def GammaInverse(name, a, b):
     return rv(name, GammaInverseDistribution, (a, b))
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Gumbel distribution (Maximum and Minimum) --------------------------------------------------------
 
 
 class GumbelDistribution(SingleContinuousDistribution):
-    _argnames = ('beta', 'mu', 'minimum')
+    _argnames = ("beta", "mu", "minimum")
 
     set = Interval(-oo, oo)
 
@@ -1792,27 +1896,28 @@ class GumbelDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         beta, mu = self.beta, self.mu
-        z = (x - mu)/beta
-        f_max = (1/beta)*exp(-z - exp(-z))
-        f_min = (1/beta)*exp(z - exp(z))
+        z = (x - mu) / beta
+        f_max = (1 / beta) * exp(-z - exp(-z))
+        f_min = (1 / beta) * exp(z - exp(z))
         return Piecewise((f_min, self.minimum), (f_max, not self.minimum))
 
     def _cdf(self, x):
         beta, mu = self.beta, self.mu
-        z = (x - mu)/beta
+        z = (x - mu) / beta
         F_max = exp(-exp(-z))
         F_min = 1 - exp(-exp(z))
         return Piecewise((F_min, self.minimum), (F_max, not self.minimum))
 
     def _characteristic_function(self, t):
-        cf_max = gamma(1 - I*self.beta*t) * exp(I*self.mu*t)
-        cf_min = gamma(1 + I*self.beta*t) * exp(I*self.mu*t)
+        cf_max = gamma(1 - I * self.beta * t) * exp(I * self.mu * t)
+        cf_min = gamma(1 + I * self.beta * t) * exp(I * self.mu * t)
         return Piecewise((cf_min, self.minimum), (cf_max, not self.minimum))
 
     def _moment_generating_function(self, t):
-        mgf_max = gamma(1 - self.beta*t) * exp(self.mu*t)
-        mgf_min = gamma(1 + self.beta*t) * exp(self.mu*t)
+        mgf_max = gamma(1 - self.beta * t) * exp(self.mu * t)
+        mgf_min = gamma(1 + self.beta * t) * exp(self.mu * t)
         return Piecewise((mgf_min, self.minimum), (mgf_max, not self.minimum))
+
 
 def Gumbel(name, beta, mu, minimum=False):
     r"""
@@ -1872,11 +1977,13 @@ def Gumbel(name, beta, mu, minimum=False):
     """
     return rv(name, GumbelDistribution, (beta, mu, minimum))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Gompertz distribution --------------------------------------------------------
 
+
 class GompertzDistribution(SingleContinuousDistribution):
-    _argnames = ('b', 'eta')
+    _argnames = ("b", "eta")
 
     set = Interval(0, oo)
 
@@ -1887,15 +1994,16 @@ class GompertzDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         eta, b = self.eta, self.b
-        return b*eta*exp(b*x)*exp(eta)*exp(-eta*exp(b*x))
+        return b * eta * exp(b * x) * exp(eta) * exp(-eta * exp(b * x))
 
     def _cdf(self, x):
         eta, b = self.eta, self.b
-        return 1 - exp(eta)*exp(-eta*exp(b*x))
+        return 1 - exp(eta) * exp(-eta * exp(b * x))
 
     def _moment_generating_function(self, t):
         eta, b = self.eta, self.b
-        return eta * exp(eta) * expint(t/b, eta)
+        return eta * exp(eta) * expint(t / b, eta)
+
 
 def Gompertz(name, b, eta):
     r"""
@@ -1942,12 +2050,13 @@ def Gompertz(name, b, eta):
     """
     return rv(name, GompertzDistribution, (b, eta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Kumaraswamy distribution -----------------------------------------------------
 
 
 class KumaraswamyDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b')
+    _argnames = ("a", "b")
 
     set = Interval(0, oo)
 
@@ -1958,14 +2067,14 @@ class KumaraswamyDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         a, b = self.a, self.b
-        return a * b * x**(a-1) * (1-x**a)**(b-1)
+        return a * b * x ** (a - 1) * (1 - x ** a) ** (b - 1)
 
     def _cdf(self, x):
         a, b = self.a, self.b
         return Piecewise(
-            (S.Zero, x < S.Zero),
-            (1 - (1 - x**a)**b, x <= S.One),
-            (S.One, True))
+            (S.Zero, x < S.Zero), (1 - (1 - x ** a) ** b, x <= S.One), (S.One, True)
+        )
+
 
 def Kumaraswamy(name, a, b):
     r"""
@@ -2019,12 +2128,13 @@ def Kumaraswamy(name, a, b):
 
     return rv(name, KumaraswamyDistribution, (a, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Laplace distribution ---------------------------------------------------------
 
 
 class LaplaceDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'b')
+    _argnames = ("mu", "b")
 
     set = Interval(-oo, oo)
 
@@ -2035,20 +2145,21 @@ class LaplaceDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, b = self.mu, self.b
-        return 1/(2*b)*exp(-Abs(x - mu)/b)
+        return 1 / (2 * b) * exp(-Abs(x - mu) / b)
 
     def _cdf(self, x):
         mu, b = self.mu, self.b
         return Piecewise(
-                    (S.Half*exp((x - mu)/b), x < mu),
-                    (S.One - S.Half*exp(-(x - mu)/b), x >= mu)
-                        )
+            (S.Half * exp((x - mu) / b), x < mu),
+            (S.One - S.Half * exp(-(x - mu) / b), x >= mu),
+        )
 
     def _characteristic_function(self, t):
-        return exp(self.mu*I*t) / (1 + self.b**2*t**2)
+        return exp(self.mu * I * t) / (1 + self.b ** 2 * t ** 2)
 
     def _moment_generating_function(self, t):
-        return exp(self.mu*t) / (1 - self.b**2*t**2)
+        return exp(self.mu * t) / (1 - self.b ** 2 * t ** 2)
+
 
 def Laplace(name, mu, b):
     r"""
@@ -2105,20 +2216,20 @@ def Laplace(name, mu, b):
 
     """
 
-    if isinstance(mu, (list, MatrixBase)) and\
-        isinstance(b, (list, MatrixBase)):
+    if isinstance(mu, (list, MatrixBase)) and isinstance(b, (list, MatrixBase)):
         from sympy.stats.joint_rv_types import MultivariateLaplaceDistribution
-        return multivariate_rv(
-            MultivariateLaplaceDistribution, name, mu, b)
+
+        return multivariate_rv(MultivariateLaplaceDistribution, name, mu, b)
 
     return rv(name, LaplaceDistribution, (mu, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Levy distribution ---------------------------------------------------------
 
 
 class LevyDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'c')
+    _argnames = ("mu", "c")
 
     @property
     def set(self):
@@ -2131,18 +2242,25 @@ class LevyDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, c = self.mu, self.c
-        return sqrt(c/(2*pi))*exp(-c/(2*(x - mu)))/((x - mu)**(S.One + S.Half))
+        return (
+            sqrt(c / (2 * pi))
+            * exp(-c / (2 * (x - mu)))
+            / ((x - mu) ** (S.One + S.Half))
+        )
 
     def _cdf(self, x):
         mu, c = self.mu, self.c
-        return erfc(sqrt(c/(2*(x - mu))))
+        return erfc(sqrt(c / (2 * (x - mu))))
 
     def _characteristic_function(self, t):
         mu, c = self.mu, self.c
         return exp(I * mu * t - sqrt(-2 * I * c * t))
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('The moment generating function of Levy distribution does not exist.')
+        raise NotImplementedError(
+            "The moment generating function of Levy distribution does not exist."
+        )
+
 
 def Levy(name, mu, c):
     r"""
@@ -2189,12 +2307,13 @@ def Levy(name, mu, c):
 
     return rv(name, LevyDistribution, (mu, c))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Logistic distribution --------------------------------------------------------
 
 
 class LogisticDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 's')
+    _argnames = ("mu", "s")
 
     set = Interval(-oo, oo)
 
@@ -2204,20 +2323,24 @@ class LogisticDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, s = self.mu, self.s
-        return exp(-(x - mu)/s)/(s*(1 + exp(-(x - mu)/s))**2)
+        return exp(-(x - mu) / s) / (s * (1 + exp(-(x - mu) / s)) ** 2)
 
     def _cdf(self, x):
         mu, s = self.mu, self.s
-        return S.One/(1 + exp(-(x - mu)/s))
+        return S.One / (1 + exp(-(x - mu) / s))
 
     def _characteristic_function(self, t):
-        return Piecewise((exp(I*t*self.mu) * pi*self.s*t / sinh(pi*self.s*t), Ne(t, 0)), (S.One, True))
+        return Piecewise(
+            (exp(I * t * self.mu) * pi * self.s * t / sinh(pi * self.s * t), Ne(t, 0)),
+            (S.One, True),
+        )
 
     def _moment_generating_function(self, t):
-        return exp(self.mu*t) * beta_fn(1 - self.s*t, 1 + self.s*t)
+        return exp(self.mu * t) * beta_fn(1 - self.s * t, 1 + self.s * t)
 
     def _quantile(self, p):
-        return self.mu - self.s*log(-S.One + S.One/p)
+        return self.mu - self.s * log(-S.One + S.One / p)
+
 
 def Logistic(name, mu, s):
     r"""
@@ -2267,12 +2390,13 @@ def Logistic(name, mu, s):
 
     return rv(name, LogisticDistribution, (mu, s))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Log-logistic distribution --------------------------------------------------------
 
 
 class LogLogisticDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta')
+    _argnames = ("alpha", "beta")
 
     set = Interval(0, oo)
 
@@ -2283,19 +2407,20 @@ class LogLogisticDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         a, b = self.alpha, self.beta
-        return ((b/a)*(x/a)**(b - 1))/(1 + (x/a)**b)**2
+        return ((b / a) * (x / a) ** (b - 1)) / (1 + (x / a) ** b) ** 2
 
     def _cdf(self, x):
         a, b = self.alpha, self.beta
-        return 1/(1 + (x/a)**(-b))
+        return 1 / (1 + (x / a) ** (-b))
 
     def _quantile(self, p):
         a, b = self.alpha, self.beta
-        return a*((p/(1 - p))**(1/b))
+        return a * ((p / (1 - p)) ** (1 / b))
 
     def expectation(self, expr, var, **kwargs):
         a, b = self.args
-        return Piecewise((S.NaN, b <= 1), (pi*a/(b*sin(pi/b)), True))
+        return Piecewise((S.NaN, b <= 1), (pi * a / (b * sin(pi / b)), True))
+
 
 def LogLogistic(name, alpha, beta):
     r"""
@@ -2360,12 +2485,13 @@ def LogLogistic(name, alpha, beta):
 
     return rv(name, LogLogisticDistribution, (alpha, beta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Log Normal distribution ------------------------------------------------------
 
 
 class LogNormalDistribution(SingleContinuousDistribution):
-    _argnames = ('mean', 'std')
+    _argnames = ("mean", "std")
 
     set = Interval(0, oo)
 
@@ -2375,7 +2501,7 @@ class LogNormalDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mean, std = self.mean, self.std
-        return exp(-(log(x) - mean)**2 / (2*std**2)) / (x*sqrt(2*pi)*std)
+        return exp(-((log(x) - mean) ** 2) / (2 * std ** 2)) / (x * sqrt(2 * pi) * std)
 
     def sample(self):
         return random.lognormvariate(self.mean, self.std)
@@ -2383,12 +2509,15 @@ class LogNormalDistribution(SingleContinuousDistribution):
     def _cdf(self, x):
         mean, std = self.mean, self.std
         return Piecewise(
-                (S.Half + S.Half*erf((log(x) - mean)/sqrt(2)/std), x > 0),
-                (S.Zero, True)
+            (S.Half + S.Half * erf((log(x) - mean) / sqrt(2) / std), x > 0),
+            (S.Zero, True),
         )
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('Moment generating function of the log-normal distribution is not defined.')
+        raise NotImplementedError(
+            "Moment generating function of the log-normal distribution is not defined."
+        )
+
 
 def LogNormal(name, mean, std):
     r"""
@@ -2453,12 +2582,13 @@ def LogNormal(name, mean, std):
 
     return rv(name, LogNormalDistribution, (mean, std))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Maxwell distribution ---------------------------------------------------------
 
 
 class MaxwellDistribution(SingleContinuousDistribution):
-    _argnames = ('a',)
+    _argnames = ("a",)
 
     set = Interval(0, oo)
 
@@ -2468,11 +2598,14 @@ class MaxwellDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         a = self.a
-        return sqrt(2/pi)*x**2*exp(-x**2/(2*a**2))/a**3
+        return sqrt(2 / pi) * x ** 2 * exp(-(x ** 2) / (2 * a ** 2)) / a ** 3
 
     def _cdf(self, x):
         a = self.a
-        return erf(sqrt(2)*x/(2*a)) - sqrt(2)*x*exp(-x**2/(2*a**2))/(sqrt(pi)*a)
+        return erf(sqrt(2) * x / (2 * a)) - sqrt(2) * x * exp(
+            -(x ** 2) / (2 * a ** 2)
+        ) / (sqrt(pi) * a)
+
 
 def Maxwell(name, a):
     r"""
@@ -2525,36 +2658,41 @@ def Maxwell(name, a):
 
     """
 
-    return rv(name, MaxwellDistribution, (a, ))
+    return rv(name, MaxwellDistribution, (a,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Moyal Distribution -----------------------------------------------------------
 class MoyalDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'sigma')
+    _argnames = ("mu", "sigma")
 
     @staticmethod
     def check(mu, sigma):
         _value_check(mu.is_real, "Location parameter must be real.")
-        _value_check(sigma.is_real and sigma > 0, "Scale parameter must be real\
-        and positive.")
+        _value_check(
+            sigma.is_real and sigma > 0,
+            "Scale parameter must be real\
+        and positive.",
+        )
 
     def pdf(self, x):
         mu, sigma = self.mu, self.sigma
-        num = exp(-(exp(-(x - mu)/sigma) + (x - mu)/(sigma))/2)
-        den = (sqrt(2*pi) * sigma)
-        return num/den
+        num = exp(-(exp(-(x - mu) / sigma) + (x - mu) / (sigma)) / 2)
+        den = sqrt(2 * pi) * sigma
+        return num / den
 
     def _characteristic_function(self, t):
         mu, sigma = self.mu, self.sigma
-        term1 = exp(I*t*mu)
-        term2 = (2**(-I*sigma*t) * gamma(Rational(1, 2) - I*t*sigma))
-        return (term1 * term2)/sqrt(pi)
+        term1 = exp(I * t * mu)
+        term2 = 2 ** (-I * sigma * t) * gamma(Rational(1, 2) - I * t * sigma)
+        return (term1 * term2) / sqrt(pi)
 
     def _moment_generating_function(self, t):
         mu, sigma = self.mu, self.sigma
-        term1 = exp(t*mu)
-        term2 = (2**(-1*sigma*t) * gamma(Rational(1, 2) - t*sigma))
-        return (term1 * term2)/sqrt(pi)
+        term1 = exp(t * mu)
+        term2 = 2 ** (-1 * sigma * t) * gamma(Rational(1, 2) - t * sigma)
+        return (term1 * term2) / sqrt(pi)
+
 
 def Moyal(name, mu, sigma):
     r"""
@@ -2603,29 +2741,39 @@ def Moyal(name, mu, sigma):
 
     return rv(name, MoyalDistribution, (mu, sigma))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Nakagami distribution --------------------------------------------------------
 
 
 class NakagamiDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'omega')
+    _argnames = ("mu", "omega")
 
     set = Interval(0, oo)
 
     @staticmethod
     def check(mu, omega):
-        _value_check(mu >= S.Half, "Shape parameter mu must be greater than equal to 1/2.")
+        _value_check(
+            mu >= S.Half, "Shape parameter mu must be greater than equal to 1/2."
+        )
         _value_check(omega > 0, "Spread parameter omega must be positive.")
 
     def pdf(self, x):
         mu, omega = self.mu, self.omega
-        return 2*mu**mu/(gamma(mu)*omega**mu)*x**(2*mu - 1)*exp(-mu/omega*x**2)
+        return (
+            2
+            * mu ** mu
+            / (gamma(mu) * omega ** mu)
+            * x ** (2 * mu - 1)
+            * exp(-mu / omega * x ** 2)
+        )
 
     def _cdf(self, x):
         mu, omega = self.mu, self.omega
         return Piecewise(
-                    (lowergamma(mu, (mu/omega)*x**2)/gamma(mu), x > 0),
-                    (S.Zero, True))
+            (lowergamma(mu, (mu / omega) * x ** 2) / gamma(mu), x > 0), (S.Zero, True)
+        )
+
 
 def Nakagami(name, mu, omega):
     r"""
@@ -2696,38 +2844,42 @@ def Nakagami(name, mu, omega):
 
     return rv(name, NakagamiDistribution, (mu, omega))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Normal distribution ----------------------------------------------------------
 
 
 class NormalDistribution(SingleContinuousDistribution):
-    _argnames = ('mean', 'std')
+    _argnames = ("mean", "std")
 
     @staticmethod
     def check(mean, std):
         _value_check(std > 0, "Standard deviation must be positive")
 
     def pdf(self, x):
-        return exp(-(x - self.mean)**2 / (2*self.std**2)) / (sqrt(2*pi)*self.std)
+        return exp(-((x - self.mean) ** 2) / (2 * self.std ** 2)) / (
+            sqrt(2 * pi) * self.std
+        )
 
     def sample(self):
         return random.normalvariate(self.mean, self.std)
 
     def _cdf(self, x):
         mean, std = self.mean, self.std
-        return erf(sqrt(2)*(-mean + x)/(2*std))/2 + S.Half
+        return erf(sqrt(2) * (-mean + x) / (2 * std)) / 2 + S.Half
 
     def _characteristic_function(self, t):
         mean, std = self.mean, self.std
-        return exp(I*mean*t - std**2*t**2/2)
+        return exp(I * mean * t - std ** 2 * t ** 2 / 2)
 
     def _moment_generating_function(self, t):
         mean, std = self.mean, self.std
-        return exp(mean*t + std**2*t**2/2)
+        return exp(mean * t + std ** 2 * t ** 2 / 2)
 
     def _quantile(self, p):
         mean, std = self.mean, self.std
-        return mean + std*sqrt(2)*erfinv(2*p - 1)
+        return mean + std * sqrt(2) * erfinv(2 * p - 1)
+
 
 def Normal(name, mean, std):
     r"""
@@ -2813,20 +2965,21 @@ def Normal(name, mean, std):
 
     """
 
-    if isinstance(mean, (list, MatrixBase, MatrixExpr)) and\
-        isinstance(std, (list, MatrixBase, MatrixExpr)):
+    if isinstance(mean, (list, MatrixBase, MatrixExpr)) and isinstance(
+        std, (list, MatrixBase, MatrixExpr)
+    ):
         from sympy.stats.joint_rv_types import MultivariateNormalDistribution
-        return multivariate_rv(
-            MultivariateNormalDistribution, name, mean, std)
+
+        return multivariate_rv(MultivariateNormalDistribution, name, mean, std)
     return rv(name, NormalDistribution, (mean, std))
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Inverse Gaussian distribution ----------------------------------------------------------
 
 
 class GaussianInverseDistribution(SingleContinuousDistribution):
-    _argnames = ('mean', 'shape')
+    _argnames = ("mean", "shape")
 
     @property
     def set(self):
@@ -2839,34 +2992,39 @@ class GaussianInverseDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, s = self.mean, self.shape
-        return exp(-s*(x - mu)**2 / (2*x*mu**2)) * sqrt(s/((2*pi*x**3)))
+        return exp(-s * (x - mu) ** 2 / (2 * x * mu ** 2)) * sqrt(
+            s / ((2 * pi * x ** 3))
+        )
 
     def sample(self):
-        scipy = import_module('scipy')
+        scipy = import_module("scipy")
         if scipy:
             from scipy.stats import invgauss
-            return invgauss.rvs(float(self.mean/self.shape), 0, float(self.shape))
+
+            return invgauss.rvs(float(self.mean / self.shape), 0, float(self.shape))
         else:
             raise NotImplementedError(
-                'Sampling the Inverse Gaussian Distribution requires Scipy.')
+                "Sampling the Inverse Gaussian Distribution requires Scipy."
+            )
 
     def _cdf(self, x):
         from sympy.stats import cdf
+
         mu, s = self.mean, self.shape
-        stdNormalcdf = cdf(Normal('x', 0, 1))
+        stdNormalcdf = cdf(Normal("x", 0, 1))
 
-        first_term = stdNormalcdf(sqrt(s/x) * ((x/mu) - S.One))
-        second_term = exp(2*s/mu) * stdNormalcdf(-sqrt(s/x)*(x/mu + S.One))
+        first_term = stdNormalcdf(sqrt(s / x) * ((x / mu) - S.One))
+        second_term = exp(2 * s / mu) * stdNormalcdf(-sqrt(s / x) * (x / mu + S.One))
 
-        return  first_term + second_term
+        return first_term + second_term
 
     def _characteristic_function(self, t):
         mu, s = self.mean, self.shape
-        return exp((s/mu)*(1 - sqrt(1 - (2*mu**2*I*t)/s)))
+        return exp((s / mu) * (1 - sqrt(1 - (2 * mu ** 2 * I * t) / s)))
 
     def _moment_generating_function(self, t):
         mu, s = self.mean, self.shape
-        return exp((s/mu)*(1 - sqrt(1 - (2*mu**2*t)/s)))
+        return exp((s / mu) * (1 - sqrt(1 - (2 * mu ** 2 * t) / s)))
 
 
 def GaussianInverse(name, mean, shape):
@@ -2932,14 +3090,15 @@ def GaussianInverse(name, mean, shape):
 
     return rv(name, GaussianInverseDistribution, (mean, shape))
 
+
 Wald = GaussianInverse
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Pareto distribution ----------------------------------------------------------
 
 
 class ParetoDistribution(SingleContinuousDistribution):
-    _argnames = ('xm', 'alpha')
+    _argnames = ("xm", "alpha")
 
     @property
     def set(self):
@@ -2952,21 +3111,18 @@ class ParetoDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         xm, alpha = self.xm, self.alpha
-        return alpha * xm**alpha / x**(alpha + 1)
+        return alpha * xm ** alpha / x ** (alpha + 1)
 
     def sample(self):
         return random.paretovariate(self.alpha)
 
     def _cdf(self, x):
         xm, alpha = self.xm, self.alpha
-        return Piecewise(
-                (S.One - xm**alpha/x**alpha, x>=xm),
-                (0, True),
-        )
+        return Piecewise((S.One - xm ** alpha / x ** alpha, x >= xm), (0, True),)
 
     def _moment_generating_function(self, t):
         xm, alpha = self.xm, self.alpha
-        return alpha * (-xm*t)**alpha * uppergamma(-alpha, -xm*t)
+        return alpha * (-xm * t) ** alpha * uppergamma(-alpha, -xm * t)
 
     def _characteristic_function(self, t):
         xm, alpha = self.xm, self.alpha
@@ -3020,12 +3176,13 @@ def Pareto(name, xm, alpha):
 
     return rv(name, ParetoDistribution, (xm, alpha))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # PowerFunction distribution ---------------------------------------------------
 
 
 class PowerFunctionDistribution(SingleContinuousDistribution):
-    _argnames=('alpha','a','b')
+    _argnames = ("alpha", "a", "b")
 
     @property
     def set(self):
@@ -3035,14 +3192,19 @@ class PowerFunctionDistribution(SingleContinuousDistribution):
     def check(alpha, a, b):
         _value_check(a.is_real, "Continuous Boundary parameter should be real.")
         _value_check(b.is_real, "Continuous Boundary parameter should be real.")
-        _value_check(a < b, " 'a' the left Boundary must be smaller than 'b' the right Boundary." )
-        _value_check(alpha.is_positive, "Continuous Shape parameter should be positive.")
+        _value_check(
+            a < b, " 'a' the left Boundary must be smaller than 'b' the right Boundary."
+        )
+        _value_check(
+            alpha.is_positive, "Continuous Shape parameter should be positive."
+        )
 
     def pdf(self, x):
         alpha, a, b = self.alpha, self.a, self.b
-        num = alpha*(x - a)**(alpha - 1)
-        den = (b - a)**alpha
-        return num/den
+        num = alpha * (x - a) ** (alpha - 1)
+        den = (b - a) ** alpha
+        return num / den
+
 
 def PowerFunction(name, alpha, a, b):
     r"""
@@ -3105,12 +3267,13 @@ def PowerFunction(name, alpha, a, b):
     """
     return rv(name, PowerFunctionDistribution, (alpha, a, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # QuadraticU distribution ------------------------------------------------------
 
 
 class QuadraticUDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b')
+    _argnames = ("a", "b")
 
     @property
     def set(self):
@@ -3118,26 +3281,39 @@ class QuadraticUDistribution(SingleContinuousDistribution):
 
     @staticmethod
     def check(a, b):
-        _value_check(b > a, "Parameter b must be in range (%s, oo)."%(a))
+        _value_check(b > a, "Parameter b must be in range (%s, oo)." % (a))
 
     def pdf(self, x):
         a, b = self.a, self.b
-        alpha = 12 / (b-a)**3
-        beta = (a+b) / 2
-        return Piecewise(
-                  (alpha * (x-beta)**2, And(a<=x, x<=b)),
-                  (S.Zero, True))
+        alpha = 12 / (b - a) ** 3
+        beta = (a + b) / 2
+        return Piecewise((alpha * (x - beta) ** 2, And(a <= x, x <= b)), (S.Zero, True))
 
     def _moment_generating_function(self, t):
         a, b = self.a, self.b
 
-        return -3 * (exp(a*t) * (4  + (a**2 + 2*a*(-2 + b) + b**2) * t) - exp(b*t) * (4 + (-4*b + (a + b)**2) * t)) / ((a-b)**3 * t**2)
+        return (
+            -3
+            * (
+                exp(a * t) * (4 + (a ** 2 + 2 * a * (-2 + b) + b ** 2) * t)
+                - exp(b * t) * (4 + (-4 * b + (a + b) ** 2) * t)
+            )
+            / ((a - b) ** 3 * t ** 2)
+        )
 
     def _characteristic_function(self, t):
         def _moment_generating_function(self, t):
             a, b = self.a, self.b
 
-            return -3*I*(exp(I*a*t*exp(I*b*t)) * (4*I - (-4*b + (a+b)**2)*t)) / ((a-b)**3 * t**2)
+            return (
+                -3
+                * I
+                * (
+                    exp(I * a * t * exp(I * b * t))
+                    * (4 * I - (-4 * b + (a + b) ** 2) * t)
+                )
+                / ((a - b) ** 3 * t ** 2)
+            )
 
 
 def QuadraticU(name, a, b):
@@ -3195,12 +3371,13 @@ def QuadraticU(name, a, b):
 
     return rv(name, QuadraticUDistribution, (a, b))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # RaisedCosine distribution ----------------------------------------------------
 
 
 class RaisedCosineDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 's')
+    _argnames = ("mu", "s")
 
     @property
     def set(self):
@@ -3213,18 +3390,30 @@ class RaisedCosineDistribution(SingleContinuousDistribution):
     def pdf(self, x):
         mu, s = self.mu, self.s
         return Piecewise(
-                ((1+cos(pi*(x-mu)/s)) / (2*s), And(mu-s<=x, x<=mu+s)),
-                (S.Zero, True))
+            ((1 + cos(pi * (x - mu) / s)) / (2 * s), And(mu - s <= x, x <= mu + s)),
+            (S.Zero, True),
+        )
 
     def _characteristic_function(self, t):
         mu, s = self.mu, self.s
-        return Piecewise((exp(-I*pi*mu/s)/2, Eq(t, -pi/s)),
-                         (exp(I*pi*mu/s)/2, Eq(t, pi/s)),
-                         (pi**2*sin(s*t)*exp(I*mu*t) / (s*t*(pi**2 - s**2*t**2)), True))
+        return Piecewise(
+            (exp(-I * pi * mu / s) / 2, Eq(t, -pi / s)),
+            (exp(I * pi * mu / s) / 2, Eq(t, pi / s)),
+            (
+                pi ** 2
+                * sin(s * t)
+                * exp(I * mu * t)
+                / (s * t * (pi ** 2 - s ** 2 * t ** 2)),
+                True,
+            ),
+        )
 
     def _moment_generating_function(self, t):
         mu, s = self.mu, self.s
-        return pi**2 * sinh(s*t) * exp(mu*t) /  (s*t*(pi**2 + s**2*t**2))
+        return (
+            pi ** 2 * sinh(s * t) * exp(mu * t) / (s * t * (pi ** 2 + s ** 2 * t ** 2))
+        )
+
 
 def RaisedCosine(name, mu, s):
     r"""
@@ -3279,12 +3468,13 @@ def RaisedCosine(name, mu, s):
 
     return rv(name, RaisedCosineDistribution, (mu, s))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Rayleigh distribution --------------------------------------------------------
 
 
 class RayleighDistribution(SingleContinuousDistribution):
-    _argnames = ('sigma',)
+    _argnames = ("sigma",)
 
     set = Interval(0, oo)
 
@@ -3294,19 +3484,23 @@ class RayleighDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         sigma = self.sigma
-        return x/sigma**2*exp(-x**2/(2*sigma**2))
+        return x / sigma ** 2 * exp(-(x ** 2) / (2 * sigma ** 2))
 
     def _cdf(self, x):
         sigma = self.sigma
-        return 1 - exp(-(x**2/(2*sigma**2)))
+        return 1 - exp(-(x ** 2 / (2 * sigma ** 2)))
 
     def _characteristic_function(self, t):
         sigma = self.sigma
-        return 1 - sigma*t*exp(-sigma**2*t**2/2) * sqrt(pi/2) * (erfi(sigma*t/sqrt(2)) - I)
+        return 1 - sigma * t * exp(-(sigma ** 2) * t ** 2 / 2) * sqrt(pi / 2) * (
+            erfi(sigma * t / sqrt(2)) - I
+        )
 
     def _moment_generating_function(self, t):
         sigma = self.sigma
-        return 1 + sigma*t*exp(sigma**2*t**2/2) * sqrt(pi/2) * (erf(sigma*t/sqrt(2)) + 1)
+        return 1 + sigma * t * exp(sigma ** 2 * t ** 2 / 2) * sqrt(pi / 2) * (
+            erf(sigma * t / sqrt(2)) + 1
+        )
 
 
 def Rayleigh(name, sigma):
@@ -3358,13 +3552,15 @@ def Rayleigh(name, sigma):
 
     """
 
-    return rv(name, RayleighDistribution, (sigma, ))
+    return rv(name, RayleighDistribution, (sigma,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Reciprocal distribution --------------------------------------------------------
 
+
 class ReciprocalDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b')
+    _argnames = ("a", "b")
 
     @property
     def set(self):
@@ -3372,13 +3568,12 @@ class ReciprocalDistribution(SingleContinuousDistribution):
 
     @staticmethod
     def check(a, b):
-        _value_check(a > 0, "Parameter > 0. a = %s"%a)
-        _value_check((a < b),
-        "Parameter b must be in range (%s, +oo]. b = %s"%(a, b))
+        _value_check(a > 0, "Parameter > 0. a = %s" % a)
+        _value_check((a < b), "Parameter b must be in range (%s, +oo]. b = %s" % (a, b))
 
     def pdf(self, x):
         a, b = self.a, self.b
-        return 1/(x*(log(b) - log(a)))
+        return 1 / (x * (log(b) - log(a)))
 
 
 def Reciprocal(name, a, b):
@@ -3418,12 +3613,12 @@ def Reciprocal(name, a, b):
     return rv(name, ReciprocalDistribution, (a, b))
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Shifted Gompertz distribution ------------------------------------------------
 
 
 class ShiftedGompertzDistribution(SingleContinuousDistribution):
-    _argnames = ('b', 'eta')
+    _argnames = ("b", "eta")
 
     set = Interval(0, oo)
 
@@ -3434,7 +3629,8 @@ class ShiftedGompertzDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         b, eta = self.b, self.eta
-        return b*exp(-b*x)*exp(-eta*exp(-b*x))*(1+eta*(1-exp(-b*x)))
+        return b * exp(-b * x) * exp(-eta * exp(-b * x)) * (1 + eta * (1 - exp(-b * x)))
+
 
 def ShiftedGompertz(name, b, eta):
     r"""
@@ -3480,12 +3676,13 @@ def ShiftedGompertz(name, b, eta):
     """
     return rv(name, ShiftedGompertzDistribution, (b, eta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # StudentT distribution --------------------------------------------------------
 
 
 class StudentTDistribution(SingleContinuousDistribution):
-    _argnames = ('nu',)
+    _argnames = ("nu",)
 
     set = Interval(-oo, oo)
 
@@ -3495,15 +3692,23 @@ class StudentTDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         nu = self.nu
-        return 1/(sqrt(nu)*beta_fn(S.Half, nu/2))*(1 + x**2/nu)**(-(nu + 1)/2)
+        return (
+            1
+            / (sqrt(nu) * beta_fn(S.Half, nu / 2))
+            * (1 + x ** 2 / nu) ** (-(nu + 1) / 2)
+        )
 
     def _cdf(self, x):
         nu = self.nu
-        return S.Half + x*gamma((nu+1)/2)*hyper((S.Half, (nu+1)/2),
-                                (Rational(3, 2),), -x**2/nu)/(sqrt(pi*nu)*gamma(nu/2))
+        return S.Half + x * gamma((nu + 1) / 2) * hyper(
+            (S.Half, (nu + 1) / 2), (Rational(3, 2),), -(x ** 2) / nu
+        ) / (sqrt(pi * nu) * gamma(nu / 2))
 
     def _moment_generating_function(self, t):
-        raise NotImplementedError('The moment generating function for the Student-T distribution is undefined.')
+        raise NotImplementedError(
+            "The moment generating function for the Student-T distribution is undefined."
+        )
+
 
 def StudentT(name, nu):
     r"""
@@ -3564,14 +3769,15 @@ def StudentT(name, nu):
 
     """
 
-    return rv(name, StudentTDistribution, (nu, ))
+    return rv(name, StudentTDistribution, (nu,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Trapezoidal distribution ------------------------------------------------------
 
 
 class TrapezoidalDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b', 'c', 'd')
+    _argnames = ("a", "b", "c", "d")
 
     @property
     def set(self):
@@ -3579,20 +3785,26 @@ class TrapezoidalDistribution(SingleContinuousDistribution):
 
     @staticmethod
     def check(a, b, c, d):
-        _value_check(a < d, "Lower bound parameter a < %s. a = %s"%(d, a))
-        _value_check((a <= b, b < c),
-        "Level start parameter b must be in range [%s, %s). b = %s"%(a, c, b))
-        _value_check((b < c, c <= d),
-        "Level end parameter c must be in range (%s, %s]. c = %s"%(b, d, c))
-        _value_check(d >= c, "Upper bound parameter d > %s. d = %s"%(c, d))
+        _value_check(a < d, "Lower bound parameter a < %s. a = %s" % (d, a))
+        _value_check(
+            (a <= b, b < c),
+            "Level start parameter b must be in range [%s, %s). b = %s" % (a, c, b),
+        )
+        _value_check(
+            (b < c, c <= d),
+            "Level end parameter c must be in range (%s, %s]. c = %s" % (b, d, c),
+        )
+        _value_check(d >= c, "Upper bound parameter d > %s. d = %s" % (c, d))
 
     def pdf(self, x):
         a, b, c, d = self.a, self.b, self.c, self.d
         return Piecewise(
-            (2*(x-a) / ((b-a)*(d+c-a-b)), And(a <= x, x < b)),
-            (2 / (d+c-a-b), And(b <= x, x < c)),
-            (2*(d-x) / ((d-c)*(d+c-a-b)), And(c <= x, x <= d)),
-            (S.Zero, True))
+            (2 * (x - a) / ((b - a) * (d + c - a - b)), And(a <= x, x < b)),
+            (2 / (d + c - a - b), And(b <= x, x < c)),
+            (2 * (d - x) / ((d - c) * (d + c - a - b)), And(c <= x, x <= d)),
+            (S.Zero, True),
+        )
+
 
 def Trapezoidal(name, a, b, c, d):
     r"""
@@ -3659,12 +3871,13 @@ def Trapezoidal(name, a, b, c, d):
     """
     return rv(name, TrapezoidalDistribution, (a, b, c, d))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Triangular distribution ------------------------------------------------------
 
 
 class TriangularDistribution(SingleContinuousDistribution):
-    _argnames = ('a', 'b', 'c')
+    _argnames = ("a", "b", "c")
 
     @property
     def set(self):
@@ -3672,26 +3885,40 @@ class TriangularDistribution(SingleContinuousDistribution):
 
     @staticmethod
     def check(a, b, c):
-        _value_check(b > a, "Parameter b > %s. b = %s"%(a, b))
-        _value_check((a <= c, c <= b),
-        "Parameter c must be in range [%s, %s]. c = %s"%(a, b, c))
+        _value_check(b > a, "Parameter b > %s. b = %s" % (a, b))
+        _value_check(
+            (a <= c, c <= b),
+            "Parameter c must be in range [%s, %s]. c = %s" % (a, b, c),
+        )
 
     def pdf(self, x):
         a, b, c = self.a, self.b, self.c
         return Piecewise(
-            (2*(x - a)/((b - a)*(c - a)), And(a <= x, x < c)),
-            (2/(b - a), Eq(x, c)),
-            (2*(b - x)/((b - a)*(b - c)), And(c < x, x <= b)),
-            (S.Zero, True))
+            (2 * (x - a) / ((b - a) * (c - a)), And(a <= x, x < c)),
+            (2 / (b - a), Eq(x, c)),
+            (2 * (b - x) / ((b - a) * (b - c)), And(c < x, x <= b)),
+            (S.Zero, True),
+        )
 
     def _characteristic_function(self, t):
         a, b, c = self.a, self.b, self.c
-        return -2 *((b-c) * exp(I*a*t) - (b-a) * exp(I*c*t) + (c-a) * exp(I*b*t)) / ((b-a)*(c-a)*(b-c)*t**2)
+        return (
+            -2
+            * (
+                (b - c) * exp(I * a * t)
+                - (b - a) * exp(I * c * t)
+                + (c - a) * exp(I * b * t)
+            )
+            / ((b - a) * (c - a) * (b - c) * t ** 2)
+        )
 
     def _moment_generating_function(self, t):
         a, b, c = self.a, self.b, self.c
-        return 2 * ((b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t)) / (
-        (b - a) * (c - a) * (b - c) * t ** 2)
+        return (
+            2
+            * ((b - c) * exp(a * t) - (b - a) * exp(c * t) + (c - a) * exp(b * t))
+            / ((b - a) * (c - a) * (b - c) * t ** 2)
+        )
 
 
 def Triangular(name, a, b, c):
@@ -3759,12 +3986,13 @@ def Triangular(name, a, b, c):
 
     return rv(name, TriangularDistribution, (a, b, c))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Uniform distribution ---------------------------------------------------------
 
 
 class UniformDistribution(SingleContinuousDistribution):
-    _argnames = ('left', 'right')
+    _argnames = ("left", "right")
 
     @property
     def set(self):
@@ -3777,34 +4005,43 @@ class UniformDistribution(SingleContinuousDistribution):
     def pdf(self, x):
         left, right = self.left, self.right
         return Piecewise(
-            (S.One/(right - left), And(left <= x, x <= right)),
-            (S.Zero, True)
+            (S.One / (right - left), And(left <= x, x <= right)), (S.Zero, True)
         )
 
     def _cdf(self, x):
         left, right = self.left, self.right
         return Piecewise(
-            (S.Zero, x < left),
-            ((x - left)/(right - left), x <= right),
-            (S.One, True)
+            (S.Zero, x < left), ((x - left) / (right - left), x <= right), (S.One, True)
         )
 
     def _characteristic_function(self, t):
         left, right = self.left, self.right
-        return Piecewise(((exp(I*t*right) - exp(I*t*left)) / (I*t*(right - left)), Ne(t, 0)),
-                         (S.One, True))
+        return Piecewise(
+            (
+                (exp(I * t * right) - exp(I * t * left)) / (I * t * (right - left)),
+                Ne(t, 0),
+            ),
+            (S.One, True),
+        )
 
     def _moment_generating_function(self, t):
         left, right = self.left, self.right
-        return Piecewise(((exp(t*right) - exp(t*left)) / (t * (right - left)), Ne(t, 0)),
-                         (S.One, True))
+        return Piecewise(
+            ((exp(t * right) - exp(t * left)) / (t * (right - left)), Ne(t, 0)),
+            (S.One, True),
+        )
 
     def expectation(self, expr, var, **kwargs):
         from sympy import Max, Min
-        kwargs['evaluate'] = True
+
+        kwargs["evaluate"] = True
         result = SingleContinuousDistribution.expectation(self, expr, var, **kwargs)
-        result = result.subs({Max(self.left, self.right): self.right,
-                              Min(self.left, self.right): self.left})
+        result = result.subs(
+            {
+                Max(self.left, self.right): self.right,
+                Min(self.left, self.right): self.left,
+            }
+        )
         return result
 
     def sample(self):
@@ -3870,12 +4107,13 @@ def Uniform(name, left, right):
 
     return rv(name, UniformDistribution, (left, right))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # UniformSum distribution ------------------------------------------------------
 
 
 class UniformSumDistribution(SingleContinuousDistribution):
-    _argnames = ('n',)
+    _argnames = ("n",)
 
     @property
     def set(self):
@@ -3883,28 +4121,37 @@ class UniformSumDistribution(SingleContinuousDistribution):
 
     @staticmethod
     def check(n):
-        _value_check((n > 0, n.is_integer),
-        "Parameter n must be positive integer.")
+        _value_check((n > 0, n.is_integer), "Parameter n must be positive integer.")
 
     def pdf(self, x):
         n = self.n
         k = Dummy("k")
-        return 1/factorial(
-            n - 1)*Sum((-1)**k*binomial(n, k)*(x - k)**(n - 1), (k, 0, floor(x)))
+        return (
+            1
+            / factorial(n - 1)
+            * Sum((-1) ** k * binomial(n, k) * (x - k) ** (n - 1), (k, 0, floor(x)))
+        )
 
     def _cdf(self, x):
         n = self.n
         k = Dummy("k")
-        return Piecewise((S.Zero, x < 0),
-                        (1/factorial(n)*Sum((-1)**k*binomial(n, k)*(x - k)**(n),
-                        (k, 0, floor(x))), x <= n),
-                        (S.One, True))
+        return Piecewise(
+            (S.Zero, x < 0),
+            (
+                1
+                / factorial(n)
+                * Sum((-1) ** k * binomial(n, k) * (x - k) ** (n), (k, 0, floor(x))),
+                x <= n,
+            ),
+            (S.One, True),
+        )
 
     def _characteristic_function(self, t):
-        return ((exp(I*t) - 1) / (I*t))**self.n
+        return ((exp(I * t) - 1) / (I * t)) ** self.n
 
     def _moment_generating_function(self, t):
-        return ((exp(t) - 1) / t)**self.n
+        return ((exp(t) - 1) / t) ** self.n
+
 
 def UniformSum(name, n):
     r"""
@@ -3973,16 +4220,17 @@ def UniformSum(name, n):
 
     """
 
-    return rv(name, UniformSumDistribution, (n, ))
+    return rv(name, UniformSumDistribution, (n,))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # VonMises distribution --------------------------------------------------------
 
 
 class VonMisesDistribution(SingleContinuousDistribution):
-    _argnames = ('mu', 'k')
+    _argnames = ("mu", "k")
 
-    set = Interval(0, 2*pi)
+    set = Interval(0, 2 * pi)
 
     @staticmethod
     def check(mu, k):
@@ -3990,7 +4238,8 @@ class VonMisesDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         mu, k = self.mu, self.k
-        return exp(k*cos(x-mu)) / (2*pi*besseli(0, k))
+        return exp(k * cos(x - mu)) / (2 * pi * besseli(0, k))
+
 
 def VonMises(name, mu, k):
     r"""
@@ -4044,12 +4293,13 @@ def VonMises(name, mu, k):
 
     return rv(name, VonMisesDistribution, (mu, k))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Weibull distribution ---------------------------------------------------------
 
 
 class WeibullDistribution(SingleContinuousDistribution):
-    _argnames = ('alpha', 'beta')
+    _argnames = ("alpha", "beta")
 
     set = Interval(0, oo)
 
@@ -4060,10 +4310,11 @@ class WeibullDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         alpha, beta = self.alpha, self.beta
-        return beta * (x/alpha)**(beta - 1) * exp(-(x/alpha)**beta) / alpha
+        return beta * (x / alpha) ** (beta - 1) * exp(-((x / alpha) ** beta)) / alpha
 
     def sample(self):
         return random.weibullvariate(self.alpha, self.beta)
+
 
 def Weibull(name, alpha, beta):
     r"""
@@ -4120,12 +4371,13 @@ def Weibull(name, alpha, beta):
 
     return rv(name, WeibullDistribution, (alpha, beta))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Wigner semicircle distribution -----------------------------------------------
 
 
 class WignerSemicircleDistribution(SingleContinuousDistribution):
-    _argnames = ('R',)
+    _argnames = ("R",)
 
     @property
     def set(self):
@@ -4137,15 +4389,18 @@ class WignerSemicircleDistribution(SingleContinuousDistribution):
 
     def pdf(self, x):
         R = self.R
-        return 2/(pi*R**2)*sqrt(R**2 - x**2)
+        return 2 / (pi * R ** 2) * sqrt(R ** 2 - x ** 2)
 
     def _characteristic_function(self, t):
-        return Piecewise((2 * besselj(1, self.R*t) / (self.R*t), Ne(t, 0)),
-                         (S.One, True))
+        return Piecewise(
+            (2 * besselj(1, self.R * t) / (self.R * t), Ne(t, 0)), (S.One, True)
+        )
 
     def _moment_generating_function(self, t):
-        return Piecewise((2 * besseli(1, self.R*t) / (self.R*t), Ne(t, 0)),
-                         (S.One, True))
+        return Piecewise(
+            (2 * besseli(1, self.R * t) / (self.R * t), Ne(t, 0)), (S.One, True)
+        )
+
 
 def WignerSemicircle(name, R):
     r"""

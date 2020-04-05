@@ -31,7 +31,7 @@ def filldedent(s, w=70):
     ========
     strlines, rawlines
     """
-    return '\n' + fill(dedent(str(s)).strip('\n'), width=w)
+    return "\n" + fill(dedent(str(s)).strip("\n"), width=w)
 
 
 def strlines(s, c=64, short=False):
@@ -64,23 +64,23 @@ def strlines(s, c=64, short=False):
     filldedent, rawlines
     """
     if type(s) is not str:
-        raise ValueError('expecting string input')
-    if '\n' in s:
+        raise ValueError("expecting string input")
+    if "\n" in s:
         return rawlines(s)
     q = '"' if repr(s).startswith('"') else "'"
-    q = (q,)*2
-    if '\\' in s:  # use r-string
-        m = '(\nr%s%%s%s\n)' % q
-        j = '%s\nr%s' % q
+    q = (q,) * 2
+    if "\\" in s:  # use r-string
+        m = "(\nr%s%%s%s\n)" % q
+        j = "%s\nr%s" % q
         c -= 3
     else:
-        m = '(\n%s%%s%s\n)' % q
-        j = '%s\n%s' % q
+        m = "(\n%s%%s%s\n)" % q
+        j = "%s\n%s" % q
         c -= 2
     out = []
     while s:
         out.append(s[:c])
-        s=s[c:]
+        s = s[c:]
     if short and len(out) == 1:
         return (m % out[0]).splitlines()[1]  # strip bounding (\n...\n)
     return m % j.join(out)
@@ -146,36 +146,38 @@ def rawlines(s):
     ========
     filldedent, strlines
     """
-    lines = s.split('\n')
+    lines = s.split("\n")
     if len(lines) == 1:
         return repr(lines[0])
     triple = ["'''" in s, '"""' in s]
-    if any(li.endswith(' ') for li in lines) or '\\' in s or all(triple):
+    if any(li.endswith(" ") for li in lines) or "\\" in s or all(triple):
         rv = []
         # add on the newlines
-        trailing = s.endswith('\n')
+        trailing = s.endswith("\n")
         last = len(lines) - 1
         for i, li in enumerate(lines):
             if i != last or trailing:
-                rv.append(repr(li + '\n'))
+                rv.append(repr(li + "\n"))
             else:
                 rv.append(repr(li))
-        return '(\n    %s\n)' % '\n    '.join(rv)
+        return "(\n    %s\n)" % "\n    ".join(rv)
     else:
-        rv = '\n    '.join(lines)
+        rv = "\n    ".join(lines)
         if triple[0]:
             return 'dedent("""\\\n    %s""")' % rv
         else:
             return "dedent('''\\\n    %s''')" % rv
 
-ARCH = str(struct.calcsize('P') * 8) + "-bit"
+
+ARCH = str(struct.calcsize("P") * 8) + "-bit"
 
 
 # XXX: PyPy doesn't support hash randomization
-HASH_RANDOMIZATION = getattr(sys.flags, 'hash_randomization', False)
+HASH_RANDOMIZATION = getattr(sys.flags, "hash_randomization", False)
 
 _debug_tmp = []  # type: List[str]
 _debug_iter = 0
+
 
 def debug_decorator(func):
     """If SYMPY_DEBUG is True, it will print a nice execution tree with
@@ -205,19 +207,20 @@ def debug_decorator(func):
                     else:
                         r += "  %s\n" % a
                 return r
+
             if len(subtrees) == 0:
                 return ""
             f = []
             for a in subtrees[:-1]:
                 f.append(indent(a))
             f.append(indent(subtrees[-1], 2))
-            return ''.join(f)
+            return "".join(f)
 
         # If there is a bug and the algorithm enters an infinite loop, enable the
         # following lines. It will print the names and parameters of all major functions
         # that are called, *before* they are called
-        #from sympy.core.compatibility import reduce
-        #print("%s%s %s%s" % (_debug_iter, reduce(lambda x, y: x + y, \
+        # from sympy.core.compatibility import reduce
+        # print("%s%s %s%s" % (_debug_iter, reduce(lambda x, y: x + y, \
         #    map(lambda x: '-', range(1, 2 + _debug_iter))), get_function_name(f), args))
 
         r = f(*args, **kw)
@@ -244,6 +247,7 @@ def debug(*args):
     Print ``*args`` if SYMPY_DEBUG is True, else do nothing.
     """
     from sympy import SYMPY_DEBUG
+
     if SYMPY_DEBUG:
         print(*args, file=sys.stderr)
 
@@ -255,17 +259,17 @@ def find_executable(executable, path=None):
     found
     """
     if path is None:
-        path = os.environ['PATH']
+        path = os.environ["PATH"]
     paths = path.split(os.pathsep)
-    extlist = ['']
-    if os.name == 'os2':
+    extlist = [""]
+    if os.name == "os2":
         (base, ext) = os.path.splitext(executable)
         # executable files on OS/2 can have an arbitrary extension, but
         # .exe is automatically appended if no dot is present in the name
         if not ext:
             executable = executable + ".exe"
-    elif sys.platform == 'win32':
-        pathext = os.environ['PATHEXT'].lower().split(os.pathsep)
+    elif sys.platform == "win32":
+        pathext = os.environ["PATHEXT"].lower().split(os.pathsep)
         (base, ext) = os.path.splitext(executable)
         if ext.lower() not in pathext:
             extlist = pathext
@@ -305,21 +309,21 @@ def func_name(x, short=False):
     sympy.core.compatibility get_function_name
     """
     alias = {
-    'GreaterThan': 'Ge',
-    'StrictGreaterThan': 'Gt',
-    'LessThan': 'Le',
-    'StrictLessThan': 'Lt',
-    'Equality': 'Eq',
-    'Unequality': 'Ne',
+        "GreaterThan": "Ge",
+        "StrictGreaterThan": "Gt",
+        "LessThan": "Le",
+        "StrictLessThan": "Lt",
+        "Equality": "Eq",
+        "Unequality": "Ne",
     }
     typ = type(x)
     if str(typ).startswith("<type '"):
         typ = str(typ).split("'")[1].split("'")[0]
     elif str(typ).startswith("<class '"):
         typ = str(typ).split("'")[1].split("'")[0]
-    rv = getattr(getattr(x, 'func', x), '__name__', typ)
-    if '.' in rv:
-        rv = rv.split('.')[-1]
+    rv = getattr(getattr(x, "func", x), "__name__", typ)
+    if "." in rv:
+        rv = rv.split(".")[-1]
     if short:
         rv = alias.get(rv, rv)
     return rv
@@ -343,8 +347,7 @@ def _replace(reps):
     if not reps:
         return lambda x: x
     D = lambda match: reps[match.group(0)]
-    pattern = _re.compile("|".join(
-        [_re.escape(k) for k, v in reps.items()]), _re.M)
+    pattern = _re.compile("|".join([_re.escape(k) for k, v in reps.items()]), _re.M)
     return lambda string: pattern.sub(D, string)
 
 
@@ -436,11 +439,13 @@ def translate(s, a, b=None, c=None):
     mr = {}
     if a is None:
         if c is not None:
-            raise ValueError('c should be None when a=None is passed, instead got %s' % c)
+            raise ValueError(
+                "c should be None when a=None is passed, instead got %s" % c
+            )
         if b is None:
             return s
         c = b
-        a = b = ''
+        a = b = ""
     else:
         if type(a) is dict:
             short = {}
@@ -450,14 +455,14 @@ def translate(s, a, b=None, c=None):
             mr = a
             c = b
             if short:
-                a, b = [''.join(i) for i in list(zip(*short.items()))]
+                a, b = ["".join(i) for i in list(zip(*short.items()))]
             else:
-                a = b = ''
+                a = b = ""
         elif len(a) != len(b):
-            raise ValueError('oldchars and newchars have different lengths')
+            raise ValueError("oldchars and newchars have different lengths")
 
     if c:
-        val = str.maketrans('', '', c)
+        val = str.maketrans("", "", c)
         s = s.translate(val)
     s = replace(s, mr)
     n = str.maketrans(a, b)
@@ -471,13 +476,13 @@ def ordinal(num):
     n = as_int(num)
     k = abs(n) % 100
     if 11 <= k <= 13:
-        suffix = 'th'
+        suffix = "th"
     elif k % 10 == 1:
-        suffix = 'st'
+        suffix = "st"
     elif k % 10 == 2:
-        suffix = 'nd'
+        suffix = "nd"
     elif k % 10 == 3:
-        suffix = 'rd'
+        suffix = "rd"
     else:
-        suffix = 'th'
+        suffix = "th"
     return str(n) + suffix

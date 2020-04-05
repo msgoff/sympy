@@ -2,7 +2,7 @@ from __future__ import print_function, division
 
 from sympy.core import Symbol, Integer
 
-x = Symbol('x')
+x = Symbol("x")
 i3 = Integer(3)
 
 

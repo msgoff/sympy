@@ -2,8 +2,18 @@
 
 from __future__ import print_function, division
 
-from tokenize import (generate_tokens, untokenize, TokenError,
-    NUMBER, STRING, NAME, OP, ENDMARKER, ERRORTOKEN, NEWLINE)
+from tokenize import (
+    generate_tokens,
+    untokenize,
+    TokenError,
+    NUMBER,
+    STRING,
+    NAME,
+    OP,
+    ENDMARKER,
+    ERRORTOKEN,
+    NEWLINE,
+)
 
 from keyword import iskeyword
 
@@ -17,7 +27,6 @@ from sympy.core.function import arity
 from sympy.utilities.misc import filldedent, func_name
 
 
-
 def _token_splittable(token):
     """
     Predicate for whether a token name can be split into multiple tokens.
@@ -26,11 +35,11 @@ def _token_splittable(token):
     it is not the name of a Greek letter. This is used to implicitly convert
     expressions like 'xyz' into 'x*y*z'.
     """
-    if '_' in token:
+    if "_" in token:
         return False
     else:
         try:
-            return not unicodedata.lookup('GREEK SMALL LETTER ' + token)
+            return not unicodedata.lookup("GREEK SMALL LETTER " + token)
         except KeyError:
             pass
     if len(token) > 1:
@@ -52,11 +61,11 @@ def _token_callable(token, local_dict, global_dict, nextToken=None):
 
 
 def _add_factorial_tokens(name, result):
-    if result == [] or result[-1][1] == '(':
+    if result == [] or result[-1][1] == "(":
         raise TokenError()
 
-    beginning = [(NAME, name), (OP, '(')]
-    end = [(OP, ')')]
+    beginning = [(NAME, name), (OP, "(")]
+    end = [(OP, ")")]
 
     diff = 0
     length = len(result)
@@ -65,14 +74,14 @@ def _add_factorial_tokens(name, result):
         toknum, tokval = token
         i = length - index - 1
 
-        if tokval == ')':
+        if tokval == ")":
             diff += 1
-        elif tokval == '(':
+        elif tokval == "(":
             diff -= 1
 
         if diff == 0:
             if i - 1 >= 0 and result[i - 1][0] == NAME:
-                return result[:i - 1] + beginning + result[i - 1:] + end
+                return result[: i - 1] + beginning + result[i - 1 :] + end
             else:
                 return result[:i] + beginning + result[i:] + end
 
@@ -85,13 +94,14 @@ class AppliedFunction(object):
 
     `exponent` is for handling the shorthand sin^2, ln^2, etc.
     """
+
     def __init__(self, function, args, exponent=None):
         if exponent is None:
             exponent = []
         self.function = function
         self.args = args
         self.exponent = exponent
-        self.items = ['function', 'args', 'exponent']
+        self.items = ["function", "args", "exponent"]
 
     def expand(self):
         """Return a list of tokens representing the function"""
@@ -104,12 +114,12 @@ class AppliedFunction(object):
         return getattr(self, self.items[index])
 
     def __repr__(self):
-        return "AppliedFunction(%s, %s, %s)" % (self.function, self.args,
-                                                self.exponent)
+        return "AppliedFunction(%s, %s, %s)" % (self.function, self.args, self.exponent)
 
 
 class ParenthesisGroup(list):
     """List of tokens representing an expression in parentheses."""
+
     pass
 
 
@@ -135,10 +145,10 @@ def _group_parentheses(recursor):
         stacklevel = 0
         for token in tokens:
             if token[0] == OP:
-                if token[1] == '(':
+                if token[1] == "(":
                     stacks.append(ParenthesisGroup([]))
                     stacklevel += 1
-                elif token[1] == ')':
+                elif token[1] == ")":
                     stacks[-1].append(token)
                     stack = stacks.pop()
 
@@ -150,9 +160,7 @@ def _group_parentheses(recursor):
                         # Recurse here to handle nested parentheses
                         # Strip off the outer parentheses to avoid an infinite loop
                         inner = stack[1:-1]
-                        inner = recursor(inner,
-                                         local_dict,
-                                         global_dict)
+                        inner = recursor(inner, local_dict, global_dict)
                         parenGroup = [stack[0]] + inner + [stack[-1]]
                         result.append(ParenthesisGroup(parenGroup))
                     stacklevel -= 1
@@ -164,6 +172,7 @@ def _group_parentheses(recursor):
         if stacklevel:
             raise TokenError("Mismatched parentheses")
         return result
+
     return _inner
 
 
@@ -211,46 +220,50 @@ def _implicit_multiplication(tokens, local_dict, global_dict):
     result = []
     for tok, nextTok in zip(tokens, tokens[1:]):
         result.append(tok)
-        if (isinstance(tok, AppliedFunction) and
-              isinstance(nextTok, AppliedFunction)):
-            result.append((OP, '*'))
-        elif (isinstance(tok, AppliedFunction) and
-              nextTok[0] == OP and nextTok[1] == '('):
+        if isinstance(tok, AppliedFunction) and isinstance(nextTok, AppliedFunction):
+            result.append((OP, "*"))
+        elif (
+            isinstance(tok, AppliedFunction) and nextTok[0] == OP and nextTok[1] == "("
+        ):
             # Applied function followed by an open parenthesis
             if tok.function[1] == "Function":
-                result[-1].function = (result[-1].function[0], 'Symbol')
-            result.append((OP, '*'))
-        elif (tok[0] == OP and tok[1] == ')' and
-              isinstance(nextTok, AppliedFunction)):
+                result[-1].function = (result[-1].function[0], "Symbol")
+            result.append((OP, "*"))
+        elif tok[0] == OP and tok[1] == ")" and isinstance(nextTok, AppliedFunction):
             # Close parenthesis followed by an applied function
-            result.append((OP, '*'))
-        elif (tok[0] == OP and tok[1] == ')' and
-              nextTok[0] == NAME):
+            result.append((OP, "*"))
+        elif tok[0] == OP and tok[1] == ")" and nextTok[0] == NAME:
             # Close parenthesis followed by an implicitly applied function
-            result.append((OP, '*'))
-        elif (tok[0] == nextTok[0] == OP
-              and tok[1] == ')' and nextTok[1] == '('):
+            result.append((OP, "*"))
+        elif tok[0] == nextTok[0] == OP and tok[1] == ")" and nextTok[1] == "(":
             # Close parenthesis followed by an open parenthesis
-            result.append((OP, '*'))
-        elif (isinstance(tok, AppliedFunction) and nextTok[0] == NAME):
+            result.append((OP, "*"))
+        elif isinstance(tok, AppliedFunction) and nextTok[0] == NAME:
             # Applied function followed by implicitly applied function
-            result.append((OP, '*'))
-        elif (tok[0] == NAME and
-              not _token_callable(tok, local_dict, global_dict) and
-              nextTok[0] == OP and nextTok[1] == '('):
+            result.append((OP, "*"))
+        elif (
+            tok[0] == NAME
+            and not _token_callable(tok, local_dict, global_dict)
+            and nextTok[0] == OP
+            and nextTok[1] == "("
+        ):
             # Constant followed by parenthesis
-            result.append((OP, '*'))
-        elif (tok[0] == NAME and
-              not _token_callable(tok, local_dict, global_dict) and
-              nextTok[0] == NAME and
-              not _token_callable(nextTok, local_dict, global_dict)):
+            result.append((OP, "*"))
+        elif (
+            tok[0] == NAME
+            and not _token_callable(tok, local_dict, global_dict)
+            and nextTok[0] == NAME
+            and not _token_callable(nextTok, local_dict, global_dict)
+        ):
             # Constant followed by constant
-            result.append((OP, '*'))
-        elif (tok[0] == NAME and
-              not _token_callable(tok, local_dict, global_dict) and
-              (isinstance(nextTok, AppliedFunction) or nextTok[0] == NAME)):
+            result.append((OP, "*"))
+        elif (
+            tok[0] == NAME
+            and not _token_callable(tok, local_dict, global_dict)
+            and (isinstance(nextTok, AppliedFunction) or nextTok[0] == NAME)
+        ):
             # Constant followed by (implicitly applied) function
-            result.append((OP, '*'))
+            result.append((OP, "*"))
     if tokens:
         result.append(tokens[-1])
     return result
@@ -261,17 +274,17 @@ def _implicit_application(tokens, local_dict, global_dict):
     result = []
     appendParen = 0  # number of closing parentheses to add
     skip = 0  # number of tokens to delay before adding a ')' (to
-              # capture **, ^, etc.)
+    # capture **, ^, etc.)
     exponentSkip = False  # skipping tokens before inserting parentheses to
-                          # work with function exponentiation
+    # work with function exponentiation
     for tok, nextTok in zip(tokens, tokens[1:]):
         result.append(tok)
-        if (tok[0] == NAME and nextTok[0] not in [OP, ENDMARKER, NEWLINE]):
+        if tok[0] == NAME and nextTok[0] not in [OP, ENDMARKER, NEWLINE]:
             if _token_callable(tok, local_dict, global_dict, nextTok):
-                result.append((OP, '('))
+                result.append((OP, "("))
                 appendParen += 1
         # name followed by exponent - function exponentiation
-        elif (tok[0] == NAME and nextTok[0] == OP and nextTok[1] == '**'):
+        elif tok[0] == NAME and nextTok[0] == OP and nextTok[1] == "**":
             if _token_callable(tok, local_dict, global_dict):
                 exponentSkip = True
         elif exponentSkip:
@@ -279,31 +292,30 @@ def _implicit_application(tokens, local_dict, global_dict):
             # power of the function exponent) OR a multiplication (as
             # implicit multiplication would have added an extraneous
             # multiplication)
-            if (isinstance(tok, AppliedFunction)
-                or (tok[0] == OP and tok[1] == '*')):
+            if isinstance(tok, AppliedFunction) or (tok[0] == OP and tok[1] == "*"):
                 # don't add anything if the next token is a multiplication
                 # or if there's already a parenthesis (if parenthesis, still
                 # stop skipping tokens)
-                if not (nextTok[0] == OP and nextTok[1] == '*'):
-                    if not(nextTok[0] == OP and nextTok[1] == '('):
-                        result.append((OP, '('))
+                if not (nextTok[0] == OP and nextTok[1] == "*"):
+                    if not (nextTok[0] == OP and nextTok[1] == "("):
+                        result.append((OP, "("))
                         appendParen += 1
                     exponentSkip = False
         elif appendParen:
-            if nextTok[0] == OP and nextTok[1] in ('^', '**', '*'):
+            if nextTok[0] == OP and nextTok[1] in ("^", "**", "*"):
                 skip = 1
                 continue
             if skip:
                 skip -= 1
                 continue
-            result.append((OP, ')'))
+            result.append((OP, ")"))
             appendParen -= 1
 
     if tokens:
         result.append(tokens[-1])
 
     if appendParen:
-        result.extend([(OP, ')')] * appendParen)
+        result.extend([(OP, ")")] * appendParen)
     return result
 
 
@@ -324,27 +336,27 @@ def function_exponentiation(tokens, local_dict, global_dict):
     consuming_exponent = False
     level = 0
     for tok, nextTok in zip(tokens, tokens[1:]):
-        if tok[0] == NAME and nextTok[0] == OP and nextTok[1] == '**':
+        if tok[0] == NAME and nextTok[0] == OP and nextTok[1] == "**":
             if _token_callable(tok, local_dict, global_dict):
                 consuming_exponent = True
         elif consuming_exponent:
-            if tok[0] == NAME and tok[1] == 'Function':
-                tok = (NAME, 'Symbol')
+            if tok[0] == NAME and tok[1] == "Function":
+                tok = (NAME, "Symbol")
             exponent.append(tok)
 
             # only want to stop after hitting )
-            if tok[0] == nextTok[0] == OP and tok[1] == ')' and nextTok[1] == '(':
+            if tok[0] == nextTok[0] == OP and tok[1] == ")" and nextTok[1] == "(":
                 consuming_exponent = False
             # if implicit multiplication was used, we may have )*( instead
-            if tok[0] == nextTok[0] == OP and tok[1] == '*' and nextTok[1] == '(':
+            if tok[0] == nextTok[0] == OP and tok[1] == "*" and nextTok[1] == "(":
                 consuming_exponent = False
                 del exponent[-1]
             continue
         elif exponent and not consuming_exponent:
             if tok[0] == OP:
-                if tok[1] == '(':
+                if tok[1] == "(":
                     level += 1
-                elif tok[1] == ')':
+                elif tok[1] == ")":
                     level -= 1
             if level == 0:
                 result.append(tok)
@@ -381,19 +393,20 @@ def split_symbols_custom(predicate):
     ... (transformation, implicit_multiplication))
     unsplittable
     """
+
     def _split_symbols(tokens, local_dict, global_dict):
         result = []
         split = False
-        split_previous=False
+        split_previous = False
 
         for tok in tokens:
             if split_previous:
                 # throw out closing parenthesis of Symbol that was split
-                split_previous=False
+                split_previous = False
                 continue
-            split_previous=False
+            split_previous = False
 
-            if tok[0] == NAME and tok[1] in ['Symbol', 'Function']:
+            if tok[0] == NAME and tok[1] in ["Symbol", "Function"]:
                 split = True
 
             elif split and tok[0] == NAME:
@@ -412,16 +425,28 @@ def split_symbols_custom(predicate):
                             char = [char]
                             for i in range(i + 1, len(symbol)):
                                 if not symbol[i].isdigit():
-                                  i -= 1
-                                  break
+                                    i -= 1
+                                    break
                                 char.append(symbol[i])
-                            char = ''.join(char)
-                            result.extend([(NAME, 'Number'), (OP, '('),
-                                           (NAME, "'%s'" % char), (OP, ')')])
+                            char = "".join(char)
+                            result.extend(
+                                [
+                                    (NAME, "Number"),
+                                    (OP, "("),
+                                    (NAME, "'%s'" % char),
+                                    (OP, ")"),
+                                ]
+                            )
                         else:
-                            use = tok_type if i == len(symbol) else 'Symbol'
-                            result.extend([(NAME, use), (OP, '('),
-                                           (NAME, "'%s'" % char), (OP, ')')])
+                            use = tok_type if i == len(symbol) else "Symbol"
+                            result.extend(
+                                [
+                                    (NAME, use),
+                                    (OP, "("),
+                                    (NAME, "'%s'" % char),
+                                    (OP, ")"),
+                                ]
+                            )
                         i += 1
 
                     # Set split_previous=True so will skip
@@ -465,9 +490,11 @@ def implicit_multiplication(result, local_dict, global_dict):
     3*x*y
     """
     # These are interdependent steps, so we don't expose them separately
-    for step in (_group_parentheses(implicit_multiplication),
-                 _apply_functions,
-                 _implicit_multiplication):
+    for step in (
+        _group_parentheses(implicit_multiplication),
+        _apply_functions,
+        _implicit_multiplication,
+    ):
         result = step(result, local_dict, global_dict)
 
     result = _flatten(result)
@@ -490,9 +517,11 @@ def implicit_application(result, local_dict, global_dict):
     >>> parse_expr('cot z + csc z', transformations=transformations)
     cot(z) + csc(z)
     """
-    for step in (_group_parentheses(implicit_application),
-                 _apply_functions,
-                 _implicit_application,):
+    for step in (
+        _group_parentheses(implicit_application),
+        _apply_functions,
+        _implicit_application,
+    ):
         result = step(result, local_dict, global_dict)
 
     result = _flatten(result)
@@ -522,8 +551,12 @@ def implicit_multiplication_application(result, local_dict, global_dict):
     3*x*y*z + 10*sin(x**2)**2 + tan(theta)
 
     """
-    for step in (split_symbols, implicit_multiplication,
-                 implicit_application, function_exponentiation):
+    for step in (
+        split_symbols,
+        implicit_multiplication,
+        implicit_application,
+        function_exponentiation,
+    ):
         result = step(result, local_dict, global_dict)
 
     return result
@@ -541,21 +574,31 @@ def auto_symbol(tokens, local_dict, global_dict):
         if tokNum == NAME:
             name = tokVal
 
-            if (name in ['True', 'False', 'None']
+            if (
+                name in ["True", "False", "None"]
                 or iskeyword(name)
                 # Don't convert attribute access
-                or (prevTok[0] == OP and prevTok[1] == '.')
+                or (prevTok[0] == OP and prevTok[1] == ".")
                 # Don't convert keyword arguments
-                or (prevTok[0] == OP and prevTok[1] in ('(', ',')
-                    and nextTokNum == OP and nextTokVal == '=')):
+                or (
+                    prevTok[0] == OP
+                    and prevTok[1] in ("(", ",")
+                    and nextTokNum == OP
+                    and nextTokVal == "="
+                )
+            ):
                 result.append((NAME, name))
                 continue
             elif name in local_dict:
-                if isinstance(local_dict[name], Symbol) and nextTokVal == '(':
-                    result.extend([(NAME, 'Function'),
-                                   (OP, '('),
-                                   (NAME, repr(str(local_dict[name]))),
-                                   (OP, ')')])
+                if isinstance(local_dict[name], Symbol) and nextTokVal == "(":
+                    result.extend(
+                        [
+                            (NAME, "Function"),
+                            (OP, "("),
+                            (NAME, repr(str(local_dict[name]))),
+                            (OP, ")"),
+                        ]
+                    )
                 else:
                     result.append((NAME, name))
                 continue
@@ -565,12 +608,14 @@ def auto_symbol(tokens, local_dict, global_dict):
                     result.append((NAME, name))
                     continue
 
-            result.extend([
-                (NAME, 'Symbol' if nextTokVal != '(' else 'Function'),
-                (OP, '('),
-                (NAME, repr(str(name))),
-                (OP, ')'),
-            ])
+            result.extend(
+                [
+                    (NAME, "Symbol" if nextTokVal != "(" else "Function"),
+                    (OP, "("),
+                    (NAME, repr(str(name))),
+                    (OP, ")"),
+                ]
+            )
         else:
             result.append((tokNum, tokVal))
 
@@ -590,24 +635,20 @@ def lambda_notation(tokens, local_dict, global_dict):
     toknum, tokval = tokens[0]
     tokLen = len(tokens)
 
-    if toknum == NAME and tokval == 'lambda':
+    if toknum == NAME and tokval == "lambda":
         if tokLen == 2 or tokLen == 3 and tokens[1][0] == NEWLINE:
             # In Python 3.6.7+, inputs without a newline get NEWLINE added to
             # the tokens
             result.extend(tokens)
         elif tokLen > 2:
-            result.extend([
-                (NAME, 'Lambda'),
-                (OP, '('),
-                (OP, '('),
-                (OP, ')'),
-                (OP, ')'),
-            ])
+            result.extend(
+                [(NAME, "Lambda"), (OP, "("), (OP, "("), (OP, ")"), (OP, ")"),]
+            )
             for tokNum, tokVal in tokens[1:]:
-                if tokNum == OP and tokVal == ':':
-                    tokVal = ','
+                if tokNum == OP and tokVal == ":":
+                    tokVal = ","
                     flag = True
-                if not flag and tokNum == OP and tokVal in ['*', '**']:
+                if not flag and tokNum == OP and tokVal in ["*", "**"]:
                     raise TokenError("Starred arguments in lambda not supported")
                 if flag:
                     result.insert(-1, (tokNum, tokVal))
@@ -626,16 +667,16 @@ def factorial_notation(tokens, local_dict, global_dict):
     for toknum, tokval in tokens:
         if toknum == ERRORTOKEN:
             op = tokval
-            if op == '!':
+            if op == "!":
                 nfactorial += 1
             else:
                 nfactorial = 0
                 result.append((OP, op))
         else:
             if nfactorial == 1:
-                result = _add_factorial_tokens('factorial', result)
+                result = _add_factorial_tokens("factorial", result)
             elif nfactorial == 2:
-                result = _add_factorial_tokens('factorial2', result)
+                result = _add_factorial_tokens("factorial2", result)
             elif nfactorial > 2:
                 raise TokenError
             nfactorial = 0
@@ -648,8 +689,8 @@ def convert_xor(tokens, local_dict, global_dict):
     result = []
     for toknum, tokval in tokens:
         if toknum == OP:
-            if tokval == '^':
-                result.append((OP, '**'))
+            if tokval == "^":
+                result.append((OP, "**"))
             else:
                 result.append((toknum, tokval))
         else:
@@ -668,16 +709,20 @@ def repeated_decimals(tokens, local_dict, global_dict):
     result = []
 
     def is_digit(s):
-        return all(i in '0123456789_' for i in s)
+        return all(i in "0123456789_" for i in s)
 
     # num will running match any DECIMAL [ INTEGER ]
     num = []
     for toknum, tokval in tokens:
         if toknum == NUMBER:
-            if (not num and '.' in tokval and 'e' not in tokval.lower() and
-                'j' not in tokval.lower()):
+            if (
+                not num
+                and "." in tokval
+                and "e" not in tokval.lower()
+                and "j" not in tokval.lower()
+            ):
                 num.append((toknum, tokval))
-            elif is_digit(tokval)and  len(num) == 2:
+            elif is_digit(tokval) and len(num) == 2:
                 num.append((toknum, tokval))
             elif is_digit(tokval) and len(num) == 3 and is_digit(num[-1][1]):
                 # Python 2 tokenizes 00123 as '00', '123'
@@ -686,13 +731,13 @@ def repeated_decimals(tokens, local_dict, global_dict):
             else:
                 num = []
         elif toknum == OP:
-            if tokval == '[' and len(num) == 1:
+            if tokval == "[" and len(num) == 1:
                 num.append((OP, tokval))
-            elif tokval == ']' and len(num) >= 3:
+            elif tokval == "]" and len(num) >= 3:
                 num.append((OP, tokval))
-            elif tokval == '.' and not num:
+            elif tokval == "." and not num:
                 # handle .[1]
-                num.append((NUMBER, '0.'))
+                num.append((NUMBER, "0."))
             else:
                 num = []
         else:
@@ -700,48 +745,48 @@ def repeated_decimals(tokens, local_dict, global_dict):
 
         result.append((toknum, tokval))
 
-        if num and num[-1][1] == ']':
+        if num and num[-1][1] == "]":
             # pre.post[repetend] = a + b/c + d/e where a = pre, b/c = post,
             # and d/e = repetend
-            result = result[:-len(num)]
-            pre, post = num[0][1].split('.')
+            result = result[: -len(num)]
+            pre, post = num[0][1].split(".")
             repetend = num[2][1]
             if len(num) == 5:
                 repetend += num[3][1]
 
-            pre = pre.replace('_', '')
-            post = post.replace('_', '')
-            repetend = repetend.replace('_', '')
+            pre = pre.replace("_", "")
+            post = post.replace("_", "")
+            repetend = repetend.replace("_", "")
 
-            zeros = '0'*len(post)
-            post, repetends = [w.lstrip('0') for w in [post, repetend]]
-                                        # or else interpreted as octal
+            zeros = "0" * len(post)
+            post, repetends = [w.lstrip("0") for w in [post, repetend]]
+            # or else interpreted as octal
 
-            a = pre or '0'
-            b, c = post or '0', '1' + zeros
-            d, e = repetends, ('9'*len(repetend)) + zeros
+            a = pre or "0"
+            b, c = post or "0", "1" + zeros
+            d, e = repetends, ("9" * len(repetend)) + zeros
 
             seq = [
-                (OP, '('),
-                    (NAME, 'Integer'),
-                    (OP, '('),
-                        (NUMBER, a),
-                    (OP, ')'),
-                    (OP, '+'),
-                    (NAME, 'Rational'),
-                    (OP, '('),
-                        (NUMBER, b),
-                        (OP, ','),
-                        (NUMBER, c),
-                    (OP, ')'),
-                    (OP, '+'),
-                    (NAME, 'Rational'),
-                    (OP, '('),
-                        (NUMBER, d),
-                        (OP, ','),
-                        (NUMBER, e),
-                    (OP, ')'),
-                (OP, ')'),
+                (OP, "("),
+                (NAME, "Integer"),
+                (OP, "("),
+                (NUMBER, a),
+                (OP, ")"),
+                (OP, "+"),
+                (NAME, "Rational"),
+                (OP, "("),
+                (NUMBER, b),
+                (OP, ","),
+                (NUMBER, c),
+                (OP, ")"),
+                (OP, "+"),
+                (NAME, "Rational"),
+                (OP, "("),
+                (NUMBER, d),
+                (OP, ","),
+                (NUMBER, e),
+                (OP, ")"),
+                (OP, ")"),
             ]
             result.extend(seq)
             num = []
@@ -764,17 +809,22 @@ def auto_number(tokens, local_dict, global_dict):
             number = tokval
             postfix = []
 
-            if number.endswith('j') or number.endswith('J'):
+            if number.endswith("j") or number.endswith("J"):
                 number = number[:-1]
-                postfix = [(OP, '*'), (NAME, 'I')]
+                postfix = [(OP, "*"), (NAME, "I")]
 
-            if '.' in number or (('e' in number or 'E' in number) and
-                    not (number.startswith('0x') or number.startswith('0X'))):
-                seq = [(NAME, 'Float'), (OP, '('),
-                    (NUMBER, repr(str(number))), (OP, ')')]
+            if "." in number or (
+                ("e" in number or "E" in number)
+                and not (number.startswith("0x") or number.startswith("0X"))
+            ):
+                seq = [
+                    (NAME, "Float"),
+                    (OP, "("),
+                    (NUMBER, repr(str(number))),
+                    (OP, ")"),
+                ]
             else:
-                seq = [(NAME, 'Integer'), (OP, '('), (
-                    NUMBER, number), (OP, ')')]
+                seq = [(NAME, "Integer"), (OP, "("), (NUMBER, number), (OP, ")")]
 
             result.extend(seq + postfix)
         else:
@@ -789,9 +839,9 @@ def rationalize(tokens, local_dict, global_dict):
     passed_float = False
     for toknum, tokval in tokens:
         if toknum == NAME:
-            if tokval == 'Float':
+            if tokval == "Float":
                 passed_float = True
-                tokval = 'Rational'
+                tokval = "Rational"
             result.append((toknum, tokval))
         elif passed_float == True and toknum == NUMBER:
             passed_float = False
@@ -859,9 +909,11 @@ def convert_equals_signs(result, local_dict, global_dict):
     Eq(Eq(2, x), False)
 
     """
-    for step in (_group_parentheses(convert_equals_signs),
-                  _apply_functions,
-                  _transform_equals_sign):
+    for step in (
+        _group_parentheses(convert_equals_signs),
+        _apply_functions,
+        _transform_equals_sign,
+    ):
         result = step(result, local_dict, global_dict)
 
     result = _flatten(result)
@@ -871,8 +923,13 @@ def convert_equals_signs(result, local_dict, global_dict):
 #: Standard transformations for :func:`parse_expr`.
 #: Inserts calls to :class:`~.Symbol`, :class:`~.Integer`, and other SymPy
 #: datatypes and allows the use of standard factorial notation (e.g. ``x!``).
-standard_transformations = (lambda_notation, auto_symbol, repeated_decimals, auto_number,
-    factorial_notation)
+standard_transformations = (
+    lambda_notation,
+    auto_symbol,
+    repeated_decimals,
+    auto_number,
+    factorial_notation,
+)
 
 
 def stringify_expr(s, local_dict, global_dict, transformations):
@@ -899,14 +956,18 @@ def eval_expr(code, local_dict, global_dict):
 
     Generally, ``parse_expr`` should be used.
     """
-    expr = eval(
-        code, global_dict, local_dict)  # take local objects in preference
+    expr = eval(code, global_dict, local_dict)  # take local objects in preference
 
     return expr
 
 
-def parse_expr(s, local_dict=None, transformations=standard_transformations,
-               global_dict=None, evaluate=True):
+def parse_expr(
+    s,
+    local_dict=None,
+    transformations=standard_transformations,
+    global_dict=None,
+    evaluate=True,
+):
     """Converts the string ``s`` to a SymPy expression, in ``local_dict``
 
     Parameters
@@ -978,32 +1039,40 @@ def parse_expr(s, local_dict=None, transformations=standard_transformations,
     if local_dict is None:
         local_dict = {}
     elif not isinstance(local_dict, dict):
-        raise TypeError('expecting local_dict to be a dict')
+        raise TypeError("expecting local_dict to be a dict")
 
     if global_dict is None:
         global_dict = {}
-        exec_('from sympy import *', global_dict)
+        exec_("from sympy import *", global_dict)
     elif not isinstance(global_dict, dict):
-        raise TypeError('expecting global_dict to be a dict')
+        raise TypeError("expecting global_dict to be a dict")
 
     transformations = transformations or ()
     if transformations:
         if not iterable(transformations):
-            raise TypeError(
-                '`transformations` should be a list of functions.')
+            raise TypeError("`transformations` should be a list of functions.")
         for _ in transformations:
             if not callable(_):
-                raise TypeError(filldedent('''
+                raise TypeError(
+                    filldedent(
+                        """
                     expected a function in `transformations`,
-                    not %s''' % func_name(_)))
+                    not %s"""
+                        % func_name(_)
+                    )
+                )
             if arity(_) != 3:
-                raise TypeError(filldedent('''
+                raise TypeError(
+                    filldedent(
+                        """
                     a transformation should be function that
-                    takes 3 arguments'''))
+                    takes 3 arguments"""
+                    )
+                )
     code = stringify_expr(s, local_dict, global_dict, transformations)
 
     if not evaluate:
-        code = compile(evaluateFalse(code), '<string>', 'eval')
+        code = compile(evaluateFalse(code), "<string>", "eval")
 
     return eval_expr(code, local_dict, global_dict)
 
@@ -1022,14 +1091,14 @@ def evaluateFalse(s):
 
 class EvaluateFalseTransformer(ast.NodeTransformer):
     operators = {
-        ast.Add: 'Add',
-        ast.Mult: 'Mul',
-        ast.Pow: 'Pow',
-        ast.Sub: 'Add',
-        ast.Div: 'Mul',
-        ast.BitOr: 'Or',
-        ast.BitAnd: 'And',
-        ast.BitXor: 'Not',
+        ast.Add: "Add",
+        ast.Mult: "Mul",
+        ast.Pow: "Pow",
+        ast.Sub: "Add",
+        ast.Div: "Mul",
+        ast.BitOr: "Or",
+        ast.BitAnd: "And",
+        ast.BitXor: "Not",
     }
 
     def flatten(self, args, func):
@@ -1052,45 +1121,67 @@ class EvaluateFalseTransformer(ast.NodeTransformer):
             sympy_class = self.operators[node.op.__class__]
             right = self.visit(node.right)
             left = self.visit(node.left)
-            if isinstance(node.left, ast.UnaryOp) and (isinstance(node.right, ast.UnaryOp) == 0) and sympy_class in ('Mul',):
+            if (
+                isinstance(node.left, ast.UnaryOp)
+                and (isinstance(node.right, ast.UnaryOp) == 0)
+                and sympy_class in ("Mul",)
+            ):
                 left, right = right, left
             if isinstance(node.op, ast.Sub):
                 right = ast.Call(
-                    func=ast.Name(id='Mul', ctx=ast.Load()),
+                    func=ast.Name(id="Mul", ctx=ast.Load()),
                     args=[ast.UnaryOp(op=ast.USub(), operand=ast.Num(1)), right],
-                    keywords=[ast.keyword(arg='evaluate', value=ast.Name(id='False', ctx=ast.Load()))],
+                    keywords=[
+                        ast.keyword(
+                            arg="evaluate", value=ast.Name(id="False", ctx=ast.Load())
+                        )
+                    ],
                     starargs=None,
-                    kwargs=None
+                    kwargs=None,
                 )
             if isinstance(node.op, ast.Div):
                 if isinstance(node.left, ast.UnaryOp):
-                    if isinstance(node.right,ast.UnaryOp):
+                    if isinstance(node.right, ast.UnaryOp):
                         left, right = right, left
                     left = ast.Call(
-                    func=ast.Name(id='Pow', ctx=ast.Load()),
-                    args=[left, ast.UnaryOp(op=ast.USub(), operand=ast.Num(1))],
-                    keywords=[ast.keyword(arg='evaluate', value=ast.Name(id='False', ctx=ast.Load()))],
-                    starargs=None,
-                    kwargs=None
-                )
+                        func=ast.Name(id="Pow", ctx=ast.Load()),
+                        args=[left, ast.UnaryOp(op=ast.USub(), operand=ast.Num(1))],
+                        keywords=[
+                            ast.keyword(
+                                arg="evaluate",
+                                value=ast.Name(id="False", ctx=ast.Load()),
+                            )
+                        ],
+                        starargs=None,
+                        kwargs=None,
+                    )
                 else:
                     right = ast.Call(
-                    func=ast.Name(id='Pow', ctx=ast.Load()),
-                    args=[right, ast.UnaryOp(op=ast.USub(), operand=ast.Num(1))],
-                    keywords=[ast.keyword(arg='evaluate', value=ast.Name(id='False', ctx=ast.Load()))],
-                    starargs=None,
-                    kwargs=None
-                )
+                        func=ast.Name(id="Pow", ctx=ast.Load()),
+                        args=[right, ast.UnaryOp(op=ast.USub(), operand=ast.Num(1))],
+                        keywords=[
+                            ast.keyword(
+                                arg="evaluate",
+                                value=ast.Name(id="False", ctx=ast.Load()),
+                            )
+                        ],
+                        starargs=None,
+                        kwargs=None,
+                    )
 
             new_node = ast.Call(
                 func=ast.Name(id=sympy_class, ctx=ast.Load()),
                 args=[left, right],
-                keywords=[ast.keyword(arg='evaluate', value=ast.Name(id='False', ctx=ast.Load()))],
+                keywords=[
+                    ast.keyword(
+                        arg="evaluate", value=ast.Name(id="False", ctx=ast.Load())
+                    )
+                ],
                 starargs=None,
-                kwargs=None
+                kwargs=None,
             )
 
-            if sympy_class in ('Add', 'Mul'):
+            if sympy_class in ("Add", "Mul"):
                 # Denest Add or Mul as appropriate
                 new_node.args = self.flatten(new_node.args, sympy_class)
 

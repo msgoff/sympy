@@ -15,20 +15,37 @@
 
 from __future__ import division
 
-__all__ = ['refraction_angle',
-           'deviation',
-           'fresnel_coefficients',
-           'brewster_angle',
-           'critical_angle',
-           'lens_makers_formula',
-           'mirror_formula',
-           'lens_formula',
-           'hyperfocal_distance',
-           'transverse_magnification'
-           ]
+__all__ = [
+    "refraction_angle",
+    "deviation",
+    "fresnel_coefficients",
+    "brewster_angle",
+    "critical_angle",
+    "lens_makers_formula",
+    "mirror_formula",
+    "lens_formula",
+    "hyperfocal_distance",
+    "transverse_magnification",
+]
 
-from sympy import Symbol, sympify, sqrt, Matrix, acos, oo, Limit, atan2, asin,\
-cos, sin, tan, I, cancel, pi, Float
+from sympy import (
+    Symbol,
+    sympify,
+    sqrt,
+    Matrix,
+    acos,
+    oo,
+    Limit,
+    atan2,
+    asin,
+    cos,
+    sin,
+    tan,
+    I,
+    cancel,
+    pi,
+    Float,
+)
 from sympy.core.compatibility import is_sequence
 from sympy.geometry.line import Ray3D
 from sympy.geometry.util import intersection
@@ -127,16 +144,16 @@ def refraction_angle(incident, medium1, medium2, normal=None, plane=None):
 
     if angle_of_incidence is not None:
         if normal is not None or plane is not None:
-            raise ValueError('Normal/plane not allowed if incident is an angle')
+            raise ValueError("Normal/plane not allowed if incident is an angle")
 
-        if not 0.0 <= angle_of_incidence < pi*0.5:
-            raise ValueError('Angle of incidence not in range [0:pi/2)')
+        if not 0.0 <= angle_of_incidence < pi * 0.5:
+            raise ValueError("Angle of incidence not in range [0:pi/2)")
 
         if critical_angle_ and angle_of_incidence > critical_angle_:
-            raise ValueError('Ray undergoes total internal reflection')
-        return asin(n1*sin(angle_of_incidence)/n2)
+            raise ValueError("Ray undergoes total internal reflection")
+        return asin(n1 * sin(angle_of_incidence) / n2)
 
-    if angle_of_incidence and not 0 <= angle_of_incidence < pi*0.5:
+    if angle_of_incidence and not 0 <= angle_of_incidence < pi * 0.5:
         raise ValueError
 
     # Treat the incident as ray below
@@ -152,8 +169,7 @@ def refraction_angle(incident, medium1, medium2, normal=None, plane=None):
         elif isinstance(incident, Ray3D):
             _incident = Matrix(incident.direction_ratio)
         else:
-            raise TypeError(
-                "incident should be a Matrix, Ray3D, or sequence")
+            raise TypeError("incident should be a Matrix, Ray3D, or sequence")
     else:
         _incident = incident
 
@@ -179,31 +195,31 @@ def refraction_angle(incident, medium1, medium2, normal=None, plane=None):
                     intersection_pt = intersection(incident, normal)
                     if len(intersection_pt) == 0:
                         raise ValueError(
-                            "Normal isn't concurrent with the incident ray.")
+                            "Normal isn't concurrent with the incident ray."
+                        )
                     else:
                         return_ray = True
                         intersection_pt = intersection_pt[0]
             else:
-                raise TypeError(
-                    "Normal should be a Matrix, Ray3D, or sequence")
+                raise TypeError("Normal should be a Matrix, Ray3D, or sequence")
         else:
             _normal = normal
 
-    eta = n1/n2  # Relative index of refraction
+    eta = n1 / n2  # Relative index of refraction
     # Calculating magnitude of the vectors
-    mag_incident = sqrt(sum([i**2 for i in _incident]))
-    mag_normal = sqrt(sum([i**2 for i in _normal]))
+    mag_incident = sqrt(sum([i ** 2 for i in _incident]))
+    mag_normal = sqrt(sum([i ** 2 for i in _normal]))
     # Converting vectors to unit vectors by dividing
     # them with their magnitudes
     _incident /= mag_incident
     _normal /= mag_normal
     c1 = -_incident.dot(_normal)  # cos(angle_of_incidence)
-    cs2 = 1 - eta**2*(1 - c1**2)  # cos(angle_of_refraction)**2
+    cs2 = 1 - eta ** 2 * (1 - c1 ** 2)  # cos(angle_of_refraction)**2
     if cs2.is_negative:  # This is the case of total internal reflection(TIR).
         return 0
-    drs = eta*_incident + (eta*c1 - sqrt(cs2))*_normal
+    drs = eta * _incident + (eta * c1 - sqrt(cs2)) * _normal
     # Multiplying unit vector by its magnitude
-    drs = drs*mag_incident
+    drs = drs * mag_incident
     if not return_ray:
         return drs
     else:
@@ -256,40 +272,63 @@ def fresnel_coefficients(angle_of_incidence, medium1, medium2):
 
     https://en.wikipedia.org/wiki/Fresnel_equations
     """
-    if not 0 <= 2*angle_of_incidence < pi:
-        raise ValueError('Angle of incidence not in range [0:pi/2)')
+    if not 0 <= 2 * angle_of_incidence < pi:
+        raise ValueError("Angle of incidence not in range [0:pi/2)")
 
     n1 = refractive_index_of_medium(medium1)
     n2 = refractive_index_of_medium(medium2)
 
-    angle_of_refraction = asin(n1*sin(angle_of_incidence)/n2)
+    angle_of_refraction = asin(n1 * sin(angle_of_incidence) / n2)
     try:
         angle_of_total_internal_reflection_onset = critical_angle(n1, n2)
     except ValueError:
         angle_of_total_internal_reflection_onset = None
 
-    if angle_of_total_internal_reflection_onset == None or\
-    angle_of_total_internal_reflection_onset > angle_of_incidence:
-        R_s = -sin(angle_of_incidence - angle_of_refraction)\
-                /sin(angle_of_incidence + angle_of_refraction)
-        R_p = tan(angle_of_incidence - angle_of_refraction)\
-                /tan(angle_of_incidence + angle_of_refraction)
-        T_s = 2*sin(angle_of_refraction)*cos(angle_of_incidence)\
-                /sin(angle_of_incidence + angle_of_refraction)
-        T_p = 2*sin(angle_of_refraction)*cos(angle_of_incidence)\
-                /(sin(angle_of_incidence + angle_of_refraction)\
-                *cos(angle_of_incidence - angle_of_refraction))
+    if (
+        angle_of_total_internal_reflection_onset == None
+        or angle_of_total_internal_reflection_onset > angle_of_incidence
+    ):
+        R_s = -sin(angle_of_incidence - angle_of_refraction) / sin(
+            angle_of_incidence + angle_of_refraction
+        )
+        R_p = tan(angle_of_incidence - angle_of_refraction) / tan(
+            angle_of_incidence + angle_of_refraction
+        )
+        T_s = (
+            2
+            * sin(angle_of_refraction)
+            * cos(angle_of_incidence)
+            / sin(angle_of_incidence + angle_of_refraction)
+        )
+        T_p = (
+            2
+            * sin(angle_of_refraction)
+            * cos(angle_of_incidence)
+            / (
+                sin(angle_of_incidence + angle_of_refraction)
+                * cos(angle_of_incidence - angle_of_refraction)
+            )
+        )
         return [R_p, R_s, T_p, T_s]
     else:
-        n = n2/n1
-        R_s = cancel((cos(angle_of_incidence)-\
-                I*sqrt(sin(angle_of_incidence)**2 - n**2))\
-                /(cos(angle_of_incidence)+\
-                I*sqrt(sin(angle_of_incidence)**2 - n**2)))
-        R_p = cancel((n**2*cos(angle_of_incidence)-\
-                I*sqrt(sin(angle_of_incidence)**2 - n**2))\
-                /(n**2*cos(angle_of_incidence)+\
-                I*sqrt(sin(angle_of_incidence)**2 - n**2)))
+        n = n2 / n1
+        R_s = cancel(
+            (cos(angle_of_incidence) - I * sqrt(sin(angle_of_incidence) ** 2 - n ** 2))
+            / (
+                cos(angle_of_incidence)
+                + I * sqrt(sin(angle_of_incidence) ** 2 - n ** 2)
+            )
+        )
+        R_p = cancel(
+            (
+                n ** 2 * cos(angle_of_incidence)
+                - I * sqrt(sin(angle_of_incidence) ** 2 - n ** 2)
+            )
+            / (
+                n ** 2 * cos(angle_of_incidence)
+                + I * sqrt(sin(angle_of_incidence) ** 2 - n ** 2)
+            )
+        )
         return [R_p, R_s]
 
 
@@ -332,11 +371,7 @@ def deviation(incident, medium1, medium2, normal=None, plane=None):
     >>> round(deviation(0.1, 1.2, 1.5), 5)
     -0.02005
     """
-    refracted = refraction_angle(incident,
-                                 medium1,
-                                 medium2,
-                                 normal=normal,
-                                 plane=plane)
+    refracted = refraction_angle(incident, medium1, medium2, normal=normal, plane=plane)
     try:
         angle_of_incidence = Float(incident)
     except TypeError:
@@ -355,8 +390,7 @@ def deviation(incident, medium1, medium2, normal=None, plane=None):
             elif isinstance(incident, Ray3D):
                 _incident = Matrix(incident.direction_ratio)
             else:
-                raise TypeError(
-                    "incident should be a Matrix, Ray3D, or sequence")
+                raise TypeError("incident should be a Matrix, Ray3D, or sequence")
         else:
             _incident = incident
 
@@ -367,16 +401,15 @@ def deviation(incident, medium1, medium2, normal=None, plane=None):
                 elif isinstance(normal, Ray3D):
                     _normal = Matrix(normal.direction_ratio)
                 else:
-                    raise TypeError(
-                        "normal should be a Matrix, Ray3D, or sequence")
+                    raise TypeError("normal should be a Matrix, Ray3D, or sequence")
             else:
                 _normal = normal
         else:
             _normal = Matrix(plane.normal_vector)
 
-        mag_incident = sqrt(sum([i**2 for i in _incident]))
-        mag_normal = sqrt(sum([i**2 for i in _normal]))
-        mag_refracted = sqrt(sum([i**2 for i in refracted]))
+        mag_incident = sqrt(sum([i ** 2 for i in _incident]))
+        mag_normal = sqrt(sum([i ** 2 for i in _normal]))
+        mag_refracted = sqrt(sum([i ** 2 for i in refracted]))
         _incident /= mag_incident
         _normal /= mag_normal
         refracted /= mag_refracted
@@ -412,6 +445,7 @@ def brewster_angle(medium1, medium2):
 
     return atan2(n2, n1)
 
+
 def critical_angle(medium1, medium2):
     """
     This function calculates the critical angle of incidence (marking the onset
@@ -438,10 +472,9 @@ def critical_angle(medium1, medium2):
     n2 = refractive_index_of_medium(medium2)
 
     if n2 > n1:
-        raise ValueError('Total internal reflection impossible for n1 < n2')
+        raise ValueError("Total internal reflection impossible for n1 < n2")
     else:
-        return asin(n2/n1)
-
+        return asin(n2 / n1)
 
 
 def lens_makers_formula(n_lens, n_surr, r1, r2):
@@ -481,7 +514,7 @@ def lens_makers_formula(n_lens, n_surr, r1, r2):
     r1 = sympify(r1)
     r2 = sympify(r2)
 
-    return 1/((n_lens - n_surr)/n_surr*(1/r1 - 1/r2))
+    return 1 / ((n_lens - n_surr) / n_surr * (1 / r1 - 1 / r2))
 
 
 def mirror_formula(focal_length=None, u=None, v=None):
@@ -522,35 +555,35 @@ def mirror_formula(focal_length=None, u=None, v=None):
     u = sympify(u)
     v = sympify(v)
     if u is oo:
-        _u = Symbol('u')
+        _u = Symbol("u")
     if v is oo:
-        _v = Symbol('v')
+        _v = Symbol("v")
     if focal_length is oo:
-        _f = Symbol('f')
+        _f = Symbol("f")
     if focal_length is None:
         if u is oo and v is oo:
-            return Limit(Limit(_v*_u/(_v + _u), _u, oo), _v, oo).doit()
+            return Limit(Limit(_v * _u / (_v + _u), _u, oo), _v, oo).doit()
         if u is oo:
-            return Limit(v*_u/(v + _u), _u, oo).doit()
+            return Limit(v * _u / (v + _u), _u, oo).doit()
         if v is oo:
-            return Limit(_v*u/(_v + u), _v, oo).doit()
-        return v*u/(v + u)
+            return Limit(_v * u / (_v + u), _v, oo).doit()
+        return v * u / (v + u)
     if u is None:
         if v is oo and focal_length is oo:
-            return Limit(Limit(_v*_f/(_v - _f), _v, oo), _f, oo).doit()
+            return Limit(Limit(_v * _f / (_v - _f), _v, oo), _f, oo).doit()
         if v is oo:
-            return Limit(_v*focal_length/(_v - focal_length), _v, oo).doit()
+            return Limit(_v * focal_length / (_v - focal_length), _v, oo).doit()
         if focal_length is oo:
-            return Limit(v*_f/(v - _f), _f, oo).doit()
-        return v*focal_length/(v - focal_length)
+            return Limit(v * _f / (v - _f), _f, oo).doit()
+        return v * focal_length / (v - focal_length)
     if v is None:
         if u is oo and focal_length is oo:
-            return Limit(Limit(_u*_f/(_u - _f), _u, oo), _f, oo).doit()
+            return Limit(Limit(_u * _f / (_u - _f), _u, oo), _f, oo).doit()
         if u is oo:
-            return Limit(_u*focal_length/(_u - focal_length), _u, oo).doit()
+            return Limit(_u * focal_length / (_u - focal_length), _u, oo).doit()
         if focal_length is oo:
-            return Limit(u*_f/(u - _f), _f, oo).doit()
-        return u*focal_length/(u - focal_length)
+            return Limit(u * _f / (u - _f), _f, oo).doit()
+        return u * focal_length / (u - focal_length)
 
 
 def lens_formula(focal_length=None, u=None, v=None):
@@ -591,35 +624,36 @@ def lens_formula(focal_length=None, u=None, v=None):
     u = sympify(u)
     v = sympify(v)
     if u is oo:
-        _u = Symbol('u')
+        _u = Symbol("u")
     if v is oo:
-        _v = Symbol('v')
+        _v = Symbol("v")
     if focal_length is oo:
-        _f = Symbol('f')
+        _f = Symbol("f")
     if focal_length is None:
         if u is oo and v is oo:
-            return Limit(Limit(_v*_u/(_u - _v), _u, oo), _v, oo).doit()
+            return Limit(Limit(_v * _u / (_u - _v), _u, oo), _v, oo).doit()
         if u is oo:
-            return Limit(v*_u/(_u - v), _u, oo).doit()
+            return Limit(v * _u / (_u - v), _u, oo).doit()
         if v is oo:
-            return Limit(_v*u/(u - _v), _v, oo).doit()
-        return v*u/(u - v)
+            return Limit(_v * u / (u - _v), _v, oo).doit()
+        return v * u / (u - v)
     if u is None:
         if v is oo and focal_length is oo:
-            return Limit(Limit(_v*_f/(_f - _v), _v, oo), _f, oo).doit()
+            return Limit(Limit(_v * _f / (_f - _v), _v, oo), _f, oo).doit()
         if v is oo:
-            return Limit(_v*focal_length/(focal_length - _v), _v, oo).doit()
+            return Limit(_v * focal_length / (focal_length - _v), _v, oo).doit()
         if focal_length is oo:
-            return Limit(v*_f/(_f - v), _f, oo).doit()
-        return v*focal_length/(focal_length - v)
+            return Limit(v * _f / (_f - v), _f, oo).doit()
+        return v * focal_length / (focal_length - v)
     if v is None:
         if u is oo and focal_length is oo:
-            return Limit(Limit(_u*_f/(_u + _f), _u, oo), _f, oo).doit()
+            return Limit(Limit(_u * _f / (_u + _f), _u, oo), _f, oo).doit()
         if u is oo:
-            return Limit(_u*focal_length/(_u + focal_length), _u, oo).doit()
+            return Limit(_u * focal_length / (_u + focal_length), _u, oo).doit()
         if focal_length is oo:
-            return Limit(u*_f/(u + _f), _f, oo).doit()
-        return u*focal_length/(u + focal_length)
+            return Limit(u * _f / (u + _f), _f, oo).doit()
+        return u * focal_length / (u + focal_length)
+
 
 def hyperfocal_distance(f, N, c):
     """
@@ -647,7 +681,8 @@ def hyperfocal_distance(f, N, c):
     N = sympify(N)
     c = sympify(c)
 
-    return (1/(N * c))*(f**2)
+    return (1 / (N * c)) * (f ** 2)
+
 
 def transverse_magnification(si, so):
     """
@@ -674,4 +709,4 @@ def transverse_magnification(si, so):
     si = sympify(si)
     so = sympify(so)
 
-    return (-(si/so))
+    return -(si / so)

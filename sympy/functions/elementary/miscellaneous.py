@@ -4,8 +4,7 @@ from sympy.core import Function, S, sympify
 from sympy.core.add import Add
 from sympy.core.containers import Tuple
 from sympy.core.operations import LatticeOp, ShortCircuit
-from sympy.core.function import (Application, Lambda,
-    ArgumentIndexError)
+from sympy.core.function import Application, Lambda, ArgumentIndexError
 from sympy.core.expr import Expr
 from sympy.core.mod import Mod
 from sympy.core.mul import Mul
@@ -18,9 +17,11 @@ from sympy.core.rules import Transform
 from sympy.core.logic import fuzzy_and, fuzzy_or, _torf
 from sympy.logic.boolalg import And, Or
 
+
 def _minmax_as_Piecewise(op, *args):
     # helper for Min/Max rewrite as Piecewise
     from sympy.functions.elementary.piecewise import Piecewise
+
     ec = []
     for i, a in enumerate(args):
         c = []
@@ -45,9 +46,10 @@ class IdentityFunction(Lambda, metaclass=Singleton):
     """
 
     def __new__(cls):
-        x = Dummy('x')
-        #construct "by hand" to avoid infinite loop
+        x = Dummy("x")
+        # construct "by hand" to avoid infinite loop
         return Expr.__new__(cls, Tuple(x), x)
+
 
 Id = S.IdentityFunction
 
@@ -302,8 +304,12 @@ def root(arg, n, k=0, evaluate=None):
     """
     n = sympify(n)
     if k:
-        return Mul(Pow(arg, S.One/n, evaluate=evaluate), S.NegativeOne**(2*k/n), evaluate=evaluate)
-    return Pow(arg, 1/n, evaluate=evaluate)
+        return Mul(
+            Pow(arg, S.One / n, evaluate=evaluate),
+            S.NegativeOne ** (2 * k / n),
+            evaluate=evaluate,
+        )
+    return Pow(arg, 1 / n, evaluate=evaluate)
 
 
 def real_root(arg, n=None, evaluate=None):
@@ -354,20 +360,27 @@ def real_root(arg, n=None, evaluate=None):
     """
     from sympy.functions.elementary.complexes import Abs, im, sign
     from sympy.functions.elementary.piecewise import Piecewise
+
     if n is not None:
         return Piecewise(
             (root(arg, n, evaluate=evaluate), Or(Eq(n, S.One), Eq(n, S.NegativeOne))),
-            (Mul(sign(arg), root(Abs(arg), n, evaluate=evaluate), evaluate=evaluate),
-            And(Eq(im(arg), S.Zero), Eq(Mod(n, 2), S.One))),
-            (root(arg, n, evaluate=evaluate), True))
+            (
+                Mul(sign(arg), root(Abs(arg), n, evaluate=evaluate), evaluate=evaluate),
+                And(Eq(im(arg), S.Zero), Eq(Mod(n, 2), S.One)),
+            ),
+            (root(arg, n, evaluate=evaluate), True),
+        )
     rv = sympify(arg)
-    n1pow = Transform(lambda x: -(-x.base)**x.exp,
-                      lambda x:
-                      x.is_Pow and
-                      x.base.is_negative and
-                      x.exp.is_Rational and
-                      x.exp.p == 1 and x.exp.q % 2)
+    n1pow = Transform(
+        lambda x: -((-x.base) ** x.exp),
+        lambda x: x.is_Pow
+        and x.base.is_negative
+        and x.exp.is_Rational
+        and x.exp.p == 1
+        and x.exp.q % 2,
+    )
     return rv.xreplace(n1pow)
+
 
 ###############################################################################
 ############################# MINIMUM and MAXIMUM #############################
@@ -376,7 +389,7 @@ def real_root(arg, n=None, evaluate=None):
 
 class MinMaxBase(Expr, LatticeOp):
     def __new__(cls, *args, **assumptions):
-        evaluate = assumptions.pop('evaluate', True)
+        evaluate = assumptions.pop("evaluate", True)
         args = (sympify(arg) for arg in args)
 
         # first standard filter, for cls.zero and cls.identity
@@ -502,14 +515,13 @@ class MinMaxBase(Expr, LatticeOp):
                 return ai
             cond = a in ai.args
             if not cond:
-                return ai.func(*[do(i, a) for i in ai.args],
-                    evaluate=False)
+                return ai.func(*[do(i, a) for i in ai.args], evaluate=False)
             if isinstance(ai, cls):
-                return ai.func(*[do(i, a) for i in ai.args if i != a],
-                    evaluate=False)
+                return ai.func(*[do(i, a) for i in ai.args if i != a], evaluate=False)
             return a
+
         for i, a in enumerate(args):
-            args[i + 1:] = [do(ai, a) for ai in args[i + 1:]]
+            args[i + 1 :] = [do(ai, a) for ai in args[i + 1 :]]
 
         # factor out common elements as for
         # Min(Max(x, y), Max(x, z)) -> Max(x, Min(y, z))
@@ -554,9 +566,11 @@ class MinMaxBase(Expr, LatticeOp):
         for arg in arg_sequence:
 
             # pre-filter, checking comparability of arguments
-            if not isinstance(arg, Expr) or arg.is_extended_real is False or (
-                    arg.is_number and
-                    not arg.is_comparable):
+            if (
+                not isinstance(arg, Expr)
+                or arg.is_extended_real is False
+                or (arg.is_number and not arg.is_comparable)
+            ):
                 raise ValueError("The argument '%s' is not comparable." % arg)
 
             if arg == cls.zero:
@@ -602,9 +616,11 @@ class MinMaxBase(Expr, LatticeOp):
         Check if x and y are connected somehow.
         """
         from sympy.core.exprtools import factor_terms
+
         def hit(v, t, f):
             if not v.is_Relational:
                 return t if v else f
+
         for i in range(2):
             if x == y:
                 return True
@@ -645,8 +661,9 @@ class MinMaxBase(Expr, LatticeOp):
 
     def _eval_rewrite_as_Abs(self, *args, **kwargs):
         from sympy.functions.elementary.complexes import Abs
-        s = (args[0] + self.func(*args[1:]))/2
-        d = abs(args[0] - self.func(*args[1:]))/2
+
+        s = (args[0] + self.func(*args[1:])) / 2
+        d = abs(args[0] - self.func(*args[1:])) / 2
         return (s + d if isinstance(self, Max) else s - d).rewrite(Abs)
 
     def evalf(self, n=15, **options):
@@ -681,6 +698,7 @@ class MinMaxBase(Expr, LatticeOp):
     _eval_is_extended_real = lambda s: _torf(i.is_extended_real for i in s.args)
     _eval_is_transcendental = lambda s: _torf(i.is_transcendental for i in s.args)
     _eval_is_zero = lambda s: _torf(i.is_zero for i in s.args)
+
 
 class Max(MinMaxBase, Application):
     """
@@ -767,11 +785,13 @@ class Max(MinMaxBase, Application):
 
     Min : find minimum values
     """
+
     zero = S.Infinity
     identity = S.NegativeInfinity
 
-    def fdiff( self, argindex ):
+    def fdiff(self, argindex):
         from sympy import Heaviside
+
         n = len(self.args)
         if 0 < argindex and argindex <= n:
             argindex -= 1
@@ -784,11 +804,13 @@ class Max(MinMaxBase, Application):
 
     def _eval_rewrite_as_Heaviside(self, *args, **kwargs):
         from sympy import Heaviside
-        return Add(*[j*Mul(*[Heaviside(j - i) for i in args if i!=j]) \
-                for j in args])
+
+        return Add(
+            *[j * Mul(*[Heaviside(j - i) for i in args if i != j]) for j in args]
+        )
 
     def _eval_rewrite_as_Piecewise(self, *args, **kwargs):
-        return _minmax_as_Piecewise('>=', *args)
+        return _minmax_as_Piecewise(">=", *args)
 
     def _eval_is_positive(self):
         return fuzzy_or(a.is_positive for a in self.args)
@@ -830,28 +852,32 @@ class Min(MinMaxBase, Application):
 
     Max : find maximum values
     """
+
     zero = S.NegativeInfinity
     identity = S.Infinity
 
-    def fdiff( self, argindex ):
+    def fdiff(self, argindex):
         from sympy import Heaviside
+
         n = len(self.args)
         if 0 < argindex and argindex <= n:
             argindex -= 1
             if n == 2:
-                return Heaviside( self.args[1-argindex] - self.args[argindex] )
-            newargs = tuple([ self.args[i] for i in range(n) if i != argindex])
-            return Heaviside( Min(*newargs) - self.args[argindex] )
+                return Heaviside(self.args[1 - argindex] - self.args[argindex])
+            newargs = tuple([self.args[i] for i in range(n) if i != argindex])
+            return Heaviside(Min(*newargs) - self.args[argindex])
         else:
             raise ArgumentIndexError(self, argindex)
 
     def _eval_rewrite_as_Heaviside(self, *args, **kwargs):
         from sympy import Heaviside
-        return Add(*[j*Mul(*[Heaviside(i-j) for i in args if i!=j]) \
-                for j in args])
+
+        return Add(
+            *[j * Mul(*[Heaviside(i - j) for i in args if i != j]) for j in args]
+        )
 
     def _eval_rewrite_as_Piecewise(self, *args, **kwargs):
-        return _minmax_as_Piecewise('<=', *args)
+        return _minmax_as_Piecewise("<=", *args)
 
     def _eval_is_positive(self):
         return fuzzy_and(a.is_positive for a in self.args)

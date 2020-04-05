@@ -12,6 +12,7 @@ from sympy.polys.polyutils import PicklableWithSlots, dict_from_expr
 from sympy.utilities import public
 from sympy.core.compatibility import is_sequence
 
+
 @public
 def itermonomials(variables, max_degrees, min_degrees=None):
     r"""
@@ -92,14 +93,14 @@ def itermonomials(variables, max_degrees, min_degrees=None):
     n = len(variables)
     if is_sequence(max_degrees):
         if len(max_degrees) != n:
-            raise ValueError('Argument sizes do not match')
+            raise ValueError("Argument sizes do not match")
         if min_degrees is None:
-            min_degrees = [0]*n
+            min_degrees = [0] * n
         elif not is_sequence(min_degrees):
-            raise ValueError('min_degrees is not a list')
+            raise ValueError("min_degrees is not a list")
         else:
             if len(min_degrees) != n:
-                raise ValueError('Argument sizes do not match')
+                raise ValueError("Argument sizes do not match")
             if any(i < 0 for i in min_degrees):
                 raise ValueError("min_degrees can't contain negative numbers")
         total_degree = False
@@ -150,12 +151,13 @@ def itermonomials(variables, max_degrees, min_degrees=None):
                 yield mon
     else:
         if any(min_degrees[i] > max_degrees[i] for i in range(n)):
-            raise ValueError('min_degrees[i] must be <= max_degrees[i] for all i')
+            raise ValueError("min_degrees[i] must be <= max_degrees[i] for all i")
         power_lists = []
         for var, min_d, max_d in zip(variables, min_degrees, max_degrees):
-            power_lists.append([var**i for i in range(min_d, max_d + 1)])
+            power_lists.append([var ** i for i in range(min_d, max_d + 1)])
         for powers in product(*power_lists):
             yield Mul(*powers)
+
 
 def monomial_count(V, N):
     r"""
@@ -188,7 +190,9 @@ def monomial_count(V, N):
 
     """
     from sympy import factorial
+
     return factorial(V + N) / factorial(V) / factorial(N)
+
 
 def monomial_mul(A, B):
     """
@@ -207,7 +211,8 @@ def monomial_mul(A, B):
     which gives `x**4*y**5*z`.
 
     """
-    return tuple([ a + b for a, b in zip(A, B) ])
+    return tuple([a + b for a, b in zip(A, B)])
+
 
 def monomial_div(A, B):
     """
@@ -238,6 +243,7 @@ def monomial_div(A, B):
     else:
         return None
 
+
 def monomial_ldiv(A, B):
     """
     Division of tuples representing monomials.
@@ -260,11 +266,13 @@ def monomial_ldiv(A, B):
     which gives `x**2*y**2*z**-1`.
 
     """
-    return tuple([ a - b for a, b in zip(A, B) ])
+    return tuple([a - b for a, b in zip(A, B)])
+
 
 def monomial_pow(A, n):
     """Return the n-th pow of the monomial. """
-    return tuple([ a*n for a in A ])
+    return tuple([a * n for a in A])
+
 
 def monomial_gcd(A, B):
     """
@@ -283,7 +291,8 @@ def monomial_gcd(A, B):
     which gives `x*y**2`.
 
     """
-    return tuple([ min(a, b) for a, b in zip(A, B) ])
+    return tuple([min(a, b) for a, b in zip(A, B)])
+
 
 def monomial_lcm(A, B):
     """
@@ -302,7 +311,8 @@ def monomial_lcm(A, B):
     which gives `x**3*y**4*z`.
 
     """
-    return tuple([ max(a, b) for a, b in zip(A, B) ])
+    return tuple([max(a, b) for a, b in zip(A, B)])
+
 
 def monomial_divides(A, B):
     """
@@ -318,6 +328,7 @@ def monomial_divides(A, B):
     False
     """
     return all(a <= b for a, b in zip(A, B))
+
 
 def monomial_max(*monoms):
     """
@@ -344,6 +355,7 @@ def monomial_max(*monoms):
 
     return tuple(M)
 
+
 def monomial_min(*monoms):
     """
     Returns minimal degree for each variable in a set of monomials.
@@ -369,6 +381,7 @@ def monomial_min(*monoms):
 
     return tuple(M)
 
+
 def monomial_deg(M):
     """
     Returns the total degree of a monomial.
@@ -383,6 +396,7 @@ def monomial_deg(M):
     3
     """
     return sum(M)
+
 
 def term_div(a, b, domain):
     """Division of two terms in over a ring/field. """
@@ -402,6 +416,7 @@ def term_div(a, b, domain):
         else:
             return None
 
+
 class MonomialOps(object):
     """Code generator of fast monomial arithmetic functions. """
 
@@ -414,111 +429,145 @@ class MonomialOps(object):
         return ns[name]
 
     def _vars(self, name):
-        return [ "%s%s" % (name, i) for i in range(self.ngens) ]
+        return ["%s%s" % (name, i) for i in range(self.ngens)]
 
     def mul(self):
         name = "monomial_mul"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B):
             (%(A)s,) = A
             (%(B)s,) = B
             return (%(AB)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        AB = [ "%s + %s" % (a, b) for a, b in zip(A, B) ]
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB))
+        AB = ["%s + %s" % (a, b) for a, b in zip(A, B)]
+        code = template % dict(
+            name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB)
+        )
         return self._build(code, name)
 
     def pow(self):
         name = "monomial_pow"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, k):
             (%(A)s,) = A
             return (%(Ak)s,)
-        """)
+        """
+        )
         A = self._vars("a")
-        Ak = [ "%s*k" % a for a in A ]
+        Ak = ["%s*k" % a for a in A]
         code = template % dict(name=name, A=", ".join(A), Ak=", ".join(Ak))
         return self._build(code, name)
 
     def mulpow(self):
         name = "monomial_mulpow"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B, k):
             (%(A)s,) = A
             (%(B)s,) = B
             return (%(ABk)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        ABk = [ "%s + %s*k" % (a, b) for a, b in zip(A, B) ]
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), ABk=", ".join(ABk))
+        ABk = ["%s + %s*k" % (a, b) for a, b in zip(A, B)]
+        code = template % dict(
+            name=name, A=", ".join(A), B=", ".join(B), ABk=", ".join(ABk)
+        )
         return self._build(code, name)
 
     def ldiv(self):
         name = "monomial_ldiv"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B):
             (%(A)s,) = A
             (%(B)s,) = B
             return (%(AB)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        AB = [ "%s - %s" % (a, b) for a, b in zip(A, B) ]
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB))
+        AB = ["%s - %s" % (a, b) for a, b in zip(A, B)]
+        code = template % dict(
+            name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB)
+        )
         return self._build(code, name)
 
     def div(self):
         name = "monomial_div"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B):
             (%(A)s,) = A
             (%(B)s,) = B
             %(RAB)s
             return (%(R)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        RAB = [ "r%(i)s = a%(i)s - b%(i)s\n    if r%(i)s < 0: return None" % dict(i=i) for i in range(self.ngens) ]
+        RAB = [
+            "r%(i)s = a%(i)s - b%(i)s\n    if r%(i)s < 0: return None" % dict(i=i)
+            for i in range(self.ngens)
+        ]
         R = self._vars("r")
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), RAB="\n    ".join(RAB), R=", ".join(R))
+        code = template % dict(
+            name=name,
+            A=", ".join(A),
+            B=", ".join(B),
+            RAB="\n    ".join(RAB),
+            R=", ".join(R),
+        )
         return self._build(code, name)
 
     def lcm(self):
         name = "monomial_lcm"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B):
             (%(A)s,) = A
             (%(B)s,) = B
             return (%(AB)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        AB = [ "%s if %s >= %s else %s" % (a, a, b, b) for a, b in zip(A, B) ]
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB))
+        AB = ["%s if %s >= %s else %s" % (a, a, b, b) for a, b in zip(A, B)]
+        code = template % dict(
+            name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB)
+        )
         return self._build(code, name)
 
     def gcd(self):
         name = "monomial_gcd"
-        template = dedent("""\
+        template = dedent(
+            """\
         def %(name)s(A, B):
             (%(A)s,) = A
             (%(B)s,) = B
             return (%(AB)s,)
-        """)
+        """
+        )
         A = self._vars("a")
         B = self._vars("b")
-        AB = [ "%s if %s <= %s else %s" % (a, a, b, b) for a, b in zip(A, B) ]
-        code = template % dict(name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB))
+        AB = ["%s if %s <= %s else %s" % (a, a, b, b) for a, b in zip(A, B)]
+        code = template % dict(
+            name=name, A=", ".join(A), B=", ".join(B), AB=", ".join(AB)
+        )
         return self._build(code, name)
+
 
 @public
 class Monomial(PicklableWithSlots):
     """Class representing a monomial, i.e. a product of powers. """
 
-    __slots__ = ('exponents', 'gens')
+    __slots__ = ("exponents", "gens")
 
     def __init__(self, monom, gens=None):
         if not iterable(monom):
@@ -548,7 +597,9 @@ class Monomial(PicklableWithSlots):
 
     def __str__(self):
         if self.gens:
-            return "*".join([ "%s**%s" % (gen, exp) for gen, exp in zip(self.gens, self.exponents) ])
+            return "*".join(
+                ["%s**%s" % (gen, exp) for gen, exp in zip(self.gens, self.exponents)]
+            )
         else:
             return "%s(%s)" % (self.__class__.__name__, self.exponents)
 
@@ -558,9 +609,10 @@ class Monomial(PicklableWithSlots):
 
         if not gens:
             raise ValueError(
-                "can't convert %s to an expression without generators" % self)
+                "can't convert %s to an expression without generators" % self
+            )
 
-        return Mul(*[ gen**exp for gen, exp in zip(gens, self.exponents) ])
+        return Mul(*[gen ** exp for gen, exp in zip(gens, self.exponents)])
 
     def __eq__(self, other):
         if isinstance(other, Monomial):
@@ -606,7 +658,7 @@ class Monomial(PicklableWithSlots):
         n = int(other)
 
         if not n:
-            return self.rebuild([0]*len(self))
+            return self.rebuild([0] * len(self))
         elif n > 0:
             exponents = self.exponents
 
@@ -624,8 +676,7 @@ class Monomial(PicklableWithSlots):
         elif isinstance(other, (tuple, Tuple)):
             exponents = other
         else:
-            raise TypeError(
-                "an instance of Monomial class expected, got %s" % other)
+            raise TypeError("an instance of Monomial class expected, got %s" % other)
 
         return self.rebuild(monomial_gcd(self.exponents, exponents))
 
@@ -636,7 +687,6 @@ class Monomial(PicklableWithSlots):
         elif isinstance(other, (tuple, Tuple)):
             exponents = other
         else:
-            raise TypeError(
-                "an instance of Monomial class expected, got %s" % other)
+            raise TypeError("an instance of Monomial class expected, got %s" % other)
 
         return self.rebuild(monomial_lcm(self.exponents, exponents))

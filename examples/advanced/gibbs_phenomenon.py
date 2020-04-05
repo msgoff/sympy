@@ -13,8 +13,23 @@ See:
  * https://en.wikipedia.org/wiki/Gibbs_phenomena
 """
 
-from sympy import var, sqrt, integrate, conjugate, seterr, Abs, pprint, I, pi,\
-    sin, cos, sign, lambdify, Integral, S
+from sympy import (
+    var,
+    sqrt,
+    integrate,
+    conjugate,
+    seterr,
+    Abs,
+    pprint,
+    I,
+    pi,
+    sin,
+    cos,
+    sign,
+    lambdify,
+    Integral,
+    S,
+)
 
 x = var("x", real=True)
 
@@ -38,14 +53,14 @@ def l2_norm(f, lim):
     sqrt(6)/3
 
     """
-    return sqrt(integrate(Abs(f)**2, lim))
+    return sqrt(integrate(Abs(f) ** 2, lim))
 
 
 def l2_inner_product(a, b, lim):
     """
     Calculates the L2 inner product (a, b) over the domain lim.
     """
-    return integrate(conjugate(a)*b, lim)
+    return integrate(conjugate(a) * b, lim)
 
 
 def l2_projection(f, basis, lim):
@@ -82,7 +97,7 @@ def l2_gram_schmidt(list, lim):
         v_norm = l2_norm(v, lim)
         if v_norm == 0:
             raise ValueError("The sequence is not linearly independent.")
-        r.append(v/v_norm)
+        r.append(v / v_norm)
     return r
 
 
@@ -96,7 +111,7 @@ def series(L):
     """
     r = 0
     for b in L:
-        r += integ(b)*b
+        r += integ(b) * b
     return r
 
 
@@ -118,7 +133,7 @@ def msolve(f, x):
     assert f(x_max) > 0
     assert f(x_min) < 0
     for n in range(100):
-        x0 = (x_max + x_min)/2
+        x0 = (x_max + x_min) / 2
         if f(x0) > 0:
             x_max = x0
         else:
@@ -129,11 +144,11 @@ def msolve(f, x):
 def main():
     L = [1]
     for i in range(1, 100):
-        L.append(cos(i*x))
-        L.append(sin(i*x))
+        L.append(cos(i * x))
+        L.append(sin(i * x))
     # next 2 lines equivalent to L = l2_gram_schmidt(L, (x, -pi, pi)), but faster:
     L[0] /= sqrt(2)
-    L = [f/sqrt(pi) for f in L]
+    L = [f / sqrt(pi) for f in L]
 
     f = series(L)
     print("Fourier series of the step function")
@@ -143,10 +158,10 @@ def main():
     print("x-value of the maximum:", x0)
     max = f.subs(x, x0).evalf()
     print("y-value of the maximum:", max)
-    g = max*pi/2
+    g = max * pi / 2
     print("Wilbraham-Gibbs constant        :", g.evalf())
-    print("Wilbraham-Gibbs constant (exact):", \
-        Integral(sin(x)/x, (x, 0, pi)).evalf())
+    print("Wilbraham-Gibbs constant (exact):", Integral(sin(x) / x, (x, 0, pi)).evalf())
+
 
 if __name__ == "__main__":
     main()

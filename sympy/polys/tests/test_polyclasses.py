@@ -7,7 +7,8 @@ from sympy.polys.polyerrors import ExactQuotientFailed, NotInvertible
 from sympy.polys.specialpolys import f_polys
 from sympy.testing.pytest import raises
 
-f_0, f_1, f_2, f_3, f_4, f_5, f_6 = [ f.to_dense() for f in f_polys() ]
+f_0, f_1, f_2, f_3, f_4, f_5, f_6 = [f.to_dense() for f in f_polys()]
+
 
 def test_DMP___init__():
     f = DMP([[0], [], [0, 1, 2], [3]], ZZ)
@@ -30,13 +31,10 @@ def test_DMP___init__():
 
 
 def test_DMP___eq__():
-    assert DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ) == \
-        DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ)
+    assert DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ) == DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ)
 
-    assert DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ) == \
-        DMP([[QQ(1), QQ(2)], [QQ(3)]], QQ)
-    assert DMP([[QQ(1), QQ(2)], [QQ(3)]], QQ) == \
-        DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ)
+    assert DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ) == DMP([[QQ(1), QQ(2)], [QQ(3)]], QQ)
+    assert DMP([[QQ(1), QQ(2)], [QQ(3)]], QQ) == DMP([[ZZ(1), ZZ(2)], [ZZ(3)]], ZZ)
 
     assert DMP([[[ZZ(1)]]], ZZ) != DMP([[ZZ(1)]], ZZ)
     assert DMP([[ZZ(1)]], ZZ) != DMP([[[ZZ(1)]]], ZZ)
@@ -50,11 +48,12 @@ def test_DMP___bool__():
 def test_DMP_to_dict():
     f = DMP([[3], [], [2], [], [8]], ZZ)
 
-    assert f.to_dict() == \
-        {(4, 0): 3, (2, 0): 2, (0, 0): 8}
-    assert f.to_sympy_dict() == \
-        {(4, 0): ZZ.to_sympy(3), (2, 0): ZZ.to_sympy(2), (0, 0):
-         ZZ.to_sympy(8)}
+    assert f.to_dict() == {(4, 0): 3, (2, 0): 2, (0, 0): 8}
+    assert f.to_sympy_dict() == {
+        (4, 0): ZZ.to_sympy(3),
+        (2, 0): ZZ.to_sympy(2),
+        (0, 0): ZZ.to_sympy(8),
+    }
 
 
 def test_DMP_properties():
@@ -122,9 +121,9 @@ def test_DMP_arithmetics():
 
     assert f.sqr() == h
     assert f.pow(2) == h
-    assert f**2 == h
+    assert f ** 2 == h
 
-    raises(TypeError, lambda: f.pow('x'))
+    raises(TypeError, lambda: f.pow("x"))
 
     f = DMP([[1], [], [1, 0, 0]], ZZ)
     g = DMP([[2], [-2, 0]], ZZ)
@@ -168,7 +167,7 @@ def test_DMP_functionality():
     assert f.TC() == ZZ(0)
     assert f.nth(1, 1) == ZZ(2)
 
-    raises(TypeError, lambda: f.nth(0, 'x'))
+    raises(TypeError, lambda: f.nth(0, "x"))
 
     assert f.max_norm() == 2
     assert f.l1_norm() == 4
@@ -178,7 +177,7 @@ def test_DMP_functionality():
     assert f.diff(m=1, j=0) == u
     assert f.diff(m=1, j=1) == u
 
-    raises(TypeError, lambda: f.diff(m='x', j=0))
+    raises(TypeError, lambda: f.diff(m="x", j=0))
 
     u = DMP([1, 2, 1], ZZ)
     v = DMP([1, 2, 1], ZZ)
@@ -197,8 +196,8 @@ def test_DMP_functionality():
 
     assert u.monic() == v
 
-    assert (4*f).content() == ZZ(4)
-    assert (4*f).primitive() == (ZZ(4), f)
+    assert (4 * f).content() == ZZ(4)
+    assert (4 * f).primitive() == (ZZ(4), f)
 
     f = DMP([[1], [2], [3], [4], [5], [6]], ZZ)
 
@@ -256,8 +255,33 @@ def test_DMP_functionality():
 
 def test_DMP_exclude():
     f = [[[[[[[[[[[[[[[[[[[[[[[[[[1]], [[]]]]]]]]]]]]]]]]]]]]]]]]]]
-    J = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-        18, 19, 20, 21, 22, 24, 25]
+    J = [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        24,
+        25,
+    ]
 
     assert DMP(f, ZZ).exclude() == (J, DMP([1, 0], ZZ))
     assert DMP([[1], [1, 0]], ZZ).exclude() == ([], DMP([[1], [1, 0]], ZZ))
@@ -387,20 +411,20 @@ def test_DMF_arithmetics():
 
     h = DMF(([[1]], [[1, 0], []]), ZZ)
 
-    assert f.mul(g) == f*g == h
-    assert g.mul(f) == g*f == h
+    assert f.mul(g) == f * g == h
+    assert g.mul(f) == g * f == h
 
     h = DMF(([[1, 0]], [[1], []]), ZZ)
 
-    assert f.quo(g) == f/g == h
+    assert f.quo(g) == f / g == h
 
     h = DMF(([[1]], [[1], [], [], []]), ZZ)
 
-    assert f.pow(3) == f**3 == h
+    assert f.pow(3) == f ** 3 == h
 
     h = DMF(([[1]], [[1, 0, 0, 0]]), ZZ)
 
-    assert g.pow(3) == g**3 == h
+    assert g.pow(3) == g ** 3 == h
 
 
 def test_ANP___init__():
@@ -485,17 +509,17 @@ def test_ANP_arithmetics():
 
     c = ANP([QQ(3), QQ(-1), QQ(6)], mod, QQ)
 
-    assert a.mul(b) == a*b == c
-    assert b.mul(a) == b*a == c
+    assert a.mul(b) == a * b == c
+    assert b.mul(a) == b * a == c
 
     c = ANP([QQ(-1, 43), QQ(9, 43), QQ(5, 43)], mod, QQ)
 
-    assert a.pow(0) == a**(0) == ANP(1, mod, QQ)
-    assert a.pow(1) == a**(1) == a
+    assert a.pow(0) == a ** (0) == ANP(1, mod, QQ)
+    assert a.pow(1) == a ** (1) == a
 
-    assert a.pow(-1) == a**(-1) == c
+    assert a.pow(-1) == a ** (-1) == c
 
-    assert a.quo(a) == a.mul(a.pow(-1)) == a*a**(-1) == ANP(1, mod, QQ)
+    assert a.quo(a) == a.mul(a.pow(-1)) == a * a ** (-1) == ANP(1, mod, QQ)
 
     c = ANP([], [1, 0, 0, -2], QQ)
     r1 = a.rem(b)
@@ -511,7 +535,8 @@ def test_ANP_arithmetics():
     # from sympy import Rational
     # c = ANP([Rational(11, 10), Rational(-1, 5), Rational(-3, 5)], [1, 0, 0, -2], QQ)
 
-    assert q == a/b # == c
+    assert q == a / b  # == c
+
 
 def test_ANP_unify():
     mod = [QQ(1), QQ(0), QQ(-2)]
@@ -529,11 +554,18 @@ def test___hash__():
     # issue 5571
     # Make sure int vs. long doesn't affect hashing with Python ground types
     assert DMP([[1, 2], [3]], ZZ) == DMP([[long(1), long(2)], [long(3)]], ZZ)
-    assert hash(DMP([[1, 2], [3]], ZZ)) == hash(DMP([[long(1), long(2)], [long(3)]], ZZ))
-    assert DMF(
-        ([[1, 2], [3]], [[1]]), ZZ) == DMF(([[long(1), long(2)], [long(3)]], [[long(1)]]), ZZ)
-    assert hash(DMF(([[1, 2], [3]], [[1]]), ZZ)) == hash(DMF(([[long(1),
-                long(2)], [long(3)]], [[long(1)]]), ZZ))
-    assert ANP([1, 1], [1, 0, 1], ZZ) == ANP([long(1), long(1)], [long(1), long(0), long(1)], ZZ)
-    assert hash(
-        ANP([1, 1], [1, 0, 1], ZZ)) == hash(ANP([long(1), long(1)], [long(1), long(0), long(1)], ZZ))
+    assert hash(DMP([[1, 2], [3]], ZZ)) == hash(
+        DMP([[long(1), long(2)], [long(3)]], ZZ)
+    )
+    assert DMF(([[1, 2], [3]], [[1]]), ZZ) == DMF(
+        ([[long(1), long(2)], [long(3)]], [[long(1)]]), ZZ
+    )
+    assert hash(DMF(([[1, 2], [3]], [[1]]), ZZ)) == hash(
+        DMF(([[long(1), long(2)], [long(3)]], [[long(1)]]), ZZ)
+    )
+    assert ANP([1, 1], [1, 0, 1], ZZ) == ANP(
+        [long(1), long(1)], [long(1), long(0), long(1)], ZZ
+    )
+    assert hash(ANP([1, 1], [1, 0, 1], ZZ)) == hash(
+        ANP([long(1), long(1)], [long(1), long(0), long(1)], ZZ)
+    )

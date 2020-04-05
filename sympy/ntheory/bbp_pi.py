@@ -1,4 +1,4 @@
-'''
+"""
 This implementation is a heavily modified fixed point implementation of
 BBP_formula for calculating the nth position of pi. The original hosted
 at: http://en.literateprograms.org/Pi_with_the_BBP_formula_(Python)
@@ -69,7 +69,7 @@ calculated for the given precision.
 4. pi_hex_digits(n) changed to have coefficient to the formula in an
 array (perhaps just a matter of preference).
 
-'''
+"""
 
 from __future__ import print_function, division
 
@@ -95,7 +95,7 @@ def _series(j, n, prec=14):
 
     t = 0
     k = n + 1
-    e = 4*(D + n - k)
+    e = 4 * (D + n - k)
     d = 8 * k + j
     while True:
         dt = (1 << e) // d
@@ -133,23 +133,25 @@ def pi_hex_digits(n, prec=14):
     """
     n, prec = as_int(n), as_int(prec)
     if n < 0:
-        raise ValueError('n cannot be negative')
+        raise ValueError("n cannot be negative")
     if prec == 0:
-        return ''
+        return ""
 
     # main of implementation arrays holding formulae coefficients
     n -= 1
     a = [4, 2, 1, 1]
     j = [1, 4, 5, 6]
 
-    #formulae
+    # formulae
     D = _dn(n, prec)
-    x = + (a[0]*_series(j[0], n, prec)
-         - a[1]*_series(j[1], n, prec)
-         - a[2]*_series(j[2], n, prec)
-         - a[3]*_series(j[3], n, prec)) & (16**D - 1)
+    x = +(
+        a[0] * _series(j[0], n, prec)
+        - a[1] * _series(j[1], n, prec)
+        - a[2] * _series(j[2], n, prec)
+        - a[3] * _series(j[3], n, prec)
+    ) & (16 ** D - 1)
 
-    s = ("%0" + "%ix" % prec) % (x // 16**(D - prec))
+    s = ("%0" + "%ix" % prec) % (x // 16 ** (D - prec))
     return s
 
 
@@ -158,4 +160,4 @@ def _dn(n, prec):
     # n = starting digit index
     # prec = the number of total digits to compute
     n += 1  # because we subtract 1 for _series
-    return int(math.log(n + prec)/math.log(16) + prec + 3)
+    return int(math.log(n + prec) / math.log(16) + prec + 3)

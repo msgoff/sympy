@@ -23,11 +23,10 @@ class NewMatrix(MutableDenseMatrix):
             return type(self)(rhs)
 
         if self.rows != rhs.rows:
-            raise ShapeError(
-                "`self` and `rhs` must have the same number of rows.")
+            raise ShapeError("`self` and `rhs` must have the same number of rows.")
         newmat = NewMatrix.zeros(self.rows, self.cols + rhs.cols)
-        newmat[:, :self.cols] = self
-        newmat[:, self.cols:] = rhs
+        newmat[:, : self.cols] = self
+        newmat[:, self.cols :] = rhs
         return type(self)(newmat)
 
     def col_join(self, bott):
@@ -36,11 +35,10 @@ class NewMatrix(MutableDenseMatrix):
             return type(self)(bott)
 
         if self.cols != bott.cols:
-            raise ShapeError(
-                "`self` and `bott` must have the same number of columns.")
+            raise ShapeError("`self` and `bott` must have the same number of columns.")
         newmat = NewMatrix.zeros(self.rows + bott.rows, self.cols)
-        newmat[:self.rows, :] = self
-        newmat[self.rows:, :] = bott
+        newmat[: self.rows, :] = self
+        newmat[self.rows :, :] = bott
         return type(self)(newmat)
 
     def gauss_jordan_solve(self, b, freevar=False):
@@ -70,7 +68,9 @@ class NewMatrix(MutableDenseMatrix):
             raise ValueError("Linear system has no solution")
 
         # Get index of free symbols (free parameters)
-        free_var_index = permutation[len(pivots):]  # non-pivots columns are free variables
+        free_var_index = permutation[
+            len(pivots) :
+        ]  # non-pivots columns are free variables
 
         # Free parameters
         tau = NewMatrix([S.One for k in range(col - rank)]).reshape(col - rank, 1)
@@ -78,7 +78,7 @@ class NewMatrix(MutableDenseMatrix):
         # Full parametric solution
         V = A[:rank, rank:]
         vt = v[:rank, 0]
-        free_sol = tau.vstack(vt - V*tau, tau)
+        free_sol = tau.vstack(vt - V * tau, tau)
 
         # Undo permutation
         sol = NewMatrix.zeros(col, 1)

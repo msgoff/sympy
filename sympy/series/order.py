@@ -135,7 +135,7 @@ class Order(Expr):
                 point = expr.point
             else:
                 variables = list(expr.free_symbols)
-                point = [S.Zero]*len(variables)
+                point = [S.Zero] * len(variables)
         else:
             args = list(args if is_sequence(args) else [args])
             variables, point = [], []
@@ -146,13 +146,15 @@ class Order(Expr):
                     point.append(p)
             else:
                 variables = list(map(sympify, args))
-                point = [S.Zero]*len(variables)
+                point = [S.Zero] * len(variables)
 
         if not all(v.is_symbol for v in variables):
-            raise TypeError('Variables are not symbols, got %s' % variables)
+            raise TypeError("Variables are not symbols, got %s" % variables)
 
         if len(list(uniq(variables))) != len(variables):
-            raise ValueError('Variables are supposed to be unique symbols, got %s' % variables)
+            raise ValueError(
+                "Variables are supposed to be unique symbols, got %s" % variables
+            )
 
         if expr.is_Order:
             expr_vp = dict(expr.args[1:])
@@ -162,7 +164,8 @@ class Order(Expr):
                 if v in new_vp.keys():
                     if p != new_vp[v]:
                         raise NotImplementedError(
-                            "Mixing Order at different points is not supported.")
+                            "Mixing Order at different points is not supported."
+                        )
                 else:
                     new_vp[v] = p
             if set(expr_vp.keys()) == set(new_vp.keys()):
@@ -175,18 +178,19 @@ class Order(Expr):
             return S.NaN
 
         if any(x in p.free_symbols for x in variables for p in point):
-            raise ValueError('Got %s as a point.' % point)
+            raise ValueError("Got %s as a point." % point)
 
         if variables:
             if any(p != point[0] for p in point):
                 raise NotImplementedError(
-                    "Multivariable orders at different points are not supported.")
+                    "Multivariable orders at different points are not supported."
+                )
             if point[0] is S.Infinity:
-                s = {k: 1/Dummy() for k in variables}
-                rs = {1/v: 1/k for k, v in s.items()}
+                s = {k: 1 / Dummy() for k in variables}
+                rs = {1 / v: 1 / k for k, v in s.items()}
             elif point[0] is S.NegativeInfinity:
-                s = {k: -1/Dummy() for k in variables}
-                rs = {-1/v: -1/k for k, v in s.items()}
+                s = {k: -1 / Dummy() for k in variables}
+                rs = {-1 / v: -1 / k for k, v in s.items()}
             elif point[0] is not S.Zero:
                 s = dict((k, Dummy() + point[0]) for k in variables)
                 rs = dict((v - point[0], k - point[0]) for k, v in s.items())
@@ -198,6 +202,7 @@ class Order(Expr):
 
             if expr.is_Add:
                 from sympy import expand_multinomial
+
                 expr = expand_multinomial(expr)
 
             if s:
@@ -234,24 +239,25 @@ class Order(Expr):
                         # expression tree for f(x)), e.g.:
                         # x**p * (-x)**q -> x**(p+q) for real p, q.
                         x = args[0]
-                        margs = list(Mul.make_args(
-                            expr.as_independent(x, as_Add=False)[1]))
+                        margs = list(
+                            Mul.make_args(expr.as_independent(x, as_Add=False)[1])
+                        )
 
                         for i, t in enumerate(margs):
                             if t.is_Pow:
                                 b, q = t.args
                                 if b in (x, -x) and q.is_real and not q.has(x):
-                                    margs[i] = x**q
+                                    margs[i] = x ** q
                                 elif b.is_Pow and not b.exp.has(x):
                                     b, r = b.args
                                     if b in (x, -x) and r.is_real:
-                                        margs[i] = x**(r*q)
+                                        margs[i] = x ** (r * q)
                                 elif b.is_Mul and b.args[0] is S.NegativeOne:
                                     b = -b
                                     if b.is_Pow and not b.exp.has(x):
                                         b, r = b.args
                                         if b in (x, -x) and r.is_real:
-                                            margs[i] = x**(r*q)
+                                            margs[i] = x ** (r * q)
 
                         expr = Mul(*margs)
 
@@ -310,18 +316,24 @@ class Order(Expr):
         if order_symbols is None:
             order_symbols = self.args[1:]
         else:
-            if (not all(o[1] == order_symbols[0][1] for o in order_symbols) and
-                    not all(p == self.point[0] for p in self.point)):  # pragma: no cover
-                raise NotImplementedError('Order at points other than 0 '
-                    'or oo not supported, got %s as a point.' % self.point)
+            if not all(o[1] == order_symbols[0][1] for o in order_symbols) and not all(
+                p == self.point[0] for p in self.point
+            ):  # pragma: no cover
+                raise NotImplementedError(
+                    "Order at points other than 0 "
+                    "or oo not supported, got %s as a point." % self.point
+                )
             if order_symbols and order_symbols[0][1] != self.point[0]:
                 raise NotImplementedError(
-                        "Multiplying Order at different points is not supported.")
+                    "Multiplying Order at different points is not supported."
+                )
             order_symbols = dict(order_symbols)
             for s, p in dict(self.args[1:]).items():
                 if s not in order_symbols.keys():
                     order_symbols[s] = p
-            order_symbols = sorted(order_symbols.items(), key=lambda x: default_sort_key(x[0]))
+            order_symbols = sorted(
+                order_symbols.items(), key=lambda x: default_sort_key(x[0])
+            )
         return self.expr, tuple(order_symbols)
 
     def removeO(self):
@@ -339,14 +351,16 @@ class Order(Expr):
         (e.g. when self and expr have different symbols).
         """
         from sympy import powsimp
+
         if expr.is_zero:
             return True
         if expr is S.NaN:
             return False
         point = self.point[0] if self.point else S.Zero
         if expr.is_Order:
-            if (any(p != point for p in expr.point) or
-                   any(p != point for p in self.point)):
+            if any(p != point for p in expr.point) or any(
+                p != point for p in self.point
+            ):
                 return None
             if expr.expr == self.expr:
                 # O(1) + O(1), O(1) + O(1, x), etc.
@@ -354,35 +368,43 @@ class Order(Expr):
             if expr.expr.is_Add:
                 return all([self.contains(x) for x in expr.expr.args])
             if self.expr.is_Add and point.is_zero:
-                return any([self.func(x, *self.args[1:]).contains(expr)
-                            for x in self.expr.args])
+                return any(
+                    [
+                        self.func(x, *self.args[1:]).contains(expr)
+                        for x in self.expr.args
+                    ]
+                )
             if self.variables and expr.variables:
                 common_symbols = tuple(
-                    [s for s in self.variables if s in expr.variables])
+                    [s for s in self.variables if s in expr.variables]
+                )
             elif self.variables:
                 common_symbols = self.variables
             else:
                 common_symbols = expr.variables
             if not common_symbols:
                 return None
-            if (self.expr.is_Pow and len(self.variables) == 1
-                and self.variables == expr.variables):
-                    symbol = self.variables[0]
-                    other = expr.expr.as_independent(symbol, as_Add=False)[1]
-                    if (other.is_Pow and other.base == symbol and
-                        self.expr.base == symbol):
-                            if point.is_zero:
-                                rv = (self.expr.exp - other.exp).is_nonpositive
-                            if point.is_infinite:
-                                rv = (self.expr.exp - other.exp).is_nonnegative
-                            if rv is not None:
-                                return rv
+            if (
+                self.expr.is_Pow
+                and len(self.variables) == 1
+                and self.variables == expr.variables
+            ):
+                symbol = self.variables[0]
+                other = expr.expr.as_independent(symbol, as_Add=False)[1]
+                if other.is_Pow and other.base == symbol and self.expr.base == symbol:
+                    if point.is_zero:
+                        rv = (self.expr.exp - other.exp).is_nonpositive
+                    if point.is_infinite:
+                        rv = (self.expr.exp - other.exp).is_nonnegative
+                    if rv is not None:
+                        return rv
 
             r = None
-            ratio = self.expr/expr.expr
-            ratio = powsimp(ratio, deep=True, combine='exp')
+            ratio = self.expr / expr.expr
+            ratio = powsimp(ratio, deep=True, combine="exp")
             for s in common_symbols:
                 from sympy.series.limits import Limit
+
                 l = Limit(ratio, s, point).doit(heuristics=False)
                 if not isinstance(l, Limit):
                     l = l != 0
@@ -398,14 +420,13 @@ class Order(Expr):
         if self.expr.is_Pow and len(self.variables) == 1:
             symbol = self.variables[0]
             other = expr.as_independent(symbol, as_Add=False)[1]
-            if (other.is_Pow and other.base == symbol and
-                self.expr.base == symbol):
-                    if point.is_zero:
-                        rv = (self.expr.exp - other.exp).is_nonpositive
-                    if point.is_infinite:
-                        rv = (self.expr.exp - other.exp).is_nonnegative
-                    if rv is not None:
-                        return rv
+            if other.is_Pow and other.base == symbol and self.expr.base == symbol:
+                if point.is_zero:
+                    rv = (self.expr.exp - other.exp).is_nonpositive
+                if point.is_infinite:
+                    rv = (self.expr.exp - other.exp).is_nonnegative
+                if rv is not None:
+                    return rv
 
         obj = self.func(expr, *self.args[1:])
         return self.contains(obj)
@@ -413,7 +434,7 @@ class Order(Expr):
     def __contains__(self, other):
         result = self.contains(other)
         if result is None:
-            raise TypeError('contains did not evaluate to a bool')
+            raise TypeError("contains did not evaluate to a bool")
         return result
 
     def _eval_subs(self, old, new):
@@ -437,13 +458,14 @@ class Order(Expr):
                     point = new.subs(var, self.point[i])
                     if point != self.point[i]:
                         from sympy.solvers.solveset import solveset
+
                         d = Dummy()
                         sol = solveset(old - new.subs(var, d), d)
                         if isinstance(sol, Complement):
                             e1 = sol.args[0]
                             e2 = sol.args[1]
                             sol = set(e1) - set(e2)
-                        res = [dict(zip((d, ), sol))]
+                        res = [dict(zip((d,), sol))]
                         point = d.subs(res[0]).limit(old, self.point[i])
                     newvars[i] = var
                     newpt[i] = point
@@ -451,7 +473,7 @@ class Order(Expr):
                     del newvars[i], newpt[i]
                     if not syms and new == self.point[i]:
                         newvars.extend(syms)
-                        newpt.extend([S.Zero]*len(syms))
+                        newpt.extend([S.Zero] * len(syms))
                 else:
                     return
             return Order(newexpr, *zip(newvars, newpt))
@@ -470,10 +492,11 @@ class Order(Expr):
             return self.func(expr, *self.args[1:])
 
     def _sage_(self):
-        #XXX: SAGE doesn't have Order yet. Let's return 0 instead.
+        # XXX: SAGE doesn't have Order yet. Let's return 0 instead.
         return Rational(0)._sage_()
 
     def __neg__(self):
         return self
+
 
 O = Order

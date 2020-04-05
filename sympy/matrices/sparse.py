@@ -18,11 +18,13 @@ from .matrices import MatrixBase, ShapeError
 from .utilities import _iszero
 
 from .decompositions import (
-    _liupc, _row_structure_symbolic_cholesky, _cholesky_sparse,
-    _LDLdecomposition_sparse)
+    _liupc,
+    _row_structure_symbolic_cholesky,
+    _cholesky_sparse,
+    _LDLdecomposition_sparse,
+)
 
-from .solvers import (
-    _lower_triangular_solve_sparse, _upper_triangular_solve_sparse)
+from .solvers import _lower_triangular_solve_sparse, _upper_triangular_solve_sparse
 
 
 class SparseMatrix(MatrixBase):
@@ -129,8 +131,7 @@ class SparseMatrix(MatrixBase):
             if r is c is None:
                 self.rows = self.cols = None
             elif None in (r, c):
-                raise ValueError(
-                    'Pass rows=None and no cols for autosizing.')
+                raise ValueError("Pass rows=None and no cols for autosizing.")
             else:
                 self.rows, self.cols = map(as_int, args[:2])
 
@@ -138,18 +139,19 @@ class SparseMatrix(MatrixBase):
                 op = args[2]
                 for i in range(self.rows):
                     for j in range(self.cols):
-                        value = self._sympify(
-                            op(self._sympify(i), self._sympify(j)))
+                        value = self._sympify(op(self._sympify(i), self._sympify(j)))
                         if value:
                             self._smat[i, j] = value
             elif isinstance(args[2], (dict, Dict)):
+
                 def update(i, j, v):
                     # update self._smat and make sure there are
                     # no collisions
                     if v:
                         if (i, j) in self._smat and v != self._smat[i, j]:
-                            raise ValueError('collision at %s' % ((i, j),))
+                            raise ValueError("collision at %s" % ((i, j),))
                         self._smat[i, j] = v
+
                 # manual copy, copy.deepcopy() doesn't work
                 for key, v in args[2].items():
                     r, c = key
@@ -170,14 +172,15 @@ class SparseMatrix(MatrixBase):
                     s = SparseMatrix(args[2])
                     self._smat = s._smat
                 else:
-                    if len(args[2]) != self.rows*self.cols:
+                    if len(args[2]) != self.rows * self.cols:
                         raise ValueError(
-                            'Flat list length (%s) != rows*columns (%s)' %
-                            (len(args[2]), self.rows*self.cols))
+                            "Flat list length (%s) != rows*columns (%s)"
+                            % (len(args[2]), self.rows * self.cols)
+                        )
                     flat_list = args[2]
                     for i in range(self.rows):
                         for j in range(self.cols):
-                            value = self._sympify(flat_list[i*self.cols + j])
+                            value = self._sympify(flat_list[i * self.cols + j])
                             if value:
                                 self._smat[i, j] = value
             if self.rows is None:  # autosizing
@@ -188,11 +191,16 @@ class SparseMatrix(MatrixBase):
                 for i, j in self._smat.keys():
                     if i and i >= self.rows or j and j >= self.cols:
                         r, c = self.shape
-                        raise ValueError(filldedent('''
+                        raise ValueError(
+                            filldedent(
+                                """
                             The location %s is out of designated
-                            range: %s''' % ((i, j), (r - 1, c - 1))))
+                            range: %s"""
+                                % ((i, j), (r - 1, c - 1))
+                            )
+                        )
         else:
-            if (len(args) == 1 and isinstance(args[0], (list, tuple))):
+            if len(args) == 1 and isinstance(args[0], (list, tuple)):
                 # list of values or lists
                 v = args[0]
                 c = 0
@@ -212,14 +220,14 @@ class SparseMatrix(MatrixBase):
                 self.cols = c
                 for i in range(self.rows):
                     for j in range(self.cols):
-                        value = _list[self.cols*i + j]
+                        value = _list[self.cols * i + j]
                         if value:
                             self._smat[i, j] = value
         return self
 
     def __eq__(self, other):
-        self_shape = getattr(self, 'shape', None)
-        other_shape = getattr(other, 'shape', None)
+        self_shape = getattr(self, "shape", None)
+        other_shape = getattr(other, "shape", None)
         if None in (self_shape, other_shape):
             return False
         if self_shape != other_shape:
@@ -243,10 +251,11 @@ class SparseMatrix(MatrixBase):
                     pass
                 elif isinstance(i, Expr) and not i.is_number:
                     from sympy.matrices.expressions.matexpr import MatrixElement
+
                     return MatrixElement(self, i, j)
                 else:
                     if i >= self.rows:
-                        raise IndexError('Row index out of bounds')
+                        raise IndexError("Row index out of bounds")
                     i = [i]
                 if isinstance(j, slice):
                     j = range(self.cols)[j]
@@ -254,10 +263,11 @@ class SparseMatrix(MatrixBase):
                     pass
                 elif isinstance(j, Expr) and not j.is_number:
                     from sympy.matrices.expressions.matexpr import MatrixElement
+
                     return MatrixElement(self, i, j)
                 else:
                     if j >= self.cols:
-                        raise IndexError('Col index out of bounds')
+                        raise IndexError("Col index out of bounds")
                     j = [j]
                 return self.extract(i, j)
 
@@ -277,9 +287,11 @@ class SparseMatrix(MatrixBase):
         raise NotImplementedError()
 
     def _eval_inverse(self, **kwargs):
-        return self.inv(method=kwargs.get('method', 'LDL'),
-                        iszerofunc=kwargs.get('iszerofunc', _iszero),
-                        try_block_diag=kwargs.get('try_block_diag', False))
+        return self.inv(
+            method=kwargs.get("method", "LDL"),
+            iszerofunc=kwargs.get("iszerofunc", _iszero),
+            try_block_diag=kwargs.get("try_block_diag", False),
+        )
 
     def _eval_Abs(self):
         return self.applyfunc(lambda x: Abs(x))
@@ -315,14 +327,14 @@ class SparseMatrix(MatrixBase):
         return self._new(self.rows, self.cols + other.cols, new_smat)
 
     def _eval_conjugate(self):
-        smat = {key: val.conjugate() for key,val in self._smat.items()}
+        smat = {key: val.conjugate() for key, val in self._smat.items()}
         return self._new(self.rows, self.cols, smat)
 
     def _eval_extract(self, rowsList, colsList):
         urow = list(uniq(rowsList))
         ucol = list(uniq(colsList))
         smat = {}
-        if len(urow)*len(ucol) < len(self._smat):
+        if len(urow) * len(ucol) < len(self._smat):
             # there are fewer elements requested than there are elements in the matrix
             for i, r in enumerate(urow):
                 for j, c in enumerate(ucol):
@@ -351,7 +363,7 @@ class SparseMatrix(MatrixBase):
 
     @classmethod
     def _eval_eye(cls, rows, cols):
-        entries = {(i,i): S.One for i in range(min(rows, cols))}
+        entries = {(i, i): S.One for i in range(min(rows, cols))}
         return cls._new(rows, cols, entries)
 
     def _eval_has(self, *patterns):
@@ -359,7 +371,7 @@ class SparseMatrix(MatrixBase):
         # has the pattern.  If _smat is full length,
         # the matrix has no zeros.
         zhas = S.Zero.has(*patterns)
-        if len(self._smat) == self.rows*self.cols:
+        if len(self._smat) == self.rows * self.cols:
             zhas = False
         return any(self[key].has(*patterns) for key in self._smat) or zhas
 
@@ -381,10 +393,10 @@ class SparseMatrix(MatrixBase):
         # if we made it here, we're both sparse matrices
         # create quick lookups for rows and cols
         row_lookup = defaultdict(dict)
-        for (i,j), val in self._smat.items():
+        for (i, j), val in self._smat.items():
             row_lookup[i][j] = val
         col_lookup = defaultdict(dict)
-        for (i,j), val in other._smat.items():
+        for (i, j), val in other._smat.items():
             col_lookup[j][i] = val
 
         smat = {}
@@ -394,7 +406,7 @@ class SparseMatrix(MatrixBase):
                 # these are the only things that need to be multiplied.
                 indices = set(col_lookup[col].keys()) & set(row_lookup[row].keys())
                 if indices:
-                    vec = [row_lookup[row][k]*col_lookup[col][k] for k in indices]
+                    vec = [row_lookup[row][k] * col_lookup[col][k] for k in indices]
                     try:
                         smat[row, col] = Add(*vec)
                     except (TypeError, SympifyError):
@@ -422,10 +434,10 @@ class SparseMatrix(MatrixBase):
         return self._new(self.rows + other.rows, self.cols, new_smat)
 
     def _eval_scalar_mul(self, other):
-        return self.applyfunc(lambda x: x*other)
+        return self.applyfunc(lambda x: x * other)
 
     def _eval_scalar_rmul(self, other):
-        return self.applyfunc(lambda x: other*x)
+        return self.applyfunc(lambda x: other * x)
 
     def _eval_transpose(self):
         """Returns the transposed SparseMatrix of this SparseMatrix.
@@ -444,11 +456,11 @@ class SparseMatrix(MatrixBase):
         [1, 3],
         [2, 4]])
         """
-        smat = {(j,i): val for (i,j),val in self._smat.items()}
+        smat = {(j, i): val for (i, j), val in self._smat.items()}
         return self._new(self.cols, self.rows, smat)
 
     def _eval_values(self):
-        return [v for k,v in self._smat.items() if not v.is_zero]
+        return [v for k, v in self._smat.items() if not v.is_zero]
 
     @classmethod
     def _eval_zeros(cls, rows, cols):
@@ -493,6 +505,7 @@ class SparseMatrix(MatrixBase):
     def as_immutable(self):
         """Returns an Immutable version of this Matrix."""
         from .immutable import ImmutableSparseMatrix
+
         return ImmutableSparseMatrix(self)
 
     def as_mutable(self):
@@ -532,7 +545,10 @@ class SparseMatrix(MatrixBase):
         sympy.matrices.sparse.MutableSparseMatrix.col_op
         sympy.matrices.sparse.SparseMatrix.row_list
         """
-        return [tuple(k + (self[k],)) for k in sorted(list(self._smat.keys()), key=lambda k: list(reversed(k)))]
+        return [
+            tuple(k + (self[k],))
+            for k in sorted(list(self._smat.keys()), key=lambda k: list(reversed(k)))
+        ]
 
     def copy(self):
         return self._new(self.rows, self.cols, self._smat)
@@ -561,22 +577,24 @@ class SparseMatrix(MatrixBase):
         sympy.matrices.sparse.MutableSparseMatrix.row_op
         sympy.matrices.sparse.SparseMatrix.col_list
         """
-        return [tuple(k + (self[k],)) for k in
-            sorted(list(self._smat.keys()), key=lambda k: list(k))]
+        return [
+            tuple(k + (self[k],))
+            for k in sorted(list(self._smat.keys()), key=lambda k: list(k))
+        ]
 
     def scalar_multiply(self, scalar):
         "Scalar element-wise multiplication"
         M = self.zeros(*self.shape)
         if scalar:
             for i in self._smat:
-                v = scalar*self._smat[i]
+                v = scalar * self._smat[i]
                 if v:
                     M._smat[i] = v
                 else:
                     M._smat.pop(i, None)
         return M
 
-    def solve_least_squares(self, rhs, method='LDL'):
+    def solve_least_squares(self, rhs, method="LDL"):
         """Return the least-square fit to the data.
 
         By default the cholesky_solve routine is used (method='CH'); other
@@ -631,19 +649,21 @@ class SparseMatrix(MatrixBase):
 
         """
         t = self.T
-        return (t*self).inv(method=method)*t*rhs
+        return (t * self).inv(method=method) * t * rhs
 
-    def solve(self, rhs, method='LDL'):
+    def solve(self, rhs, method="LDL"):
         """Return solution to self*soln = rhs using given inversion method.
 
         For a list of possible inversion methods, see the .inv() docstring.
         """
         if not self.is_square:
             if self.rows < self.cols:
-                raise ValueError('Under-determined system.')
+                raise ValueError("Under-determined system.")
             elif self.rows > self.cols:
-                raise ValueError('For over-determined system, M, having '
-                    'more rows than columns, try M.solve_least_squares(rhs).')
+                raise ValueError(
+                    "For over-determined system, M, having "
+                    "more rows than columns, try M.solve_least_squares(rhs)."
+                )
         else:
             return self.inv(method=method).multiply(rhs)
 
@@ -668,12 +688,12 @@ class SparseMatrix(MatrixBase):
     def upper_triangular_solve(self, rhs):
         return _upper_triangular_solve_sparse(self, rhs)
 
-    liupc.__doc__                           = _liupc.__doc__
+    liupc.__doc__ = _liupc.__doc__
     row_structure_symbolic_cholesky.__doc__ = _row_structure_symbolic_cholesky.__doc__
-    cholesky.__doc__                        = _cholesky_sparse.__doc__
-    LDLdecomposition.__doc__                = _LDLdecomposition_sparse.__doc__
-    lower_triangular_solve.__doc__          = lower_triangular_solve.__doc__
-    upper_triangular_solve.__doc__          = upper_triangular_solve.__doc__
+    cholesky.__doc__ = _cholesky_sparse.__doc__
+    LDLdecomposition.__doc__ = _LDLdecomposition_sparse.__doc__
+    lower_triangular_solve.__doc__ = lower_triangular_solve.__doc__
+    upper_triangular_solve.__doc__ = upper_triangular_solve.__doc__
 
 
 class MutableSparseMatrix(SparseMatrix, MatrixBase):
@@ -907,13 +927,14 @@ class MutableSparseMatrix(SparseMatrix, MatrixBase):
         if shape != (dr, dc):
             raise ShapeError(
                 "The Matrix `value` doesn't have the same dimensions "
-                "as the in sub-Matrix given by `key`.")
+                "as the in sub-Matrix given by `key`."
+            )
         if not isinstance(value, SparseMatrix):
             for i in range(value.rows):
                 for j in range(value.cols):
                     self[i + rlo, j + clo] = value[i, j]
         else:
-            if (rhi - rlo)*(chi - clo) < len(self):
+            if (rhi - rlo) * (chi - clo) < len(self):
                 for i in range(rlo, rhi):
                     for j in range(clo, chi):
                         self._smat.pop((i, j), None)
@@ -954,8 +975,7 @@ class MutableSparseMatrix(SparseMatrix, MatrixBase):
             self._smat = {}
         else:
             v = self._sympify(value)
-            self._smat = {(i, j): v
-                for i in range(self.rows) for j in range(self.cols)}
+            self._smat = {(i, j): v for i in range(self.rows) for j in range(self.cols)}
 
     def row_del(self, k):
         """Delete the given row of the matrix.

@@ -2,7 +2,7 @@ from sympy.core.backend import Symbol
 from sympy.physics.vector import Point, Vector, ReferenceFrame
 from sympy.physics.mechanics import RigidBody, Particle, inertia
 
-__all__ = ['Body']
+__all__ = ["Body"]
 
 
 # XXX: We use type:ignore because the classes RigidBody and Particle have
@@ -93,32 +93,32 @@ class Body(RigidBody, Particle):  # type: ignore
     and a reference frame, just not an inertia.
     """
 
-    def __init__(self, name, masscenter=None, mass=None, frame=None,
-                 central_inertia=None):
+    def __init__(
+        self, name, masscenter=None, mass=None, frame=None, central_inertia=None
+    ):
 
         self.name = name
         self.loads = []
 
         if frame is None:
-            frame = ReferenceFrame(name + '_frame')
+            frame = ReferenceFrame(name + "_frame")
 
         if masscenter is None:
-            masscenter = Point(name + '_masscenter')
+            masscenter = Point(name + "_masscenter")
 
         if central_inertia is None and mass is None:
-            ixx = Symbol(name + '_ixx')
-            iyy = Symbol(name + '_iyy')
-            izz = Symbol(name + '_izz')
-            izx = Symbol(name + '_izx')
-            ixy = Symbol(name + '_ixy')
-            iyz = Symbol(name + '_iyz')
-            _inertia = (inertia(frame, ixx, iyy, izz, ixy, iyz, izx),
-                        masscenter)
+            ixx = Symbol(name + "_ixx")
+            iyy = Symbol(name + "_iyy")
+            izz = Symbol(name + "_izz")
+            izx = Symbol(name + "_izx")
+            ixy = Symbol(name + "_ixy")
+            iyz = Symbol(name + "_iyz")
+            _inertia = (inertia(frame, ixx, iyy, izz, ixy, iyz, izx), masscenter)
         else:
             _inertia = (central_inertia, masscenter)
 
         if mass is None:
-            _mass = Symbol(name + '_mass')
+            _mass = Symbol(name + "_mass")
         else:
             _mass = mass
 

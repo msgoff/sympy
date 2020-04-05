@@ -5,11 +5,13 @@
 # Py2 SyntaxError from sympy/__init__.py
 
 import sys
+
 assert sys.version_info[:2] == (2, 7), "This test is for Python 2.7 only"
 
 import os
+
 thisdir = os.path.dirname(__file__)
-parentdir = os.path.normpath(os.path.join(thisdir, '..'))
+parentdir = os.path.normpath(os.path.join(thisdir, ".."))
 
 # Append the SymPy root directory to path
 sys.path.append(parentdir)

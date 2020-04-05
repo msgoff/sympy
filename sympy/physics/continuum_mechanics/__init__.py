@@ -1,3 +1,3 @@
-__all__ = ['Beam']
+__all__ = ["Beam"]
 
 from .beam import Beam

@@ -9,7 +9,7 @@ import re
 from sympy.core.compatibility import Iterable
 from sympy import Derivative
 
-_name_with_digits_p = re.compile(r'^([a-zA-Z]+)([0-9]+)$')
+_name_with_digits_p = re.compile(r"^([a-zA-Z]+)([0-9]+)$")
 
 
 def split_super_sub(text):
@@ -40,7 +40,7 @@ def split_super_sub(text):
     subs = []
     while pos < len(text):
         start = pos + 1
-        if text[pos:pos + 2] == "__":
+        if text[pos : pos + 2] == "__":
             start += 1
         pos_hat = text.find("^", start)
         if pos_hat < 0:

@@ -10,6 +10,7 @@ from sympy.core.decorators import wraps
 from sympy.core.compatibility import get_function_globals, get_function_name, iterable
 from sympy.testing.runtests import DependencyError, SymPyDocTests, PyTestReporter
 
+
 def threaded_factory(func, use_add):
     """A factory for ``threaded`` decorators. """
     from sympy.core import sympify
@@ -28,10 +29,11 @@ def threaded_factory(func, use_add):
             expr = sympify(expr)
 
             if use_add and expr.is_Add:
-                return expr.__class__(*[ func(f, *args, **kwargs) for f in expr.args ])
+                return expr.__class__(*[func(f, *args, **kwargs) for f in expr.args])
             elif expr.is_Relational:
-                return expr.__class__(func(expr.lhs, *args, **kwargs),
-                                      func(expr.rhs, *args, **kwargs))
+                return expr.__class__(
+                    func(expr.lhs, *args, **kwargs), func(expr.rhs, *args, **kwargs)
+                )
             else:
                 return func(expr, *args, **kwargs)
 
@@ -114,19 +116,22 @@ class no_attrs_in_subclass(object):
     False
 
     """
+
     def __init__(self, cls, f):
         self.cls = cls
         self.f = f
 
     def __get__(self, instance, owner=None):
         if owner == self.cls:
-            if hasattr(self.f, '__get__'):
+            if hasattr(self.f, "__get__"):
                 return self.f.__get__(instance, owner)
             return self.f
         raise AttributeError
 
 
-def doctest_depends_on(exe=None, modules=None, disable_viewers=None, python_version=None):
+def doctest_depends_on(
+    exe=None, modules=None, disable_viewers=None, python_version=None
+):
     """
     Adds metadata about the dependencies which need to be met for doctesting
     the docstrings of the decorated objects.
@@ -143,13 +148,13 @@ def doctest_depends_on(exe=None, modules=None, disable_viewers=None, python_vers
 
     dependencies = {}
     if exe is not None:
-        dependencies['executables'] = exe
+        dependencies["executables"] = exe
     if modules is not None:
-        dependencies['modules'] = modules
+        dependencies["modules"] = modules
     if disable_viewers is not None:
-        dependencies['disable_viewers'] = disable_viewers
+        dependencies["disable_viewers"] = disable_viewers
     if python_version is not None:
-        dependencies['python_version'] = python_version
+        dependencies["python_version"] = python_version
 
     def skiptests():
         r = PyTestReporter()
@@ -159,17 +164,15 @@ def doctest_depends_on(exe=None, modules=None, disable_viewers=None, python_vers
         except DependencyError:
             return True  # Skip doctests
         else:
-            return False # Run doctests
+            return False  # Run doctests
 
     def depends_on_deco(fn):
         fn._doctest_depends_on = dependencies
         fn.__doctest_skip__ = skiptests
 
         if inspect.isclass(fn):
-            fn._doctest_depdends_on = no_attrs_in_subclass(
-                fn, fn._doctest_depends_on)
-            fn.__doctest_skip__ = no_attrs_in_subclass(
-                fn, fn.__doctest_skip__)
+            fn._doctest_depdends_on = no_attrs_in_subclass(fn, fn._doctest_depends_on)
+            fn.__doctest_skip__ = no_attrs_in_subclass(fn, fn.__doctest_skip__)
         return fn
 
     return depends_on_deco
@@ -228,7 +231,7 @@ def memoize_property(propfunc):
     """Property decorator that caches the value of potentially expensive
     `propfunc` after the first evaluation. The cached value is stored in
     the corresponding property name with an attached underscore."""
-    attrname = '_' + propfunc.__name__
+    attrname = "_" + propfunc.__name__
     sentinel = object()
 
     @wraps(propfunc)

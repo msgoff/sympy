@@ -57,9 +57,9 @@ def dpll_satisfiable(expr, all_models=False):
         return False
 
     # Uncomment to confirm the solution is valid (hitting set for the clauses)
-    #else:
-        #for cls in clauses_int_repr:
-            #assert solver.var_settings.intersection(cls)
+    # else:
+    # for cls in clauses_int_repr:
+    # assert solver.var_settings.intersection(cls)
 
 
 def _all_models(models):
@@ -80,8 +80,16 @@ class SATSolver(object):
      normal form.
     """
 
-    def __init__(self, clauses, variables, var_settings, symbols=None,
-                heuristic='vsids', clause_learning='none', INTERVAL=500):
+    def __init__(
+        self,
+        clauses,
+        variables,
+        var_settings,
+        symbols=None,
+        heuristic="vsids",
+        clause_learning="none",
+        INTERVAL=500,
+    ):
 
         self.var_settings = var_settings
         self.heuristic = heuristic
@@ -98,7 +106,7 @@ class SATSolver(object):
         self._initialize_variables(variables)
         self._initialize_clauses(clauses)
 
-        if 'vsids' == heuristic:
+        if "vsids" == heuristic:
             self._vsids_init()
             self.heur_calculate = self._vsids_calculate
             self.heur_lit_assigned = self._vsids_lit_assigned
@@ -106,16 +114,16 @@ class SATSolver(object):
             self.heur_clause_added = self._vsids_clause_added
 
             # Note: Uncomment this if/when clause learning is enabled
-            #self.update_functions.append(self._vsids_decay)
+            # self.update_functions.append(self._vsids_decay)
 
         else:
             raise NotImplementedError
 
-        if 'simple' == clause_learning:
+        if "simple" == clause_learning:
             self.add_learned_clause = self._simple_add_learned_clause
             self.compute_conflict = self.simple_compute_conflict
             self.update_functions.append(self.simple_clean_clauses)
-        elif 'none' == clause_learning:
+        elif "none" == clause_learning:
             self.add_learned_clause = lambda x: None
             self.compute_conflict = lambda: None
         else:
@@ -215,8 +223,10 @@ class SATSolver(object):
 
                 # Stopping condition for a satisfying theory
                 if 0 == lit:
-                    yield dict((self.symbols[abs(lit) - 1],
-                                lit > 0) for lit in self.var_settings)
+                    yield dict(
+                        (self.symbols[abs(lit) - 1], lit > 0)
+                        for lit in self.var_settings
+                    )
                     while self._current_level.flipped:
                         self._undo()
                     if len(self.levels) == 1:
@@ -417,6 +427,7 @@ class SATSolver(object):
       theory, and return True if any simplification occurred and False
       otherwise.
     """
+
     def _simplify(self):
         """Iterate over the various forms of propagation to simplify the theory.
 

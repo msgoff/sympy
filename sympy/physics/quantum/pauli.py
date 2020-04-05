@@ -7,8 +7,14 @@ from sympy.matrices import Matrix
 from sympy.functions.special.tensor_functions import KroneckerDelta
 
 __all__ = [
-    'SigmaX', 'SigmaY', 'SigmaZ', 'SigmaMinus', 'SigmaPlus', 'SigmaZKet',
-    'SigmaZBra', 'qsimplify_pauli'
+    "SigmaX",
+    "SigmaY",
+    "SigmaZ",
+    "SigmaMinus",
+    "SigmaPlus",
+    "SigmaZKet",
+    "SigmaZBra",
+    "qsimplify_pauli",
 ]
 
 
@@ -71,7 +77,7 @@ class SigmaX(SigmaOpBase):
         if self.name != other.name:
             return Integer(0)
         else:
-            return - 2 * I * SigmaY(self.name)
+            return -2 * I * SigmaY(self.name)
 
     def _eval_commutator_BosonOp(self, other, **hints):
         return Integer(0)
@@ -87,24 +93,25 @@ class SigmaX(SigmaOpBase):
 
     def _print_contents_latex(self, printer, *args):
         if self.use_name:
-            return r'{\sigma_x^{(%s)}}' % str(self.name)
+            return r"{\sigma_x^{(%s)}}" % str(self.name)
         else:
-            return r'{\sigma_x}'
+            return r"{\sigma_x}"
 
     def _print_contents(self, printer, *args):
-        return 'SigmaX()'
+        return "SigmaX()"
 
     def _eval_power(self, e):
         if e.is_Integer and e.is_positive:
             return SigmaX(self.name).__pow__(int(e) % 2)
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[0, 1], [1, 0]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaY(SigmaOpBase):
@@ -144,7 +151,7 @@ class SigmaY(SigmaOpBase):
         if self.name != other.name:
             return Integer(0)
         else:
-            return - 2 * I * SigmaZ(self.name)
+            return -2 * I * SigmaZ(self.name)
 
     def _eval_anticommutator_SigmaX(self, other, **hints):
         return Integer(0)
@@ -157,24 +164,25 @@ class SigmaY(SigmaOpBase):
 
     def _print_contents_latex(self, printer, *args):
         if self.use_name:
-            return r'{\sigma_y^{(%s)}}' % str(self.name)
+            return r"{\sigma_y^{(%s)}}" % str(self.name)
         else:
-            return r'{\sigma_y}'
+            return r"{\sigma_y}"
 
     def _print_contents(self, printer, *args):
-        return 'SigmaY()'
+        return "SigmaY()"
 
     def _eval_power(self, e):
         if e.is_Integer and e.is_positive:
             return SigmaY(self.name).__pow__(int(e) % 2)
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[0, -I], [I, 0]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaZ(SigmaOpBase):
@@ -214,7 +222,7 @@ class SigmaZ(SigmaOpBase):
         if self.name != other.name:
             return Integer(0)
         else:
-            return - 2 * I * SigmaX(self.name)
+            return -2 * I * SigmaX(self.name)
 
     def _eval_anticommutator_SigmaX(self, other, **hints):
         return Integer(0)
@@ -227,24 +235,25 @@ class SigmaZ(SigmaOpBase):
 
     def _print_contents_latex(self, printer, *args):
         if self.use_name:
-            return r'{\sigma_z^{(%s)}}' % str(self.name)
+            return r"{\sigma_z^{(%s)}}" % str(self.name)
         else:
-            return r'{\sigma_z}'
+            return r"{\sigma_z}"
 
     def _print_contents(self, printer, *args):
-        return 'SigmaZ()'
+        return "SigmaZ()"
 
     def _eval_power(self, e):
         if e.is_Integer and e.is_positive:
             return SigmaZ(self.name).__pow__(int(e) % 2)
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[1, 0], [0, -1]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaMinus(SigmaOpBase):
@@ -301,7 +310,7 @@ class SigmaMinus(SigmaOpBase):
         return Integer(1)
 
     def _eval_anticommutator_SigmaY(self, other, **hints):
-        return - I * Integer(1)
+        return -I * Integer(1)
 
     def _eval_anticommutator_SigmaPlus(self, other, **hints):
         return Integer(1)
@@ -315,20 +324,21 @@ class SigmaMinus(SigmaOpBase):
 
     def _print_contents_latex(self, printer, *args):
         if self.use_name:
-            return r'{\sigma_-^{(%s)}}' % str(self.name)
+            return r"{\sigma_-^{(%s)}}" % str(self.name)
         else:
-            return r'{\sigma_-}'
+            return r"{\sigma_-}"
 
     def _print_contents(self, printer, *args):
-        return 'SigmaMinus()'
+        return "SigmaMinus()"
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[0, 0], [1, 0]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaPlus(SigmaOpBase):
@@ -405,20 +415,21 @@ class SigmaPlus(SigmaOpBase):
 
     def _print_contents_latex(self, printer, *args):
         if self.use_name:
-            return r'{\sigma_+^{(%s)}}' % str(self.name)
+            return r"{\sigma_+^{(%s)}}" % str(self.name)
         else:
-            return r'{\sigma_+}'
+            return r"{\sigma_+}"
 
     def _print_contents(self, printer, *args):
-        return 'SigmaPlus()'
+        return "SigmaPlus()"
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[0, 1], [0, 0]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaZKet(Ket):
@@ -477,12 +488,13 @@ class SigmaZKet(Ket):
             return SigmaZKet(0)
 
     def _represent_default_basis(self, **options):
-        format = options.get('format', 'sympy')
-        if format == 'sympy':
+        format = options.get("format", "sympy")
+        if format == "sympy":
             return Matrix([[1], [0]]) if self.n == 0 else Matrix([[0], [1]])
         else:
-            raise NotImplementedError('Representation in format ' +
-                                      format + ' not implemented.')
+            raise NotImplementedError(
+                "Representation in format " + format + " not implemented."
+            )
 
 
 class SigmaZBra(Bra):
@@ -533,18 +545,18 @@ def _qsimplify_pauli_product(a, b):
             return I * SigmaZ(a.name)
 
         if isinstance(b, SigmaZ):
-            return - I * SigmaY(a.name)
+            return -I * SigmaY(a.name)
 
         if isinstance(b, SigmaMinus):
-            return (Integer(1)/2 + SigmaZ(a.name)/2)
+            return Integer(1) / 2 + SigmaZ(a.name) / 2
 
         if isinstance(b, SigmaPlus):
-            return (Integer(1)/2 - SigmaZ(a.name)/2)
+            return Integer(1) / 2 - SigmaZ(a.name) / 2
 
     elif isinstance(a, SigmaY):
 
         if isinstance(b, SigmaX):
-            return - I * SigmaZ(a.name)
+            return -I * SigmaZ(a.name)
 
         if isinstance(b, SigmaY):
             return Integer(1)
@@ -553,10 +565,10 @@ def _qsimplify_pauli_product(a, b):
             return I * SigmaX(a.name)
 
         if isinstance(b, SigmaMinus):
-            return -I * (Integer(1) + SigmaZ(a.name))/2
+            return -I * (Integer(1) + SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaPlus):
-            return I * (Integer(1) - SigmaZ(a.name))/2
+            return I * (Integer(1) - SigmaZ(a.name)) / 2
 
     elif isinstance(a, SigmaZ):
 
@@ -564,13 +576,13 @@ def _qsimplify_pauli_product(a, b):
             return I * SigmaY(a.name)
 
         if isinstance(b, SigmaY):
-            return - I * SigmaX(a.name)
+            return -I * SigmaX(a.name)
 
         if isinstance(b, SigmaZ):
             return Integer(1)
 
         if isinstance(b, SigmaMinus):
-            return - SigmaMinus(a.name)
+            return -SigmaMinus(a.name)
 
         if isinstance(b, SigmaPlus):
             return SigmaPlus(a.name)
@@ -578,10 +590,10 @@ def _qsimplify_pauli_product(a, b):
     elif isinstance(a, SigmaMinus):
 
         if isinstance(b, SigmaX):
-            return (Integer(1) - SigmaZ(a.name))/2
+            return (Integer(1) - SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaY):
-            return - I * (Integer(1) - SigmaZ(a.name))/2
+            return -I * (Integer(1) - SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaZ):
             # (SigmaX(a.name) - I * SigmaY(a.name))/2
@@ -591,22 +603,22 @@ def _qsimplify_pauli_product(a, b):
             return Integer(0)
 
         if isinstance(b, SigmaPlus):
-            return Integer(1)/2 - SigmaZ(a.name)/2
+            return Integer(1) / 2 - SigmaZ(a.name) / 2
 
     elif isinstance(a, SigmaPlus):
 
         if isinstance(b, SigmaX):
-            return (Integer(1) + SigmaZ(a.name))/2
+            return (Integer(1) + SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaY):
-            return I * (Integer(1) + SigmaZ(a.name))/2
+            return I * (Integer(1) + SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaZ):
-            #-(SigmaX(a.name) + I * SigmaY(a.name))/2
+            # -(SigmaX(a.name) + I * SigmaY(a.name))/2
             return -SigmaPlus(a.name)
 
         if isinstance(b, SigmaMinus):
-            return (Integer(1) + SigmaZ(a.name))/2
+            return (Integer(1) + SigmaZ(a.name)) / 2
 
         if isinstance(b, SigmaPlus):
             return Integer(0)
@@ -652,10 +664,12 @@ def qsimplify_pauli(e):
         while nc:
             curr = nc.pop(0)
 
-            while (len(nc) and
-                   isinstance(curr, SigmaOpBase) and
-                   isinstance(nc[0], SigmaOpBase) and
-                   curr.name == nc[0].name):
+            while (
+                len(nc)
+                and isinstance(curr, SigmaOpBase)
+                and isinstance(nc[0], SigmaOpBase)
+                and curr.name == nc[0].name
+            ):
 
                 x = nc.pop(0)
                 y = _qsimplify_pauli_product(curr, x)

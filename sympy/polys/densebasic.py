@@ -9,6 +9,7 @@ from sympy.polys.orderings import monomial_key
 
 import random
 
+
 def poly_LC(f, K):
     """
     Return leading coefficient of ``f``.
@@ -51,6 +52,7 @@ def poly_TC(f, K):
         return K.zero
     else:
         return f[-1]
+
 
 dup_LC = dmp_LC = poly_LC
 dup_TC = dmp_TC = poly_TC
@@ -189,7 +191,7 @@ def _rec_degree_in(g, v, i, j):
 
     v, i = v - 1, i + 1
 
-    return max([ _rec_degree_in(c, v, i, j) for c in g ])
+    return max([_rec_degree_in(c, v, i, j) for c in g])
 
 
 def dmp_degree_in(f, j, u):
@@ -245,7 +247,7 @@ def dmp_degree_list(f, u):
     (1, 2)
 
     """
-    degs = [-oo]*(u + 1)
+    degs = [-oo] * (u + 1)
     _rec_degree_list(f, u, 0, degs)
     return tuple(degs)
 
@@ -335,7 +337,7 @@ def _rec_strip(g, v):
 
     w = v - 1
 
-    return dmp_strip([ _rec_strip(c, w) for c in g ], v)
+    return dmp_strip([_rec_strip(c, w) for c in g], v)
 
 
 def dmp_validate(f, K=None):
@@ -363,8 +365,7 @@ def dmp_validate(f, K=None):
     if not levels:
         return _rec_strip(f, u), u
     else:
-        raise ValueError(
-            "invalid data structure for a multivariate polynomial")
+        raise ValueError("invalid data structure for a multivariate polynomial")
 
 
 def dup_reverse(f):
@@ -426,7 +427,7 @@ def dmp_copy(f, u):
 
     v = u - 1
 
-    return [ dmp_copy(c, v) for c in f ]
+    return [dmp_copy(c, v) for c in f]
 
 
 def dup_to_tuple(f):
@@ -489,7 +490,7 @@ def dup_normal(f, K):
     [1, 2, 3]
 
     """
-    return dup_strip([ K.normal(c) for c in f ])
+    return dup_strip([K.normal(c) for c in f])
 
 
 def dmp_normal(f, u, K):
@@ -511,7 +512,7 @@ def dmp_normal(f, u, K):
 
     v = u - 1
 
-    return dmp_strip([ dmp_normal(c, v, K) for c in f ], u)
+    return dmp_strip([dmp_normal(c, v, K) for c in f], u)
 
 
 def dup_convert(f, K0, K1):
@@ -536,7 +537,7 @@ def dup_convert(f, K0, K1):
     if K0 is not None and K0 == K1:
         return f
     else:
-        return dup_strip([ K1.convert(c, K0) for c in f ])
+        return dup_strip([K1.convert(c, K0) for c in f])
 
 
 def dmp_convert(f, u, K0, K1):
@@ -565,7 +566,7 @@ def dmp_convert(f, u, K0, K1):
 
     v = u - 1
 
-    return dmp_strip([ dmp_convert(c, v, K0, K1) for c in f ], u)
+    return dmp_strip([dmp_convert(c, v, K0, K1) for c in f], u)
 
 
 def dup_from_sympy(f, K):
@@ -583,7 +584,7 @@ def dup_from_sympy(f, K):
     True
 
     """
-    return dup_strip([ K.from_sympy(c) for c in f ])
+    return dup_strip([K.from_sympy(c) for c in f])
 
 
 def dmp_from_sympy(f, u, K):
@@ -606,7 +607,7 @@ def dmp_from_sympy(f, u, K):
 
     v = u - 1
 
-    return dmp_strip([ dmp_from_sympy(c, v, K) for c in f ], u)
+    return dmp_strip([dmp_from_sympy(c, v, K) for c in f], u)
 
 
 def dup_nth(f, n, K):
@@ -847,9 +848,9 @@ def dmp_zeros(n, u, K):
         return []
 
     if u < 0:
-        return [K.zero]*n
+        return [K.zero] * n
     else:
-        return [ dmp_zero(u) for i in range(n) ]
+        return [dmp_zero(u) for i in range(n)]
 
 
 def dmp_grounds(c, n, u):
@@ -872,9 +873,9 @@ def dmp_grounds(c, n, u):
         return []
 
     if u < 0:
-        return [c]*n
+        return [c] * n
     else:
-        return [ dmp_ground(c, u) for i in range(n) ]
+        return [dmp_ground(c, u) for i in range(n)]
 
 
 def dmp_negative_p(f, u, K):
@@ -1002,7 +1003,7 @@ def dmp_from_dict(f, u, K):
         if head in coeffs:
             coeffs[head][tail] = coeff
         else:
-            coeffs[head] = { tail: coeff }
+            coeffs[head] = {tail: coeff}
 
     n, v, h = max(coeffs.keys()), u - 1, []
 
@@ -1088,7 +1089,7 @@ def dmp_to_dict(f, u, K=None, zero=False):
         return dup_to_dict(f, K, zero=zero)
 
     if dmp_zero_p(f, u) and zero:
-        return {(0,)*(u + 1): K.zero}
+        return {(0,) * (u + 1): K.zero}
 
     n, v, result = dmp_degree(f, u), u - 1, {}
 
@@ -1132,9 +1133,7 @@ def dmp_swap(f, i, j, u, K):
     F, H = dmp_to_dict(f, u), {}
 
     for exp, coeff in F.items():
-        H[exp[:i] + (exp[j],) +
-          exp[i + 1:j] +
-          (exp[i],) + exp[j + 1:]] = coeff
+        H[exp[:i] + (exp[j],) + exp[i + 1 : j] + (exp[i],) + exp[j + 1 :]] = coeff
 
     return dmp_from_dict(H, u, K)
 
@@ -1160,7 +1159,7 @@ def dmp_permute(f, P, u, K):
     F, H = dmp_to_dict(f, u), {}
 
     for exp, coeff in F.items():
-        new_exp = [0]*len(exp)
+        new_exp = [0] * len(exp)
 
         for e, p in zip(exp, P):
             new_exp[p] = e
@@ -1218,11 +1217,11 @@ def dmp_raise(f, l, u, K):
 
         k = l - 1
 
-        return [ dmp_ground(c, k) for c in f ]
+        return [dmp_ground(c, k) for c in f]
 
     v = u - 1
 
-    return [ dmp_raise(c, l, v, K) for c in f ]
+    return [dmp_raise(c, l, v, K) for c in f]
 
 
 def dup_deflate(f, K):
@@ -1275,10 +1274,10 @@ def dmp_deflate(f, u, K):
 
     """
     if dmp_zero_p(f, u):
-        return (1,)*(u + 1), f
+        return (1,) * (u + 1), f
 
     F = dmp_to_dict(f, u)
-    B = [0]*(u + 1)
+    B = [0] * (u + 1)
 
     for M in F.keys():
         for i, m in enumerate(M):
@@ -1296,7 +1295,7 @@ def dmp_deflate(f, u, K):
     H = {}
 
     for A, coeff in F.items():
-        N = [ a // b for a, b in zip(A, B) ]
+        N = [a // b for a, b in zip(A, B)]
         H[tuple(N)] = coeff
 
     return B, dmp_from_dict(H, u, K)
@@ -1338,7 +1337,7 @@ def dup_multi_deflate(polys, K):
 
         G = igcd(G, g)
 
-    return G, tuple([ p[::G] for p in polys ])
+    return G, tuple([p[::G] for p in polys])
 
 
 def dmp_multi_deflate(polys, u, K):
@@ -1362,7 +1361,7 @@ def dmp_multi_deflate(polys, u, K):
         M, H = dup_multi_deflate(polys, K)
         return (M,), H
 
-    F, B = [], [0]*(u + 1)
+    F, B = [], [0] * (u + 1)
 
     for p in polys:
         f = dmp_to_dict(p, u)
@@ -1389,7 +1388,7 @@ def dmp_multi_deflate(polys, u, K):
         h = {}
 
         for A, coeff in f.items():
-            N = [ a // b for a, b in zip(A, B) ]
+            N = [a // b for a, b in zip(A, B)]
             h[tuple(N)] = coeff
 
         H.append(dmp_from_dict(h, u, K))
@@ -1421,7 +1420,7 @@ def dup_inflate(f, m, K):
     result = [f[0]]
 
     for coeff in f[1:]:
-        result.extend([K.zero]*(m - 1))
+        result.extend([K.zero] * (m - 1))
         result.append(coeff)
 
     return result
@@ -1436,7 +1435,7 @@ def _rec_inflate(g, M, v, i, K):
 
     w, j = v - 1, i + 1
 
-    g = [ _rec_inflate(c, M, w, j, K) for c in g ]
+    g = [_rec_inflate(c, M, w, j, K) for c in g]
 
     result = [g[0]]
 
@@ -1676,7 +1675,7 @@ def dmp_terms_gcd(f, u, K):
 
     """
     if dmp_ground_TC(f, u, K) or dmp_zero_p(f, u):
-        return (0,)*(u + 1), f
+        return (0,) * (u + 1), f
 
     F = dmp_to_dict(f, u)
     G = monomial_min(*list(F.keys()))
@@ -1729,13 +1728,14 @@ def dmp_list_terms(f, u, K, order=None):
     [((1, 1), 1), ((1, 0), 1), ((0, 1), 2), ((0, 0), 3)]
 
     """
+
     def sort(terms, O):
         return sorted(terms, key=lambda term: O(term[0]), reverse=True)
 
     terms = _rec_list_terms(f, u, ())
 
     if not terms:
-        return [((0,)*(u + 1), K.zero)]
+        return [((0,) * (u + 1), K.zero)]
 
     if order is None:
         return terms
@@ -1763,9 +1763,9 @@ def dup_apply_pairs(f, g, h, args, K):
 
     if n != m:
         if n > m:
-            g = [K.zero]*(n - m) + g
+            g = [K.zero] * (n - m) + g
         else:
-            f = [K.zero]*(m - n) + f
+            f = [K.zero] * (m - n) + f
 
     result = []
 
@@ -1828,7 +1828,7 @@ def dup_slice(f, m, n, K):
     if not f:
         return []
     else:
-        return f + [K.zero]*m
+        return f + [K.zero] * m
 
 
 def dmp_slice(f, m, n, u, K):
@@ -1850,7 +1850,7 @@ def dmp_slice_in(f, m, n, j, u, K):
         k = monom[j]
 
         if k < m or k >= n:
-            monom = monom[:j] + (0,) + monom[j + 1:]
+            monom = monom[:j] + (0,) + monom[j + 1 :]
 
         if monom in g:
             g[monom] += coeff
@@ -1874,7 +1874,7 @@ def dup_random(n, a, b, K):
     [-2, -8, 9, -4]
 
     """
-    f = [ K.convert(random.randint(a, b)) for _ in range(0, n + 1) ]
+    f = [K.convert(random.randint(a, b)) for _ in range(0, n + 1)]
 
     while not f[0]:
         f[0] = K.convert(random.randint(a, b))

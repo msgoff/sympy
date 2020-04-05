@@ -12,6 +12,7 @@ from sympy.utilities import public
 # - poly rings over quotients?
 # - division by non-units in integral domains?
 
+
 @public
 class QuotientRingElement(object):
     """
@@ -29,6 +30,7 @@ class QuotientRingElement(object):
 
     def __str__(self):
         from sympy import sstr
+
         return sstr(self.data) + " + " + str(self.ring.base_ideal)
 
     def __add__(self, om):
@@ -42,7 +44,7 @@ class QuotientRingElement(object):
     __radd__ = __add__
 
     def __neg__(self):
-        return self.ring(self.data*self.ring.ring.convert(-1))
+        return self.ring(self.data * self.ring.ring.convert(-1))
 
     def __sub__(self, om):
         return self.__add__(-om)
@@ -56,12 +58,12 @@ class QuotientRingElement(object):
                 o = self.ring.convert(o)
             except (NotImplementedError, CoercionFailed):
                 return NotImplemented
-        return self.ring(self.data*o.data)
+        return self.ring(self.data * o.data)
 
     __rmul__ = __mul__
 
     def __rdiv__(self, o):
-        return self.ring.revert(self)*o
+        return self.ring.revert(self) * o
 
     __rtruediv__ = __rdiv__
 
@@ -71,12 +73,12 @@ class QuotientRingElement(object):
                 o = self.ring.convert(o)
             except (NotImplementedError, CoercionFailed):
                 return NotImplemented
-        return self.ring.revert(o)*self
+        return self.ring.revert(o) * self
 
     __truediv__ = __div__
 
     def __pow__(self, oth):
-        return self.ring(self.data**oth)
+        return self.ring(self.data ** oth)
 
     def __eq__(self, om):
         if not isinstance(om, self.__class__) or om.ring != self.ring:
@@ -120,7 +122,7 @@ class QuotientRing(Ring):
 
     def __init__(self, ring, ideal):
         if not ideal.ring == ring:
-            raise ValueError('Ideal must belong to %s, got %s' % (ring, ideal))
+            raise ValueError("Ideal must belong to %s, got %s" % (ring, ideal))
         self.ring = ring
         self.base_ideal = ideal
         self.zero = self(self.ring.zero)
@@ -141,8 +143,11 @@ class QuotientRing(Ring):
 
     def __eq__(self, other):
         """Returns `True` if two domains are equivalent. """
-        return isinstance(other, QuotientRing) and \
-            self.ring == other.ring and self.base_ideal == other.base_ideal
+        return (
+            isinstance(other, QuotientRing)
+            and self.ring == other.ring
+            and self.base_ideal == other.base_ideal
+        )
 
     def from_ZZ_python(K1, a, K0):
         """Convert a Python `int` object to `dtype`. """
@@ -167,11 +172,11 @@ class QuotientRing(Ring):
 
     def poly_ring(self, *gens):
         """Returns a polynomial ring, i.e. `K[X]`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def frac_field(self, *gens):
         """Returns a fraction field, i.e. `K(X)`. """
-        raise NotImplementedError('nested domains not allowed')
+        raise NotImplementedError("nested domains not allowed")
 
     def revert(self, a):
         """
@@ -181,7 +186,7 @@ class QuotientRing(Ring):
         try:
             return self(I.in_terms_of_generators(1)[0])
         except ValueError:  # 1 not in I
-            raise NotReversible('%s not a unit in %r' % (a, self))
+            raise NotReversible("%s not a unit in %r" % (a, self))
 
     def is_zero(self, a):
         return self.base_ideal.contains(a.data)

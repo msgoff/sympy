@@ -19,9 +19,11 @@ class SympifyError(ValueError):
         if self.base_exc is None:
             return "SympifyError: %r" % (self.expr,)
 
-        return ("Sympify of expression '%s' failed, because of exception being "
-            "raised:\n%s: %s" % (self.expr, self.base_exc.__class__.__name__,
-            str(self.base_exc)))
+        return (
+            "Sympify of expression '%s' failed, because of exception being "
+            "raised:\n%s: %s"
+            % (self.expr, self.base_exc.__class__.__name__, str(self.base_exc))
+        )
 
 
 # See sympify docstring.
@@ -52,6 +54,7 @@ class CantSympify(object):
     SympifyError: SympifyError: {}
 
     """
+
     pass
 
 
@@ -60,6 +63,7 @@ def _convert_numpy_types(a, **sympify_args):
     Converts a numpy datatype input to an appropriate SymPy type.
     """
     import numpy as np
+
     if not isinstance(a, np.floating):
         if np.iscomplex(a):
             return converter[complex](a.item())
@@ -68,19 +72,21 @@ def _convert_numpy_types(a, **sympify_args):
     else:
         try:
             from sympy.core.numbers import Float
+
             prec = np.finfo(a).nmant + 1
             # E.g. double precision means prec=53 but nmant=52
             # Leading bit of mantissa is always 1, so is not stored
-            a = str(list(np.reshape(np.asarray(a),
-                                    (1, np.size(a)))[0]))[1:-1]
+            a = str(list(np.reshape(np.asarray(a), (1, np.size(a)))[0]))[1:-1]
             return Float(a, precision=prec)
         except NotImplementedError:
-            raise SympifyError('Translation for numpy float : %s '
-                               'is not implemented' % a)
+            raise SympifyError(
+                "Translation for numpy float : %s " "is not implemented" % a
+            )
 
 
-def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
-        evaluate=None):
+def sympify(
+    a, locals=None, convert_xor=True, strict=False, rational=False, evaluate=None
+):
     """Converts an arbitrary expression to a type that can be used inside SymPy.
 
     For example, it will convert Python ints into instances of sympy.Integer,
@@ -266,7 +272,7 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
     -2*(-(-x + 1/x)/(x*(x - 1/x)**2) - 1/(x*(x - 1/x))) - 1
 
     """
-    is_sympy = getattr(a, '__sympy__', None)
+    is_sympy = getattr(a, "__sympy__", None)
     if is_sympy is not None:
         return a
 
@@ -296,12 +302,18 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
 
     # Support for basic numpy datatypes
     # Note that this check exists to avoid importing NumPy when not necessary
-    if type(a).__module__ == 'numpy':
+    if type(a).__module__ == "numpy":
         import numpy as np
+
         if np.isscalar(a):
-            return _convert_numpy_types(a, locals=locals,
-                convert_xor=convert_xor, strict=strict, rational=rational,
-                evaluate=evaluate)
+            return _convert_numpy_types(
+                a,
+                locals=locals,
+                convert_xor=convert_xor,
+                strict=strict,
+                rational=rational,
+                evaluate=evaluate,
+            )
 
     _sympy_ = getattr(a, "_sympy_", None)
     if _sympy_ is not None:
@@ -321,6 +333,7 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
             shape = getattr(a, "shape", None)
             if shape is not None:
                 from ..tensor.array import Array
+
                 return Array(a.flat, a.shape)  # works with e.g. NumPy arrays
 
     if not isinstance(a, str):
@@ -339,15 +352,27 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
 
     if iterable(a):
         try:
-            return type(a)([sympify(x, locals=locals, convert_xor=convert_xor,
-                rational=rational) for x in a])
+            return type(a)(
+                [
+                    sympify(
+                        x, locals=locals, convert_xor=convert_xor, rational=rational
+                    )
+                    for x in a
+                ]
+            )
         except TypeError:
             # Not all iterables are rebuildable with their type.
             pass
     if isinstance(a, dict):
         try:
-            return type(a)([sympify(x, locals=locals, convert_xor=convert_xor,
-                rational=rational) for x in a.items()])
+            return type(a)(
+                [
+                    sympify(
+                        x, locals=locals, convert_xor=convert_xor, rational=rational
+                    )
+                    for x in a.items()
+                ]
+            )
         except TypeError:
             # Not all iterables are rebuildable with their type.
             pass
@@ -362,12 +387,16 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
     # return an exception
     try:
         from .compatibility import unicode
+
         a = unicode(a)
     except Exception as exc:
         raise SympifyError(a, exc)
 
-    from sympy.parsing.sympy_parser import (parse_expr, TokenError,
-                                            standard_transformations)
+    from sympy.parsing.sympy_parser import (
+        parse_expr,
+        TokenError,
+        standard_transformations,
+    )
     from sympy.parsing.sympy_parser import convert_xor as t_convert_xor
     from sympy.parsing.sympy_parser import rationalize as t_rationalize
 
@@ -379,10 +408,12 @@ def sympify(a, locals=None, convert_xor=True, strict=False, rational=False,
         transformations += (t_convert_xor,)
 
     try:
-        a = a.replace('\n', '')
-        expr = parse_expr(a, local_dict=locals, transformations=transformations, evaluate=evaluate)
+        a = a.replace("\n", "")
+        expr = parse_expr(
+            a, local_dict=locals, transformations=transformations, evaluate=evaluate
+        )
     except (TokenError, SyntaxError) as exc:
-        raise SympifyError('could not parse %r' % a, exc)
+        raise SympifyError("could not parse %r" % a, exc)
 
     return expr
 
@@ -445,31 +476,32 @@ def kernS(s):
     import string
     from random import choice
     from sympy.core.symbol import Symbol
+
     hit = False
     quoted = '"' in s or "'" in s
-    if '(' in s and not quoted:
-        if s.count('(') != s.count(")"):
-            raise SympifyError('unmatched left parenthesis')
+    if "(" in s and not quoted:
+        if s.count("(") != s.count(")"):
+            raise SympifyError("unmatched left parenthesis")
 
         # strip all space from s
-        s = ''.join(s.split())
+        s = "".join(s.split())
         olds = s
         # now use space to represent a symbol that
         # will
         # step 1. turn potential 2-arg Muls into 3-arg versions
         # 1a. *( -> * *(
-        s = s.replace('*(', '* *(')
+        s = s.replace("*(", "* *(")
         # 1b. close up exponentials
-        s = s.replace('** *', '**')
+        s = s.replace("** *", "**")
         # 2. handle the implied multiplication of a negated
         # parenthesized expression in two steps
         # 2a:  -(...)  -->  -( *(...)
-        target = '-( *('
-        s = s.replace('-(', target)
+        target = "-( *("
+        s = s.replace("-(", target)
         # 2b: double the matching closing parenthesis
         # -( *(...)  -->  -( *(...))
         i = nest = 0
-        assert target.endswith('(')  # assumption below
+        assert target.endswith("(")  # assumption below
         while True:
             j = s.find(target, i)
             if j == -1:
@@ -484,12 +516,12 @@ def kernS(s):
                     break
             s = s[:j] + ")" + s[j:]
             i = j + 2  # the first char after 2nd )
-        if ' ' in s:
+        if " " in s:
             # get a unique kern
-            kern = '_'
+            kern = "_"
             while kern in s:
                 kern += choice(string.ascii_letters + string.digits)
-            s = s.replace(' ', kern)
+            s = s.replace(" ", kern)
         hit = kern in s
 
     for i in range(2):
@@ -507,12 +539,14 @@ def kernS(s):
         return expr
 
     rep = {Symbol(kern): 1}
+
     def _clear(expr):
         if isinstance(expr, (list, tuple, set)):
             return type(expr)([_clear(e) for e in expr])
-        if hasattr(expr, 'subs'):
+        if hasattr(expr, "subs"):
             return expr.subs(rep, hack2=True)
         return expr
+
     expr = _clear(expr)
     # hope that kern is not there anymore
     return expr

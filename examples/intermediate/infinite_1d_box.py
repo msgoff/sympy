@@ -40,7 +40,7 @@ def E_n(n, a, mass):
     ``mass``
         mass.
     """
-    return ((n * pi / a)**2) / mass
+    return ((n * pi / a) ** 2) / mass
 
 
 def energy_corrections(perturbation, n, a=10, mass=0.5):
@@ -60,18 +60,21 @@ def energy_corrections(perturbation, n, a=10, mass=0.5):
     """
     x, _a = var("x _a")
 
-    Vnm = lambda n, m, a: Integral(X_n(n, a, x) * X_n(m, a, x)
-        * perturbation.subs({_a: a}), (x, 0, a)).n()
+    Vnm = lambda n, m, a: Integral(
+        X_n(n, a, x) * X_n(m, a, x) * perturbation.subs({_a: a}), (x, 0, a)
+    ).n()
 
     # As we know from theory for V0*r/a we will just V(n, n-1) and V(n, n+1)
     #   wouldn't equals zero
 
-    return (E_n(n, a, mass).evalf(),
-
-            Vnm(n, n, a).evalf(),
-
-            (Vnm(n, n - 1, a)**2/(E_n(n, a, mass) - E_n(n - 1, a, mass))
-           + Vnm(n, n + 1, a)**2/(E_n(n, a, mass) - E_n(n + 1, a, mass))).evalf())
+    return (
+        E_n(n, a, mass).evalf(),
+        Vnm(n, n, a).evalf(),
+        (
+            Vnm(n, n - 1, a) ** 2 / (E_n(n, a, mass) - E_n(n - 1, a, mass))
+            + Vnm(n, n + 1, a) ** 2 / (E_n(n, a, mass) - E_n(n + 1, a, mass))
+        ).evalf(),
+    )
 
 
 def main():
@@ -82,7 +85,7 @@ def main():
     print()
 
     x, _a = var("x _a")
-    perturbation = .1 * x / _a
+    perturbation = 0.1 * x / _a
 
     E1 = energy_corrections(perturbation, 1)
     print("Energy for first term (n=1):")

@@ -40,6 +40,7 @@ class Determinant(Expr):
         except (AttributeError, NotImplementedError):
             return self
 
+
 def det(matexpr):
     """ Matrix Determinant
 
@@ -81,4 +82,4 @@ def refine_Determinant(expr, assumptions):
     return expr
 
 
-handlers_dict['Determinant'] = refine_Determinant
+handlers_dict["Determinant"] = refine_Determinant

@@ -11,11 +11,12 @@ import warnings
 from sympy.core.compatibility import get_function_name
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 
-ON_TRAVIS = os.getenv('TRAVIS_BUILD_NUMBER', None)
+ON_TRAVIS = os.getenv("TRAVIS_BUILD_NUMBER", None)
 
 try:
     import pytest
-    USE_PYTEST = getattr(sys, '_running_pytest', False)
+
+    USE_PYTEST = getattr(sys, "_running_pytest", False)
 except ImportError:
     USE_PYTEST = False
 
@@ -96,14 +97,14 @@ else:
             raise Failed("DID NOT RAISE")
         elif isinstance(code, str):
             raise TypeError(
-                '\'raises(xxx, "code")\' has been phased out; '
-                'change \'raises(xxx, "expression")\' '
-                'to \'raises(xxx, lambda: expression)\', '
-                '\'raises(xxx, "statement")\' '
-                'to \'with raises(xxx): statement\'')
+                "'raises(xxx, \"code\")' has been phased out; "
+                "change 'raises(xxx, \"expression\")' "
+                "to 'raises(xxx, lambda: expression)', "
+                "'raises(xxx, \"statement\")' "
+                "to 'with raises(xxx): statement'"
+            )
         else:
-            raise TypeError(
-                'raises() expects a callable for the 2nd argument.')
+            raise TypeError("raises() expects a callable for the 2nd argument.")
 
     class RaisesContext(object):
         def __init__(self, expectedException):
@@ -149,6 +150,7 @@ else:
 
     def SKIP(reason):
         """Similar to ``skip()``, but this is a decorator. """
+
         def wrapper(func):
             def func_wrapper():
                 raise Skipped(reason)
@@ -174,7 +176,7 @@ else:
 
     @contextlib.contextmanager
     def warns(warningcls, **kwargs):
-        '''Like raises but tests that warnings are emitted.
+        """Like raises but tests that warnings are emitted.
 
         >>> from sympy.testing.pytest import warns
         >>> import warnings
@@ -188,10 +190,10 @@ else:
         ...
         Failed: DID NOT WARN. No warnings of type UserWarning\
         was emitted. The list of emitted warnings is: [].
-        '''
-        match = kwargs.pop('match', '')
+        """
+        match = kwargs.pop("match", "")
         if kwargs:
-            raise TypeError('Invalid keyword arguments: %s' % kwargs)
+            raise TypeError("Invalid keyword arguments: %s" % kwargs)
 
         # Absorbs all warnings in warnrec
         with warnings.catch_warnings(record=True) as warnrec:
@@ -203,16 +205,17 @@ else:
 
         # Raise if expected warning not found
         if not any(issubclass(w.category, warningcls) for w in warnrec):
-            msg = ('Failed: DID NOT WARN.'
-                   ' No warnings of type %s was emitted.'
-                   ' The list of emitted warnings is: %s.'
-                   ) % (warningcls, [w.message for w in warnrec])
+            msg = (
+                "Failed: DID NOT WARN."
+                " No warnings of type %s was emitted."
+                " The list of emitted warnings is: %s."
+            ) % (warningcls, [w.message for w in warnrec])
             raise Failed(msg)
 
 
 @contextlib.contextmanager
 def warns_deprecated_sympy():
-    '''Shorthand for ``warns(SymPyDeprecationWarning)``
+    """Shorthand for ``warns(SymPyDeprecationWarning)``
 
     This is the recommended way to test that ``SymPyDeprecationWarning`` is
     emitted for deprecated features in SymPy. To test for other warnings use
@@ -233,13 +236,14 @@ def warns_deprecated_sympy():
     ...
     Failed: DID NOT WARN. No warnings of type \
     SymPyDeprecationWarning was emitted. The list of emitted warnings is: [].
-    '''
+    """
     with warns(SymPyDeprecationWarning):
         yield
 
+
 @contextlib.contextmanager
 def ignore_warnings(warningcls):
-    '''Context manager to suppress warnings during tests.
+    """Context manager to suppress warnings during tests.
 
     This function is useful for suppressing warnings during tests. The warns
     function should be used to assert that a warning is raised. The
@@ -270,7 +274,7 @@ def ignore_warnings(warningcls):
     ...         warnings.warn('deprecated', UserWarning)
 
     (No warning emitted)
-    '''
+    """
     # Absorbs all warnings in warnrec
     with warnings.catch_warnings(record=True) as warnrec:
         # Make sure our warning doesn't get filtered

@@ -28,15 +28,14 @@ http://ojensen.wordpress.com/2010/08/10/fast-ufunc-ish-hydrogen-solutions/
 import sys
 from sympy.external import import_module
 
-np = import_module('numpy')
+np = import_module("numpy")
 if not np:
     sys.exit("Cannot import numpy. Exiting.")
-pylab = import_module('pylab', warn_not_installed=True)
+pylab = import_module("pylab", warn_not_installed=True)
 
 from sympy.utilities.lambdify import implemented_function
 from sympy.utilities.autowrap import autowrap, ufuncify
-from sympy import Idx, IndexedBase, Lambda, pprint, Symbol, oo, Integral,\
-    Function
+from sympy import Idx, IndexedBase, Lambda, pprint, Symbol, oo, Integral, Function
 from sympy.physics.sho import R_nl
 from sympy.physics.hydrogen import R_nl as hydro_nl
 
@@ -45,12 +44,12 @@ from sympy.physics.hydrogen import R_nl as hydro_nl
 # calculation parameters to play with
 # ***************************************************************************
 
-basis_dimension = 5         # Size of h.o. basis (n < basis_dimension)
-omega2 = 0.1                # in atomic units: twice the oscillator frequency
-orbital_momentum_l = 1      # the quantum number `l` for angular momentum
-hydrogen_n = 2              # the nodal quantum number for the Hydrogen wave
-rmax = 20                   # cut off in the radial direction
-gridsize = 200              # number of points in the grid
+basis_dimension = 5  # Size of h.o. basis (n < basis_dimension)
+omega2 = 0.1  # in atomic units: twice the oscillator frequency
+orbital_momentum_l = 1  # the quantum number `l` for angular momentum
+hydrogen_n = 2  # the nodal quantum number for the Hydrogen wave
+rmax = 20  # cut off in the radial direction
+gridsize = 200  # number of points in the grid
 
 # ***************************************************************************
 
@@ -60,11 +59,11 @@ def main():
     print(__doc__)
 
     # arrays are represented with IndexedBase, indices with Idx
-    m = Symbol('m', integer=True)
-    i = Idx('i', m)
-    A = IndexedBase('A')
-    B = IndexedBase('B')
-    x = Symbol('x')
+    m = Symbol("m", integer=True)
+    i = Idx("i", m)
+    A = IndexedBase("A")
+    B = IndexedBase("B")
+    x = Symbol("x")
 
     print("Compiling ufuncs for radial harmonic oscillator solutions")
 
@@ -78,8 +77,9 @@ def main():
         # Reduce the number of operations in the expression by eval to float
         expr = expr.evalf(15)
 
-        print("The h.o. wave function with l = %i and n = %i is" % (
-            orbital_momentum_l, n))
+        print(
+            "The h.o. wave function with l = %i and n = %i is" % (orbital_momentum_l, n)
+        )
         pprint(expr)
 
         # implement, compile and wrap it as a ufunc
@@ -125,30 +125,31 @@ def main():
         # The benefit is that the routines that searches for repeated indices
         # in order to make contractions will not search through the wave
         # function expression.
-        psi_ho = implemented_function('psi_ho',
-                Lambda(x, R_nl(n, orbital_momentum_l, omega2, x)))
+        psi_ho = implemented_function(
+            "psi_ho", Lambda(x, R_nl(n, orbital_momentum_l, omega2, x))
+        )
 
         # We represent the hydrogen function by an array which will be an input
         # argument to the binary routine.  This will let the integrators find
         # h.o. basis coefficients for any wave function we throw at them.
-        psi = IndexedBase('psi')
+        psi = IndexedBase("psi")
 
         #
         # setup expression for the integration
         #
 
-        step = Symbol('step')  # use symbolic stepsize for flexibility
+        step = Symbol("step")  # use symbolic stepsize for flexibility
 
         # let i represent an index of the grid array, and let A represent the
         # grid array.  Then we can approximate the integral by a sum over the
         # following expression (simplified rectangular rule, ignoring end point
         # corrections):
 
-        expr = A[i]**2*psi_ho(A[i])*psi[i]*step
+        expr = A[i] ** 2 * psi_ho(A[i]) * psi[i] * step
 
         if n == 0:
             print("Setting up binary integrators for the integral:")
-            pprint(Integral(x**2*psi_ho(x)*Function('psi')(x), (x, 0, oo)))
+            pprint(Integral(x ** 2 * psi_ho(x) * Function("psi")(x), (x, 0, oo)))
 
         # Autowrap it.  For functions that take more than one argument, it is
         # a good idea to use the 'args' keyword so that you know the signature
@@ -159,9 +160,11 @@ def main():
         # Lets see how it converges with the grid dimension
         print("Checking convergence of integrator for n = %i" % n)
         for g in range(3, 8):
-            grid, step = np.linspace(0, rmax, 2**g, retstep=True)
-            print("grid dimension %5i, integral = %e" % (2**g,
-                    binary_integrator[n](grid, H_ufunc(grid), step)))
+            grid, step = np.linspace(0, rmax, 2 ** g, retstep=True)
+            print(
+                "grid dimension %5i, integral = %e"
+                % (2 ** g, binary_integrator[n](grid, H_ufunc(grid), step))
+            )
 
     print("A binary integrator has been set up for each basis state")
     print("We will now use them to reconstruct a hydrogen solution.")
@@ -169,8 +172,10 @@ def main():
     # Note: We didn't need to specify grid or use gridsize before now
     grid, stepsize = np.linspace(0, rmax, gridsize, retstep=True)
 
-    print("Calculating coefficients with gridsize = %i and stepsize %f" % (
-        len(grid), stepsize))
+    print(
+        "Calculating coefficients with gridsize = %i and stepsize %f"
+        % (len(grid), stepsize)
+    )
 
     coeffs = {}
     for n in range(basis_dimension):
@@ -181,10 +186,10 @@ def main():
     hydro_approx = 0
     all_steps = {}
     for n in range(basis_dimension):
-        hydro_approx += basis_ho[n](grid)*coeffs[n]
+        hydro_approx += basis_ho[n](grid) * coeffs[n]
         all_steps[n] = hydro_approx.copy()
         if pylab:
-            line = pylab.plot(grid, all_steps[n], ':', label='max n = %i' % n)
+            line = pylab.plot(grid, all_steps[n], ":", label="max n = %i" % n)
 
     # check error numerically
     diff = np.max(np.abs(hydro_approx - H_ufunc(grid)))
@@ -197,12 +202,13 @@ def main():
     # Check visually
     if pylab:
         print("Here's a plot showing the contribution for each n")
-        line[0].set_linestyle('-')
-        pylab.plot(grid, H_ufunc(grid), 'r-', label='exact')
+        line[0].set_linestyle("-")
+        pylab.plot(grid, H_ufunc(grid), "r-", label="exact")
         pylab.legend()
         pylab.show()
 
-    print("""Note:
+    print(
+        """Note:
     These binary integrators were specialized to find coefficients for a
     harmonic oscillator basis, but they can process any wave function as long
     as it is available as a vector and defined on a grid with equidistant
@@ -214,8 +220,9 @@ def main():
     so that the integrators can find coefficients for *any* isotropic harmonic
     oscillator basis.
 
-    """)
+    """
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

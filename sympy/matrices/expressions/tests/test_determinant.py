@@ -1,17 +1,22 @@
 from sympy.core import S, symbols
 from sympy.matrices import eye, Matrix, ShapeError
 from sympy.matrices.expressions import (
-    Identity, MatrixExpr, MatrixSymbol, Determinant,
-    det, ZeroMatrix, Transpose
+    Identity,
+    MatrixExpr,
+    MatrixSymbol,
+    Determinant,
+    det,
+    ZeroMatrix,
+    Transpose,
 )
 from sympy.matrices.expressions.matexpr import OneMatrix
 from sympy.testing.pytest import raises
 from sympy import refine, Q
 
-n = symbols('n', integer=True)
-A = MatrixSymbol('A', n, n)
-B = MatrixSymbol('B', n, n)
-C = MatrixSymbol('C', 3, 4)
+n = symbols("n", integer=True)
+A = MatrixSymbol("A", n, n)
+B = MatrixSymbol("B", n, n)
+C = MatrixSymbol("C", 3, 4)
 
 
 def test_det():
@@ -25,6 +30,7 @@ def test_det():
     raises(TypeError, lambda: Determinant(S.One))
 
     assert Determinant(A).arg is A
+
 
 def test_eval_determinant():
     assert det(Identity(n)) == 1

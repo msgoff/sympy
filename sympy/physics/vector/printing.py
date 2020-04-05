@@ -8,8 +8,7 @@ from sympy.printing.pretty.pretty import PrettyPrinter
 from sympy.printing.pretty.pretty_symbology import center_accent
 from sympy.printing.str import StrPrinter
 
-__all__ = ['vprint', 'vsstrrepr', 'vsprint', 'vpprint', 'vlatex',
-           'init_vprinting']
+__all__ = ["vprint", "vsstrrepr", "vsprint", "vpprint", "vlatex", "init_vprinting"]
 
 
 class VectorStrPrinter(StrPrinter):
@@ -17,9 +16,11 @@ class VectorStrPrinter(StrPrinter):
 
     def _print_Derivative(self, e):
         from sympy.physics.vector.functions import dynamicsymbols
+
         t = dynamicsymbols._t
-        if (bool(sum([i == t for i in e.variables])) &
-                isinstance(type(e.args[0]), UndefinedFunction)):
+        if bool(sum([i == t for i in e.variables])) & isinstance(
+            type(e.args[0]), UndefinedFunction
+        ):
             ol = str(e.args[0].func)
             for i, v in enumerate(e.variables):
                 ol += dynamicsymbols._str
@@ -29,14 +30,16 @@ class VectorStrPrinter(StrPrinter):
 
     def _print_Function(self, e):
         from sympy.physics.vector.functions import dynamicsymbols
+
         t = dynamicsymbols._t
         if isinstance(type(e), UndefinedFunction):
-            return StrPrinter().doprint(e).replace("(%s)" % t, '')
+            return StrPrinter().doprint(e).replace("(%s)" % t, "")
         return e.func.__name__ + "(%s)" % self.stringify(e.args, ", ")
 
 
 class VectorStrReprPrinter(VectorStrPrinter):
     """String repr printer for vector expressions."""
+
     def _print_str(self, s):
         return repr(s)
 
@@ -46,12 +49,14 @@ class VectorLatexPrinter(LatexPrinter):
 
     def _print_Function(self, expr, exp=None):
         from sympy.physics.vector.functions import dynamicsymbols
+
         func = expr.func.__name__
         t = dynamicsymbols._t
 
-        if hasattr(self, '_print_' + func) and \
-            not isinstance(type(expr), UndefinedFunction):
-            return getattr(self, '_print_' + func)(expr, exp)
+        if hasattr(self, "_print_" + func) and not isinstance(
+            type(expr), UndefinedFunction
+        ):
+            return getattr(self, "_print_" + func)(expr, exp)
         elif isinstance(type(expr), UndefinedFunction) and (expr.args == (t,)):
 
             name, supers, subs = split_super_sub(func)
@@ -77,13 +82,15 @@ class VectorLatexPrinter(LatexPrinter):
             args = [str(self._print(arg)) for arg in expr.args]
             # How inverse trig functions should be displayed, formats are:
             # abbreviated: asin, full: arcsin, power: sin^-1
-            inv_trig_style = self._settings['inv_trig_style']
+            inv_trig_style = self._settings["inv_trig_style"]
             # If we are dealing with a power-style inverse trig function
             inv_trig_power_case = False
             # If it is applicable to fold the argument brackets
-            can_fold_brackets = self._settings['fold_func_brackets'] and \
-                len(args) == 1 and \
-                not self._needs_function_brackets(expr.args[0])
+            can_fold_brackets = (
+                self._settings["fold_func_brackets"]
+                and len(args) == 1
+                and not self._needs_function_brackets(expr.args[0])
+            )
 
             inv_trig_table = ["asin", "acos", "atan", "acot"]
 
@@ -120,6 +127,7 @@ class VectorLatexPrinter(LatexPrinter):
 
     def _print_Derivative(self, der_expr):
         from sympy.physics.vector.functions import dynamicsymbols
+
         # make sure it is in the right form
         der_expr = der_expr.doit()
         if not isinstance(der_expr, Derivative):
@@ -138,7 +146,7 @@ class VectorLatexPrinter(LatexPrinter):
         # done checking
         dots = len(syms)
         base = self._print_Function(expr)
-        base_split = base.split('_', 1)
+        base_split = base.split("_", 1)
         base = base_split[0]
         if dots == 1:
             base = r"\dot{%s}" % base
@@ -148,10 +156,10 @@ class VectorLatexPrinter(LatexPrinter):
             base = r"\dddot{%s}" % base
         elif dots == 4:
             base = r"\ddddot{%s}" % base
-        else: # Fallback to standard printing
+        else:  # Fallback to standard printing
             return LatexPrinter().doprint(der_expr)
         if len(base_split) != 1:
-            base += '_' + base_split[1]
+            base += "_" + base_split[1]
         return base
 
 
@@ -160,6 +168,7 @@ class VectorPrettyPrinter(PrettyPrinter):
 
     def _print_Derivative(self, deriv):
         from sympy.physics.vector.functions import dynamicsymbols
+
         # XXX use U('PARTIAL DIFFERENTIAL') here ?
         t = dynamicsymbols._t
         dot_i = 0
@@ -172,9 +181,11 @@ class VectorPrettyPrinter(PrettyPrinter):
             else:
                 return super(VectorPrettyPrinter, self)._print_Derivative(deriv)
 
-        if not (isinstance(type(deriv.expr), UndefinedFunction)
-                and (deriv.expr.args == (t,))):
-                return super(VectorPrettyPrinter, self)._print_Derivative(deriv)
+        if not (
+            isinstance(type(deriv.expr), UndefinedFunction)
+            and (deriv.expr.args == (t,))
+        ):
+            return super(VectorPrettyPrinter, self)._print_Derivative(deriv)
         else:
             pform = self._print_Function(deriv.expr)
 
@@ -188,26 +199,29 @@ class VectorPrettyPrinter(PrettyPrinter):
             return super(VectorPrettyPrinter, self)._print_Derivative(deriv)
 
         # Deal with special symbols
-        dots = {0 : u"",
-                1 : u"\N{COMBINING DOT ABOVE}",
-                2 : u"\N{COMBINING DIAERESIS}",
-                3 : u"\N{COMBINING THREE DOTS ABOVE}",
-                4 : u"\N{COMBINING FOUR DOTS ABOVE}"}
+        dots = {
+            0: u"",
+            1: u"\N{COMBINING DOT ABOVE}",
+            2: u"\N{COMBINING DIAERESIS}",
+            3: u"\N{COMBINING THREE DOTS ABOVE}",
+            4: u"\N{COMBINING FOUR DOTS ABOVE}",
+        }
 
         d = pform.__dict__
-        #if unicode is false then calculate number of apostrophes needed and add to output
+        # if unicode is false then calculate number of apostrophes needed and add to output
         if not self._use_unicode:
             apostrophes = ""
             for i in range(0, dot_i):
                 apostrophes += "'"
-            d['picture'][0] += apostrophes + "(t)"
+            d["picture"][0] += apostrophes + "(t)"
         else:
-            d['picture'] = [center_accent(d['picture'][0], dots[dot_i])]
-        d['unicode'] =  center_accent(d['unicode'], dots[dot_i])
+            d["picture"] = [center_accent(d["picture"][0], dots[dot_i])]
+        d["unicode"] = center_accent(d["unicode"], dots[dot_i])
         return pform
 
     def _print_Function(self, e):
         from sympy.physics.vector.functions import dynamicsymbols
+
         t = dynamicsymbols._t
         # XXX works only for applied functions
         func = e.func
@@ -252,7 +266,8 @@ def vprint(expr, **settings):
     outstr = vsprint(expr, **settings)
 
     from sympy.core.compatibility import builtins
-    if (outstr != 'None'):
+
+    if outstr != "None":
         builtins._ = outstr
         print(outstr)
 
@@ -329,8 +344,9 @@ def vpprint(expr, **settings):
     # Note that this is copied from sympy.printing.pretty.pretty_print:
 
     # XXX: this is an ugly hack, but at least it works
-    use_unicode = pp._settings['use_unicode']
+    use_unicode = pp._settings["use_unicode"]
     from sympy.printing.pretty.pretty_symbology import pretty_use_unicode
+
     uflag = pretty_use_unicode(use_unicode)
 
     try:
@@ -412,10 +428,11 @@ def init_vprinting(**kwargs):
     omega'
 
     """
-    kwargs['str_printer'] = vsstrrepr
-    kwargs['pretty_printer'] = vpprint
-    kwargs['latex_printer'] = vlatex
+    kwargs["str_printer"] = vsstrrepr
+    kwargs["pretty_printer"] = vpprint
+    kwargs["latex_printer"] = vlatex
     init_printing(**kwargs)
 
-params = init_printing.__doc__.split('Examples\n    ========')[0]  # type: ignore
+
+params = init_printing.__doc__.split("Examples\n    ========")[0]  # type: ignore
 init_vprinting.__doc__ = init_vprinting.__doc__.format(params)  # type: ignore

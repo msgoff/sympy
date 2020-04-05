@@ -8,13 +8,11 @@ from sympy.printing.pretty.stringpict import prettyForm
 from sympy.physics.quantum.operator import Operator
 from sympy.physics.quantum.dagger import Dagger
 
-__all__ = [
-    'AntiCommutator'
-]
+__all__ = ["AntiCommutator"]
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Anti-commutator
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 class AntiCommutator(Expr):
@@ -74,6 +72,7 @@ class AntiCommutator(Expr):
 
     .. [1] https://en.wikipedia.org/wiki/Commutator
     """
+
     is_commutative = False
 
     def __new__(cls, A, B):
@@ -88,9 +87,9 @@ class AntiCommutator(Expr):
         if not (a and b):
             return S.Zero
         if a == b:
-            return Integer(2)*a**2
+            return Integer(2) * a ** 2
         if a.is_commutative or b.is_commutative:
-            return Integer(2)*a*b
+            return Integer(2) * a * b
 
         # [xA,yB]  ->  xy*[A,B]
         ca, nca = a.args_cnc()
@@ -100,7 +99,7 @@ class AntiCommutator(Expr):
             return Mul(Mul(*c_part), cls(Mul._from_args(nca), Mul._from_args(ncb)))
 
         # Canonical ordering of arguments
-        #The Commutator [A,B] is on canonical form if A < B.
+        # The Commutator [A,B] is on canonical form if A < B.
         if a.compare(b) == 1:
             return cls(b, a)
 
@@ -118,15 +117,16 @@ class AntiCommutator(Expr):
                     comm = None
             if comm is not None:
                 return comm.doit(**hints)
-        return (A*B + B*A).doit(**hints)
+        return (A * B + B * A).doit(**hints)
 
     def _eval_adjoint(self):
         return AntiCommutator(Dagger(self.args[0]), Dagger(self.args[1]))
 
     def _sympyrepr(self, printer, *args):
         return "%s(%s,%s)" % (
-            self.__class__.__name__, printer._print(
-                self.args[0]), printer._print(self.args[1])
+            self.__class__.__name__,
+            printer._print(self.args[0]),
+            printer._print(self.args[1]),
         )
 
     def _sympystr(self, printer, *args):
@@ -134,11 +134,12 @@ class AntiCommutator(Expr):
 
     def _pretty(self, printer, *args):
         pform = printer._print(self.args[0], *args)
-        pform = prettyForm(*pform.right((prettyForm(u','))))
+        pform = prettyForm(*pform.right((prettyForm(u","))))
         pform = prettyForm(*pform.right((printer._print(self.args[1], *args))))
-        pform = prettyForm(*pform.parens(left='{', right='}'))
+        pform = prettyForm(*pform.parens(left="{", right="}"))
         return pform
 
     def _latex(self, printer, *args):
-        return "\\left\\{%s,%s\\right\\}" % tuple([
-            printer._print(arg, *args) for arg in self.args])
+        return "\\left\\{%s,%s\\right\\}" % tuple(
+            [printer._print(arg, *args) for arg in self.args]
+        )

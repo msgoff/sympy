@@ -67,6 +67,7 @@ import ConfigParser
 try:
     # https://pypi.python.org/pypi/fabric-virtualenv/
     from fabvenv import virtualenv, make_virtualenv
+
     # Note, according to fabvenv docs, always use an absolute path with
     # virtualenv().
 except ImportError:
@@ -81,6 +82,7 @@ except ImportError:
 
 env.use_ssh_config = True
 
+
 def full_path_split(path):
     """
     Function to do a full split on a path.
@@ -91,6 +93,7 @@ def full_path_split(path):
         return (tail,)
     return full_path_split(rest) + (tail,)
 
+
 @contextmanager
 def use_venv(pyversion):
     """
@@ -99,15 +102,16 @@ def use_venv(pyversion):
     pyversion should be '2' or '3'
     """
     pyversion = str(pyversion)
-    if pyversion == '2':
+    if pyversion == "2":
         yield
-    elif pyversion == '3':
+    elif pyversion == "3":
         oldvenv = env.virtualenv
-        env.virtualenv = 'virtualenv -p /usr/bin/python3'
+        env.virtualenv = "virtualenv -p /usr/bin/python3"
         yield
         env.virtualenv = oldvenv
     else:
         raise ValueError("pyversion must be one of '2' or '3', not %s" % pyversion)
+
 
 @task
 def prepare():
@@ -122,6 +126,7 @@ def prepare():
     prepare_apt()
     checkout_cache()
 
+
 @task
 def prepare_apt():
     """
@@ -132,19 +137,24 @@ def prepare_apt():
     dependencies.
     """
     sudo("apt-get -qq update")
-    sudo("apt-get -y install git python3 make python-virtualenv zip python-dev python-mpmath python3-setuptools")
+    sudo(
+        "apt-get -y install git python3 make python-virtualenv zip python-dev python-mpmath python3-setuptools"
+    )
     # Need 7.1.2 for Python 3.2 support
     sudo("easy_install3 pip==7.1.2")
     sudo("pip3 install mpmath")
     # Be sure to use the Python 2 pip
     sudo("/usr/bin/pip install twine")
     # Needed to build the docs
-    sudo("apt-get -y install graphviz inkscape texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra librsvg2-bin docbook2x")
+    sudo(
+        "apt-get -y install graphviz inkscape texlive texlive-xetex texlive-fonts-recommended texlive-latex-extra librsvg2-bin docbook2x"
+    )
     # Our Ubuntu is too old to include Python 3.3
     sudo("apt-get -y install python-software-properties")
     sudo("add-apt-repository -y ppa:fkrull/deadsnakes")
     sudo("apt-get -y update")
     sudo("apt-get -y install python3.3")
+
 
 @task
 def remove_userspace():
@@ -156,6 +166,7 @@ def remove_userspace():
     run("rm -rf repos")
     if os.path.exists("release"):
         error("release directory already exists locally. Remove it to continue.")
+
 
 @task
 def checkout_cache():
@@ -169,8 +180,9 @@ def checkout_cache():
     run("rm -rf sympy-cache.git")
     run("git clone --bare https://github.com/sympy/sympy.git sympy-cache.git")
 
+
 @task
-def gitrepos(branch=None, fork='sympy'):
+def gitrepos(branch=None, fork="sympy"):
     """
     Clone the repo
 
@@ -192,9 +204,14 @@ def gitrepos(branch=None, fork='sympy'):
         raise Exception("Cannot release from master")
     run("mkdir -p repos")
     with cd("/home/vagrant/repos"):
-        run("git clone --reference ../sympy-cache.git https://github.com/{fork}/sympy.git".format(fork=fork))
+        run(
+            "git clone --reference ../sympy-cache.git https://github.com/{fork}/sympy.git".format(
+                fork=fork
+            )
+        )
         with cd("/home/vagrant/repos/sympy"):
             run("git checkout -t origin/%s" % branch)
+
 
 @task
 def get_sympy_version(version_cache=[]):
@@ -207,11 +224,12 @@ def get_sympy_version(version_cache=[]):
         gitrepos()
     with cd("/home/vagrant/repos/sympy"):
         version = run('python -c "import sympy;print(sympy.__version__)"')
-    assert '\n' not in version
-    assert ' ' not in version
-    assert '\t' not in version
+    assert "\n" not in version
+    assert " " not in version
+    assert "\t" not in version
     version_cache.append(version)
     return version
+
 
 @task
 def get_sympy_short_version():
@@ -220,9 +238,10 @@ def get_sympy_short_version():
     (like 0.7.3)
     """
     version = get_sympy_version()
-    parts = version.split('.')
+    parts = version.split(".")
     non_rc_parts = [i for i in parts if i.isdigit()]
-    return '.'.join(non_rc_parts) # Remove any rc tags
+    return ".".join(non_rc_parts)  # Remove any rc tags
+
 
 @task
 def test_sympy():
@@ -232,13 +251,14 @@ def test_sympy():
     with cd("/home/vagrant/repos/sympy"):
         run("./setup.py test")
 
+
 @task
-def test_tarball(release='2'):
+def test_tarball(release="2"):
     """
     Test that the tarball can be unpacked and installed, and that sympy
     imports in the install.
     """
-    if release not in {'2', '3'}: # TODO: Add win32
+    if release not in {"2", "3"}:  # TODO: Add win32
         raise ValueError("release must be one of '2', '3', not %s" % release)
 
     venv = "/home/vagrant/repos/test-{release}-virtualenv".format(release=release)
@@ -247,14 +267,21 @@ def test_tarball(release='2'):
     with use_venv(release):
         make_virtualenv(venv)
         with virtualenv(venv):
-            run("cp /vagrant/release/{source} releasetar.tar".format(**tarball_formatter_dict))
+            run(
+                "cp /vagrant/release/{source} releasetar.tar".format(
+                    **tarball_formatter_dict
+                )
+            )
             run("tar xvf releasetar.tar")
-            with cd("/home/vagrant/{source-orig-notar}".format(**tarball_formatter_dict)):
+            with cd(
+                "/home/vagrant/{source-orig-notar}".format(**tarball_formatter_dict)
+            ):
                 run("python setup.py install")
                 run('python -c "import sympy; print(sympy.__version__)"')
 
+
 @task
-def release(branch=None, fork='sympy'):
+def release(branch=None, fork="sympy"):
     """
     Perform all the steps required for the release, except uploading
 
@@ -275,10 +302,11 @@ def release(branch=None, fork='sympy'):
     source_tarball()
     build_docs()
     copy_release_files()
-    test_tarball('2')
-    test_tarball('3')
+    test_tarball("2")
+    test_tarball("3")
     compare_tar_against_git()
     print_authors()
+
 
 @task
 def source_tarball():
@@ -292,6 +320,7 @@ def source_tarball():
         run("./setup.py bdist_wininst")
         run("mv dist/{win32-orig} dist/{win32}".format(**tarball_formatter()))
 
+
 @task
 def build_docs():
     """
@@ -300,7 +329,7 @@ def build_docs():
     with cd("/home/vagrant/repos/sympy"):
         run("mkdir -p dist")
         venv = "/home/vagrant/docs-virtualenv"
-        make_virtualenv(venv, dependencies=['sphinx==1.1.3', 'numpy', 'mpmath'])
+        make_virtualenv(venv, dependencies=["sphinx==1.1.3", "numpy", "mpmath"])
         with virtualenv(venv):
             with cd("/home/vagrant/repos/sympy/doc"):
                 run("make clean")
@@ -314,7 +343,12 @@ def build_docs():
                 run("make latex")
                 with cd("/home/vagrant/repos/sympy/doc/_build/latex"):
                     run("make")
-                    run("cp {pdf-orig} ../../../dist/{pdf}".format(**tarball_formatter()))
+                    run(
+                        "cp {pdf-orig} ../../../dist/{pdf}".format(
+                            **tarball_formatter()
+                        )
+                    )
+
 
 @task
 def copy_release_files():
@@ -324,6 +358,7 @@ def copy_release_files():
     with cd("/home/vagrant/repos/sympy"):
         run("mkdir -p /vagrant/release")
         run("cp dist/* /vagrant/release/")
+
 
 @task
 def show_files(file, print_=True):
@@ -340,18 +375,23 @@ def show_files(file, print_=True):
     """
     # TODO: Test the unarchived name. See
     # https://github.com/sympy/sympy/issues/7087.
-    if file == 'source':
-        ret = local("tar tf release/{source}".format(**tarball_formatter()), capture=True)
-    elif file == 'win':
+    if file == "source":
+        ret = local(
+            "tar tf release/{source}".format(**tarball_formatter()), capture=True
+        )
+    elif file == "win":
         # TODO: Windows
         raise NotImplementedError("Windows installers")
-    elif file == 'html':
-        ret = local("unzip -l release/{html}".format(**tarball_formatter()), capture=True)
+    elif file == "html":
+        ret = local(
+            "unzip -l release/{html}".format(**tarball_formatter()), capture=True
+        )
     else:
         raise ValueError(file + " is not valid")
     if print_:
         print(ret)
     return ret
+
 
 # If a file does not end up in the tarball that should, add it to setup.py if
 # it is Python, or MANIFEST.in if it is not.  (There is a command at the top
@@ -365,68 +405,68 @@ def show_files(file, print_=True):
 # Files that are in git that should not be in the tarball
 git_whitelist = {
     # Git specific dotfiles
-    '.gitattributes',
-    '.gitignore',
-    '.mailmap',
+    ".gitattributes",
+    ".gitignore",
+    ".mailmap",
     # Travis
-    '.travis.yml',
+    ".travis.yml",
     # Code of conduct
-    'CODE_OF_CONDUCT.md',
+    "CODE_OF_CONDUCT.md",
     # Nothing from bin/ should be shipped unless we intend to install it. Most
     # of this stuff is for development anyway. To run the tests from the
     # tarball, use setup.py test, or import sympy and run sympy.test() or
     # sympy.doctest().
-    'bin/adapt_paths.py',
-    'bin/ask_update.py',
-    'bin/authors_update.py',
-    'bin/coverage_doctest.py',
-    'bin/coverage_report.py',
-    'bin/build_doc.sh',
-    'bin/deploy_doc.sh',
-    'bin/diagnose_imports',
-    'bin/doctest',
-    'bin/generate_test_list.py',
-    'bin/get_sympy.py',
-    'bin/py.bench',
-    'bin/mailmap_update.py',
-    'bin/strip_whitespace',
-    'bin/sympy_time.py',
-    'bin/sympy_time_cache.py',
-    'bin/test',
-    'bin/test_import',
-    'bin/test_import.py',
-    'bin/test_isolated',
-    'bin/test_travis.sh',
+    "bin/adapt_paths.py",
+    "bin/ask_update.py",
+    "bin/authors_update.py",
+    "bin/coverage_doctest.py",
+    "bin/coverage_report.py",
+    "bin/build_doc.sh",
+    "bin/deploy_doc.sh",
+    "bin/diagnose_imports",
+    "bin/doctest",
+    "bin/generate_test_list.py",
+    "bin/get_sympy.py",
+    "bin/py.bench",
+    "bin/mailmap_update.py",
+    "bin/strip_whitespace",
+    "bin/sympy_time.py",
+    "bin/sympy_time_cache.py",
+    "bin/test",
+    "bin/test_import",
+    "bin/test_import.py",
+    "bin/test_isolated",
+    "bin/test_travis.sh",
     # The notebooks are not ready for shipping yet. They need to be cleaned
     # up, and preferably doctested.  See also
     # https://github.com/sympy/sympy/issues/6039.
-    'examples/advanced/identitysearch_example.ipynb',
-    'examples/beginner/plot_advanced.ipynb',
-    'examples/beginner/plot_colors.ipynb',
-    'examples/beginner/plot_discont.ipynb',
-    'examples/beginner/plot_gallery.ipynb',
-    'examples/beginner/plot_intro.ipynb',
-    'examples/intermediate/limit_examples_advanced.ipynb',
-    'examples/intermediate/schwarzschild.ipynb',
-    'examples/notebooks/density.ipynb',
-    'examples/notebooks/fidelity.ipynb',
-    'examples/notebooks/fresnel_integrals.ipynb',
-    'examples/notebooks/qubits.ipynb',
-    'examples/notebooks/sho1d_example.ipynb',
-    'examples/notebooks/spin.ipynb',
-    'examples/notebooks/trace.ipynb',
-    'examples/notebooks/README.txt',
+    "examples/advanced/identitysearch_example.ipynb",
+    "examples/beginner/plot_advanced.ipynb",
+    "examples/beginner/plot_colors.ipynb",
+    "examples/beginner/plot_discont.ipynb",
+    "examples/beginner/plot_gallery.ipynb",
+    "examples/beginner/plot_intro.ipynb",
+    "examples/intermediate/limit_examples_advanced.ipynb",
+    "examples/intermediate/schwarzschild.ipynb",
+    "examples/notebooks/density.ipynb",
+    "examples/notebooks/fidelity.ipynb",
+    "examples/notebooks/fresnel_integrals.ipynb",
+    "examples/notebooks/qubits.ipynb",
+    "examples/notebooks/sho1d_example.ipynb",
+    "examples/notebooks/spin.ipynb",
+    "examples/notebooks/trace.ipynb",
+    "examples/notebooks/README.txt",
     # This stuff :)
-    'release/.gitignore',
-    'release/README.md',
-    'release/Vagrantfile',
-    'release/fabfile.py',
+    "release/.gitignore",
+    "release/README.md",
+    "release/Vagrantfile",
+    "release/fabfile.py",
     # This is just a distribute version of setup.py. Used mainly for setup.py
     # develop, which we don't care about in the release tarball
-    'setupegg.py',
+    "setupegg.py",
     # Example on how to use tox to test Sympy. For development.
-    'tox.ini.sample',
-    }
+    "tox.ini.sample",
+}
 
 # Files that should be in the tarball should not be in git
 
@@ -434,13 +474,14 @@ tarball_whitelist = {
     # Generated by setup.py. Contains metadata for PyPI.
     "PKG-INFO",
     # Generated by setuptools. More metadata.
-    'setup.cfg',
-    'sympy.egg-info/PKG-INFO',
-    'sympy.egg-info/SOURCES.txt',
-    'sympy.egg-info/dependency_links.txt',
-    'sympy.egg-info/requires.txt',
-    'sympy.egg-info/top_level.txt',
-    }
+    "setup.cfg",
+    "sympy.egg-info/PKG-INFO",
+    "sympy.egg-info/SOURCES.txt",
+    "sympy.egg-info/dependency_links.txt",
+    "sympy.egg-info/requires.txt",
+    "sympy.egg-info/top_level.txt",
+}
+
 
 @task
 def compare_tar_against_git():
@@ -450,7 +491,7 @@ def compare_tar_against_git():
     with hide("commands"):
         with cd("/home/vagrant/repos/sympy"):
             git_lsfiles = set([i.strip() for i in run("git ls-files").split("\n")])
-        tar_output_orig = set(show_files('source', print_=False).split("\n"))
+        tar_output_orig = set(show_files("source", print_=False).split("\n"))
         tar_output = set()
     for file in tar_output_orig:
         # The tar files are like sympy-0.7.3/sympy/__init__.py, and the git
@@ -463,8 +504,7 @@ def compare_tar_against_git():
     # print git_lsfiles
     fail = False
     print()
-    print(blue("Files in the tarball from git that should not be there:",
-        bold=True))
+    print(blue("Files in the tarball from git that should not be there:", bold=True))
     print()
     for line in sorted(tar_output.intersection(git_whitelist)):
         fail = True
@@ -485,39 +525,51 @@ def compare_tar_against_git():
     if fail:
         error("Non-whitelisted files found or not found in the tarball")
 
+
 @task
-def md5(file='*', print_=True):
+def md5(file="*", print_=True):
     """
     Print the md5 sums of the release files
     """
     out = local("md5sum release/" + file, capture=True)
     # Remove the release/ part for printing. Useful for copy-pasting into the
     # release notes.
-    out = [i.split() for i in out.strip().split('\n')]
-    out = '\n'.join(["%s\t%s" % (i, os.path.split(j)[1]) for i, j in out])
+    out = [i.split() for i in out.strip().split("\n")]
+    out = "\n".join(["%s\t%s" % (i, os.path.split(j)[1]) for i, j in out])
     if print_:
         print(out)
     return out
 
-descriptions = OrderedDict([
-    ('source', "The SymPy source installer.",),
-    ('win32', "Python Windows 32-bit installer.",),
-    ('html', '''Html documentation for the Python 2 version. This is the same as
-the <a href="https://docs.sympy.org/latest/index.html">online documentation</a>.''',),
-    ('pdf', '''Pdf version of the <a href="https://docs.sympy.org/latest/index.html"> html documentation</a>.''',),
-    ])
+
+descriptions = OrderedDict(
+    [
+        ("source", "The SymPy source installer.",),
+        ("win32", "Python Windows 32-bit installer.",),
+        (
+            "html",
+            """Html documentation for the Python 2 version. This is the same as
+the <a href="https://docs.sympy.org/latest/index.html">online documentation</a>.""",
+        ),
+        (
+            "pdf",
+            """Pdf version of the <a href="https://docs.sympy.org/latest/index.html"> html documentation</a>.""",
+        ),
+    ]
+)
+
 
 @task
-def size(file='*', print_=True):
+def size(file="*", print_=True):
     """
     Print the sizes of the release files
     """
     out = local("du -h release/" + file, capture=True)
-    out = [i.split() for i in out.strip().split('\n')]
-    out = '\n'.join(["%s\t%s" % (i, os.path.split(j)[1]) for i, j in out])
+    out = [i.split() for i in out.strip().split("\n")]
+    out = "\n".join(["%s\t%s" % (i, os.path.split(j)[1]) for i, j in out])
     if print_:
         print(out)
     return out
+
 
 @task
 def table():
@@ -530,12 +582,12 @@ def table():
     tarball_formatter_dict = tarball_formatter()
     shortversion = get_sympy_short_version()
 
-    tarball_formatter_dict['version'] = shortversion
+    tarball_formatter_dict["version"] = shortversion
 
-    md5s = [i.split('\t') for i in md5(print_=False).split('\n')]
+    md5s = [i.split("\t") for i in md5(print_=False).split("\n")]
     md5s_dict = {name: md5 for md5, name in md5s}
 
-    sizes = [i.split('\t') for i in size(print_=False).split('\n')]
+    sizes = [i.split("\t") for i in size(print_=False).split("\n")]
     sizes_dict = {name: size for size, name in sizes}
 
     table = []
@@ -550,34 +602,39 @@ def table():
         table.append("<%s>" % name)
         yield
         table.append("</%s>" % name)
+
     @contextmanager
     def a_href(link):
-        table.append("<a href=\"%s\">" % link)
+        table.append('<a href="%s">' % link)
         yield
         table.append("</a>")
 
-    with tag('table'):
-        with tag('tr'):
+    with tag("table"):
+        with tag("tr"):
             for headname in ["Filename", "Description", "size", "md5"]:
                 with tag("th"):
                     table.append(headname)
 
         for key in descriptions:
             name = get_tarball_name(key)
-            with tag('tr'):
-                with tag('td'):
-                    with a_href('https://github.com/sympy/sympy/releases/download/sympy-%s/%s' %(version,name)):
-                        with tag('b'):
+            with tag("tr"):
+                with tag("td"):
+                    with a_href(
+                        "https://github.com/sympy/sympy/releases/download/sympy-%s/%s"
+                        % (version, name)
+                    ):
+                        with tag("b"):
                             table.append(name)
-                with tag('td'):
+                with tag("td"):
                     table.append(descriptions[key].format(**tarball_formatter_dict))
-                with tag('td'):
+                with tag("td"):
                     table.append(sizes_dict[name])
-                with tag('td'):
+                with tag("td"):
                     table.append(md5s_dict[name])
 
-    out = ' '.join(table)
+    out = " ".join(table)
     return out
+
 
 @task
 def get_tarball_name(file):
@@ -597,48 +654,51 @@ def get_tarball_name(file):
     pdf:               The name of the pdf file (after renaming)
     """
     version = get_sympy_version()
-    doctypename = defaultdict(str, {'html': 'zip', 'pdf': 'pdf'})
-    winos = defaultdict(str, {'win32': 'win32', 'win32-orig': 'linux-i686'})
+    doctypename = defaultdict(str, {"html": "zip", "pdf": "pdf"})
+    winos = defaultdict(str, {"win32": "win32", "win32-orig": "linux-i686"})
 
-    if file in {'source-orig', 'source'}:
-        name = 'sympy-{version}.tar.gz'
-    elif file == 'source-orig-notar':
+    if file in {"source-orig", "source"}:
+        name = "sympy-{version}.tar.gz"
+    elif file == "source-orig-notar":
         name = "sympy-{version}"
-    elif file in {'win32', 'win32-orig'}:
+    elif file in {"win32", "win32-orig"}:
         name = "sympy-{version}.{wintype}.exe"
-    elif file in {'html', 'pdf', 'html-nozip'}:
+    elif file in {"html", "pdf", "html-nozip"}:
         name = "sympy-docs-{type}-{version}"
-        if file == 'html-nozip':
+        if file == "html-nozip":
             # zip files keep the name of the original zipped directory. See
             # https://github.com/sympy/sympy/issues/7087.
-            file = 'html'
+            file = "html"
         else:
             name += ".{extension}"
-    elif file == 'pdf-orig':
+    elif file == "pdf-orig":
         name = "sympy-{version}.pdf"
     else:
         raise ValueError(file + " is not a recognized argument")
 
-    ret = name.format(version=version, type=file,
-        extension=doctypename[file], wintype=winos[file])
+    ret = name.format(
+        version=version, type=file, extension=doctypename[file], wintype=winos[file]
+    )
     return ret
 
+
 tarball_name_types = {
-    'source-orig',
-    'source-orig-notar',
-    'source',
-    'win32-orig',
-    'win32',
-    'html',
-    'html-nozip',
-    'pdf-orig',
-    'pdf',
-    }
+    "source-orig",
+    "source-orig-notar",
+    "source",
+    "win32-orig",
+    "win32",
+    "html",
+    "html-nozip",
+    "pdf-orig",
+    "pdf",
+}
 
 # This has to be a function, because you cannot call any function here at
 # import time (before the vagrant() function is run).
 def tarball_formatter():
     return {name: get_tarball_name(name) for name in tarball_name_types}
+
 
 @task
 def get_previous_version_tag():
@@ -659,24 +719,32 @@ def get_previous_version_tag():
     curcommit = "HEAD"
     with cd("/home/vagrant/repos/sympy"):
         while True:
-            curtag = run("git describe --abbrev=0 --tags " +
-                curcommit).strip()
+            curtag = run("git describe --abbrev=0 --tags " + curcommit).strip()
             if shortversion in curtag:
                 # If the tagged commit is a merge commit, we cannot be sure
                 # that it will go back in the right direction. This almost
                 # never happens, so just error
-                parents = local("git rev-list --parents -n 1 " + curtag,
-                    capture=True).strip().split()
+                parents = (
+                    local("git rev-list --parents -n 1 " + curtag, capture=True)
+                    .strip()
+                    .split()
+                )
                 # rev-list prints the current commit and then all its parents
                 # If the tagged commit *is* a merge commit, just comment this
                 # out, and make sure `fab vagrant get_previous_version_tag` is correct
                 assert len(parents) == 2, curtag
-                curcommit = curtag + "^" # The parent of the tagged commit
+                curcommit = curtag + "^"  # The parent of the tagged commit
             else:
-                print(blue("Using {tag} as the tag for the previous "
-                    "release.".format(tag=curtag), bold=True))
+                print(
+                    blue(
+                        "Using {tag} as the tag for the previous "
+                        "release.".format(tag=curtag),
+                        bold=True,
+                    )
+                )
                 return curtag
         error("Could not find the tag for the previous release.")
+
 
 @task
 def get_authors():
@@ -691,6 +759,7 @@ def get_authors():
     directory) to make AUTHORS and .mailmap up-to-date first before using
     this. fab vagrant release does this automatically.
     """
+
     def lastnamekey(name):
         """
         Sort key to sort by last name
@@ -707,20 +776,29 @@ def get_authors():
 
         # Note, you must call unicode() *before* lower, or else it won't
         # lowercase non-ASCII characters like Č -> č
-        text = unicode(name.strip().split()[-1], encoding='utf-8').lower()
+        text = unicode(name.strip().split()[-1], encoding="utf-8").lower()
         # Convert things like Čertík to Certik
-        return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore')
+        return unicodedata.normalize("NFKD", text).encode("ascii", "ignore")
 
     old_release_tag = get_previous_version_tag()
-    with cd("/home/vagrant/repos/sympy"), hide('commands'):
-        releaseauthors = set(run('git --no-pager log {tag}.. --format="%aN"'.format(tag=old_release_tag)).strip().split('\n'))
-        priorauthors = set(run('git --no-pager log {tag} --format="%aN"'.format(tag=old_release_tag)).strip().split('\n'))
+    with cd("/home/vagrant/repos/sympy"), hide("commands"):
+        releaseauthors = set(
+            run('git --no-pager log {tag}.. --format="%aN"'.format(tag=old_release_tag))
+            .strip()
+            .split("\n")
+        )
+        priorauthors = set(
+            run('git --no-pager log {tag} --format="%aN"'.format(tag=old_release_tag))
+            .strip()
+            .split("\n")
+        )
         releaseauthors = {name.strip() for name in releaseauthors if name.strip()}
         priorauthors = {name.strip() for name in priorauthors if name.strip()}
         newauthors = releaseauthors - priorauthors
         starred_newauthors = {name + "*" for name in newauthors}
         authors = releaseauthors - newauthors | starred_newauthors
         return (sorted(authors, key=lastnamekey), len(releaseauthors), len(newauthors))
+
 
 @task
 def print_authors():
@@ -729,10 +807,15 @@ def print_authors():
     """
     authors, authorcount, newauthorcount = get_authors()
 
-    print(blue("Here are the authors to put at the bottom of the release "
-        "notes.", bold=True))
+    print(
+        blue(
+            "Here are the authors to put at the bottom of the release " "notes.",
+            bold=True,
+        )
+    )
     print()
-    print("""## Authors
+    print(
+        """## Authors
 
 The following people contributed at least one patch to this release (names are
 given in alphabetical order by last name). A total of {authorcount} people
@@ -741,11 +824,15 @@ patch for the first time for this release; {newauthorcount} people contributed
 for the first time for this release.
 
 Thanks to everyone who contributed to this release!
-""".format(authorcount=authorcount, newauthorcount=newauthorcount))
+""".format(
+            authorcount=authorcount, newauthorcount=newauthorcount
+        )
+    )
 
     for name in authors:
         print("- " + name)
     print()
+
 
 @task
 def check_tag_exists():
@@ -753,13 +840,15 @@ def check_tag_exists():
     Check if the tag for this release has been uploaded yet.
     """
     version = get_sympy_version()
-    tag = 'sympy-' + version
+    tag = "sympy-" + version
     with cd("/home/vagrant/repos/sympy"):
         all_tags = run("git ls-remote --tags origin")
     return tag in all_tags
 
+
 # ------------------------------------------------
 # Updating websites
+
 
 @task
 def update_websites():
@@ -771,28 +860,34 @@ def update_websites():
     update_docs()
     update_sympy_org()
 
+
 def get_location(location):
     """
     Read/save a location from the configuration file.
     """
-    locations_file = os.path.expanduser('~/.sympy/sympy-locations')
+    locations_file = os.path.expanduser("~/.sympy/sympy-locations")
     config = ConfigParser.SafeConfigParser()
     config.read(locations_file)
-    the_location = config.has_option("Locations", location) and config.get("Locations", location)
+    the_location = config.has_option("Locations", location) and config.get(
+        "Locations", location
+    )
     if not the_location:
-        the_location = raw_input("Where is the SymPy {location} directory? ".format(location=location))
+        the_location = raw_input(
+            "Where is the SymPy {location} directory? ".format(location=location)
+        )
         if not config.has_section("Locations"):
             config.add_section("Locations")
         config.set("Locations", location, the_location)
         save = raw_input("Save this to file [yes]? ")
-        if save.lower().strip() in ['', 'y', 'yes']:
+        if save.lower().strip() in ["", "y", "yes"]:
             print("saving to ", locations_file)
-            with open(locations_file, 'w') as f:
+            with open(locations_file, "w") as f:
                 config.write(f)
     else:
         print("Reading {location} location from config".format(location=location))
 
     return os.path.abspath(os.path.expanduser(the_location))
+
 
 @task
 def update_docs(docs_location=None):
@@ -804,49 +899,90 @@ def update_docs(docs_location=None):
     print("Docs location:", docs_location)
 
     # Check that the docs directory is clean
-    local("cd {docs_location} && git diff --exit-code > /dev/null".format(docs_location=docs_location))
-    local("cd {docs_location} && git diff --cached --exit-code > /dev/null".format(docs_location=docs_location))
+    local(
+        "cd {docs_location} && git diff --exit-code > /dev/null".format(
+            docs_location=docs_location
+        )
+    )
+    local(
+        "cd {docs_location} && git diff --cached --exit-code > /dev/null".format(
+            docs_location=docs_location
+        )
+    )
 
     # See the README of the docs repo. We have to remove the old redirects,
     # move in the new docs, and create redirects.
     current_version = get_sympy_version()
-    previous_version = get_previous_version_tag().lstrip('sympy-')
+    previous_version = get_previous_version_tag().lstrip("sympy-")
     print("Removing redirects from previous version")
-    local("cd {docs_location} && rm -r {previous_version}".format(docs_location=docs_location,
-        previous_version=previous_version))
+    local(
+        "cd {docs_location} && rm -r {previous_version}".format(
+            docs_location=docs_location, previous_version=previous_version
+        )
+    )
     print("Moving previous latest docs to old version")
-    local("cd {docs_location} && mv latest {previous_version}".format(docs_location=docs_location,
-        previous_version=previous_version))
+    local(
+        "cd {docs_location} && mv latest {previous_version}".format(
+            docs_location=docs_location, previous_version=previous_version
+        )
+    )
 
     print("Unzipping docs into repo")
-    release_dir = os.path.abspath(os.path.expanduser(os.path.join(os.path.curdir, 'release')))
-    docs_zip = os.path.abspath(os.path.join(release_dir, get_tarball_name('html')))
-    local("cd {docs_location} && unzip {docs_zip} > /dev/null".format(docs_location=docs_location,
-        docs_zip=docs_zip))
-    local("cd {docs_location} && mv {docs_zip_name} {version}".format(docs_location=docs_location,
-        docs_zip_name=get_tarball_name("html-nozip"), version=current_version))
+    release_dir = os.path.abspath(
+        os.path.expanduser(os.path.join(os.path.curdir, "release"))
+    )
+    docs_zip = os.path.abspath(os.path.join(release_dir, get_tarball_name("html")))
+    local(
+        "cd {docs_location} && unzip {docs_zip} > /dev/null".format(
+            docs_location=docs_location, docs_zip=docs_zip
+        )
+    )
+    local(
+        "cd {docs_location} && mv {docs_zip_name} {version}".format(
+            docs_location=docs_location,
+            docs_zip_name=get_tarball_name("html-nozip"),
+            version=current_version,
+        )
+    )
 
     print("Writing new version to releases.txt")
-    with open(os.path.join(docs_location, "releases.txt"), 'a') as f:
+    with open(os.path.join(docs_location, "releases.txt"), "a") as f:
         f.write("{version}:SymPy {version}\n".format(version=current_version))
 
     print("Generating indexes")
-    local("cd {docs_location} && ./generate_indexes.py".format(docs_location=docs_location))
-    local("cd {docs_location} && mv {version} latest".format(docs_location=docs_location,
-        version=current_version))
+    local(
+        "cd {docs_location} && ./generate_indexes.py".format(
+            docs_location=docs_location
+        )
+    )
+    local(
+        "cd {docs_location} && mv {version} latest".format(
+            docs_location=docs_location, version=current_version
+        )
+    )
 
     print("Generating redirects")
-    local("cd {docs_location} && ./generate_redirects.py latest {version} ".format(docs_location=docs_location,
-        version=current_version))
+    local(
+        "cd {docs_location} && ./generate_redirects.py latest {version} ".format(
+            docs_location=docs_location, version=current_version
+        )
+    )
 
     print("Committing")
-    local("cd {docs_location} && git add -A {version} latest".format(docs_location=docs_location,
-        version=current_version))
-    local("cd {docs_location} && git commit -a -m \'Updating docs to {version}\'".format(docs_location=docs_location,
-        version=current_version))
+    local(
+        "cd {docs_location} && git add -A {version} latest".format(
+            docs_location=docs_location, version=current_version
+        )
+    )
+    local(
+        "cd {docs_location} && git commit -a -m 'Updating docs to {version}'".format(
+            docs_location=docs_location, version=current_version
+        )
+    )
 
     print("Pushing")
     local("cd {docs_location} && git push origin".format(docs_location=docs_location))
+
 
 @task
 def update_sympy_org(website_location=None):
@@ -858,44 +994,76 @@ def update_sympy_org(website_location=None):
     website_location = website_location or get_location("sympy.github.com")
 
     # Check that the website directory is clean
-    local("cd {website_location} && git diff --exit-code > /dev/null".format(website_location=website_location))
-    local("cd {website_location} && git diff --cached --exit-code > /dev/null".format(website_location=website_location))
+    local(
+        "cd {website_location} && git diff --exit-code > /dev/null".format(
+            website_location=website_location
+        )
+    )
+    local(
+        "cd {website_location} && git diff --cached --exit-code > /dev/null".format(
+            website_location=website_location
+        )
+    )
 
-    release_date = time.gmtime(os.path.getctime(os.path.join("release",
-        tarball_formatter()['source'])))
+    release_date = time.gmtime(
+        os.path.getctime(os.path.join("release", tarball_formatter()["source"]))
+    )
     release_year = str(release_date.tm_year)
     release_month = str(release_date.tm_mon)
     release_day = str(release_date.tm_mday)
     version = get_sympy_version()
 
-    with open(os.path.join(website_location, "templates", "index.html"), 'r') as f:
-        lines = f.read().split('\n')
+    with open(os.path.join(website_location, "templates", "index.html"), "r") as f:
+        lines = f.read().split("\n")
         # We could try to use some html parser, but this way is easier
         try:
             news = lines.index(r"    <h3>{% trans %}News{% endtrans %}</h3>")
         except ValueError:
             error("index.html format not as expected")
-        lines.insert(news + 2,  # There is a <p> after the news line. Put it
+        lines.insert(
+            news + 2,  # There is a <p> after the news line. Put it
             # after that.
-            r"""        <span class="date">{{ datetime(""" + release_year + """, """ + release_month + """, """ + release_day + """) }}</span> {% trans v='""" + version + """' %}Version {{ v }} released{% endtrans %} (<a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-""" + version + """">{% trans %}changes{% endtrans %}</a>)<br/>
-    </p><p>""")
+            r"""        <span class="date">{{ datetime("""
+            + release_year
+            + """, """
+            + release_month
+            + """, """
+            + release_day
+            + """) }}</span> {% trans v='"""
+            + version
+            + """' %}Version {{ v }} released{% endtrans %} (<a href="https://github.com/sympy/sympy/wiki/Release-Notes-for-"""
+            + version
+            + """">{% trans %}changes{% endtrans %}</a>)<br/>
+    </p><p>""",
+        )
 
-    with open(os.path.join(website_location, "templates", "index.html"), 'w') as f:
+    with open(os.path.join(website_location, "templates", "index.html"), "w") as f:
         print("Updating index.html template")
-        f.write('\n'.join(lines))
+        f.write("\n".join(lines))
 
     print("Generating website pages")
-    local("cd {website_location} && ./generate".format(website_location=website_location))
+    local(
+        "cd {website_location} && ./generate".format(website_location=website_location)
+    )
 
     print("Committing")
-    local("cd {website_location} && git commit -a -m \'Add {version} to the news\'".format(website_location=website_location,
-        version=version))
+    local(
+        "cd {website_location} && git commit -a -m 'Add {version} to the news'".format(
+            website_location=website_location, version=version
+        )
+    )
 
     print("Pushing")
-    local("cd {website_location} && git push origin".format(website_location=website_location))
+    local(
+        "cd {website_location} && git push origin".format(
+            website_location=website_location
+        )
+    )
+
 
 # ------------------------------------------------
 # Uploading
+
 
 @task
 def upload():
@@ -910,6 +1078,7 @@ def upload():
     test_pypi(2)
     test_pypi(3)
 
+
 @task
 def distutils_check():
     """
@@ -918,6 +1087,7 @@ def distutils_check():
     with cd("/home/vagrant/repos/sympy"):
         run("python setup.py check")
         run("python3 setup.py check")
+
 
 @task
 def pypi_register():
@@ -930,6 +1100,7 @@ def pypi_register():
     with cd("/home/vagrant/repos/sympy"):
         run("python setup.py register")
 
+
 @task
 def pypi_upload():
     """
@@ -939,8 +1110,9 @@ def pypi_upload():
         run("twine upload dist/*.tar.gz")
         run("twine upload dist/*.exe")
 
+
 @task
-def test_pypi(release='2'):
+def test_pypi(release="2"):
     """
     Test that the sympy can be pip installed, and that sympy imports in the
     install.
@@ -951,7 +1123,7 @@ def test_pypi(release='2'):
 
     release = str(release)
 
-    if release not in {'2', '3'}: # TODO: Add win32
+    if release not in {"2", "3"}:  # TODO: Add win32
         raise ValueError("release must be one of '2', '3', not %s" % release)
 
     venv = "/home/vagrant/repos/test-{release}-pip-virtualenv".format(release=release)
@@ -960,7 +1132,12 @@ def test_pypi(release='2'):
         make_virtualenv(venv)
         with virtualenv(venv):
             run("pip install sympy")
-            run('python -c "import sympy; assert sympy.__version__ == \'{version}\'"'.format(version=version))
+            run(
+                "python -c \"import sympy; assert sympy.__version__ == '{version}'\"".format(
+                    version=version
+                )
+            )
+
 
 @task
 def GitHub_release_text():
@@ -978,15 +1155,27 @@ See https://github.com/sympy/sympy/wiki/release-notes-for-{shortversion} for the
 files below.
 """
     out = out.format(shortversion=shortversion, htmltable=htmltable)
-    print(blue("Here are the release notes to copy into the GitHub release "
-        "Markdown form:", bold=True))
+    print(
+        blue(
+            "Here are the release notes to copy into the GitHub release "
+            "Markdown form:",
+            bold=True,
+        )
+    )
     print()
     print(out)
     return out
 
+
 @task
-def GitHub_release(username=None, user='sympy', token=None,
-    token_file_path="~/.sympy/release-token", repo='sympy', draft=False):
+def GitHub_release(
+    username=None,
+    user="sympy",
+    token=None,
+    token_file_path="~/.sympy/release-token",
+    repo="sympy",
+    draft=False,
+):
     """
     Upload the release files to GitHub.
 
@@ -999,7 +1188,7 @@ def GitHub_release(username=None, user='sympy', token=None,
     release_text = GitHub_release_text()
     version = get_sympy_version()
     short_version = get_sympy_short_version()
-    tag = 'sympy-' + version
+    tag = "sympy-" + version
     prerelease = short_version != version
 
     urls = URLs(user=user, repo=repo)
@@ -1015,22 +1204,25 @@ def GitHub_release(username=None, user='sympy', token=None,
     # not be sure that the correct commit is tagged.  So we require that the
     # tag exist first.
     if not check_tag_exists():
-        error("The tag for this version has not been pushed yet. Cannot upload the release.")
+        error(
+            "The tag for this version has not been pushed yet. Cannot upload the release."
+        )
 
     # See https://developer.github.com/v3/repos/releases/#create-a-release
     # First, create the release
     post = {}
-    post['tag_name'] = tag
-    post['name'] = "SymPy " + version
-    post['body'] = release_text
-    post['draft'] = draft
-    post['prerelease'] = prerelease
+    post["tag_name"] = tag
+    post["name"] = "SymPy " + version
+    post["body"] = release_text
+    post["draft"] = draft
+    post["prerelease"] = prerelease
 
-    print("Creating release for tag", tag, end=' ')
+    print("Creating release for tag", tag, end=" ")
 
-    result = query_GitHub(urls.releases_url, username, password=None,
-        token=token, data=json.dumps(post)).json()
-    release_id = result['id']
+    result = query_GitHub(
+        urls.releases_url, username, password=None, token=token, data=json.dumps(post)
+    ).json()
+    release_id = result["id"]
 
     print(green("Done"))
 
@@ -1039,33 +1231,41 @@ def GitHub_release(username=None, user='sympy', token=None,
         tarball = get_tarball_name(key)
 
         params = {}
-        params['name'] = tarball
+        params["name"] = tarball
 
-        if tarball.endswith('gz'):
-            headers = {'Content-Type':'application/gzip'}
-        elif tarball.endswith('pdf'):
-            headers = {'Content-Type':'application/pdf'}
-        elif tarball.endswith('zip'):
-            headers = {'Content-Type':'application/zip'}
+        if tarball.endswith("gz"):
+            headers = {"Content-Type": "application/gzip"}
+        elif tarball.endswith("pdf"):
+            headers = {"Content-Type": "application/pdf"}
+        elif tarball.endswith("zip"):
+            headers = {"Content-Type": "application/zip"}
         else:
-            headers = {'Content-Type':'application/octet-stream'}
+            headers = {"Content-Type": "application/octet-stream"}
 
-        print("Uploading", tarball, end=' ')
+        print("Uploading", tarball, end=" ")
         sys.stdout.flush()
-        with open(os.path.join("release", tarball), 'rb') as f:
-            result = query_GitHub(urls.release_uploads_url % release_id, username,
-                password=None, token=token, data=f, params=params,
-                headers=headers).json()
+        with open(os.path.join("release", tarball), "rb") as f:
+            result = query_GitHub(
+                urls.release_uploads_url % release_id,
+                username,
+                password=None,
+                token=token,
+                data=f,
+                params=params,
+                headers=headers,
+            ).json()
 
         print(green("Done"))
 
     # TODO: download the files and check that they have the right md5 sum
+
 
 def GitHub_check_authentication(urls, username, password, token):
     """
     Checks that username & password is valid.
     """
     query_GitHub(urls.api_url, username, password, token)
+
 
 def GitHub_authenticate(urls, username, token=None):
     _login_message = """\
@@ -1111,27 +1311,27 @@ https to authenticate with GitHub, otherwise not saved anywhere else:\
                 name = "SymPy Release"
             token = generate_token(urls, username, password, name=name)
             print("Your token is", token)
-            print("Use this token from now on as GitHub_release:token=" + token +
-                ",username=" + username)
+            print(
+                "Use this token from now on as GitHub_release:token="
+                + token
+                + ",username="
+                + username
+            )
             print(red("DO NOT share this token with anyone"))
             save = raw_input("Do you want to save this token to a file [yes]? ")
-            if save.lower().strip() in ['y', 'yes', 'ye', '']:
+            if save.lower().strip() in ["y", "yes", "ye", ""]:
                 save_token_file(token)
 
     return username, password, token
 
+
 def generate_token(urls, username, password, OTP=None, name="SymPy Release"):
-    enc_data = json.dumps(
-        {
-            "scopes": ["public_repo"],
-            "note": name
-        }
-    )
+    enc_data = json.dumps({"scopes": ["public_repo"], "note": name})
 
     url = urls.authorize_url
-    rep = query_GitHub(url, username=username, password=password,
-        data=enc_data).json()
+    rep = query_GitHub(url, username=username, password=password, data=enc_data).json()
     return rep["token"]
+
 
 def save_token_file(token):
     token_file = raw_input("> Enter token file location [~/.sympy/release-token] ")
@@ -1144,8 +1344,8 @@ def save_token_file(token):
     try:
         if not os.path.isdir(token_folder):
             os.mkdir(token_folder, 0o700)
-        with open(token_file_expand, 'w') as f:
-            f.write(token + '\n')
+        with open(token_file_expand, "w") as f:
+            f.write(token + "\n")
         os.chmod(token_file_expand, stat.S_IREAD | stat.S_IWRITE)
     except OSError as e:
         print("> Unable to create folder for token file: ", e)
@@ -1155,6 +1355,7 @@ def save_token_file(token):
         return
 
     return token_file
+
 
 def load_token_file(path="~/.sympy/release-token"):
     print("> Using token file %s" % path)
@@ -1175,16 +1376,21 @@ def load_token_file(path="~/.sympy/release-token"):
 
     return token.strip()
 
+
 class URLs(object):
     """
     This class contains URLs and templates which used in requests to GitHub API
     """
 
-    def __init__(self, user="sympy", repo="sympy",
+    def __init__(
+        self,
+        user="sympy",
+        repo="sympy",
         api_url="https://api.github.com",
         authorize_url="https://api.github.com/authorizations",
-        uploads_url='https://uploads.github.com',
-        main_url='https://github.com'):
+        uploads_url="https://uploads.github.com",
+        main_url="https://github.com",
+    ):
         """Generates all URLs and templates"""
 
         self.user = user
@@ -1201,19 +1407,32 @@ class URLs(object):
         self.single_pull_template = self.pull_list_url + "/%d"
         self.user_info_template = api_url + "/users/%s"
         self.user_repos_template = api_url + "/users/%s/repos"
-        self.issue_comment_template = (api_url + "/repos" + "/" + user + "/" + repo + "/issues/%d" +
-            "/comments")
-        self.release_uploads_url = (uploads_url + "/repos/" + user + "/" +
-            repo + "/releases/%d" + "/assets")
-        self.release_download_url = (main_url + "/" + user + "/" + repo +
-            "/releases/download/%s/%s")
+        self.issue_comment_template = (
+            api_url + "/repos" + "/" + user + "/" + repo + "/issues/%d" + "/comments"
+        )
+        self.release_uploads_url = (
+            uploads_url + "/repos/" + user + "/" + repo + "/releases/%d" + "/assets"
+        )
+        self.release_download_url = (
+            main_url + "/" + user + "/" + repo + "/releases/download/%s/%s"
+        )
 
 
 class AuthenticationFailed(Exception):
     pass
 
-def query_GitHub(url, username=None, password=None, token=None, data=None,
-    OTP=None, headers=None, params=None, files=None):
+
+def query_GitHub(
+    url,
+    username=None,
+    password=None,
+    token=None,
+    data=None,
+    OTP=None,
+    headers=None,
+    params=None,
+    files=None,
+):
     """
     Query GitHub API.
 
@@ -1223,34 +1442,47 @@ def query_GitHub(url, username=None, password=None, token=None, data=None,
     headers = headers or {}
 
     if OTP:
-        headers['X-GitHub-OTP'] = OTP
+        headers["X-GitHub-OTP"] = OTP
 
     if token:
-        auth = OAuth2(client_id=username, token=dict(access_token=token,
-            token_type='bearer'))
+        auth = OAuth2(
+            client_id=username, token=dict(access_token=token, token_type="bearer")
+        )
     else:
         auth = HTTPBasicAuth(username, password)
     if data:
-        r = requests.post(url, auth=auth, data=data, headers=headers,
-            params=params, files=files)
+        r = requests.post(
+            url, auth=auth, data=data, headers=headers, params=params, files=files
+        )
     else:
         r = requests.get(url, auth=auth, headers=headers, params=params, stream=True)
 
     if r.status_code == 401:
-        two_factor = r.headers.get('X-GitHub-OTP')
+        two_factor = r.headers.get("X-GitHub-OTP")
         if two_factor:
-            print("A two-factor authentication code is required:", two_factor.split(';')[1].strip())
+            print(
+                "A two-factor authentication code is required:",
+                two_factor.split(";")[1].strip(),
+            )
             OTP = raw_input("Authentication code: ")
-            return query_GitHub(url, username=username, password=password,
-                token=token, data=data, OTP=OTP)
+            return query_GitHub(
+                url,
+                username=username,
+                password=password,
+                token=token,
+                data=data,
+                OTP=OTP,
+            )
 
         raise AuthenticationFailed("invalid username or password")
 
     r.raise_for_status()
     return r
 
+
 # ------------------------------------------------
 # Vagrant related configuration
+
 
 @task
 def vagrant():
@@ -1259,25 +1491,27 @@ def vagrant():
     """
     vc = get_vagrant_config()
     # change from the default user to 'vagrant'
-    env.user = vc['User']
+    env.user = vc["User"]
     # connect to the port-forwarded ssh
-    env.hosts = ['%s:%s' % (vc['HostName'], vc['Port'])]
+    env.hosts = ["%s:%s" % (vc["HostName"], vc["Port"])]
     # use vagrant ssh key
-    env.key_filename = vc['IdentityFile'].strip('"')
+    env.key_filename = vc["IdentityFile"].strip('"')
     # Forward the agent if specified:
-    env.forward_agent = vc.get('ForwardAgent', 'no') == 'yes'
+    env.forward_agent = vc.get("ForwardAgent", "no") == "yes"
+
 
 def get_vagrant_config():
     """
     Parses vagrant configuration and returns it as dict of ssh parameters
     and their values
     """
-    result = local('vagrant ssh-config', capture=True)
+    result = local("vagrant ssh-config", capture=True)
     conf = {}
     for line in iter(result.splitlines()):
         parts = line.split()
-        conf[parts[0]] = ' '.join(parts[1:])
+        conf[parts[0]] = " ".join(parts[1:])
     return conf
+
 
 @task
 def restart_network():
@@ -1286,12 +1520,14 @@ def restart_network():
     """
     run("sudo /etc/init.d/networking restart")
 
+
 # ---------------------------------------
 # Just a simple testing command:
+
 
 @task
 def uname():
     """
     Get the uname in Vagrant. Useful for testing that Vagrant works.
     """
-    run('uname -a')
+    run("uname -a")

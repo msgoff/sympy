@@ -20,7 +20,7 @@ class ReprPrinter(Printer):
 
     _default_settings = {
         "order": None,
-        "perm_cyclic" : True,
+        "perm_cyclic": True,
     }  # type: Dict[str, Any]
 
     def reprify(self, args, sep):
@@ -41,7 +41,7 @@ class ReprPrinter(Printer):
             l = []
             for o in expr.args:
                 l.append(self._print(o))
-            return expr.__class__.__name__ + '(%s)' % ', '.join(l)
+            return expr.__class__.__name__ + "(%s)" % ", ".join(l)
         elif hasattr(expr, "__module__") and hasattr(expr, "__name__"):
             return "<'%s.%s'>" % (expr.__module__, expr.__name__)
         else:
@@ -67,48 +67,48 @@ class ReprPrinter(Printer):
         if perm_cyclic is not None:
             SymPyDeprecationWarning(
                 feature="Permutation.print_cyclic = {}".format(perm_cyclic),
-                useinstead="init_printing(perm_cyclic={})"
-                .format(perm_cyclic),
+                useinstead="init_printing(perm_cyclic={})".format(perm_cyclic),
                 issue=15201,
-                deprecated_since_version="1.6").warn()
+                deprecated_since_version="1.6",
+            ).warn()
         else:
             perm_cyclic = self._settings.get("perm_cyclic", True)
 
         if perm_cyclic:
             if not expr.size:
-                return 'Permutation()'
+                return "Permutation()"
             # before taking Cycle notation, see if the last element is
             # a singleton and move it to the head of the string
-            s = Cycle(expr)(expr.size - 1).__repr__()[len('Cycle'):]
-            last = s.rfind('(')
-            if not last == 0 and ',' not in s[last:]:
+            s = Cycle(expr)(expr.size - 1).__repr__()[len("Cycle") :]
+            last = s.rfind("(")
+            if not last == 0 and "," not in s[last:]:
                 s = s[last:] + s[:last]
-            return 'Permutation%s' %s
+            return "Permutation%s" % s
         else:
             s = expr.support()
             if not s:
                 if expr.size < 5:
-                    return 'Permutation(%s)' % str(expr.array_form)
-                return 'Permutation([], size=%s)' % expr.size
-            trim = str(expr.array_form[:s[-1] + 1]) + ', size=%s' % expr.size
+                    return "Permutation(%s)" % str(expr.array_form)
+                return "Permutation([], size=%s)" % expr.size
+            trim = str(expr.array_form[: s[-1] + 1]) + ", size=%s" % expr.size
             use = full = str(expr.array_form)
             if len(trim) < len(full):
                 use = trim
-            return 'Permutation(%s)' % use
+            return "Permutation(%s)" % use
 
     def _print_Function(self, expr):
         r = self._print(expr.func)
-        r += '(%s)' % ', '.join([self._print(a) for a in expr.args])
+        r += "(%s)" % ", ".join([self._print(a) for a in expr.args])
         return r
 
     def _print_FunctionClass(self, expr):
         if issubclass(expr, AppliedUndef):
-            return 'Function(%r)' % (expr.__name__)
+            return "Function(%r)" % (expr.__name__)
         else:
             return expr.__name__
 
     def _print_Half(self, expr):
-        return 'Rational(1, 2)'
+        return "Rational(1, 2)"
 
     def _print_RationalConstant(self, expr):
         return str(expr)
@@ -120,25 +120,25 @@ class ReprPrinter(Printer):
         return str(expr)
 
     def _print_Integer(self, expr):
-        return 'Integer(%i)' % expr.p
+        return "Integer(%i)" % expr.p
 
     def _print_Integers(self, expr):
-        return 'Integers'
+        return "Integers"
 
     def _print_Naturals(self, expr):
-        return 'Naturals'
+        return "Naturals"
 
     def _print_Naturals0(self, expr):
-        return 'Naturals0'
+        return "Naturals0"
 
     def _print_Reals(self, expr):
-        return 'Reals'
+        return "Reals"
 
     def _print_EmptySet(self, expr):
-        return 'EmptySet'
+        return "EmptySet"
 
     def _print_EmptySequence(self, expr):
-        return 'EmptySequence'
+        return "EmptySequence"
 
     def _print_list(self, expr):
         return "[%s]" % self.reprify(expr, ", ")
@@ -146,16 +146,18 @@ class ReprPrinter(Printer):
     def _print_MatrixBase(self, expr):
         # special case for some empty matrices
         if (expr.rows == 0) ^ (expr.cols == 0):
-            return '%s(%s, %s, %s)' % (expr.__class__.__name__,
-                                       self._print(expr.rows),
-                                       self._print(expr.cols),
-                                       self._print([]))
+            return "%s(%s, %s, %s)" % (
+                expr.__class__.__name__,
+                self._print(expr.rows),
+                self._print(expr.cols),
+                self._print([]),
+            )
         l = []
         for i in range(expr.rows):
             l.append([])
             for j in range(expr.cols):
                 l[-1].append(expr[i, j])
-        return '%s(%s)' % (expr.__class__.__name__, self._print(l))
+        return "%s(%s)" % (expr.__class__.__name__, self._print(l))
 
     def _print_MutableSparseMatrix(self, expr):
         return self._print_MatrixBase(expr)
@@ -192,7 +194,7 @@ class ReprPrinter(Printer):
 
     def _print_Mul(self, expr, order=None):
         terms = expr.args
-        if self.order != 'old':
+        if self.order != "old":
             args = expr._new_rawargs(*terms).as_ordered_factors()
         else:
             args = terms
@@ -205,34 +207,44 @@ class ReprPrinter(Printer):
         return clsname + "(%s)" % ", ".join(args)
 
     def _print_Rational(self, expr):
-        return 'Rational(%s, %s)' % (self._print(expr.p), self._print(expr.q))
+        return "Rational(%s, %s)" % (self._print(expr.p), self._print(expr.q))
 
     def _print_PythonRational(self, expr):
         return "%s(%d, %d)" % (expr.__class__.__name__, expr.p, expr.q)
 
     def _print_Fraction(self, expr):
-        return 'Fraction(%s, %s)' % (self._print(expr.numerator), self._print(expr.denominator))
+        return "Fraction(%s, %s)" % (
+            self._print(expr.numerator),
+            self._print(expr.denominator),
+        )
 
     def _print_Float(self, expr):
         r = mlib_to_str(expr._mpf_, repr_dps(expr._prec))
         return "%s('%s', precision=%i)" % (expr.__class__.__name__, r, expr._prec)
 
     def _print_Sum2(self, expr):
-        return "Sum2(%s, (%s, %s, %s))" % (self._print(expr.f), self._print(expr.i),
-                                           self._print(expr.a), self._print(expr.b))
+        return "Sum2(%s, (%s, %s, %s))" % (
+            self._print(expr.f),
+            self._print(expr.i),
+            self._print(expr.a),
+            self._print(expr.b),
+        )
 
     def _print_Symbol(self, expr):
         d = expr._assumptions.generator
         # print the dummy_index like it was an assumption
         if expr.is_Dummy:
-            d['dummy_index'] = expr.dummy_index
+            d["dummy_index"] = expr.dummy_index
 
         if d == {}:
             return "%s(%s)" % (expr.__class__.__name__, self._print(expr.name))
         else:
-            attr = ['%s=%s' % (k, v) for k, v in d.items()]
-            return "%s(%s, %s)" % (expr.__class__.__name__,
-                                   self._print(expr.name), ', '.join(attr))
+            attr = ["%s=%s" % (k, v) for k, v in d.items()]
+            return "%s(%s, %s)" % (
+                expr.__class__.__name__,
+                self._print(expr.name),
+                ", ".join(attr),
+            )
 
     def _print_Predicate(self, expr):
         return "%s(%s)" % (expr.__class__.__name__, self._print(expr.name))
@@ -253,21 +265,36 @@ class ReprPrinter(Printer):
         return "%s('%s')" % (expr.__class__.__name__, expr.name)
 
     def _print_AlgebraicNumber(self, expr):
-        return "%s(%s, %s)" % (expr.__class__.__name__,
-            self._print(expr.root), self._print(expr.coeffs()))
+        return "%s(%s, %s)" % (
+            expr.__class__.__name__,
+            self._print(expr.root),
+            self._print(expr.coeffs()),
+        )
 
     def _print_PolyRing(self, ring):
-        return "%s(%s, %s, %s)" % (ring.__class__.__name__,
-            self._print(ring.symbols), self._print(ring.domain), self._print(ring.order))
+        return "%s(%s, %s, %s)" % (
+            ring.__class__.__name__,
+            self._print(ring.symbols),
+            self._print(ring.domain),
+            self._print(ring.order),
+        )
 
     def _print_FracField(self, field):
-        return "%s(%s, %s, %s)" % (field.__class__.__name__,
-            self._print(field.symbols), self._print(field.domain), self._print(field.order))
+        return "%s(%s, %s, %s)" % (
+            field.__class__.__name__,
+            self._print(field.symbols),
+            self._print(field.domain),
+            self._print(field.order),
+        )
 
     def _print_PolyElement(self, poly):
         terms = list(poly.terms())
         terms.sort(key=poly.ring.order, reverse=True)
-        return "%s(%s, %s)" % (poly.__class__.__name__, self._print(poly.ring), self._print(terms))
+        return "%s(%s, %s)" % (
+            poly.__class__.__name__,
+            self._print(poly.ring),
+            self._print(terms),
+        )
 
     def _print_FracElement(self, frac):
         numer_terms = list(frac.numer.terms())
@@ -276,7 +303,12 @@ class ReprPrinter(Printer):
         denom_terms.sort(key=frac.field.order, reverse=True)
         numer = self._print(numer_terms)
         denom = self._print(denom_terms)
-        return "%s(%s, %s, %s)" % (frac.__class__.__name__, self._print(frac.field), numer, denom)
+        return "%s(%s, %s, %s)" % (
+            frac.__class__.__name__,
+            self._print(frac.field),
+            numer,
+            denom,
+        )
 
     def _print_FractionField(self, domain):
         cls = domain.__class__.__name__
@@ -286,7 +318,7 @@ class ReprPrinter(Printer):
     def _print_PolynomialRingBase(self, ring):
         cls = ring.__class__.__name__
         dom = self._print(ring.domain)
-        gens = ', '.join(map(self._print, ring.gens))
+        gens = ", ".join(map(self._print, ring.gens))
         order = str(ring.order)
         if order != ring.default_order:
             orderstr = ", order=" + order

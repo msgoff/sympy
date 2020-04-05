@@ -24,27 +24,38 @@ image distance
 from __future__ import print_function, division
 
 __all__ = [
-    'RayTransferMatrix',
-    'FreeSpace',
-    'FlatRefraction',
-    'CurvedRefraction',
-    'FlatMirror',
-    'CurvedMirror',
-    'ThinLens',
-    'GeometricRay',
-    'BeamParameter',
-    'waist2rayleigh',
-    'rayleigh2waist',
-    'geometric_conj_ab',
-    'geometric_conj_af',
-    'geometric_conj_bf',
-    'gaussian_conj',
-    'conjugate_gauss_beams',
+    "RayTransferMatrix",
+    "FreeSpace",
+    "FlatRefraction",
+    "CurvedRefraction",
+    "FlatMirror",
+    "CurvedMirror",
+    "ThinLens",
+    "GeometricRay",
+    "BeamParameter",
+    "waist2rayleigh",
+    "rayleigh2waist",
+    "geometric_conj_ab",
+    "geometric_conj_af",
+    "geometric_conj_bf",
+    "gaussian_conj",
+    "conjugate_gauss_beams",
 ]
 
 
-from sympy import (atan2, Expr, I, im, Matrix, pi, re, sqrt, sympify,
-    together, MutableDenseMatrix)
+from sympy import (
+    atan2,
+    Expr,
+    I,
+    im,
+    Matrix,
+    pi,
+    re,
+    sqrt,
+    sympify,
+    together,
+    MutableDenseMatrix,
+)
 from sympy.utilities.misc import filldedent
 
 ###
@@ -111,14 +122,17 @@ class RayTransferMatrix(MutableDenseMatrix):
 
         if len(args) == 4:
             temp = ((args[0], args[1]), (args[2], args[3]))
-        elif len(args) == 1 \
-            and isinstance(args[0], Matrix) \
-                and args[0].shape == (2, 2):
+        elif len(args) == 1 and isinstance(args[0], Matrix) and args[0].shape == (2, 2):
             temp = args[0]
         else:
-            raise ValueError(filldedent('''
+            raise ValueError(
+                filldedent(
+                    """
                 Expecting 2x2 Matrix or the 4 elements of
-                the Matrix but got %s''' % str(args)))
+                the Matrix but got %s"""
+                    % str(args)
+                )
+            )
         return Matrix.__new__(cls, temp)
 
     def __mul__(self, other):
@@ -127,11 +141,9 @@ class RayTransferMatrix(MutableDenseMatrix):
         elif isinstance(other, GeometricRay):
             return GeometricRay(Matrix.__mul__(self, other))
         elif isinstance(other, BeamParameter):
-            temp = self*Matrix(((other.q,), (1,)))
-            q = (temp[0]/temp[1]).expand(complex=True)
-            return BeamParameter(other.wavelen,
-                                 together(re(q)),
-                                 z_r=together(im(q)))
+            temp = self * Matrix(((other.q,), (1,)))
+            q = (temp[0] / temp[1]).expand(complex=True)
+            return BeamParameter(other.wavelen, together(re(q)), z_r=together(im(q)))
         else:
             return Matrix.__mul__(self, other)
 
@@ -221,6 +233,7 @@ class FreeSpace(RayTransferMatrix):
     [1, d],
     [0, 1]])
     """
+
     def __new__(cls, d):
         return RayTransferMatrix.__new__(cls, 1, d, 0, 1)
 
@@ -251,9 +264,10 @@ class FlatRefraction(RayTransferMatrix):
     [1,     0],
     [0, n1/n2]])
     """
+
     def __new__(cls, n1, n2):
         n1, n2 = map(sympify, (n1, n2))
-        return RayTransferMatrix.__new__(cls, 1, 0, 0, n1/n2)
+        return RayTransferMatrix.__new__(cls, 1, 0, 0, n1 / n2)
 
 
 class CurvedRefraction(RayTransferMatrix):
@@ -283,9 +297,10 @@ class CurvedRefraction(RayTransferMatrix):
     [               1,     0],
     [(n1 - n2)/(R*n2), n1/n2]])
     """
+
     def __new__(cls, R, n1, n2):
         R, n1, n2 = map(sympify, (R, n1, n2))
-        return RayTransferMatrix.__new__(cls, 1, 0, (n1 - n2)/R/n2, n1/n2)
+        return RayTransferMatrix.__new__(cls, 1, 0, (n1 - n2) / R / n2, n1 / n2)
 
 
 class FlatMirror(RayTransferMatrix):
@@ -306,6 +321,7 @@ class FlatMirror(RayTransferMatrix):
     [1, 0],
     [0, 1]])
     """
+
     def __new__(cls):
         return RayTransferMatrix.__new__(cls, 1, 0, 0, 1)
 
@@ -335,9 +351,10 @@ class CurvedMirror(RayTransferMatrix):
     [   1, 0],
     [-2/R, 1]])
     """
+
     def __new__(cls, R):
         R = sympify(R)
-        return RayTransferMatrix.__new__(cls, 1, 0, -2/R, 1)
+        return RayTransferMatrix.__new__(cls, 1, 0, -2 / R, 1)
 
 
 class ThinLens(RayTransferMatrix):
@@ -365,14 +382,16 @@ class ThinLens(RayTransferMatrix):
     [   1, 0],
     [-1/f, 1]])
     """
+
     def __new__(cls, f):
         f = sympify(f)
-        return RayTransferMatrix.__new__(cls, 1, 0, -1/f, 1)
+        return RayTransferMatrix.__new__(cls, 1, 0, -1 / f, 1)
 
 
 ###
 # Representation for geometric ray
 ###
+
 
 class GeometricRay(MutableDenseMatrix):
     """
@@ -415,15 +434,19 @@ class GeometricRay(MutableDenseMatrix):
     """
 
     def __new__(cls, *args):
-        if len(args) == 1 and isinstance(args[0], Matrix) \
-                and args[0].shape == (2, 1):
+        if len(args) == 1 and isinstance(args[0], Matrix) and args[0].shape == (2, 1):
             temp = args[0]
         elif len(args) == 2:
             temp = ((args[0],), (args[1],))
         else:
-            raise ValueError(filldedent('''
+            raise ValueError(
+                filldedent(
+                    """
                 Expecting 2x1 Matrix or the 2 elements of
-                the Matrix but got %s''' % str(args)))
+                the Matrix but got %s"""
+                    % str(args)
+                )
+            )
         return Matrix.__new__(cls, temp)
 
     @property
@@ -464,6 +487,7 @@ class GeometricRay(MutableDenseMatrix):
 ###
 # Representation for gauss beam
 ###
+
 
 class BeamParameter(Expr):
     """
@@ -511,7 +535,8 @@ class BeamParameter(Expr):
     .. [1] https://en.wikipedia.org/wiki/Complex_beam_parameter
     .. [2] https://en.wikipedia.org/wiki/Gaussian_beam
     """
-    #TODO A class Complex may be implemented. The BeamParameter may
+
+    # TODO A class Complex may be implemented. The BeamParameter may
     # subclass it. See:
     # https://groups.google.com/d/topic/sympy/7XkU07NRBEs/discussion
 
@@ -524,7 +549,7 @@ class BeamParameter(Expr):
         elif w is not None and z_r is None:
             z_r = waist2rayleigh(sympify(w), wavelen)
         else:
-            raise ValueError('Constructor expects exactly one named argument.')
+            raise ValueError("Constructor expects exactly one named argument.")
 
         return Expr.__new__(cls, wavelen, z, z_r)
 
@@ -553,7 +578,7 @@ class BeamParameter(Expr):
         >>> p.q
         1 + 1.88679245283019*I*pi
         """
-        return self.z + I*self.z_r
+        return self.z + I * self.z_r
 
     @property
     def radius(self):
@@ -568,7 +593,7 @@ class BeamParameter(Expr):
         >>> p.radius
         1 + 3.55998576005696*pi**2
         """
-        return self.z*(1 + (self.z_r/self.z)**2)
+        return self.z * (1 + (self.z_r / self.z) ** 2)
 
     @property
     def w(self):
@@ -588,7 +613,7 @@ class BeamParameter(Expr):
         >>> p.w
         0.001*sqrt(0.2809/pi**2 + 1)
         """
-        return self.w_0*sqrt(1 + (self.z/self.z_r)**2)
+        return self.w_0 * sqrt(1 + (self.z / self.z_r) ** 2)
 
     @property
     def w_0(self):
@@ -608,7 +633,7 @@ class BeamParameter(Expr):
         >>> p.w_0
         0.00100000000000000
         """
-        return sqrt(self.z_r/pi*self.wavelen)
+        return sqrt(self.z_r / pi * self.wavelen)
 
     @property
     def divergence(self):
@@ -623,7 +648,7 @@ class BeamParameter(Expr):
         >>> p.divergence
         0.00053/pi
         """
-        return self.wavelen/pi/self.w_0
+        return self.wavelen / pi / self.w_0
 
     @property
     def gouy(self):
@@ -656,12 +681,13 @@ class BeamParameter(Expr):
         >>> p.waist_approximation_limit
         1.06e-6/pi
         """
-        return 2*self.wavelen/pi
+        return 2 * self.wavelen / pi
 
 
 ###
 # Utilities
 ###
+
 
 def waist2rayleigh(w, wavelen):
     """
@@ -682,7 +708,7 @@ def waist2rayleigh(w, wavelen):
     pi*w**2/wavelen
     """
     w, wavelen = map(sympify, (w, wavelen))
-    return w**2*pi/wavelen
+    return w ** 2 * pi / wavelen
 
 
 def rayleigh2waist(z_r, wavelen):
@@ -703,7 +729,7 @@ def rayleigh2waist(z_r, wavelen):
     sqrt(wavelen*z_r)/sqrt(pi)
     """
     z_r, wavelen = map(sympify, (z_r, wavelen))
-    return sqrt(z_r/pi*wavelen)
+    return sqrt(z_r / pi * wavelen)
 
 
 def geometric_conj_ab(a, b):
@@ -731,7 +757,7 @@ def geometric_conj_ab(a, b):
     if a.is_infinite or b.is_infinite:
         return a if b.is_infinite else b
     else:
-        return a*b/(a + b)
+        return a * b / (a + b)
 
 
 def geometric_conj_af(a, f):
@@ -760,6 +786,7 @@ def geometric_conj_af(a, f):
     """
     a, f = map(sympify, (a, f))
     return -geometric_conj_ab(a, -f)
+
 
 geometric_conj_bf = geometric_conj_af
 
@@ -800,9 +827,9 @@ def gaussian_conj(s_in, z_r_in, f):
     1/sqrt(1 - s_in**2/f**2 + z_r_in**2/f**2)
     """
     s_in, z_r_in, f = map(sympify, (s_in, z_r_in, f))
-    s_out = 1 / ( -1/(s_in + z_r_in**2/(s_in - f)) + 1/f )
-    m = 1/sqrt((1 - (s_in/f)**2) + (z_r_in/f)**2)
-    z_r_out = z_r_in / ((1 - (s_in/f)**2) + (z_r_in/f)**2)
+    s_out = 1 / (-1 / (s_in + z_r_in ** 2 / (s_in - f)) + 1 / f)
+    m = 1 / sqrt((1 - (s_in / f) ** 2) + (z_r_in / f) ** 2)
+    z_r_out = z_r_in / ((1 - (s_in / f) ** 2) + (z_r_in / f) ** 2)
     return (s_out, z_r_out, m)
 
 
@@ -842,34 +869,47 @@ def conjugate_gauss_beams(wavelen, waist_in, waist_out, **kwargs):
     >>> conjugate_gauss_beams(l, w_i, w_o, f=f)[2]
     f
     """
-    #TODO add the other possible arguments
+    # TODO add the other possible arguments
     wavelen, waist_in, waist_out = map(sympify, (wavelen, waist_in, waist_out))
     m = waist_out / waist_in
     z = waist2rayleigh(waist_in, wavelen)
     if len(kwargs) != 1:
         raise ValueError("The function expects only one named argument")
-    elif 'dist' in kwargs:
-        raise NotImplementedError(filldedent('''
-            Currently only focal length is supported as a parameter'''))
-    elif 'f' in kwargs:
-        f = sympify(kwargs['f'])
-        s_in = f * (1 - sqrt(1/m**2 - z**2/f**2))
+    elif "dist" in kwargs:
+        raise NotImplementedError(
+            filldedent(
+                """
+            Currently only focal length is supported as a parameter"""
+            )
+        )
+    elif "f" in kwargs:
+        f = sympify(kwargs["f"])
+        s_in = f * (1 - sqrt(1 / m ** 2 - z ** 2 / f ** 2))
         s_out = gaussian_conj(s_in, z, f)[0]
-    elif 's_in' in kwargs:
-        raise NotImplementedError(filldedent('''
-            Currently only focal length is supported as a parameter'''))
+    elif "s_in" in kwargs:
+        raise NotImplementedError(
+            filldedent(
+                """
+            Currently only focal length is supported as a parameter"""
+            )
+        )
     else:
-        raise ValueError(filldedent('''
-            The functions expects the focal length as a named argument'''))
+        raise ValueError(
+            filldedent(
+                """
+            The functions expects the focal length as a named argument"""
+            )
+        )
     return (s_in, s_out, f)
 
-#TODO
-#def plot_beam():
+
+# TODO
+# def plot_beam():
 #    """Plot the beam radius as it propagates in space."""
 #    pass
 
-#TODO
-#def plot_beam_conjugation():
+# TODO
+# def plot_beam_conjugation():
 #    """
 #    Plot the intersection of two beams.
 #

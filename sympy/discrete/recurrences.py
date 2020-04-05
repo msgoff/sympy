@@ -6,6 +6,7 @@ from __future__ import print_function, division
 from sympy.core import S, sympify
 from sympy.core.compatibility import as_int, iterable
 
+
 def linrec(coeffs, init, n):
     r"""
     Evaluation of univariate linear recurrences of homogeneous type
@@ -87,27 +88,29 @@ def linrec(coeffs, init, n):
         return S.Zero
 
     if not iterable(coeffs):
-        raise TypeError("Expected a sequence of coefficients for"
-                        " the recurrence")
+        raise TypeError("Expected a sequence of coefficients for" " the recurrence")
 
     if not iterable(init):
-        raise TypeError("Expected a sequence of values for the initialization"
-                        " of the recurrence")
+        raise TypeError(
+            "Expected a sequence of values for the initialization" " of the recurrence"
+        )
 
     n = as_int(n)
     if n < 0:
-        raise ValueError("Point of evaluation of recurrence must be a "
-                        "non-negative integer")
+        raise ValueError(
+            "Point of evaluation of recurrence must be a " "non-negative integer"
+        )
 
     c = [sympify(arg) for arg in coeffs]
     b = [sympify(arg) for arg in init]
     k = len(c)
 
     if len(b) > k:
-        raise TypeError("Count of initial values should not exceed the "
-                        "order of the recurrence")
+        raise TypeError(
+            "Count of initial values should not exceed the " "order of the recurrence"
+        )
     else:
-        b += [S.Zero]*(k - len(b)) # remaining initial values default to zero
+        b += [S.Zero] * (k - len(b))  # remaining initial values default to zero
 
     def _square_and_reduce(u, offset):
         # squares `(u_0 + u_1 x + u_2 x^2 + \cdots + u_{k-1} x^k)` (and
@@ -115,14 +118,14 @@ def linrec(coeffs, init, n):
         # length upto `2k` to `k` using the characteristic equation of the
         # recurrence given by, `x^k = c_0 x^{k-1} + c_1 x^{k-2} + \cdots + c_{k-1}`
 
-        w = [S.Zero]*(2*len(u) - 1 + offset)
+        w = [S.Zero] * (2 * len(u) - 1 + offset)
         for i, p in enumerate(u):
             for j, q in enumerate(u):
-                w[offset + i + j] += p*q
+                w[offset + i + j] += p * q
 
         for j in range(len(w) - 1, k - 1, -1):
             for i in range(k):
-                w[j - i - 1] += w[j]*c[i]
+                w[j - i - 1] += w[j] * c[i]
 
         return w[:k]
 
@@ -132,8 +135,8 @@ def linrec(coeffs, init, n):
         # `y(n) = cf_0 y(k-1) + cf_1 y(k-2) + \cdots + cf_{k-1} y(0)`
 
         if n < k:
-            return [S.Zero]*n + [S.One] + [S.Zero]*(k - n - 1)
+            return [S.Zero] * n + [S.One] + [S.Zero] * (k - n - 1)
         else:
-            return _square_and_reduce(_final_coeffs(n//2), n%2)
+            return _square_and_reduce(_final_coeffs(n // 2), n % 2)
 
-    return b[n] if n < k else sum(u*v for u, v in zip(_final_coeffs(n), b))
+    return b[n] if n < k else sum(u * v for u, v in zip(_final_coeffs(n), b))

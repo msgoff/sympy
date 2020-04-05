@@ -4,18 +4,18 @@ from sympy.matrices import eye, Matrix
 from sympy import symbols, S
 from sympy import refine, Q
 
-n, m, l, k, p = symbols('n m l k p', integer=True)
-A = MatrixSymbol('A', n, m)
-B = MatrixSymbol('B', m, l)
-C = MatrixSymbol('C', n, n)
+n, m, l, k, p = symbols("n m l k p", integer=True)
+A = MatrixSymbol("A", n, m)
+B = MatrixSymbol("B", m, l)
+C = MatrixSymbol("C", n, n)
 
 
 def test_transpose():
-    Sq = MatrixSymbol('Sq', n, n)
+    Sq = MatrixSymbol("Sq", n, n)
 
     assert transpose(A) == Transpose(A)
     assert Transpose(A).shape == (m, n)
-    assert Transpose(A*B).shape == (l, n)
+    assert Transpose(A * B).shape == (l, n)
     assert transpose(Transpose(A)) == A
     assert isinstance(Transpose(Transpose(A)), Transpose)
 
@@ -33,18 +33,18 @@ def test_transpose():
 
     assert Transpose(Sq)[0, 1] == Sq[1, 0]
 
-    assert Transpose(A*B).doit() == Transpose(B) * Transpose(A)
+    assert Transpose(A * B).doit() == Transpose(B) * Transpose(A)
 
 
 def test_transpose_MatAdd_MatMul():
     # Issue 16807
     from sympy.functions.elementary.trigonometric import cos
 
-    x = symbols('x')
-    M = MatrixSymbol('M', 3, 3)
-    N = MatrixSymbol('N', 3, 3)
+    x = symbols("x")
+    M = MatrixSymbol("M", 3, 3)
+    N = MatrixSymbol("N", 3, 3)
 
-    assert (N + (cos(x) * M)).T == cos(x)*M.T + N.T
+    assert (N + (cos(x) * M)).T == cos(x) * M.T + N.T
 
 
 def test_refine():
@@ -52,6 +52,6 @@ def test_refine():
 
 
 def test_transpose1x1():
-    m = MatrixSymbol('m', 1, 1)
+    m = MatrixSymbol("m", 1, 1)
     assert m == refine(m.T)
     assert m == refine(m.T.T)

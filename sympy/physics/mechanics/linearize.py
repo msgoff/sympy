@@ -1,6 +1,6 @@
 from __future__ import print_function, division
 
-__all__ = ['Linearizer']
+__all__ = ["Linearizer"]
 
 from sympy.core.backend import Matrix, eye, zeros
 from sympy.core.compatibility import Iterable
@@ -10,6 +10,7 @@ from sympy.physics.vector import dynamicsymbols
 from sympy.physics.mechanics.functions import msubs
 
 from collections import namedtuple
+
 
 class Linearizer(object):
     """This object holds the general model form for a dynamic system.
@@ -32,8 +33,25 @@ class Linearizer(object):
         Permutation matrix such that [q_ind, u_ind]^T = perm_mat*[q, u]^T
     """
 
-    def __init__(self, f_0, f_1, f_2, f_3, f_4, f_c, f_v, f_a, q, u,
-            q_i=None, q_d=None, u_i=None, u_d=None, r=None, lams=None):
+    def __init__(
+        self,
+        f_0,
+        f_1,
+        f_2,
+        f_3,
+        f_4,
+        f_c,
+        f_v,
+        f_a,
+        q,
+        u,
+        q_i=None,
+        q_d=None,
+        u_i=None,
+        u_d=None,
+        r=None,
+        lams=None,
+    ):
         """
         Parameters
         ----------
@@ -83,8 +101,9 @@ class Linearizer(object):
         # qd and u vectors have any intersecting variables, this can cause
         # problems. We'll fix this with some hackery, and Dummy variables
         dup_vars = set(self._qd).intersection(self.u)
-        self._qd_dup = Matrix([var if var not in dup_vars else Dummy()
-            for var in self._qd])
+        self._qd_dup = Matrix(
+            [var if var not in dup_vars else Dummy() for var in self._qd]
+        )
 
         # Derive dimesion terms
         l = len(self.f_c)
@@ -93,7 +112,7 @@ class Linearizer(object):
         o = len(self.u)
         s = len(self.r)
         k = len(self.lams)
-        dims = namedtuple('dims', ['l', 'm', 'n', 'o', 's', 'k'])
+        dims = namedtuple("dims", ["l", "m", "n", "o", "s", "k"])
         self._dims = dims(l, m, n, o, s, k)
 
         self._setup_done = False
@@ -149,8 +168,9 @@ class Linearizer(object):
         # If not, C_0 is I_(nxn). Note that this works even if n=0
         if l > 0:
             f_c_jac_q = self.f_c.jacobian(self.q)
-            self._C_0 = (eye(n) - self._Pqd * (f_c_jac_q *
-                    self._Pqd).LUsolve(f_c_jac_q)) * self._Pqi
+            self._C_0 = (
+                eye(n) - self._Pqd * (f_c_jac_q * self._Pqd).LUsolve(f_c_jac_q)
+            ) * self._Pqi
         else:
             self._C_0 = eye(n)
         # If there are motion constraints (m > 0), form C_1 and C_2 as normal.
@@ -164,8 +184,7 @@ class Linearizer(object):
                 self._C_1 = -self._Pud * temp.LUsolve(f_v_jac_q)
             else:
                 self._C_1 = zeros(o, n)
-            self._C_2 = (eye(o) - self._Pud *
-                    temp.LUsolve(f_v_jac_u)) * self._Pui
+            self._C_2 = (eye(o) - self._Pud * temp.LUsolve(f_v_jac_u)) * self._Pui
         else:
             self._C_1 = zeros(o, n)
             self._C_2 = eye(o)
@@ -321,19 +340,19 @@ class Linearizer(object):
         if n != 0:
             r1c1 = A_qq
             if o != 0:
-                r1c1 += (A_qu * C_1)
+                r1c1 += A_qu * C_1
             r1c1 = r1c1 * C_0
             if m != 0:
                 r2c1 = A_uqc
                 if o != 0:
-                    r2c1 += (A_uuc * C_1)
+                    r2c1 += A_uuc * C_1
                 r2c1 = r2c1 * C_0
             else:
                 r2c1 = Matrix()
             if o - m + k != 0:
                 r3c1 = A_uqd
                 if o != 0:
-                    r3c1 += (A_uud * C_1)
+                    r3c1 += A_uud * C_1
                 r3c1 = r3c1 * C_0
             else:
                 r3c1 = Matrix()
@@ -419,8 +438,10 @@ def permutation_matrix(orig_vec, per_vec):
     if not isinstance(per_vec, (list, tuple)):
         per_vec = flatten(per_vec)
     if set(orig_vec) != set(per_vec):
-        raise ValueError("orig_vec and per_vec must be the same length, " +
-                "and contain the same symbols.")
+        raise ValueError(
+            "orig_vec and per_vec must be the same length, "
+            + "and contain the same symbols."
+        )
     ind_list = [orig_vec.index(i) for i in per_vec]
     p_matrix = zeros(len(orig_vec))
     for i, j in enumerate(ind_list):

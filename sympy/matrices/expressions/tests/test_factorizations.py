@@ -1,8 +1,9 @@
 from sympy.matrices.expressions.factorizations import lu, LofCholesky, qr, svd
 from sympy import Symbol, MatrixSymbol, ask, Q
 
-n = Symbol('n')
-X = MatrixSymbol('X', n, n)
+n = Symbol("n")
+X = MatrixSymbol("X", n, n)
+
 
 def test_LU():
     L, U = lu(X)
@@ -10,14 +11,17 @@ def test_LU():
     assert ask(Q.lower_triangular(L))
     assert ask(Q.upper_triangular(U))
 
+
 def test_Cholesky():
     LofCholesky(X)
+
 
 def test_QR():
     Q_, R = qr(X)
     assert Q_.shape == R.shape == X.shape
     assert ask(Q.orthogonal(Q_))
     assert ask(Q.upper_triangular(R))
+
 
 def test_svd():
     U, S, V = svd(X)

@@ -85,48 +85,48 @@ class MatrixExpr(Expr):
     def __abs__(self):
         raise NotImplementedError
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__radd__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__radd__")
     def __add__(self, other):
         return MatAdd(self, other, check=True).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__add__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__add__")
     def __radd__(self, other):
         return MatAdd(other, self, check=True).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rsub__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rsub__")
     def __sub__(self, other):
         return MatAdd(self, -other, check=True).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__sub__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__sub__")
     def __rsub__(self, other):
         return MatAdd(other, -self, check=True).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rmul__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rmul__")
     def __mul__(self, other):
         return MatMul(self, other).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rmul__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rmul__")
     def __matmul__(self, other):
         return MatMul(self, other).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__mul__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__mul__")
     def __rmul__(self, other):
         return MatMul(other, self).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__mul__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__mul__")
     def __rmatmul__(self, other):
         return MatMul(other, self).doit()
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rpow__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rpow__")
     def __pow__(self, other):
         if not self.is_square:
             raise ShapeError("Power of non-square matrix %s" % self)
@@ -138,21 +138,21 @@ class MatrixExpr(Expr):
             return self
         return MatPow(self, other).doit(deep=False)
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__pow__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__pow__")
     def __rpow__(self, other):
         raise NotImplementedError("Matrix Power not defined")
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rdiv__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rdiv__")
     def __div__(self, other):
-        return self * other**S.NegativeOne
+        return self * other ** S.NegativeOne
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__div__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__div__")
     def __rdiv__(self, other):
         raise NotImplementedError()
-        #return MatMul(other, Pow(self, S.NegativeOne))
+        # return MatMul(other, Pow(self, S.NegativeOne))
 
     __truediv__ = __div__  # type: Callable[[MatrixExpr, Any], Any]
     __rtruediv__ = __rdiv__  # type: Callable[[MatrixExpr, Any], Any]
@@ -172,16 +172,19 @@ class MatrixExpr(Expr):
     def _eval_conjugate(self):
         from sympy.matrices.expressions.adjoint import Adjoint
         from sympy.matrices.expressions.transpose import Transpose
+
         return Adjoint(Transpose(self))
 
     def as_real_imag(self, deep=True, **hints):
         from sympy import I
+
         real = S.Half * (self + self._eval_conjugate())
-        im = (self - self._eval_conjugate())/(2*I)
+        im = (self - self._eval_conjugate()) / (2 * I)
         return (real, im)
 
     def _eval_inverse(self):
         from sympy.matrices.expressions.inverse import Inverse
+
         return Inverse(self)
 
     def _eval_transpose(self):
@@ -198,6 +201,7 @@ class MatrixExpr(Expr):
 
     def _eval_adjoint(self):
         from sympy.matrices.expressions.adjoint import Adjoint
+
         return Adjoint(self)
 
     def _eval_derivative_array(self, x):
@@ -221,10 +225,12 @@ class MatrixExpr(Expr):
             return _matrix_derivative(x, self)
         else:
             from sympy import Derivative
+
             return Derivative(x, self)
 
     def _accept_eval_derivative(self, s):
         from sympy import MatrixBase, NDimArray
+
         if isinstance(s, (MatrixBase, NDimArray, MatrixExpr)):
             return s._visit_eval_derivative_array(self)
         else:
@@ -234,16 +240,18 @@ class MatrixExpr(Expr):
     def _check_dim(cls, dim):
         """Helper function to check invalid matrix dimensions"""
         from sympy.solvers.solvers import check_assumptions
+
         ok = check_assumptions(dim, integer=True, nonnegative=True)
         if ok is False:
             raise ValueError(
                 "The dimension specification {} should be "
-                "a nonnegative integer.".format(dim))
-
+                "a nonnegative integer.".format(dim)
+            )
 
     def _entry(self, i, j, **kwargs):
         raise NotImplementedError(
-            "Indexing not implemented for %s" % self.__class__.__name__)
+            "Indexing not implemented for %s" % self.__class__.__name__
+        )
 
     def adjoint(self):
         return adjoint(self)
@@ -257,11 +265,12 @@ class MatrixExpr(Expr):
 
     def transpose(self):
         from sympy.matrices.expressions.transpose import transpose
+
         return transpose(self)
 
     @property
     def T(self):
-        '''Matrix transposition'''
+        """Matrix transposition"""
         return self.transpose()
 
     def inverse(self):
@@ -277,19 +286,25 @@ class MatrixExpr(Expr):
     def valid_index(self, i, j):
         def is_valid(idx):
             return isinstance(idx, (int, Integer, Symbol, Expr))
-        return (is_valid(i) and is_valid(j) and
-                (self.rows is None or
-                (0 <= i) != False and (i < self.rows) != False) and
-                (0 <= j) != False and (j < self.cols) != False)
+
+        return (
+            is_valid(i)
+            and is_valid(j)
+            and (self.rows is None or (0 <= i) != False and (i < self.rows) != False)
+            and (0 <= j) != False
+            and (j < self.cols) != False
+        )
 
     def __getitem__(self, key):
         if not isinstance(key, tuple) and isinstance(key, slice):
             from sympy.matrices.expressions.slice import MatrixSlice
+
             return MatrixSlice(self, key, (0, None, 1))
         if isinstance(key, tuple) and len(key) == 2:
             i, j = key
             if isinstance(i, slice) or isinstance(j, slice):
                 from sympy.matrices.expressions.slice import MatrixSlice
+
                 return MatrixSlice(self, i, j)
             i, j = _sympify(i), _sympify(j)
             if self.valid_index(i, j) != False:
@@ -301,9 +316,13 @@ class MatrixExpr(Expr):
             rows, cols = self.shape
             # allow single indexing if number of columns is known
             if not isinstance(cols, Integer):
-                raise IndexError(filldedent('''
+                raise IndexError(
+                    filldedent(
+                        """
                     Single indexing is only supported when the number
-                    of columns is known.'''))
+                    of columns is known."""
+                    )
+                )
             key = _sympify(key)
             i = key // cols
             j = key % cols
@@ -312,9 +331,13 @@ class MatrixExpr(Expr):
             else:
                 raise IndexError("Invalid index %s" % key)
         elif isinstance(key, (Symbol, Expr)):
-                raise IndexError(filldedent('''
+            raise IndexError(
+                filldedent(
+                    """
                     Only integers may be used when addressing the matrix
-                    with a single index.'''))
+                    with a single index."""
+                )
+            )
         raise IndexError("Invalid index, wanted %s[i,j]" % self)
 
     def as_explicit(self):
@@ -342,9 +365,10 @@ class MatrixExpr(Expr):
 
         """
         from sympy.matrices.immutable import ImmutableDenseMatrix
-        return ImmutableDenseMatrix([[    self[i, j]
-                            for j in range(self.cols)]
-                            for i in range(self.rows)])
+
+        return ImmutableDenseMatrix(
+            [[self[i, j] for j in range(self.cols)] for i in range(self.rows)]
+        )
 
     def as_mutable(self):
         """
@@ -373,6 +397,7 @@ class MatrixExpr(Expr):
 
     def __array__(self):
         from numpy import empty
+
         a = empty(self.shape, dtype=object)
         for i in range(self.rows):
             for j in range(self.cols):
@@ -442,29 +467,31 @@ class MatrixExpr(Expr):
         from sympy.strategies.traverse import bottom_up
 
         def remove_matelement(expr, i1, i2):
-
             def repl_match(pos):
                 def func(x):
                     if not isinstance(x, MatrixElement):
                         return False
                     if x.args[pos] != i1:
                         return False
-                    if x.args[3-pos] == 0:
-                        if x.args[0].shape[2-pos] == 1:
+                    if x.args[3 - pos] == 0:
+                        if x.args[0].shape[2 - pos] == 1:
                             return True
                         else:
                             return False
                     return True
+
                 return func
 
-            expr = expr.replace(repl_match(1),
-                lambda x: x.args[0])
-            expr = expr.replace(repl_match(2),
-                lambda x: transpose(x.args[0]))
+            expr = expr.replace(repl_match(1), lambda x: x.args[0])
+            expr = expr.replace(repl_match(2), lambda x: transpose(x.args[0]))
 
             # Make sure that all Mul are transformed to MatMul and that they
             # are flattened:
-            rule = bottom_up(lambda x: reduce(lambda a, b: a*b, x.args) if isinstance(x, (Mul, MatMul)) else x)
+            rule = bottom_up(
+                lambda x: reduce(lambda a, b: a * b, x.args)
+                if isinstance(x, (Mul, MatMul))
+                else x
+            )
             return rule(expr)
 
         def recurse_expr(expr, index_ranges={}):
@@ -492,7 +519,7 @@ class MatrixExpr(Expr):
                         arg_symbol = arg_symbol.args[0]
                     pos_arg.append(arg_symbol)
                     pos_ind.append(arg_indices)
-                    link_ind.append([None]*len(arg_indices))
+                    link_ind.append([None] * len(arg_indices))
                     for i, ind in enumerate(arg_indices):
                         if ind in dlinks:
                             other_i = dlinks[ind]
@@ -517,16 +544,19 @@ class MatrixExpr(Expr):
                                 cur_line.append(transpose(pos_arg[d]))
                             else:
                                 cur_line.append(pos_arg[d])
-                        next_ind_pos = link_ind[d][1-r]
+                        next_ind_pos = link_ind[d][1 - r]
                         counter2 += 1
                         # Mark as visited, there will be no `None` anymore:
                         link_ind[d] = (-1, -1)
                         if next_ind_pos is None:
-                            index2 = pos_ind[d][1-r]
+                            index2 = pos_ind[d][1 - r]
                             lines[(index1, index2)] = cur_line
                             break
                         cur_ind_pos = next_ind_pos
-                lines = {k: MatMul.fromiter(v) if len(v) != 1 else v[0] for k, v in lines.items()}
+                lines = {
+                    k: MatMul.fromiter(v) if len(v) != 1 else v[0]
+                    for k, v in lines.items()
+                }
                 return [(Mul.fromiter(nonmatargs), None)] + [
                     (MatrixElement(a, i, j), (i, j)) for (i, j), a in lines.items()
                 ]
@@ -540,7 +570,7 @@ class MatrixExpr(Expr):
                             scalar = elem
                             continue
                         indices = tuple(sorted(indices, key=default_sort_key))
-                        d[indices].append(scalar*remove_matelement(elem, *indices))
+                        d[indices].append(scalar * remove_matelement(elem, *indices))
                         scalar = 1
                 return [(MatrixElement(Add.fromiter(v), *k), k) for k, v in d.items()]
             elif isinstance(expr, KroneckerDelta):
@@ -554,21 +584,26 @@ class MatrixExpr(Expr):
                 matrix_symbol, i1, i2 = expr.args
                 if i1 in index_ranges:
                     r1, r2 = index_ranges[i1]
-                    if r1 != 0 or matrix_symbol.shape[0] != r2+1:
-                        raise ValueError("index range mismatch: {0} vs. (0, {1})".format(
-                            (r1, r2), matrix_symbol.shape[0]))
+                    if r1 != 0 or matrix_symbol.shape[0] != r2 + 1:
+                        raise ValueError(
+                            "index range mismatch: {0} vs. (0, {1})".format(
+                                (r1, r2), matrix_symbol.shape[0]
+                            )
+                        )
                 if i2 in index_ranges:
                     r1, r2 = index_ranges[i2]
-                    if r1 != 0 or matrix_symbol.shape[1] != r2+1:
-                        raise ValueError("index range mismatch: {0} vs. (0, {1})".format(
-                            (r1, r2), matrix_symbol.shape[1]))
+                    if r1 != 0 or matrix_symbol.shape[1] != r2 + 1:
+                        raise ValueError(
+                            "index range mismatch: {0} vs. (0, {1})".format(
+                                (r1, r2), matrix_symbol.shape[1]
+                            )
+                        )
                 if (i1 == i2) and (i1 in index_ranges):
                     return [(trace(matrix_symbol), None)]
                 return [(MatrixElement(matrix_symbol, i1, i2), (i1, i2))]
             elif isinstance(expr, Sum):
                 return recurse_expr(
-                    expr.args[0],
-                    index_ranges={i[0]: i[1:] for i in expr.args[1:]}
+                    expr.args[0], index_ranges={i[0]: i[1:] for i in expr.args[1:]}
                 )
             else:
                 return [(expr, None)]
@@ -589,6 +624,7 @@ class MatrixExpr(Expr):
 
     def applyfunc(self, func):
         from .applyfunc import ElementwiseApplyFunction
+
         return ElementwiseApplyFunction(func, self)
 
     def _eval_Eq(self, other):
@@ -632,11 +668,14 @@ def get_postprocessor(cls):
                 # raising an exception. That way different algorithms can
                 # replace matrix expressions with non-commutative symbols to
                 # manipulate them like non-commutative scalars.
-                return cls._from_args(nonmatrices + [mat_class(*matrices).doit(deep=False)])
+                return cls._from_args(
+                    nonmatrices + [mat_class(*matrices).doit(deep=False)]
+                )
 
         if mat_class == MatAdd:
             return mat_class(*matrices).doit(deep=False)
         return mat_class(cls._from_args(nonmatrices), *matrices).doit(deep=False)
+
     return _postprocessor
 
 
@@ -648,6 +687,7 @@ Basic._constructor_postprocessor_mapping[MatrixExpr] = {
 
 def _matrix_derivative(expr, x):
     from sympy import Derivative
+
     lines = expr._eval_derivative_matrix_lines(x)
 
     parts = [i.build() for i in lines]
@@ -679,13 +719,13 @@ def _matrix_derivative(expr, x):
             elif p2 == Identity(1):
                 pbase = p1
             else:
-                pbase = p1*p2
+                pbase = p1 * p2
             if len(parts) == 2:
                 return pbase
             else:  # len(parts) > 2
                 if pbase.is_Matrix:
                     raise ValueError("")
-                return pbase*Mul.fromiter(parts[2:])
+                return pbase * Mul.fromiter(parts[2:])
 
     if rank <= 2:
         return Add.fromiter([contract_one_dims(i) for i in parts])
@@ -704,6 +744,7 @@ class MatrixElement(Expr):
     def __new__(cls, name, n, m):
         n, m = map(_sympify, (n, m))
         from sympy import MatrixBase
+
         if isinstance(name, (MatrixBase,)):
             if n.is_Integer and m.is_Integer:
                 return name[n, m]
@@ -714,7 +755,7 @@ class MatrixElement(Expr):
         return obj
 
     def doit(self, **kwargs):
-        deep = kwargs.get('deep', True)
+        deep = kwargs.get("deep", True)
         if deep:
             args = [arg.doit(**kwargs) for arg in self.args]
         else:
@@ -730,6 +771,7 @@ class MatrixElement(Expr):
 
         if not isinstance(v, MatrixElement):
             from sympy import MatrixBase
+
             if isinstance(self.parent, MatrixBase):
                 return self.parent.diff(v)[self.i, self.j]
             return S.Zero
@@ -739,15 +781,20 @@ class MatrixElement(Expr):
         m, n = self.parent.shape
 
         if M == v.args[0]:
-            return KroneckerDelta(self.args[1], v.args[1], (0, m-1)) * \
-                   KroneckerDelta(self.args[2], v.args[2], (0, n-1))
+            return KroneckerDelta(self.args[1], v.args[1], (0, m - 1)) * KroneckerDelta(
+                self.args[2], v.args[2], (0, n - 1)
+            )
 
         if isinstance(M, Inverse):
             i, j = self.args[1:]
             i1, i2 = symbols("z1, z2", cls=Dummy)
             Y = M.args[0]
             r1, r2 = Y.shape
-            return -Sum(M[i, i1]*Y[i1, i2].diff(v)*M[i2, j], (i1, 0, r1-1), (i2, 0, r2-1))
+            return -Sum(
+                M[i, i1] * Y[i1, i2].diff(v) * M[i2, j],
+                (i1, 0, r1 - 1),
+                (i2, 0, r2 - 1),
+            )
 
         if self.has(v.args[0]):
             return None
@@ -772,6 +819,7 @@ class MatrixSymbol(MatrixExpr):
     >>> 2*A*B + Identity(3)
     I + 2*A*B
     """
+
     is_commutative = False
     is_symbol = True
     _diff_wrt = True
@@ -814,9 +862,10 @@ class MatrixSymbol(MatrixExpr):
         return set((self,))
 
     def doit(self, **hints):
-        if hints.get('deep', True):
-            return type(self)(self.args[0], self.args[1].doit(**hints),
-                    self.args[2].doit(**hints))
+        if hints.get("deep", True):
+            return type(self)(
+                self.args[0], self.args[1].doit(**hints), self.args[2].doit(**hints)
+            )
         else:
             return self
 
@@ -829,17 +878,17 @@ class MatrixSymbol(MatrixExpr):
 
     def _eval_derivative_matrix_lines(self, x):
         if self != x:
-            first = ZeroMatrix(x.shape[0], self.shape[0]) if self.shape[0] != 1 else S.Zero
-            second = ZeroMatrix(x.shape[1], self.shape[1]) if self.shape[1] != 1 else S.Zero
-            return [_LeftRightArgs(
-                [first, second],
-            )]
+            first = (
+                ZeroMatrix(x.shape[0], self.shape[0]) if self.shape[0] != 1 else S.Zero
+            )
+            second = (
+                ZeroMatrix(x.shape[1], self.shape[1]) if self.shape[1] != 1 else S.Zero
+            )
+            return [_LeftRightArgs([first, second],)]
         else:
             first = Identity(self.shape[0]) if self.shape[0] != 1 else S.One
             second = Identity(self.shape[1]) if self.shape[1] != 1 else S.One
-            return [_LeftRightArgs(
-                [first, second],
-            )]
+            return [_LeftRightArgs([first, second],)]
 
 
 class Identity(MatrixExpr):
@@ -897,7 +946,7 @@ class Identity(MatrixExpr):
             return S.One
         elif eq is S.false:
             return S.Zero
-        return KroneckerDelta(i, j, (0, self.cols-1))
+        return KroneckerDelta(i, j, (0, self.cols - 1))
 
     def _eval_determinant(self):
         return S.One
@@ -910,6 +959,7 @@ class GenericIdentity(Identity):
     This exists primarily so MatMul() with no arguments can return something
     meaningful.
     """
+
     def __new__(cls):
         # super(Identity, cls) instead of super(GenericIdentity, cls) because
         # Identity.__new__ doesn't have the same signature
@@ -952,6 +1002,7 @@ class ZeroMatrix(MatrixExpr):
     >>> Z*A.T
     0
     """
+
     is_ZeroMatrix = True
 
     def __new__(cls, m, n):
@@ -965,8 +1016,8 @@ class ZeroMatrix(MatrixExpr):
     def shape(self):
         return (self.args[0], self.args[1])
 
-    @_sympifyit('other', NotImplemented)
-    @call_highest_priority('__rpow__')
+    @_sympifyit("other", NotImplemented)
+    @call_highest_priority("__rpow__")
     def __pow__(self, other):
         if other != 1 and not self.is_square:
             raise ShapeError("Power of non-square matrix %s" % self)
@@ -1004,6 +1055,7 @@ class GenericZeroMatrix(ZeroMatrix):
     This exists primarily so MatAdd() with no arguments can return something
     meaningful.
     """
+
     def __new__(cls):
         # super(ZeroMatrix, cls) instead of super(GenericZeroMatrix, cls)
         # because ZeroMatrix.__new__ doesn't have the same signature
@@ -1036,6 +1088,7 @@ class OneMatrix(MatrixExpr):
     """
     Matrix whose all entries are ones.
     """
+
     def __new__(cls, m, n):
         m, n = _sympify(m), _sympify(n)
         cls._check_dim(m)
@@ -1050,13 +1103,14 @@ class OneMatrix(MatrixExpr):
 
     def as_explicit(self):
         from sympy import ImmutableDenseMatrix
+
         return ImmutableDenseMatrix.ones(*self.shape)
 
     def _eval_transpose(self):
         return OneMatrix(self.cols, self.rows)
 
     def _eval_trace(self):
-        return S.One*self.rows
+        return S.One * self.rows
 
     def _eval_determinant(self):
         condition = Eq(self.shape[0], 1) & Eq(self.shape[1], 1)
@@ -1066,6 +1120,7 @@ class OneMatrix(MatrixExpr):
             return S.Zero
         else:
             from sympy import Determinant
+
             return Determinant(self)
 
     def conjugate(self):
@@ -1105,7 +1160,7 @@ class _LeftRightArgs(object):
 
     @property
     def first_pointer(self):
-       return self._first_pointer_parent[self._first_pointer_index]
+        return self._first_pointer_parent[self._first_pointer_index]
 
     @first_pointer.setter
     def first_pointer(self, value):
@@ -1121,20 +1176,27 @@ class _LeftRightArgs(object):
 
     def __repr__(self):
         built = [self._build(i) for i in self._lines]
-        return "_LeftRightArgs(lines=%s, higher=%s)" % (
-            built,
-            self.higher,
-        )
+        return "_LeftRightArgs(lines=%s, higher=%s)" % (built, self.higher,)
 
     def transpose(self):
-        self._first_pointer_parent, self._second_pointer_parent = self._second_pointer_parent, self._first_pointer_parent
-        self._first_pointer_index, self._second_pointer_index = self._second_pointer_index, self._first_pointer_index
-        self._first_line_index, self._second_line_index = self._second_line_index, self._first_line_index
+        self._first_pointer_parent, self._second_pointer_parent = (
+            self._second_pointer_parent,
+            self._first_pointer_parent,
+        )
+        self._first_pointer_index, self._second_pointer_index = (
+            self._second_pointer_index,
+            self._first_pointer_index,
+        )
+        self._first_line_index, self._second_line_index = (
+            self._second_line_index,
+            self._first_line_index,
+        )
         return self
 
     @staticmethod
     def _build(expr):
         from sympy.core.expr import ExprBuilder
+
         if isinstance(expr, ExprBuilder):
             return expr.build()
         if isinstance(expr, list):
@@ -1165,12 +1227,12 @@ class _LeftRightArgs(object):
             # Remove one-dimensional identity matrices:
             # (this is needed by `a.diff(a)` where `a` is a vector)
             if _get_shape(self.second) == (1, 1):
-                return self.first*self.second[0, 0]
+                return self.first * self.second[0, 0]
             if _get_shape(self.first) == (1, 1):
-                return self.first[1, 1]*self.second.T
+                return self.first[1, 1] * self.second.T
             raise ValueError("incompatible shapes")
         if self.first != 1:
-            return self.first*self.second.T
+            return self.first * self.second.T
         else:
             return self.higher
 
@@ -1190,21 +1252,15 @@ class _LeftRightArgs(object):
 
     def _multiply_pointer(self, pointer, other):
         from sympy.core.expr import ExprBuilder
-        from sympy.codegen.array_utils import CodegenArrayContraction, CodegenArrayTensorProduct
+        from sympy.codegen.array_utils import (
+            CodegenArrayContraction,
+            CodegenArrayTensorProduct,
+        )
 
         subexpr = ExprBuilder(
             CodegenArrayContraction,
-            [
-                ExprBuilder(
-                    CodegenArrayTensorProduct,
-                    [
-                        pointer,
-                        other
-                    ]
-                ),
-                (1, 2)
-            ],
-            validator=CodegenArrayContraction._validate
+            [ExprBuilder(CodegenArrayTensorProduct, [pointer, other]), (1, 2)],
+            validator=CodegenArrayContraction._validate,
         )
 
         return subexpr
@@ -1226,6 +1282,7 @@ class _LeftRightArgs(object):
 
 def _make_matrix(x):
     from sympy import ImmutableDenseMatrix
+
     if isinstance(x, MatrixExpr):
         return x
     return ImmutableDenseMatrix([[x]])

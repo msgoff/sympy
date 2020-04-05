@@ -170,8 +170,12 @@ def jones_vector(psi, chi):
     ⎣  2   ⎦
 
     """
-    return Matrix([-I*sin(chi)*sin(psi) + cos(chi)*cos(psi),
-                   I*sin(chi)*cos(psi) + sin(psi)*cos(chi)])
+    return Matrix(
+        [
+            -I * sin(chi) * sin(psi) + cos(chi) * cos(psi),
+            I * sin(chi) * cos(psi) + sin(psi) * cos(chi),
+        ]
+    )
 
 
 def stokes_vector(psi, chi, p=1, I=1):
@@ -284,9 +288,9 @@ def stokes_vector(psi, chi, p=1, I=1):
 
     """
     S0 = I
-    S1 = I*p*cos(2*psi)*cos(2*chi)
-    S2 = I*p*sin(2*psi)*cos(2*chi)
-    S3 = I*p*sin(2*chi)
+    S1 = I * p * cos(2 * psi) * cos(2 * chi)
+    S2 = I * p * sin(2 * psi) * cos(2 * chi)
+    S3 = I * p * sin(2 * chi)
     return Matrix([S0, S1, S2, S3])
 
 
@@ -328,10 +332,14 @@ def jones_2_stokes(e):
 
     """
     ex, ey = e
-    return Matrix([Abs(ex)**2 + Abs(ey)**2,
-                   Abs(ex)**2 - Abs(ey)**2,
-                   2*re(ex*ey.conjugate()),
-                   -2*im(ex*ey.conjugate())])
+    return Matrix(
+        [
+            Abs(ex) ** 2 + Abs(ey) ** 2,
+            Abs(ex) ** 2 - Abs(ey) ** 2,
+            2 * re(ex * ey.conjugate()),
+            -2 * im(ex * ey.conjugate()),
+        ]
+    )
 
 
 def linear_polarizer(theta=0):
@@ -365,8 +373,12 @@ def linear_polarizer(theta=0):
 
 
     """
-    M = Matrix([[cos(theta)**2, sin(theta)*cos(theta)],
-                [sin(theta)*cos(theta), sin(theta)**2]])
+    M = Matrix(
+        [
+            [cos(theta) ** 2, sin(theta) * cos(theta)],
+            [sin(theta) * cos(theta), sin(theta) ** 2],
+        ]
+    )
     return M
 
 
@@ -406,11 +418,19 @@ def phase_retarder(theta=0, delta=0):
     ⎣⎝1 - ℯ   ⎠⋅ℯ     ⋅sin(θ)⋅cos(θ)  ⎝ℯ   ⋅cos (θ) + sin (θ)⎠⋅ℯ     ⎦
 
     """
-    R = Matrix([[cos(theta)**2 + exp(I*delta)*sin(theta)**2,
-                (1-exp(I*delta))*cos(theta)*sin(theta)],
-                [(1-exp(I*delta))*cos(theta)*sin(theta),
-                sin(theta)**2 + exp(I*delta)*cos(theta)**2]])
-    return R*exp(-I*delta/2)
+    R = Matrix(
+        [
+            [
+                cos(theta) ** 2 + exp(I * delta) * sin(theta) ** 2,
+                (1 - exp(I * delta)) * cos(theta) * sin(theta),
+            ],
+            [
+                (1 - exp(I * delta)) * cos(theta) * sin(theta),
+                sin(theta) ** 2 + exp(I * delta) * cos(theta) ** 2,
+            ],
+        ]
+    )
+    return R * exp(-I * delta / 2)
 
 
 def half_wave_retarder(theta):
@@ -478,7 +498,7 @@ def quarter_wave_retarder(theta):
     ⎣(1 - ⅈ)⋅ℯ     ⋅sin(θ)⋅cos(θ)  ⎝sin (θ) + ⅈ⋅cos (θ)⎠⋅ℯ     ⎦
 
     """
-    return phase_retarder(theta, pi/2)
+    return phase_retarder(theta, pi / 2)
 
 
 def transmissive_filter(T):
@@ -605,12 +625,9 @@ def mueller_matrix(J):
     ⎣0    sin(2⋅θ)     -cos(2⋅θ)        0    ⎦
 
     """
-    A = Matrix([[1, 0, 0, 1],
-                [1, 0, 0, -1],
-                [0, 1, 1, 0],
-                [0, -I, I, 0]])
+    A = Matrix([[1, 0, 0, 1], [1, 0, 0, -1], [0, 1, 1, 0], [0, -I, I, 0]])
 
-    return simplify(A*TensorProduct(J, J.conjugate())*A.inv())
+    return simplify(A * TensorProduct(J, J.conjugate()) * A.inv())
 
 
 def polarizing_beam_splitter(Tp=1, Rs=1, Ts=0, Rp=0, phia=0, phib=0):
@@ -666,8 +683,12 @@ def polarizing_beam_splitter(Tp=1, Rs=1, Ts=0, Rp=0, phia=0, phib=0):
     [   0      -I*\/ Rs *e            0            \/ Ts       ]
 
     """
-    PBS = Matrix([[sqrt(Tp), 0, I*sqrt(Rp), 0],
-                  [0, sqrt(Ts), 0, -I*sqrt(Rs)*exp(I*phia)],
-                  [I*sqrt(Rp), 0, sqrt(Tp), 0],
-                  [0, -I*sqrt(Rs)*exp(I*phib), 0, sqrt(Ts)]])
+    PBS = Matrix(
+        [
+            [sqrt(Tp), 0, I * sqrt(Rp), 0],
+            [0, sqrt(Ts), 0, -I * sqrt(Rs) * exp(I * phia)],
+            [I * sqrt(Rp), 0, sqrt(Tp), 0],
+            [0, -I * sqrt(Rs) * exp(I * phib), 0, sqrt(Ts)],
+        ]
+    )
     return PBS

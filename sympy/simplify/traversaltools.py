@@ -23,6 +23,7 @@ def use(expr, func, level=0, args=(), kwargs={}):
     x**3 + 2*x**2*y + x*y**2 + 1
 
     """
+
     def _use(expr, level):
         if not level:
             return func(expr, *args, **kwargs)

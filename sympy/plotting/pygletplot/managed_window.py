@@ -14,11 +14,9 @@ class ManagedWindow(Window):
     in a separate thread. Behavior is added by creating a subclass
     which overrides setup, update, and/or draw.
     """
+
     fps_limit = 30
-    default_win_args = dict(width=600,
-                            height=500,
-                            vsync=False,
-                            resizable=True)
+    default_win_args = dict(width=600, height=500, vsync=False, resizable=True)
 
     def __init__(self, **win_args):
         """
@@ -28,7 +26,7 @@ class ManagedWindow(Window):
         """
 
         # check if this is run from the doctester
-        if win_args.get('runfromdoctester', False):
+        if win_args.get("runfromdoctester", False):
             return
 
         self.win_args = dict(self.default_win_args, **win_args)
@@ -104,5 +102,6 @@ class ManagedWindow(Window):
         """
         pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ManagedWindow()

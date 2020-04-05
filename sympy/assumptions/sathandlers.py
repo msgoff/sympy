@@ -5,13 +5,20 @@ from collections import defaultdict
 from sympy.assumptions.ask import Q
 from sympy.assumptions.assume import Predicate, AppliedPredicate
 from sympy.assumptions.cnf import AND, OR, to_NNF
-from sympy.core import (Add, Mul, Pow, Integer, Number, NumberSymbol,)
+from sympy.core import (
+    Add,
+    Mul,
+    Pow,
+    Integer,
+    Number,
+    NumberSymbol,
+)
 from sympy.core.compatibility import MutableMapping
 from sympy.core.numbers import ImaginaryUnit
 from sympy.core.rules import Transform
 from sympy.core.sympify import _sympify
 from sympy.functions.elementary.complexes import Abs
-from sympy.logic.boolalg import (Equivalent, Implies, BooleanFunction)
+from sympy.logic.boolalg import Equivalent, Implies, BooleanFunction
 from sympy.matrices.expressions import MatMul
 
 # APIs here may be subject to change
@@ -48,6 +55,7 @@ class UnevaluatedOnFree(BooleanFunction):
     evaluate it using .rcall().
 
     """
+
     def __new__(cls, arg):
         # Mostly type checking here
         arg = _sympify(arg)
@@ -62,11 +70,14 @@ class UnevaluatedOnFree(BooleanFunction):
             return obj
         predicate_args = {pred.args[0] for pred in applied_predicates}
         if len(predicate_args) > 1:
-            raise ValueError("The AppliedPredicates in arg must be applied to a single expression.")
+            raise ValueError(
+                "The AppliedPredicates in arg must be applied to a single expression."
+            )
         obj = BooleanFunction.__new__(cls, arg)
         obj.expr = predicate_args.pop()
-        obj.pred = arg.xreplace(Transform(lambda e: e.func, lambda e:
-            isinstance(e, AppliedPredicate)))
+        obj.pred = arg.xreplace(
+            Transform(lambda e: e.func, lambda e: isinstance(e, AppliedPredicate))
+        )
         applied = obj.apply(obj.expr)
         if applied is None:
             return obj
@@ -168,8 +179,12 @@ class ExactlyOneArg(UnevaluatedOnFree):
         # Technically this is xor, but if one term in the disjunction is true,
         # it is not possible for the remainder to be true, so regular or is
         # fine in this case.
-        res = OR(*[AND(pred_args[i], *[~lit for lit in pred_args[:i] +
-            pred_args[i+1:]]) for i in range(len(pred_args))])
+        res = OR(
+            *[
+                AND(pred_args[i], *[~lit for lit in pred_args[:i] + pred_args[i + 1 :]])
+                for i in range(len(pred_args))
+            ]
+        )
         return res
         # Note: this is the equivalent cnf form. The above is more efficient
         # as the first argument of an implication, since p >> q is the same as
@@ -243,9 +258,11 @@ class CheckOldAssump(UnevaluatedOnFree):
 class CheckIsPrime(UnevaluatedOnFree):
     def apply(self, expr=None, is_Not=False):
         from sympy import isprime
+
         arg = self.args[0](expr) if callable(self.args[0]) else self.args[0]
         res = Equivalent(arg, isprime(expr))
         return to_NNF(res)
+
 
 class CustomLambda(object):
     """
@@ -253,6 +270,7 @@ class CustomLambda(object):
 
     Workaround until we get a better way to represent certain facts.
     """
+
     def __init__(self, lamda):
         self.lamda = lamda
 
@@ -268,6 +286,7 @@ class ClassFactRegistry(MutableMapping):
     ``C``. ``registry[C]`` returns a set of handlers for class ``C``, or any
     of its superclasses.
     """
+
     def __init__(self, d=None):
         d = d or {}
         self.d = defaultdict(frozenset, d)
@@ -305,21 +324,52 @@ def register_fact(klass, fact, registry=fact_registry):
 
 for klass, fact in [
     (Mul, Equivalent(Q.zero, AnyArgs(Q.zero))),
-    (MatMul, Implies(AllArgs(Q.square), Equivalent(Q.invertible, AllArgs(Q.invertible)))),
+    (
+        MatMul,
+        Implies(AllArgs(Q.square), Equivalent(Q.invertible, AllArgs(Q.invertible))),
+    ),
     (Add, Implies(AllArgs(Q.positive), Q.positive)),
     (Add, Implies(AllArgs(Q.negative), Q.negative)),
     (Mul, Implies(AllArgs(Q.positive), Q.positive)),
     (Mul, Implies(AllArgs(Q.commutative), Q.commutative)),
     (Mul, Implies(AllArgs(Q.real), Q.commutative)),
-
-    (Pow, CustomLambda(lambda power: Implies(Q.real(power.base) &
-    Q.even(power.exp) & Q.nonnegative(power.exp), Q.nonnegative(power)))),
-    (Pow, CustomLambda(lambda power: Implies(Q.nonnegative(power.base) & Q.odd(power.exp) & Q.nonnegative(power.exp), Q.nonnegative(power)))),
-    (Pow, CustomLambda(lambda power: Implies(Q.nonpositive(power.base) & Q.odd(power.exp) & Q.nonnegative(power.exp), Q.nonpositive(power)))),
-
+    (
+        Pow,
+        CustomLambda(
+            lambda power: Implies(
+                Q.real(power.base) & Q.even(power.exp) & Q.nonnegative(power.exp),
+                Q.nonnegative(power),
+            )
+        ),
+    ),
+    (
+        Pow,
+        CustomLambda(
+            lambda power: Implies(
+                Q.nonnegative(power.base) & Q.odd(power.exp) & Q.nonnegative(power.exp),
+                Q.nonnegative(power),
+            )
+        ),
+    ),
+    (
+        Pow,
+        CustomLambda(
+            lambda power: Implies(
+                Q.nonpositive(power.base) & Q.odd(power.exp) & Q.nonnegative(power.exp),
+                Q.nonpositive(power),
+            )
+        ),
+    ),
     # This one can still be made easier to read. I think we need basic pattern
     # matching, so that we can just write Equivalent(Q.zero(x**y), Q.zero(x) & Q.positive(y))
-    (Pow, CustomLambda(lambda power: Equivalent(Q.zero(power), Q.zero(power.base) & Q.positive(power.exp)))),
+    (
+        Pow,
+        CustomLambda(
+            lambda power: Equivalent(
+                Q.zero(power), Q.zero(power.base) & Q.positive(power.exp)
+            )
+        ),
+    ),
     (Integer, CheckIsPrime(Q.prime)),
     (Integer, CheckOldAssump(Q.composite)),
     # Implicitly assumes Mul has more than one arg
@@ -327,34 +377,33 @@ for klass, fact in [
     (Mul, Implies(AllArgs(Q.prime), ~Q.prime)),
     # More advanced prime assumptions will require inequalities, as 1 provides
     # a corner case.
-    (Mul, Implies(AllArgs(Q.imaginary | Q.real), Implies(ExactlyOneArg(Q.imaginary), Q.imaginary))),
+    (
+        Mul,
+        Implies(
+            AllArgs(Q.imaginary | Q.real),
+            Implies(ExactlyOneArg(Q.imaginary), Q.imaginary),
+        ),
+    ),
     (Mul, Implies(AllArgs(Q.real), Q.real)),
     (Add, Implies(AllArgs(Q.real), Q.real)),
     # General Case: Odd number of imaginary args implies mul is imaginary(To be implemented)
-    (Mul, Implies(AllArgs(Q.real), Implies(ExactlyOneArg(Q.irrational),
-        Q.irrational))),
-    (Add, Implies(AllArgs(Q.real), Implies(ExactlyOneArg(Q.irrational),
-        Q.irrational))),
+    (Mul, Implies(AllArgs(Q.real), Implies(ExactlyOneArg(Q.irrational), Q.irrational))),
+    (Add, Implies(AllArgs(Q.real), Implies(ExactlyOneArg(Q.irrational), Q.irrational))),
     (Mul, Implies(AllArgs(Q.rational), Q.rational)),
     (Add, Implies(AllArgs(Q.rational), Q.rational)),
-
     (Abs, Q.nonnegative),
     (Abs, Equivalent(AllArgs(~Q.zero), ~Q.zero)),
-
     # Including the integer qualification means we don't need to add any facts
     # for odd, since the assumptions already know that every integer is
     # exactly one of even or odd.
     (Mul, Implies(AllArgs(Q.integer), Equivalent(AnyArgs(Q.even), Q.even))),
-
     (Abs, Implies(AllArgs(Q.even), Q.even)),
     (Abs, Implies(AllArgs(Q.odd), Q.odd)),
-
     (Add, Implies(AllArgs(Q.integer), Q.integer)),
     (Add, Implies(ExactlyOneArg(~Q.integer), ~Q.integer)),
     (Mul, Implies(AllArgs(Q.integer), Q.integer)),
     (Mul, Implies(ExactlyOneArg(~Q.rational), ~Q.integer)),
     (Abs, Implies(AllArgs(Q.integer), Q.integer)),
-
     (Number, CheckOldAssump(Q.negative)),
     (Number, CheckOldAssump(Q.zero)),
     (Number, CheckOldAssump(Q.positive)),
@@ -385,7 +434,7 @@ for klass, fact in [
     (ImaginaryUnit, CheckOldAssump(Q.nonpositive)),
     (ImaginaryUnit, CheckOldAssump(Q.rational)),
     (ImaginaryUnit, CheckOldAssump(Q.irrational)),
-    (ImaginaryUnit, CheckOldAssump(Q.imaginary))
-    ]:
+    (ImaginaryUnit, CheckOldAssump(Q.imaginary)),
+]:
 
     register_fact(klass, fact)

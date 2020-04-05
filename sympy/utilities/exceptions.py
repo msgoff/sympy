@@ -132,11 +132,24 @@ class SymPyDeprecationWarning(DeprecationWarning):
 
     """
 
-    def __init__(self, value=None, feature=None, last_supported_version=None,
-                 useinstead=None, issue=None, deprecated_since_version=None):
+    def __init__(
+        self,
+        value=None,
+        feature=None,
+        last_supported_version=None,
+        useinstead=None,
+        issue=None,
+        deprecated_since_version=None,
+    ):
 
-        self.args = (value, feature, last_supported_version, useinstead,
-                issue, deprecated_since_version)
+        self.args = (
+            value,
+            feature,
+            last_supported_version,
+            useinstead,
+            issue,
+            deprecated_since_version,
+        )
 
         self.fullMessage = ""
 
@@ -144,27 +157,34 @@ class SymPyDeprecationWarning(DeprecationWarning):
             raise ValueError("feature is required argument of SymPyDeprecationWarning")
 
         if not deprecated_since_version:
-            raise ValueError("deprecated_since_version is a required argument of SymPyDeprecationWarning")
+            raise ValueError(
+                "deprecated_since_version is a required argument of SymPyDeprecationWarning"
+            )
 
-        self.fullMessage = "%s has been deprecated since SymPy %s. " % \
-                                   (feature, deprecated_since_version)
+        self.fullMessage = "%s has been deprecated since SymPy %s. " % (
+            feature,
+            deprecated_since_version,
+        )
 
         if last_supported_version:
-            self.fullMessage += ("It will be last supported in SymPy "
-                "version %s. ") % last_supported_version
+            self.fullMessage += (
+                "It will be last supported in SymPy " "version %s. "
+            ) % last_supported_version
         if useinstead:
             self.fullMessage += "Use %s instead. " % useinstead
 
         if not issue:
-            raise ValueError("""\
+            raise ValueError(
+                """\
 The issue argument of SymPyDeprecationWarning is required.
 This should be a separate issue with the "Deprecation Removal" label. See
 https://github.com/sympy/sympy/wiki/Deprecating-policy.\
-""")
+"""
+            )
 
-        self.fullMessage += ("See "
-            "https://github.com/sympy/sympy/issues/%d for more "
-            "info. ") % issue
+        self.fullMessage += (
+            "See " "https://github.com/sympy/sympy/issues/%d for more " "info. "
+        ) % issue
 
         if value:
             if not isinstance(value, str):
@@ -176,13 +196,14 @@ https://github.com/sympy/sympy/wiki/Deprecating-policy.\
         self.fullMessage += value
 
     def __str__(self):
-        return '\n%s\n' % filldedent(self.fullMessage)
+        return "\n%s\n" % filldedent(self.fullMessage)
 
     def warn(self, stacklevel=2):
         # the next line is what the user would see after the error is printed
         # if stacklevel was set to 1. If you are writing a wrapper around this,
         # increase the stacklevel accordingly.
         warnings.warn(self, stacklevel=stacklevel)
+
 
 # Python by default hides DeprecationWarnings, which we do not want.
 warnings.simplefilter("once", SymPyDeprecationWarning)

@@ -19,8 +19,8 @@ def serializedATN():
         buf.write(u"\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t")
         buf.write(u"\22\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27")
         buf.write(u"\4\30\t\30\4\31\t\31\4\32\t\32\4\33\t\33\4\34\t\34\4")
-        buf.write(u"\35\t\35\4\36\t\36\4\37\t\37\4 \t \4!\t!\4\"\t\"\4#\t")
-        buf.write(u"#\4$\t$\4%\t%\4&\t&\4\'\t\'\4(\t(\4)\t)\4*\t*\4+\t+\4")
+        buf.write(u'\35\t\35\4\36\t\36\4\37\t\37\4 \t \4!\t!\4"\t"\4#\t')
+        buf.write(u"#\4$\t$\4%\t%\4&\t&\4'\t'\4(\t(\4)\t)\4*\t*\4+\t+\4")
         buf.write(u",\t,\4-\t-\4.\t.\4/\t/\4\60\t\60\4\61\t\61\4\62\t\62")
         buf.write(u"\4\63\t\63\4\64\t\64\3\2\3\2\3\3\3\3\3\4\3\4\3\5\3\5")
         buf.write(u"\3\5\3\6\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3\b\3\t\3\t\3\t")
@@ -31,11 +31,11 @@ def serializedATN():
         buf.write(u"\34\3\34\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\35\3\36")
         buf.write(u"\3\36\3\36\3\36\3\36\3\36\5\36\u00ba\n\36\3\37\3\37\3")
         buf.write(u"\37\3\37\3\37\3\37\3\37\3 \3 \3 \3 \3 \3!\3!\3!\3!\3")
-        buf.write(u"!\3!\3!\3!\3!\3!\3!\3\"\3\"\3\"\3\"\3\"\3\"\3\"\3#\3")
+        buf.write(u'!\3!\3!\3!\3!\3!\3!\3"\3"\3"\3"\3"\3"\3"\3#\3')
         buf.write(u"#\3#\3#\3#\3#\3#\3#\3#\3#\3$\3$\3$\3$\3$\3$\5$\u00ea")
         buf.write(u"\n$\3%\3%\3%\3%\3%\3%\5%\u00f2\n%\3&\3&\3&\3&\3&\3&\3")
-        buf.write(u"&\3&\3&\5&\u00fd\n&\3\'\3\'\3\'\3\'\3\'\3\'\5\'\u0105")
-        buf.write(u"\n\'\3(\3(\3(\3(\3(\3(\3(\3(\3(\5(\u0110\n(\3)\3)\3)")
+        buf.write(u"&\3&\3&\5&\u00fd\n&\3'\3'\3'\3'\3'\3'\5'\u0105")
+        buf.write(u"\n'\3(\3(\3(\3(\3(\3(\3(\3(\3(\5(\u0110\n(\3)\3)\3)")
         buf.write(u"\3)\3)\3)\3)\3)\3)\3)\5)\u011c\n)\3*\3*\3*\3*\3*\3*\3")
         buf.write(u"*\3*\3*\3*\3+\3+\3+\3+\3+\3+\3+\3+\3+\5+\u0131\n+\3,")
         buf.write(u"\3,\3,\3,\3,\3,\3,\3,\3,\3,\3,\3,\3,\3,\3,\5,\u0142\n")
@@ -49,18 +49,18 @@ def serializedATN():
         buf.write(u"\63\u0180\n\63\f\63\16\63\u0183\13\63\3\64\6\64\u0186")
         buf.write(u"\n\64\r\64\16\64\u0187\3\64\3\64\3\u0173\2\65\3\3\5\4")
         buf.write(u"\7\5\t\6\13\7\r\b\17\t\21\n\23\13\25\f\27\r\31\16\33")
-        buf.write(u"\17\35\20\37\21!\22#\23%\24\'\25)\26+\27-\30/\31\61\32")
-        buf.write(u"\63\33\65\34\67\359\36;\37= ?!A\"C#E$G%I&K\'M(O)Q*S+")
+        buf.write(u"\17\35\20\37\21!\22#\23%\24'\25)\26+\27-\30/\31\61\32")
+        buf.write(u"\63\33\65\34\67\359\36;\37= ?!A\"C#E$G%I&K'M(O)Q*S+")
         buf.write(u"U,W-Y\2[\2]._/a\60c\61e\62g\63\3\2\32\4\2OOoo\4\2CCc")
         buf.write(u"c\4\2UUuu\4\2KKkk\4\2PPpp\4\2GGgg\4\2TTtt\4\2VVvv\4\2")
         buf.write(u"RRrr\4\2WWww\4\2QQqq\4\2XXxx\4\2[[{{\4\2EEee\4\2FFff")
         buf.write(u"\4\2YYyy\4\2HHhh\4\2DDdd\4\2NNnn\4\2IIii\3\2\62;\4\2")
-        buf.write(u"C\\c|\6\2\62;C\\aac|\6\2\13\f\17\17\"\"((\2\u019c\2\3")
+        buf.write(u'C\\c|\6\2\62;C\\aac|\6\2\13\f\17\17""((\2\u019c\2\3')
         buf.write(u"\3\2\2\2\2\5\3\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2")
         buf.write(u"\2\2\2\r\3\2\2\2\2\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2")
         buf.write(u"\2\2\25\3\2\2\2\2\27\3\2\2\2\2\31\3\2\2\2\2\33\3\2\2")
         buf.write(u"\2\2\35\3\2\2\2\2\37\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2")
-        buf.write(u"%\3\2\2\2\2\'\3\2\2\2\2)\3\2\2\2\2+\3\2\2\2\2-\3\2\2")
+        buf.write(u"%\3\2\2\2\2'\3\2\2\2\2)\3\2\2\2\2+\3\2\2\2\2-\3\2\2")
         buf.write(u"\2\2/\3\2\2\2\2\61\3\2\2\2\2\63\3\2\2\2\2\65\3\2\2\2")
         buf.write(u"\2\67\3\2\2\2\29\3\2\2\2\2;\3\2\2\2\2=\3\2\2\2\2?\3\2")
         buf.write(u"\2\2\2A\3\2\2\2\2C\3\2\2\2\2E\3\2\2\2\2G\3\2\2\2\2I\3")
@@ -71,7 +71,7 @@ def serializedATN():
         buf.write(u"\2\2\2\17x\3\2\2\2\21{\3\2\2\2\23~\3\2\2\2\25\u0081\3")
         buf.write(u"\2\2\2\27\u0083\3\2\2\2\31\u0085\3\2\2\2\33\u0087\3\2")
         buf.write(u"\2\2\35\u0089\3\2\2\2\37\u008b\3\2\2\2!\u008d\3\2\2\2")
-        buf.write(u"#\u008f\3\2\2\2%\u0091\3\2\2\2\'\u0093\3\2\2\2)\u0095")
+        buf.write(u"#\u008f\3\2\2\2%\u0091\3\2\2\2'\u0093\3\2\2\2)\u0095")
         buf.write(u"\3\2\2\2+\u0097\3\2\2\2-\u0099\3\2\2\2/\u009c\3\2\2\2")
         buf.write(u"\61\u00a0\3\2\2\2\63\u00a2\3\2\2\2\65\u00a4\3\2\2\2\67")
         buf.write(u"\u00a6\3\2\2\29\u00ab\3\2\2\2;\u00b3\3\2\2\2=\u00bb\3")
@@ -90,7 +90,7 @@ def serializedATN():
         buf.write(u"\2\u0084\30\3\2\2\2\u0085\u0086\7*\2\2\u0086\32\3\2\2")
         buf.write(u"\2\u0087\u0088\7+\2\2\u0088\34\3\2\2\2\u0089\u008a\7")
         buf.write(u"}\2\2\u008a\36\3\2\2\2\u008b\u008c\7\177\2\2\u008c \3")
-        buf.write(u"\2\2\2\u008d\u008e\7<\2\2\u008e\"\3\2\2\2\u008f\u0090")
+        buf.write(u'\2\2\2\u008d\u008e\7<\2\2\u008e"\3\2\2\2\u008f\u0090')
         buf.write(u"\7-\2\2\u0090$\3\2\2\2\u0091\u0092\7/\2\2\u0092&\3\2")
         buf.write(u"\2\2\u0093\u0094\7=\2\2\u0094(\3\2\2\2\u0095\u0096\7")
         buf.write(u"\60\2\2\u0096*\3\2\2\2\u0097\u0098\7@\2\2\u0098,\3\2")
@@ -177,7 +177,7 @@ def serializedATN():
         buf.write(u"\7G\2\2\u0166\u0167\5]/\2\u0167\u016e\3\2\2\2\u0168\u0169")
         buf.write(u"\5_\60\2\u0169\u016a\7G\2\2\u016a\u016b\7/\2\2\u016b")
         buf.write(u"\u016c\5]/\2\u016c\u016e\3\2\2\2\u016d\u0164\3\2\2\2")
-        buf.write(u"\u016d\u0168\3\2\2\2\u016eb\3\2\2\2\u016f\u0173\7\'\2")
+        buf.write(u"\u016d\u0168\3\2\2\2\u016eb\3\2\2\2\u016f\u0173\7'\2")
         buf.write(u"\2\u0170\u0172\13\2\2\2\u0171\u0170\3\2\2\2\u0172\u0175")
         buf.write(u"\3\2\2\2\u0173\u0174\3\2\2\2\u0173\u0171\3\2\2\2\u0174")
         buf.write(u"\u0177\3\2\2\2\u0175\u0173\3\2\2\2\u0176\u0178\7\17\2")
@@ -199,7 +199,7 @@ class AutolevLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     T__0 = 1
     T__1 = 2
@@ -251,41 +251,128 @@ class AutolevLexer(Lexer):
     ID = 48
     WS = 49
 
-    channelNames = [ u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN" ]
+    channelNames = [u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN"]
 
-    modeNames = [ u"DEFAULT_MODE" ]
+    modeNames = [u"DEFAULT_MODE"]
 
-    literalNames = [ u"<INVALID>",
-            u"'['", u"']'", u"'='", u"'+='", u"'-='", u"':='", u"'*='", 
-            u"'/='", u"'^='", u"','", u"'''", u"'('", u"')'", u"'{'", u"'}'", 
-            u"':'", u"'+'", u"'-'", u"';'", u"'.'", u"'>'", u"'0>'", u"'1>>'", 
-            u"'^'", u"'*'", u"'/'" ]
+    literalNames = [
+        u"<INVALID>",
+        u"'['",
+        u"']'",
+        u"'='",
+        u"'+='",
+        u"'-='",
+        u"':='",
+        u"'*='",
+        u"'/='",
+        u"'^='",
+        u"','",
+        u"'''",
+        u"'('",
+        u"')'",
+        u"'{'",
+        u"'}'",
+        u"':'",
+        u"'+'",
+        u"'-'",
+        u"';'",
+        u"'.'",
+        u"'>'",
+        u"'0>'",
+        u"'1>>'",
+        u"'^'",
+        u"'*'",
+        u"'/'",
+    ]
 
-    symbolicNames = [ u"<INVALID>",
-            u"Mass", u"Inertia", u"Input", u"Output", u"Save", u"UnitSystem", 
-            u"Encode", u"Newtonian", u"Frames", u"Bodies", u"Particles", 
-            u"Points", u"Constants", u"Specifieds", u"Imaginary", u"Variables", 
-            u"MotionVariables", u"INT", u"FLOAT", u"EXP", u"LINE_COMMENT", 
-            u"ID", u"WS" ]
+    symbolicNames = [
+        u"<INVALID>",
+        u"Mass",
+        u"Inertia",
+        u"Input",
+        u"Output",
+        u"Save",
+        u"UnitSystem",
+        u"Encode",
+        u"Newtonian",
+        u"Frames",
+        u"Bodies",
+        u"Particles",
+        u"Points",
+        u"Constants",
+        u"Specifieds",
+        u"Imaginary",
+        u"Variables",
+        u"MotionVariables",
+        u"INT",
+        u"FLOAT",
+        u"EXP",
+        u"LINE_COMMENT",
+        u"ID",
+        u"WS",
+    ]
 
-    ruleNames = [ u"T__0", u"T__1", u"T__2", u"T__3", u"T__4", u"T__5", 
-                  u"T__6", u"T__7", u"T__8", u"T__9", u"T__10", u"T__11", 
-                  u"T__12", u"T__13", u"T__14", u"T__15", u"T__16", u"T__17", 
-                  u"T__18", u"T__19", u"T__20", u"T__21", u"T__22", u"T__23", 
-                  u"T__24", u"T__25", u"Mass", u"Inertia", u"Input", u"Output", 
-                  u"Save", u"UnitSystem", u"Encode", u"Newtonian", u"Frames", 
-                  u"Bodies", u"Particles", u"Points", u"Constants", u"Specifieds", 
-                  u"Imaginary", u"Variables", u"MotionVariables", u"DIFF", 
-                  u"DIGIT", u"INT", u"FLOAT", u"EXP", u"LINE_COMMENT", u"ID", 
-                  u"WS" ]
+    ruleNames = [
+        u"T__0",
+        u"T__1",
+        u"T__2",
+        u"T__3",
+        u"T__4",
+        u"T__5",
+        u"T__6",
+        u"T__7",
+        u"T__8",
+        u"T__9",
+        u"T__10",
+        u"T__11",
+        u"T__12",
+        u"T__13",
+        u"T__14",
+        u"T__15",
+        u"T__16",
+        u"T__17",
+        u"T__18",
+        u"T__19",
+        u"T__20",
+        u"T__21",
+        u"T__22",
+        u"T__23",
+        u"T__24",
+        u"T__25",
+        u"Mass",
+        u"Inertia",
+        u"Input",
+        u"Output",
+        u"Save",
+        u"UnitSystem",
+        u"Encode",
+        u"Newtonian",
+        u"Frames",
+        u"Bodies",
+        u"Particles",
+        u"Points",
+        u"Constants",
+        u"Specifieds",
+        u"Imaginary",
+        u"Variables",
+        u"MotionVariables",
+        u"DIFF",
+        u"DIGIT",
+        u"INT",
+        u"FLOAT",
+        u"EXP",
+        u"LINE_COMMENT",
+        u"ID",
+        u"WS",
+    ]
 
     grammarFileName = u"Autolev.g4"
 
     def __init__(self, input=None, output=sys.stdout):
         super(AutolevLexer, self).__init__(input, output=output)
         self.checkVersion("4.7.1")
-        self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
+        self._interp = LexerATNSimulator(
+            self, self.atn, self.decisionsToDFA, PredictionContextCache()
+        )
         self._actions = None
         self._predicates = None
-
-

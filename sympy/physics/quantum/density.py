@@ -8,7 +8,11 @@ from sympy.printing.pretty.stringpict import prettyForm
 from sympy.physics.quantum.dagger import Dagger
 from sympy.physics.quantum.operator import HermitianOperator
 from sympy.physics.quantum.represent import represent
-from sympy.physics.quantum.matrixutils import numpy_ndarray, scipy_sparse_matrix, to_numpy
+from sympy.physics.quantum.matrixutils import (
+    numpy_ndarray,
+    scipy_sparse_matrix,
+    to_numpy,
+)
 from sympy.physics.quantum.tensorproduct import TensorProduct, tensor_product_simp
 
 
@@ -35,6 +39,7 @@ class Density(HermitianOperator):
     'Density'((|0>, 0.5),(|1>, 0.5))
 
     """
+
     @classmethod
     def _eval_args(cls, args):
         # call this to qsympify the args
@@ -43,8 +48,9 @@ class Density(HermitianOperator):
         for arg in args:
             # Check if arg is a tuple
             if not (isinstance(arg, Tuple) and len(arg) == 2):
-                raise ValueError("Each argument should be of form [state,prob]"
-                                 " or ( state, prob )")
+                raise ValueError(
+                    "Each argument should be of form [state,prob]" " or ( state, prob )"
+                )
 
         return args
 
@@ -140,7 +146,7 @@ class Density(HermitianOperator):
         'Density'((A*|0>, 0.5),(A*|1>, 0.5))
 
         """
-        new_args = [(op*state, prob) for (state, prob) in self.args]
+        new_args = [(op * state, prob) for (state, prob) in self.args]
         return Density(*new_args)
 
     def doit(self, **hints):
@@ -162,12 +168,11 @@ class Density(HermitianOperator):
         terms = []
         for (state, prob) in self.args:
             state = state.expand()  # needed to break up (a+b)*c
-            if (isinstance(state, Add)):
+            if isinstance(state, Add):
                 for arg in product(state.args, repeat=2):
-                    terms.append(prob*self._generate_outer_prod(arg[0],
-                                                                arg[1]))
+                    terms.append(prob * self._generate_outer_prod(arg[0], arg[1]))
             else:
-                terms.append(prob*self._generate_outer_prod(state, state))
+                terms.append(prob * self._generate_outer_prod(state, state))
 
         return Add(*terms)
 
@@ -175,32 +180,37 @@ class Density(HermitianOperator):
         c_part1, nc_part1 = arg1.args_cnc()
         c_part2, nc_part2 = arg2.args_cnc()
 
-        if (len(nc_part1) == 0 or len(nc_part2) == 0):
-            raise ValueError('Atleast one-pair of'
-                             ' Non-commutative instance required'
-                             ' for outer product.')
+        if len(nc_part1) == 0 or len(nc_part2) == 0:
+            raise ValueError(
+                "Atleast one-pair of"
+                " Non-commutative instance required"
+                " for outer product."
+            )
 
         # Muls of Tensor Products should be expanded
         # before this function is called
-        if (isinstance(nc_part1[0], TensorProduct) and len(nc_part1) == 1
-                and len(nc_part2) == 1):
-            op = tensor_product_simp(nc_part1[0]*Dagger(nc_part2[0]))
+        if (
+            isinstance(nc_part1[0], TensorProduct)
+            and len(nc_part1) == 1
+            and len(nc_part2) == 1
+        ):
+            op = tensor_product_simp(nc_part1[0] * Dagger(nc_part2[0]))
         else:
-            op = Mul(*nc_part1)*Dagger(Mul(*nc_part2))
+            op = Mul(*nc_part1) * Dagger(Mul(*nc_part2))
 
-        return Mul(*c_part1)*Mul(*c_part2) * op
+        return Mul(*c_part1) * Mul(*c_part2) * op
 
     def _represent(self, **options):
         return represent(self.doit(), **options)
 
     def _print_operator_name_latex(self, printer, *args):
-        return printer._print(r'\rho', *args)
+        return printer._print(r"\rho", *args)
 
     def _print_operator_name_pretty(self, printer, *args):
-        return prettyForm('\N{GREEK SMALL LETTER RHO}')
+        return prettyForm("\N{GREEK SMALL LETTER RHO}")
 
     def _eval_trace(self, **kwargs):
-        indices = kwargs.get('indices', [])
+        indices = kwargs.get("indices", [])
         return Tr(self.doit(), indices).doit()
 
     def entropy(self):
@@ -247,14 +257,14 @@ def entropy(density):
 
     if isinstance(density, Matrix):
         eigvals = density.eigenvals().keys()
-        return expand(-sum(e*log(e) for e in eigvals))
+        return expand(-sum(e * log(e) for e in eigvals))
     elif isinstance(density, numpy_ndarray):
         import numpy as np
+
         eigvals = np.linalg.eigvals(density)
-        return -np.sum(eigvals*np.log(eigvals))
+        return -np.sum(eigvals * np.log(eigvals))
     else:
-        raise ValueError(
-            "numpy.ndarray, scipy.sparse or sympy matrix expected")
+        raise ValueError("numpy.ndarray, scipy.sparse or sympy matrix expected")
 
 
 def fidelity(state1, state2):
@@ -305,13 +315,17 @@ def fidelity(state1, state2):
     state2 = represent(state2) if isinstance(state2, Density) else state2
 
     if not isinstance(state1, Matrix) or not isinstance(state2, Matrix):
-        raise ValueError("state1 and state2 must be of type Density or Matrix "
-                         "received type=%s for state1 and type=%s for state2" %
-                         (type(state1), type(state2)))
+        raise ValueError(
+            "state1 and state2 must be of type Density or Matrix "
+            "received type=%s for state1 and type=%s for state2"
+            % (type(state1), type(state2))
+        )
 
     if state1.shape != state2.shape and state1.is_square:
-        raise ValueError("The dimensions of both args should be equal and the "
-                         "matrix obtained should be a square matrix")
+        raise ValueError(
+            "The dimensions of both args should be equal and the "
+            "matrix obtained should be a square matrix"
+        )
 
-    sqrt_state1 = state1**S.Half
-    return Tr((sqrt_state1*state2*sqrt_state1)**S.Half).doit()
+    sqrt_state1 = state1 ** S.Half
+    return Tr((sqrt_state1 * state2 * sqrt_state1) ** S.Half).doit()

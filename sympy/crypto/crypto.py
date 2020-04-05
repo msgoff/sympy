@@ -35,11 +35,12 @@ from sympy.testing.randtest import _randrange, _randint
 
 class NonInvertibleCipherWarning(RuntimeWarning):
     """A warning raised if the cipher is not invertible."""
+
     def __init__(self, msg):
         self.fullMessage = msg
 
     def __str__(self):
-        return '\n\t' + self.fullMessage
+        return "\n\t" + self.fullMessage
 
     def warn(self, stacklevel=2):
         warnings.warn(self, stacklevel=stacklevel)
@@ -70,14 +71,14 @@ def AZ(s=None):
     t = type(s) is str
     if t:
         s = [s]
-    rv = [check_and_join(i.upper().split(), uppercase, filter=True)
-        for i in s]
+    rv = [check_and_join(i.upper().split(), uppercase, filter=True) for i in s]
     if t:
         return rv[0]
     return rv
 
-bifid5 = AZ().replace('J', '')
-bifid6 = AZ() + '0123456789'
+
+bifid5 = AZ().replace("J", "")
+bifid6 = AZ() + "0123456789"
 bifid10 = printable
 
 
@@ -102,16 +103,15 @@ def padded_key(key, symbols, filter=True):
     """
     syms = list(uniq(symbols))
     if len(syms) != len(symbols):
-        extra = ''.join(sorted(set(
-            [i for i in symbols if symbols.count(i) > 1])))
-        raise ValueError('duplicate characters in symbols: %s' % extra)
+        extra = "".join(sorted(set([i for i in symbols if symbols.count(i) > 1])))
+        raise ValueError("duplicate characters in symbols: %s" % extra)
     extra = set(key) - set(syms)
     if extra:
         raise ValueError(
-            'characters in key but not symbols: %s' % ''.join(
-            sorted(extra)))
-    key0 = ''.join(list(uniq(key)))
-    return key0 + ''.join([i for i in syms if i not in key0])
+            "characters in key but not symbols: %s" % "".join(sorted(extra))
+        )
+    key0 = "".join(list(uniq(key)))
+    return key0 + "".join([i for i in syms if i not in key0])
 
 
 def check_and_join(phrase, symbols=None, filter=None):
@@ -146,14 +146,13 @@ def check_and_join(phrase, symbols=None, filter=None):
     ValueError: characters in phrase but not symbols: "!HPS"
 
     """
-    rv = ''.join(''.join(phrase))
+    rv = "".join("".join(phrase))
     if symbols is not None:
         symbols = check_and_join(symbols)
-        missing = ''.join(list(sorted(set(rv) - set(symbols))))
+        missing = "".join(list(sorted(set(rv) - set(symbols))))
         if missing:
             if not filter:
-                raise ValueError(
-                    'characters in phrase but not symbols: "%s"' % missing)
+                raise ValueError('characters in phrase but not symbols: "%s"' % missing)
             rv = translate(rv, None, missing)
     return rv
 
@@ -167,7 +166,7 @@ def _prep(msg, key, alp, default=None):
         else:
             alp = default
     else:
-        alp = ''.join(alp)
+        alp = "".join(alp)
     key = check_and_join(key, alp, filter=True)
     msg = check_and_join(msg, alp, filter=True)
     return msg, key, alp
@@ -264,7 +263,7 @@ def encipher_shift(msg, key, symbols=None):
     decipher_shift
 
     """
-    msg, _, A = _prep(msg, '', symbols)
+    msg, _, A = _prep(msg, "", symbols)
     shift = len(A) - key % len(A)
     key = A[shift:] + A[:shift]
     return translate(msg, key, A)
@@ -296,6 +295,7 @@ def decipher_shift(msg, key, symbols=None):
     """
     return encipher_shift(msg, -key, symbols)
 
+
 def encipher_rot13(msg, symbols=None):
     """
     Performs the ROT13 encryption on a given plaintext ``msg``.
@@ -323,6 +323,7 @@ def encipher_rot13(msg, symbols=None):
 
     """
     return encipher_shift(msg, 13, symbols)
+
 
 def decipher_rot13(msg, symbols=None):
     """
@@ -353,6 +354,7 @@ def decipher_rot13(msg, symbols=None):
 
     """
     return decipher_shift(msg, 13, symbols)
+
 
 ######## affine cipher examples ############
 
@@ -421,15 +423,15 @@ def encipher_affine(msg, key, symbols=None, _inverse=False):
     decipher_affine
 
     """
-    msg, _, A = _prep(msg, '', symbols)
+    msg, _, A = _prep(msg, "", symbols)
     N = len(A)
     a, b = key
     assert gcd(a, N) == 1
     if _inverse:
         c = mod_inverse(a, N)
-        d = -b*c
+        d = -b * c
         a, b = c, d
-    B = ''.join([A[(a*i + b) % N] for i in range(N)])
+    B = "".join([A[(a * i + b) % N] for i in range(N)])
     return translate(msg, A, B)
 
 
@@ -481,7 +483,7 @@ def encipher_atbash(msg, symbols=None):
     decipher_atbash
 
     """
-    return encipher_affine(msg, (25,25), symbols)
+    return encipher_affine(msg, (25, 25), symbols)
 
 
 def decipher_atbash(msg, symbols=None):
@@ -520,7 +522,8 @@ def decipher_atbash(msg, symbols=None):
     encipher_atbash
 
     """
-    return decipher_affine(msg, (25,25), symbols)
+    return decipher_affine(msg, (25, 25), symbols)
+
 
 #################### substitution cipher ###########################
 
@@ -587,6 +590,7 @@ def encipher_substitution(msg, old, new=None):
 ######################################################################
 #################### Vigenere cipher examples ########################
 ######################################################################
+
 
 def encipher_vigenere(msg, key, symbols=None):
     """
@@ -752,7 +756,7 @@ def encipher_vigenere(msg, key, symbols=None):
     rv = []
     for i, m in enumerate(msg):
         rv.append(A[(map[m] + key[i % k]) % N])
-    rv = ''.join(rv)
+    rv = "".join(rv)
     return rv
 
 
@@ -772,11 +776,11 @@ def decipher_vigenere(msg, key, symbols=None):
     """
     msg, key, A = _prep(msg, key, symbols)
     map = {c: i for i, c in enumerate(A)}
-    N = len(A)   # normally, 26
+    N = len(A)  # normally, 26
     K = [map[c] for c in key]
     n = len(K)
     C = [map[c] for c in msg]
-    rv = ''.join([A[(-K[i % n] + c) % N] for i, c in enumerate(C)])
+    rv = "".join([A[(-K[i % n] + c) % N] for i, c in enumerate(C)])
     return rv
 
 
@@ -870,11 +874,15 @@ def encipher_hill(msg, key, symbols=None, pad="Q"):
     n = len(P)
     m, r = divmod(n, k)
     if r:
-        P = P + [map[pad]]*(k - r)
+        P = P + [map[pad]] * (k - r)
         m += 1
-    rv = ''.join([A[c % N] for j in range(m) for c in
-        list(key*Matrix(k, 1, [P[i]
-        for i in range(k*j, k*(j + 1))]))])
+    rv = "".join(
+        [
+            A[c % N]
+            for j in range(m)
+            for c in list(key * Matrix(k, 1, [P[i] for i in range(k * j, k * (j + 1))]))
+        ]
+    )
     return rv
 
 
@@ -930,7 +938,7 @@ def decipher_hill(msg, key, symbols=None):
 
     """
     assert key.is_square
-    msg, _, A = _prep(msg, '', symbols)
+    msg, _, A = _prep(msg, "", symbols)
     map = {c: i for i, c in enumerate(A)}
     C = [map[c] for c in msg]
     N = len(A)
@@ -938,12 +946,18 @@ def decipher_hill(msg, key, symbols=None):
     n = len(C)
     m, r = divmod(n, k)
     if r:
-        C = C + [0]*(k - r)
+        C = C + [0] * (k - r)
         m += 1
     key_inv = key.inv_mod(N)
-    rv = ''.join([A[p % N] for j in range(m) for p in
-        list(key_inv*Matrix(
-        k, 1, [C[i] for i in range(k*j, k*(j + 1))]))])
+    rv = "".join(
+        [
+            A[p % N]
+            for j in range(m)
+            for p in list(
+                key_inv * Matrix(k, 1, [C[i] for i in range(k * j, k * (j + 1))])
+            )
+        ]
+    )
     return rv
 
 
@@ -993,22 +1007,21 @@ def encipher_bifid(msg, key, symbols=None):
 
     """
     msg, key, A = _prep(msg, key, symbols, bifid10)
-    long_key = ''.join(uniq(key)) or A
+    long_key = "".join(uniq(key)) or A
 
-    n = len(A)**.5
+    n = len(A) ** 0.5
     if n != int(n):
-        raise ValueError(
-            'Length of alphabet (%s) is not a square number.' % len(A))
+        raise ValueError("Length of alphabet (%s) is not a square number." % len(A))
     N = int(n)
-    if len(long_key) < N**2:
-      long_key = list(long_key) + [x for x in A if x not in long_key]
+    if len(long_key) < N ** 2:
+        long_key = list(long_key) + [x for x in A if x not in long_key]
 
     # the fractionalization
     row_col = {ch: divmod(i, N) for i, ch in enumerate(long_key)}
     r, c = zip(*[row_col[x] for x in msg])
     rc = r + c
     ch = {i: ch for ch, i in row_col.items()}
-    rv = ''.join((ch[i] for i in zip(rc[::2], rc[1::2])))
+    rv = "".join((ch[i] for i in zip(rc[::2], rc[1::2])))
     return rv
 
 
@@ -1090,25 +1103,23 @@ def decipher_bifid(msg, key, symbols=None):
     'heldo~wor6d!'
 
     """
-    msg, _, A = _prep(msg, '', symbols, bifid10)
-    long_key = ''.join(uniq(key)) or A
+    msg, _, A = _prep(msg, "", symbols, bifid10)
+    long_key = "".join(uniq(key)) or A
 
-    n = len(A)**.5
+    n = len(A) ** 0.5
     if n != int(n):
-        raise ValueError(
-            'Length of alphabet (%s) is not a square number.' % len(A))
+        raise ValueError("Length of alphabet (%s) is not a square number." % len(A))
     N = int(n)
-    if len(long_key) < N**2:
+    if len(long_key) < N ** 2:
         long_key = list(long_key) + [x for x in A if x not in long_key]
 
     # the reverse fractionalization
-    row_col = dict(
-        [(ch, divmod(i, N)) for i, ch in enumerate(long_key)])
+    row_col = dict([(ch, divmod(i, N)) for i, ch in enumerate(long_key)])
     rc = [i for c in msg for i in row_col[c]]
     n = len(msg)
     rc = zip(*(rc[:n], rc[n:]))
     ch = {i: ch for ch, i in row_col.items()}
-    rv = ''.join((ch[i] for i in rc))
+    rv = "".join((ch[i] for i in rc))
     return rv
 
 
@@ -1142,13 +1153,12 @@ def bifid_square(key):
     padded_key
 
     """
-    A = ''.join(uniq(''.join(key)))
-    n = len(A)**.5
+    A = "".join(uniq("".join(key)))
+    n = len(A) ** 0.5
     if n != int(n):
-        raise ValueError(
-            'Length of alphabet (%s) is not a square number.' % len(A))
+        raise ValueError("Length of alphabet (%s) is not a square number." % len(A))
     n = int(n)
-    f = lambda i, j: Symbol(A[n*i + j])
+    f = lambda i, j: Symbol(A[n * i + j])
     rv = Matrix(n, n, f)
     return rv
 
@@ -1254,7 +1264,7 @@ def encipher_bifid5(msg, key):
     """
     msg, key, _ = _prep(msg.upper(), key.upper(), None, bifid5)
     key = padded_key(key, bifid5)
-    return encipher_bifid(msg, '', key)
+    return encipher_bifid(msg, "", key)
 
 
 def decipher_bifid5(msg, key):
@@ -1298,7 +1308,7 @@ def decipher_bifid5(msg, key):
     """
     msg, key, _ = _prep(msg.upper(), key.upper(), None, bifid5)
     key = padded_key(key, bifid5)
-    return decipher_bifid(msg, '', key)
+    return decipher_bifid(msg, "", key)
 
 
 def bifid5_square(key=None):
@@ -1323,7 +1333,7 @@ def bifid5_square(key=None):
     if not key:
         key = bifid5
     else:
-        _, key, _ = _prep('', key.upper(), None, bifid5)
+        _, key, _ = _prep("", key.upper(), None, bifid5)
         key = padded_key(key, bifid5)
     return bifid_square(key)
 
@@ -1362,7 +1372,7 @@ def encipher_bifid6(msg, key):
     """
     msg, key, _ = _prep(msg.upper(), key.upper(), None, bifid6)
     key = padded_key(key, bifid6)
-    return encipher_bifid(msg, '', key)
+    return encipher_bifid(msg, "", key)
 
 
 def decipher_bifid6(msg, key):
@@ -1405,7 +1415,7 @@ def decipher_bifid6(msg, key):
     """
     msg, key, _ = _prep(msg.upper(), key.upper(), None, bifid6)
     key = padded_key(key, bifid6)
-    return decipher_bifid(msg, '', key)
+    return decipher_bifid(msg, "", key)
 
 
 def bifid6_square(key=None):
@@ -1433,12 +1443,13 @@ def bifid6_square(key=None):
     if not key:
         key = bifid6
     else:
-        _, key, _ = _prep('', key.upper(), None, bifid6)
+        _, key, _ = _prep("", key.upper(), None, bifid6)
         key = padded_key(key, bifid6)
     return bifid_square(key)
 
 
 #################### RSA  #############################
+
 
 def _decipher_rsa_crt(i, d, factors):
     """Decipher RSA using chinese remainder theorem from the information
@@ -1478,6 +1489,7 @@ def _decipher_rsa_crt(i, d, factors):
     65
     """
     from sympy.ntheory.modular import crt
+
     moduluses = [pow(i, d, p) for p in factors]
 
     result = crt(factors, moduluses)
@@ -1504,32 +1516,33 @@ def _rsa_key(*args, **kwargs):
     from sympy.ntheory import totient as _euler
     from sympy.ntheory import reduced_totient as _carmichael
 
-    public = kwargs.pop('public', True)
-    private = kwargs.pop('private', True)
-    totient = kwargs.pop('totient', 'Euler')
-    index = kwargs.pop('index', None)
-    multipower = kwargs.pop('multipower', None)
+    public = kwargs.pop("public", True)
+    private = kwargs.pop("private", True)
+    totient = kwargs.pop("totient", "Euler")
+    index = kwargs.pop("index", None)
+    multipower = kwargs.pop("multipower", None)
 
     if len(args) < 2:
         return False
 
-    if totient not in ('Euler', 'Carmichael'):
+    if totient not in ("Euler", "Carmichael"):
         raise ValueError(
-            "The argument totient={} should either be " \
-            "'Euler', 'Carmichalel'." \
-            .format(totient))
+            "The argument totient={} should either be "
+            "'Euler', 'Carmichalel'.".format(totient)
+        )
 
-    if totient == 'Euler':
+    if totient == "Euler":
         _totient = _euler
     else:
         _totient = _carmichael
 
     if index is not None:
         index = as_int(index)
-        if totient != 'Carmichael':
+        if totient != "Carmichael":
             raise ValueError(
                 "Setting the 'index' keyword argument requires totient"
-                "notation to be specified as 'Carmichael'.")
+                "notation to be specified as 'Carmichael'."
+            )
 
     primes, e = args[:-1], args[-1]
 
@@ -1539,7 +1552,7 @@ def _rsa_key(*args, **kwargs):
             new_primes.extend(factorint(i, multiple=True))
         primes = new_primes
 
-    n = reduce(lambda i, j: i*j, primes)
+    n = reduce(lambda i, j: i * j, primes)
 
     tally = multiset(primes)
     if all(v == 1 for v in tally.values()):
@@ -1549,15 +1562,14 @@ def _rsa_key(*args, **kwargs):
     else:
         if not multipower:
             NonInvertibleCipherWarning(
-                'Non-distinctive primes found in the factors {}. '
-                'The cipher may not be decryptable for some numbers '
-                'in the complete residue system Z[{}], but the cipher '
-                'can still be valid if you restrict the domain to be '
-                'the reduced residue system Z*[{}]. You can pass '
-                'the flag multipower=True if you want to suppress this '
-                'warning.'
-                .format(primes, n, n)
-                ).warn()
+                "Non-distinctive primes found in the factors {}. "
+                "The cipher may not be decryptable for some numbers "
+                "in the complete residue system Z[{}], but the cipher "
+                "can still be valid if you restrict the domain to be "
+                "the reduced residue system Z*[{}]. You can pass "
+                "the flag multipower=True if you want to suppress this "
+                "warning.".format(primes, n, n)
+            ).warn()
         phi = _totient._from_factors(tally)
 
     if igcd(e, phi) == 1:
@@ -1878,13 +1890,13 @@ def _encipher_decipher_rsa(i, key, factors=None):
     def _is_coprime_set(l):
         is_coprime_set = True
         for i in range(len(l)):
-            for j in range(i+1, len(l)):
+            for j in range(i + 1, len(l)):
                 if igcd(l[i], l[j]) != 1:
                     is_coprime_set = False
                     break
         return is_coprime_set
 
-    prod = reduce(lambda i, j: i*j, factors)
+    prod = reduce(lambda i, j: i * j, factors)
     if prod == n and _is_coprime_set(factors):
         return _decipher_rsa_crt(i, d, factors)
     return _encipher_decipher_rsa(i, key, factors=None)
@@ -2085,10 +2097,10 @@ def kid_rsa_public_key(a, b, A, B):
     (369, 58)
 
     """
-    M = a*b - 1
-    e = A*M + a
-    d = B*M + b
-    n = (e*d - 1)//M
+    M = a * b - 1
+    e = A * M + a
+    d = B * M + b
+    n = (e * d - 1) // M
     return n, e
 
 
@@ -2107,10 +2119,10 @@ def kid_rsa_private_key(a, b, A, B):
     (369, 70)
 
     """
-    M = a*b - 1
-    e = A*M + a
-    d = B*M + b
-    n = (e*d - 1)//M
+    M = a * b - 1
+    e = A * M + a
+    d = B * M + b
+    n = (e * d - 1) // M
     return n, d
 
 
@@ -2131,7 +2143,7 @@ def encipher_kid_rsa(msg, key):
 
     """
     n, e = key
-    return (msg*e) % n
+    return (msg * e) % n
 
 
 def decipher_kid_rsa(msg, key):
@@ -2155,42 +2167,69 @@ def decipher_kid_rsa(msg, key):
 
     """
     n, d = key
-    return (msg*d) % n
+    return (msg * d) % n
 
 
 #################### Morse Code ######################################
 
 morse_char = {
-    ".-": "A", "-...": "B",
-    "-.-.": "C", "-..": "D",
-    ".": "E", "..-.": "F",
-    "--.": "G", "....": "H",
-    "..": "I", ".---": "J",
-    "-.-": "K", ".-..": "L",
-    "--": "M", "-.": "N",
-    "---": "O", ".--.": "P",
-    "--.-": "Q", ".-.": "R",
-    "...": "S", "-": "T",
-    "..-": "U", "...-": "V",
-    ".--": "W", "-..-": "X",
-    "-.--": "Y", "--..": "Z",
-    "-----": "0", ".----": "1",
-    "..---": "2", "...--": "3",
-    "....-": "4", ".....": "5",
-    "-....": "6", "--...": "7",
-    "---..": "8", "----.": "9",
-    ".-.-.-": ".", "--..--": ",",
-    "---...": ":", "-.-.-.": ";",
-    "..--..": "?", "-....-": "-",
-    "..--.-": "_", "-.--.": "(",
-    "-.--.-": ")", ".----.": "'",
-    "-...-": "=", ".-.-.": "+",
-    "-..-.": "/", ".--.-.": "@",
-    "...-..-": "$", "-.-.--": "!"}
+    ".-": "A",
+    "-...": "B",
+    "-.-.": "C",
+    "-..": "D",
+    ".": "E",
+    "..-.": "F",
+    "--.": "G",
+    "....": "H",
+    "..": "I",
+    ".---": "J",
+    "-.-": "K",
+    ".-..": "L",
+    "--": "M",
+    "-.": "N",
+    "---": "O",
+    ".--.": "P",
+    "--.-": "Q",
+    ".-.": "R",
+    "...": "S",
+    "-": "T",
+    "..-": "U",
+    "...-": "V",
+    ".--": "W",
+    "-..-": "X",
+    "-.--": "Y",
+    "--..": "Z",
+    "-----": "0",
+    ".----": "1",
+    "..---": "2",
+    "...--": "3",
+    "....-": "4",
+    ".....": "5",
+    "-....": "6",
+    "--...": "7",
+    "---..": "8",
+    "----.": "9",
+    ".-.-.-": ".",
+    "--..--": ",",
+    "---...": ":",
+    "-.-.-.": ";",
+    "..--..": "?",
+    "-....-": "-",
+    "..--.-": "_",
+    "-.--.": "(",
+    "-.--.-": ")",
+    ".----.": "'",
+    "-...-": "=",
+    ".-.-.": "+",
+    "-..-.": "/",
+    ".--.-.": "@",
+    "...-..-": "$",
+    "-.-.--": "!",
+}
 char_morse = {v: k for k, v in morse_char.items()}
 
 
-def encode_morse(msg, sep='|', mapping=None):
+def encode_morse(msg, sep="|", mapping=None):
     """
     Encodes a plaintext into popular Morse Code with letters
     separated by `sep` and words by a double `sep`.
@@ -2212,16 +2251,16 @@ def encode_morse(msg, sep='|', mapping=None):
 
     mapping = mapping or char_morse
     assert sep not in mapping
-    word_sep = 2*sep
+    word_sep = 2 * sep
     mapping[" "] = word_sep
     suffix = msg and msg[-1] in whitespace
 
     # normalize whitespace
-    msg = (' ' if word_sep else '').join(msg.split())
+    msg = (" " if word_sep else "").join(msg.split())
     # omit unmapped chars
-    chars = set(''.join(msg.split()))
+    chars = set("".join(msg.split()))
     ok = set(mapping.keys())
-    msg = translate(msg, None, ''.join(chars - ok))
+    msg = translate(msg, None, "".join(chars - ok))
 
     morsestring = []
     words = msg.split()
@@ -2234,10 +2273,10 @@ def encode_morse(msg, sep='|', mapping=None):
         word = sep.join(morseword)
         morsestring.append(word)
 
-    return word_sep.join(morsestring) + (word_sep if suffix else '')
+    return word_sep.join(morsestring) + (word_sep if suffix else "")
 
 
-def decode_morse(msg, sep='|', mapping=None):
+def decode_morse(msg, sep="|", mapping=None):
     """
     Decodes a Morse Code with letters separated by `sep`
     (default is '|') and words by `word_sep` (default is '||)
@@ -2259,13 +2298,13 @@ def decode_morse(msg, sep='|', mapping=None):
     """
 
     mapping = mapping or morse_char
-    word_sep = 2*sep
+    word_sep = 2 * sep
     characterstring = []
     words = msg.strip(word_sep).split(word_sep)
     for word in words:
         letters = word.split(sep)
         chars = [mapping[c] for c in letters]
-        word = ''.join(chars)
+        word = "".join(chars)
         characterstring.append(word)
     rv = " ".join(characterstring)
     return rv
@@ -2372,9 +2411,9 @@ def lfsr_sequence(key, fill, n):
         s0 = s[:]
         L.append(s[0])
         s = s[1:k]
-        x = sum([int(key[i]*s0[i]) for i in range(k)])
+        x = sum([int(key[i] * s0[i]) for i in range(k)])
         s.append(F(x))
-    return L       # use [x.to_int() for x in L] for int version
+    return L  # use [x.to_int() for x in L] for int version
 
 
 def lfsr_autocorrelation(L, P, k):
@@ -2420,9 +2459,9 @@ def lfsr_autocorrelation(L, P, k):
         raise TypeError("L (=%s) must be a list" % L)
     P = int(P)
     k = int(k)
-    L0 = L[:P]     # slices makes a copy
+    L0 = L[:P]  # slices makes a copy
     L1 = L0 + L0[:k]
-    L2 = [(-1)**(L1[i].to_int() + L1[i + k].to_int()) for i in range(P)]
+    L2 = [(-1) ** (L1[i].to_int() + L1[i + k].to_int()) for i in range(P)]
     tot = sum(L2)
     return Rational(tot, P)
 
@@ -2486,42 +2525,44 @@ def lfsr_connection_polynomial(s):
     # Initialization:
     p = s[0].mod
     x = Symbol("x")
-    C = 1*x**0
-    B = 1*x**0
+    C = 1 * x ** 0
+    B = 1 * x ** 0
     m = 1
-    b = 1*x**0
+    b = 1 * x ** 0
     L = 0
     N = 0
     while N < len(s):
         if L > 0:
             dC = Poly(C).degree()
             r = min(L + 1, dC + 1)
-            coeffsC = [C.subs(x, 0)] + [C.coeff(x**i)
-                for i in range(1, dC + 1)]
-            d = (s[N].to_int() + sum([coeffsC[i]*s[N - i].to_int()
-                for i in range(1, r)])) % p
+            coeffsC = [C.subs(x, 0)] + [C.coeff(x ** i) for i in range(1, dC + 1)]
+            d = (
+                s[N].to_int()
+                + sum([coeffsC[i] * s[N - i].to_int() for i in range(1, r)])
+            ) % p
         if L == 0:
-            d = s[N].to_int()*x**0
+            d = s[N].to_int() * x ** 0
         if d == 0:
             m += 1
             N += 1
         if d > 0:
-            if 2*L > N:
-                C = (C - d*((b**(p - 2)) % p)*x**m*B).expand()
+            if 2 * L > N:
+                C = (C - d * ((b ** (p - 2)) % p) * x ** m * B).expand()
                 m += 1
                 N += 1
             else:
                 T = C
-                C = (C - d*((b**(p - 2)) % p)*x**m*B).expand()
+                C = (C - d * ((b ** (p - 2)) % p) * x ** m * B).expand()
                 L = N + 1 - L
                 m = 1
                 b = d
                 B = T
                 N += 1
     dC = Poly(C).degree()
-    coeffsC = [C.subs(x, 0)] + [C.coeff(x**i) for i in range(1, dC + 1)]
-    return sum([coeffsC[i] % p*x**i for i in range(dC + 1)
-        if coeffsC[i] is not None])
+    coeffsC = [C.subs(x, 0)] + [C.coeff(x ** i) for i in range(1, dC + 1)]
+    return sum(
+        [coeffsC[i] % p * x ** i for i in range(dC + 1) if coeffsC[i] is not None]
+    )
 
 
 #################### ElGamal  #############################
@@ -2575,7 +2616,7 @@ def elgamal_private_key(digit=10, seed=None):
 
     """
     randrange = _randrange(seed)
-    p = nextprime(2**digit)
+    p = nextprime(2 ** digit)
     return p, primitive_root(p), randrange(2, p)
 
 
@@ -2659,11 +2700,10 @@ def encipher_elgamal(i, key, seed=None):
     """
     p, r, e = key
     if i < 0 or i >= p:
-        raise ValueError(
-            'Message (%s) should be in range(%s)' % (i, p))
+        raise ValueError("Message (%s) should be in range(%s)" % (i, p))
     randrange = _randrange(seed)
     a = randrange(2, p)
-    return pow(r, a, p), i*pow(e, a, p) % p
+    return pow(r, a, p), i * pow(e, a, p) % p
 
 
 def decipher_elgamal(msg, key):
@@ -2701,11 +2741,12 @@ def decipher_elgamal(msg, key):
     """
     p, _, d = key
     c1, c2 = msg
-    u = igcdex(c1**d, p)[0]
+    u = igcdex(c1 ** d, p)[0]
     return u * c2 % p
 
 
 ################ Diffie-Hellman Key Exchange  #########################
+
 
 def dh_private_key(digit=10, seed=None):
     r"""
@@ -2766,7 +2807,7 @@ def dh_private_key(digit=10, seed=None):
     True
 
     """
-    p = nextprime(2**digit)
+    p = nextprime(2 ** digit)
     g = primitive_root(p)
     randrange = _randrange(seed)
     a = randrange(2, p)
@@ -2845,9 +2886,14 @@ def dh_shared_key(key, b):
     """
     p, _, x = key
     if 1 >= b or b >= p:
-        raise ValueError(filldedent('''
+        raise ValueError(
+            filldedent(
+                """
             Value of b should be greater 1 and less
-            than prime %s.''' % p))
+            than prime %s."""
+                % p
+            )
+        )
 
     return pow(x, b, p)
 
@@ -2880,7 +2926,7 @@ def _legendre(a, p):
         Legendre symbol (a / p).
 
     """
-    sig = pow(a, (p - 1)//2, p)
+    sig = pow(a, (p - 1) // 2, p)
     if sig == 1:
         return 1
     elif sig == 0:
@@ -2953,14 +2999,13 @@ def gm_private_key(p, q, a=None):
 
     """
     if p == q:
-        raise ValueError("expected distinct primes, "
-                         "got two copies of %i" % p)
+        raise ValueError("expected distinct primes, " "got two copies of %i" % p)
     elif not isprime(p) or not isprime(q):
-        raise ValueError("first two arguments must be prime, "
-                         "got %i of %i" % (p, q))
+        raise ValueError("first two arguments must be prime, " "got %i of %i" % (p, q))
     elif p == 2 or q == 2:
-        raise ValueError("first two arguments must not be even, "
-                         "got %i of %i" % (p, q))
+        raise ValueError(
+            "first two arguments must not be even, " "got %i of %i" % (p, q)
+        )
     return p, q
 
 
@@ -3025,8 +3070,8 @@ def encipher_gm(i, key, seed=None):
     """
     if i < 0:
         raise ValueError(
-            "message must be a non-negative "
-            "integer: got %d instead" % i)
+            "message must be a non-negative " "integer: got %d instead" % i
+        )
     a, N = key
     bits = []
     while i > 0:
@@ -3035,9 +3080,8 @@ def encipher_gm(i, key, seed=None):
 
     gen = _random_coprime_stream(N, seed)
     rev = reversed(bits)
-    encode = lambda b: next(gen)**2*pow(a, b) % N
-    return [ encode(b) for b in rev ]
-
+    encode = lambda b: next(gen) ** 2 * pow(a, b) % N
+    return [encode(b) for b in rev]
 
 
 def decipher_gm(message, key):
@@ -3070,10 +3114,10 @@ def decipher_gm(message, key):
     return m
 
 
-
 ########### RailFence Cipher #############
 
-def encipher_railfence(message,rails):
+
+def encipher_railfence(message, rails):
     """
     Performs Railfence Encryption on plaintext and returns ciphertext
 
@@ -3103,10 +3147,10 @@ def encipher_railfence(message,rails):
     """
     r = list(range(rails))
     p = cycle(r + r[-2:0:-1])
-    return ''.join(sorted(message, key=lambda i: next(p)))
+    return "".join(sorted(message, key=lambda i: next(p)))
 
 
-def decipher_railfence(ciphertext,rails):
+def decipher_railfence(ciphertext, rails):
     """
     Decrypt the message using the given rails
 
@@ -3133,13 +3177,14 @@ def decipher_railfence(ciphertext,rails):
     p = cycle(r + r[-2:0:-1])
 
     idx = sorted(range(len(ciphertext)), key=lambda i: next(p))
-    res = [''] * len(ciphertext)
+    res = [""] * len(ciphertext)
     for i, c in zip(idx, ciphertext):
         res[i] = c
-    return ''.join(res)
+    return "".join(res)
 
 
 ################ Blum-Goldwasser cryptosystem  #########################
+
 
 def bg_private_key(p, q):
     """
@@ -3174,15 +3219,17 @@ def bg_private_key(p, q):
     """
 
     if not isprime(p) or not isprime(q):
-        raise ValueError("the two arguments must be prime, "
-                         "got %i and %i" %(p, q))
+        raise ValueError("the two arguments must be prime, " "got %i and %i" % (p, q))
     elif p == q:
-        raise ValueError("the two arguments must be distinct, "
-                         "got two copies of %i. " %p)
+        raise ValueError(
+            "the two arguments must be distinct, " "got two copies of %i. " % p
+        )
     elif (p - 3) % 4 != 0 or (q - 3) % 4 != 0:
-        raise ValueError("the two arguments must be congruent to 3 mod 4, "
-                         "got %i and %i" %(p, q))
+        raise ValueError(
+            "the two arguments must be congruent to 3 mod 4, " "got %i and %i" % (p, q)
+        )
     return p, q
+
 
 def bg_public_key(p, q):
     """
@@ -3208,6 +3255,7 @@ def bg_public_key(p, q):
     p, q = bg_private_key(p, q)
     N = p * q
     return N
+
 
 def encipher_bg(i, key, seed=None):
     """
@@ -3248,8 +3296,8 @@ def encipher_bg(i, key, seed=None):
 
     if i < 0:
         raise ValueError(
-            "message must be a non-negative "
-            "integer: got %d instead" % i)
+            "message must be a non-negative " "integer: got %d instead" % i
+        )
 
     enc_msg = []
     while i > 0:
@@ -3259,17 +3307,18 @@ def encipher_bg(i, key, seed=None):
     L = len(enc_msg)
 
     r = _randint(seed)(2, key - 1)
-    x = r**2 % key
-    x_L = pow(int(x), int(2**L), int(key))
+    x = r ** 2 % key
+    x_L = pow(int(x), int(2 ** L), int(key))
 
     rand_bits = []
     for _ in range(L):
         rand_bits.append(x % 2)
-        x = x**2 % key
+        x = x ** 2 % key
 
     encrypt_msg = [m ^ b for (m, b) in zip(enc_msg, rand_bits)]
 
     return (encrypt_msg, x_L)
+
 
 def decipher_bg(message, key):
     """
@@ -3306,8 +3355,8 @@ def decipher_bg(message, key):
     encrypt_msg, y = message
     public_key = p * q
     L = len(encrypt_msg)
-    p_t = ((p + 1)/4)**L
-    q_t = ((q + 1)/4)**L
+    p_t = ((p + 1) / 4) ** L
+    q_t = ((q + 1) / 4) ** L
     r_p = pow(int(y), int(p_t), int(p))
     r_q = pow(int(y), int(q_t), int(q))
 
@@ -3316,11 +3365,11 @@ def decipher_bg(message, key):
     orig_bits = []
     for _ in range(L):
         orig_bits.append(x % 2)
-        x = x**2 % public_key
+        x = x ** 2 % public_key
 
     orig_msg = 0
     for (m, b) in zip(encrypt_msg, orig_bits):
         orig_msg = orig_msg * 2
-        orig_msg += (m ^ b)
+        orig_msg += m ^ b
 
     return orig_msg

@@ -15,8 +15,7 @@ from sympy.core.symbol import Dummy
 from sympy.core.coreerrors import NonCommutativeExpression
 from sympy.core.containers import Tuple, Dict
 from sympy.utilities import default_sort_key
-from sympy.utilities.iterables import (common_prefix, common_suffix,
-        variations, ordered)
+from sympy.utilities.iterables import common_prefix, common_suffix, variations, ordered
 
 from collections import defaultdict
 
@@ -112,6 +111,7 @@ def _monotonic_sign(self):
             from sympy.polys.polytools import real_roots
             from sympy.polys.polyroots import roots
             from sympy.polys.polyerrors import PolynomialError
+
             x = free.pop()
             x0 = _monotonic_sign(x)
             if x0 == _eps or x0 == -_eps:
@@ -129,25 +129,25 @@ def _monotonic_sign(self):
                 if x.is_nonnegative and all(r <= x0 for r in currentroots):
                     if y.is_nonnegative and d.is_positive:
                         if y:
-                            return y if y.is_positive else Dummy('pos', positive=True)
+                            return y if y.is_positive else Dummy("pos", positive=True)
                         else:
-                            return Dummy('nneg', nonnegative=True)
+                            return Dummy("nneg", nonnegative=True)
                     if y.is_nonpositive and d.is_negative:
                         if y:
-                            return y if y.is_negative else Dummy('neg', negative=True)
+                            return y if y.is_negative else Dummy("neg", negative=True)
                         else:
-                            return Dummy('npos', nonpositive=True)
+                            return Dummy("npos", nonpositive=True)
                 elif x.is_nonpositive and all(r >= x0 for r in currentroots):
                     if y.is_nonnegative and d.is_negative:
                         if y:
-                            return Dummy('pos', positive=True)
+                            return Dummy("pos", positive=True)
                         else:
-                            return Dummy('nneg', nonnegative=True)
+                            return Dummy("nneg", nonnegative=True)
                     if y.is_nonpositive and d.is_positive:
                         if y:
-                            return Dummy('neg', negative=True)
+                            return Dummy("neg", negative=True)
                         else:
-                            return Dummy('npos', nonpositive=True)
+                            return Dummy("npos", nonpositive=True)
         else:
             n, d = self.as_numer_denom()
             den = None
@@ -157,15 +157,15 @@ def _monotonic_sign(self):
                 if _monotonic_sign(n) is not None:
                     den = _monotonic_sign(d)
             if den is not None and (den.is_positive or den.is_negative):
-                v = n*den
+                v = n * den
                 if v.is_positive:
-                    return Dummy('pos', positive=True)
+                    return Dummy("pos", positive=True)
                 elif v.is_nonnegative:
-                    return Dummy('nneg', nonnegative=True)
+                    return Dummy("nneg", nonnegative=True)
                 elif v.is_negative:
-                    return Dummy('neg', negative=True)
+                    return Dummy("neg", negative=True)
                 elif v.is_nonpositive:
-                    return Dummy('npos', nonpositive=True)
+                    return Dummy("npos", nonpositive=True)
         return None
 
     # multivariate
@@ -177,10 +177,11 @@ def _monotonic_sign(self):
         if not (n.is_number or d.is_number):
             return
         if (
-                a.is_Mul or a.is_Pow) and \
-                a.is_rational and \
-                all(p.exp.is_Integer for p in a.atoms(Pow) if p.is_Pow) and \
-                (a.is_positive or a.is_negative):
+            (a.is_Mul or a.is_Pow)
+            and a.is_rational
+            and all(p.exp.is_Integer for p in a.atoms(Pow) if p.is_Pow)
+            and (a.is_positive or a.is_negative)
+        ):
             v = S.One
             for ai in Mul.make_args(a):
                 if ai.is_number:
@@ -194,7 +195,9 @@ def _monotonic_sign(self):
                 v *= ai.subs(reps)
     elif c:
         # signed linear expression
-        if not any(p for p in a.atoms(Pow) if not p.is_number) and (a.is_nonpositive or a.is_nonnegative):
+        if not any(p for p in a.atoms(Pow) if not p.is_number) and (
+            a.is_nonpositive or a.is_nonnegative
+        ):
             free = list(a.free_symbols)
             p = {}
             for i in free:
@@ -287,7 +290,7 @@ def decompose_power_rat(expr):
 class Factors(object):
     """Efficient representation of ``f_1*f_2*...*f_n``."""
 
-    __slots__ = ('factors', 'gens')
+    __slots__ = ("factors", "gens")
 
     def __init__(self, factors=None):  # Factors
         """Initialize Factors from dict or expr.
@@ -345,7 +348,7 @@ class Factors(object):
                         factors[Integer(n.p)] = S.One
                     factors[Integer(n.q)] = S.NegativeOne
                 else:
-                    raise ValueError('Expected Float|Rational|Integer, not %s' % n)
+                    raise ValueError("Expected Float|Rational|Integer, not %s" % n)
         elif isinstance(factors, Basic) and not factors.args:
             factors = {factors: S.One}
         elif isinstance(factors, Expr):
@@ -362,7 +365,7 @@ class Factors(object):
                     factors[q] = (factors[q] if q in factors else S.Zero) - factors[f]
                     factors.pop(f)
             if i:
-                factors[I] = S.One*i
+                factors[I] = S.One * i
             if nc:
                 factors[Mul(*nc, evaluate=False)] = S.One
         else:
@@ -379,7 +382,7 @@ class Factors(object):
                 for k in handle:
                     if not _isnumber(factors[k]):
                         continue
-                    i1 *= k**factors.pop(k)
+                    i1 *= k ** factors.pop(k)
                 if i1 is not S.One:
                     for a in i1.args if i1.is_Mul else [i1]:  # at worst, -1.0*I*(-1)**e
                         if a is S.NegativeOne:
@@ -396,12 +399,12 @@ class Factors(object):
                             factors[-a] = S.One
                             factors[S.NegativeOne] = S.One
                         else:
-                            raise ValueError('unexpected factor in i1: %s' % a)
+                            raise ValueError("unexpected factor in i1: %s" % a)
 
         self.factors = factors
-        keys = getattr(factors, 'keys', None)
+        keys = getattr(factors, "keys", None)
         if keys is None:
-            raise TypeError('expecting Expr or dictionary')
+            raise TypeError("expecting Expr or dictionary")
         self.gens = frozenset(keys())
 
     def __hash__(self):  # Factors
@@ -410,8 +413,9 @@ class Factors(object):
         return hash((keys, values))
 
     def __repr__(self):  # Factors
-        return "Factors({%s})" % ', '.join(
-            ['%s: %s' % (k, v) for k, v in ordered(self.factors.items())])
+        return "Factors({%s})" % ", ".join(
+            ["%s: %s" % (k, v) for k, v in ordered(self.factors.items())]
+        )
 
     @property
     def is_zero(self):  # Factors
@@ -451,9 +455,9 @@ class Factors(object):
                 if isinstance(exp, Integer):
                     b, e = factor.as_base_exp()
                     e = _keep_coeff(exp, e)
-                    args.append(b**e)
+                    args.append(b ** e)
                 else:
-                    args.append(factor**exp)
+                    args.append(factor ** exp)
             else:
                 args.append(factor)
         return Mul(*args)
@@ -717,7 +721,7 @@ class Factors(object):
 
             if other:
                 for factor, exp in self.factors.items():
-                    factors[factor] = exp*other
+                    factors[factor] = exp * other
 
             return Factors(factors)
         else:
@@ -815,13 +819,12 @@ class Factors(object):
 class Term(object):
     """Efficient representation of ``coeff*(numer/denom)``. """
 
-    __slots__ = ('coeff', 'numer', 'denom')
+    __slots__ = ("coeff", "numer", "denom")
 
     def __init__(self, term, numer=None, denom=None):  # Term
         if numer is None and denom is None:
             if not term.is_commutative:
-                raise NonCommutativeExpression(
-                    'commutative expression expected')
+                raise NonCommutativeExpression("commutative expression expected")
 
             coeff, factors = term.as_coeff_mul()
             numer, denom = defaultdict(int), defaultdict(int)
@@ -831,7 +834,7 @@ class Term(object):
 
                 if base.is_Add:
                     cont, base = base.primitive()
-                    coeff *= cont**exp
+                    coeff *= cont ** exp
 
                 if exp > 0:
                     numer[base] += exp
@@ -860,10 +863,10 @@ class Term(object):
         return "Term(%s, %s, %s)" % (self.coeff, self.numer, self.denom)
 
     def as_expr(self):  # Term
-        return self.coeff*(self.numer.as_expr()/self.denom.as_expr())
+        return self.coeff * (self.numer.as_expr() / self.denom.as_expr())
 
     def mul(self, other):  # Term
-        coeff = self.coeff*other.coeff
+        coeff = self.coeff * other.coeff
         numer = self.numer.mul(other.numer)
         denom = self.denom.mul(other.denom)
 
@@ -872,7 +875,7 @@ class Term(object):
         return Term(coeff, numer, denom)
 
     def inv(self):  # Term
-        return Term(1/self.coeff, self.denom, self.numer)
+        return Term(1 / self.coeff, self.denom, self.numer)
 
     def quo(self, other):  # Term
         return self.mul(other.inv())
@@ -881,19 +884,23 @@ class Term(object):
         if other < 0:
             return self.inv().pow(-other)
         else:
-            return Term(self.coeff ** other,
-                        self.numer.pow(other),
-                        self.denom.pow(other))
+            return Term(
+                self.coeff ** other, self.numer.pow(other), self.denom.pow(other)
+            )
 
     def gcd(self, other):  # Term
-        return Term(self.coeff.gcd(other.coeff),
-                    self.numer.gcd(other.numer),
-                    self.denom.gcd(other.denom))
+        return Term(
+            self.coeff.gcd(other.coeff),
+            self.numer.gcd(other.numer),
+            self.denom.gcd(other.denom),
+        )
 
     def lcm(self, other):  # Term
-        return Term(self.coeff.lcm(other.coeff),
-                    self.numer.lcm(other.numer),
-                    self.denom.lcm(other.denom))
+        return Term(
+            self.coeff.lcm(other.coeff),
+            self.numer.lcm(other.numer),
+            self.denom.lcm(other.denom),
+        )
 
     def __mul__(self, other):  # Term
         if isinstance(other, Term):
@@ -916,9 +923,11 @@ class Term(object):
             return NotImplemented
 
     def __eq__(self, other):  # Term
-        return (self.coeff == other.coeff and
-                self.numer == other.numer and
-                self.denom == other.denom)
+        return (
+            self.coeff == other.coeff
+            and self.numer == other.numer
+            and self.denom == other.denom
+        )
 
     def __ne__(self, other):  # Term
         return not self == other
@@ -968,7 +977,7 @@ def _gcd_terms(terms, isprimitive=False, fraction=True):
             numers = []
             for term in terms:
                 numer = term.numer.mul(denom.quo(term.denom))
-                numers.append(term.coeff*numer.as_expr())
+                numers.append(term.coeff * numer.as_expr())
         else:
             numers = [t.as_expr() for t in terms]
             denom = Term(S.One).numer
@@ -1037,6 +1046,7 @@ def gcd_terms(terms, isprimitive=False, clear=True, fraction=True):
     factor_terms, sympy.polys.polytools.terms_gcd
 
     """
+
     def mask(terms):
         """replace nc portions of each term with a unique Dummy symbols
         and return the replacements to restore them"""
@@ -1054,9 +1064,12 @@ def gcd_terms(terms, isprimitive=False, clear=True, fraction=True):
         return args, dict(reps)
 
     isadd = isinstance(terms, Add)
-    addlike = isadd or not isinstance(terms, Basic) and \
-        is_sequence(terms, include=set) and \
-        not isinstance(terms, Dict)
+    addlike = (
+        isadd
+        or not isinstance(terms, Basic)
+        and is_sequence(terms, include=set)
+        and not isinstance(terms, Dict)
+    )
 
     if addlike:
         if isadd:  # i.e. an Add
@@ -1071,12 +1084,11 @@ def gcd_terms(terms, isprimitive=False, clear=True, fraction=True):
             c, _coeff = coeff.as_coeff_Mul()
             if not c.is_Integer and not clear and numer.is_Add:
                 n, d = c.as_numer_denom()
-                _numer = numer/d
-                if any(a.as_coeff_Mul()[0].is_Integer
-                        for a in _numer.args):
+                _numer = numer / d
+                if any(a.as_coeff_Mul()[0].is_Integer for a in _numer.args):
                     numer = _numer
-                    coeff = n*_coeff
-        return _keep_coeff(coeff, factors*numer/denom, clear=clear)
+                    coeff = n * _coeff
+        return _keep_coeff(coeff, factors * numer / denom, clear=clear)
 
     if not isinstance(terms, Basic):
         return terms
@@ -1086,8 +1098,11 @@ def gcd_terms(terms, isprimitive=False, clear=True, fraction=True):
 
     if terms.is_Mul:
         c, args = terms.as_coeff_mul()
-        return _keep_coeff(c, Mul(*[gcd_terms(i, isprimitive, clear, fraction)
-            for i in args]), clear=clear)
+        return _keep_coeff(
+            c,
+            Mul(*[gcd_terms(i, isprimitive, clear, fraction) for i in args]),
+            clear=clear,
+        )
 
     def handle(a):
         # don't treat internal args like terms of an Add
@@ -1203,9 +1218,11 @@ def factor_terms(expr, radical=False, clear=False, fraction=False, sign=True):
     gcd_terms, sympy.polys.polytools.terms_gcd
 
     """
+
     def do(expr):
         from sympy.concrete.summations import Sum
         from sympy.integrals.integrals import Integral
+
         is_iterable = iterable(expr)
 
         if not isinstance(expr, Basic) or expr.is_Atom:
@@ -1213,8 +1230,12 @@ def factor_terms(expr, radical=False, clear=False, fraction=False, sign=True):
                 return type(expr)([do(i) for i in expr])
             return expr
 
-        if expr.is_Pow or expr.is_Function or \
-                is_iterable or not hasattr(expr, 'args_cnc'):
+        if (
+            expr.is_Pow
+            or expr.is_Function
+            or is_iterable
+            or not hasattr(expr, "args_cnc")
+        ):
             args = expr.args
             newargs = tuple([do(i) for i in args])
             if newargs == args:
@@ -1222,16 +1243,18 @@ def factor_terms(expr, radical=False, clear=False, fraction=False, sign=True):
             return expr.func(*newargs)
 
         if isinstance(expr, (Sum, Integral)):
-            return _factor_sum_int(expr,
-                radical=radical, clear=clear,
-                fraction=fraction, sign=sign)
+            return _factor_sum_int(
+                expr, radical=radical, clear=clear, fraction=fraction, sign=sign
+            )
 
         cont, p = expr.as_content_primitive(radical=radical, clear=clear)
         if p.is_Add:
             list_args = [do(a) for a in Add.make_args(p)]
             # get a common negative (if there) which gcd_terms does not remove
-            if all(a.as_coeff_Mul()[0].extract_multiplicatively(-1) is not None
-                   for a in list_args):
+            if all(
+                a.as_coeff_Mul()[0].extract_multiplicatively(-1) is not None
+                for a in list_args
+            ):
                 cont = -cont
                 list_args = [-a for a in list_args]
             # watch out for exp(-(x+2)) which gcd_terms will change to exp(-x-2)
@@ -1243,15 +1266,14 @@ def factor_terms(expr, radical=False, clear=False, fraction=False, sign=True):
                     special[list_args[i]] = a
             # rebuild p not worrying about the order which gcd_terms will fix
             p = Add._from_args(list_args)
-            p = gcd_terms(p,
-                isprimitive=True,
-                clear=clear,
-                fraction=fraction).xreplace(special)
+            p = gcd_terms(p, isprimitive=True, clear=clear, fraction=fraction).xreplace(
+                special
+            )
         elif p.args:
-            p = p.func(
-                *[do(a) for a in p.args])
+            p = p.func(*[do(a) for a in p.args])
         rv = _keep_coeff(cont, p, clear=clear, sign=sign)
         return rv
+
     expr = sympify(expr)
     return do(expr)
 
@@ -1335,7 +1357,7 @@ def _mask_nc(eq, name=None):
     (_d0**2 + 1, {_d0: Basic()}, [])
 
     """
-    name = name or 'mask'
+    name = name or "mask"
     # Make Dummy() append sequential numbers to the name
 
     def numbered_names():
@@ -1348,6 +1370,7 @@ def _mask_nc(eq, name=None):
 
     def Dummy(*args, **kwargs):
         from sympy import Dummy
+
         return Dummy(next(names), *args, **kwargs)
 
     expr = eq
@@ -1413,8 +1436,15 @@ def factor_nc(expr):
 
     def _pemexpand(expr):
         "Expand with the minimal set of hints necessary to check the result."
-        return expr.expand(deep=True, mul=True, power_exp=True,
-            power_base=False, basic=False, multinomial=True, log=False)
+        return expr.expand(
+            deep=True,
+            mul=True,
+            power_exp=True,
+            power_base=False,
+            basic=False,
+            multinomial=True,
+            log=False,
+        )
 
     expr = sympify(expr)
     if not isinstance(expr, Expr) or not expr.args:
@@ -1442,10 +1472,10 @@ def factor_nc(expr):
             c, g = c.as_coeff_Mul()
             if g is not S.One:
                 for i, (cc, _) in enumerate(args):
-                    cc = list(Mul.make_args(Mul._from_args(list(cc))/g))
+                    cc = list(Mul.make_args(Mul._from_args(list(cc)) / g))
                     args[i][0] = cc
             for i, (cc, _) in enumerate(args):
-                cc[0] = cc[0]/c
+                cc[0] = cc[0] / c
                 args[i][0] = cc
         # find any noncommutative common prefix
         for i, a in enumerate(args):
@@ -1470,10 +1500,10 @@ def factor_nc(expr):
                             break
                     else:
                         ok = hit = True
-                        l = b**e
-                        il = b**-e
+                        l = b ** e
+                        il = b ** -e
                         for _ in args:
-                            _[1][0] = il*_[1][0]
+                            _[1][0] = il * _[1][0]
                         break
                 if not ok:
                     break
@@ -1506,10 +1536,10 @@ def factor_nc(expr):
                             break
                     else:
                         ok = hit = True
-                        r = b**e
-                        il = b**-e
+                        r = b ** e
+                        il = b ** -e
                         for _ in args:
-                            _[1][-1] = _[1][-1]*il
+                            _[1][-1] = _[1][-1] * il
                         break
                 if not ok:
                     break
@@ -1518,9 +1548,9 @@ def factor_nc(expr):
             lenn = len(n)
             r = Mul(*n)
             for _ in args:
-                _[1] = _[1][:len(_[1]) - lenn]
+                _[1] = _[1][: len(_[1]) - lenn]
         if hit:
-            mid = Add(*[Mul(*cc)*Mul(*nc) for cc, nc in args])
+            mid = Add(*[Mul(*cc) * Mul(*nc) for cc, nc in args])
         else:
             mid = expr
 
@@ -1538,7 +1568,7 @@ def factor_nc(expr):
         new_mid = new_mid.subs(r2).subs(unrep1)
 
         if new_mid.is_Pow:
-            return _keep_coeff(c, g*l*new_mid*r)
+            return _keep_coeff(c, g * l * new_mid * r)
 
         if new_mid.is_Mul:
             # XXX TODO there should be a way to inspect what order the terms
@@ -1552,15 +1582,15 @@ def factor_nc(expr):
                 else:
                     b, e = f.as_base_exp()
                     if e.is_Integer:
-                        ncfac.extend([b]*e)
+                        ncfac.extend([b] * e)
                     else:
                         ncfac.append(f)
-            pre_mid = g*Mul(*cfac)*l
-            target = _pemexpand(expr/c)
+            pre_mid = g * Mul(*cfac) * l
+            target = _pemexpand(expr / c)
             for s in variations(ncfac, len(ncfac)):
-                ok = pre_mid*Mul(*s)*r
+                ok = pre_mid * Mul(*s) * r
                 if _pemexpand(ok) == target:
                     return _keep_coeff(c, ok)
 
         # mid was an Add that didn't factor successfully
-        return _keep_coeff(c, g*l*mid*r)
+        return _keep_coeff(c, g * l * mid * r)

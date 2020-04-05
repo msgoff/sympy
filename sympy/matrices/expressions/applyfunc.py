@@ -50,21 +50,22 @@ class ElementwiseApplyFunction(MatrixExpr):
             raise ValueError("{} must be a matrix instance.".format(expr))
 
         if not isinstance(function, FunctionClass):
-            d = Dummy('d')
+            d = Dummy("d")
             function = Lambda(d, function(d))
 
         function = sympify(function)
         if not isinstance(function, (FunctionClass, Lambda)):
             raise ValueError(
-                "{} should be compatible with SymPy function classes."
-                .format(function))
+                "{} should be compatible with SymPy function classes.".format(function)
+            )
 
         if 1 not in function.nargs:
             raise ValueError(
-                '{} should be able to accept 1 arguments.'.format(function))
+                "{} should be able to accept 1 arguments.".format(function)
+            )
 
         if not isinstance(function, Lambda):
-            d = Dummy('d')
+            d = Dummy("d")
             function = Lambda(d, function(d))
 
         obj = MatrixExpr.__new__(cls, function, expr)
@@ -95,8 +96,7 @@ class ElementwiseApplyFunction(MatrixExpr):
             return expr.applyfunc(self.function)
         elif isinstance(expr, ElementwiseApplyFunction):
             return ElementwiseApplyFunction(
-                lambda x: self.function(expr.function(x)),
-                expr.expr
+                lambda x: self.function(expr.function(x)), expr.expr
             ).doit()
         else:
             return self
@@ -116,16 +116,18 @@ class ElementwiseApplyFunction(MatrixExpr):
 
     def _eval_derivative(self, x):
         from sympy import hadamard_product
+
         dexpr = self.expr.diff(x)
         fdiff = self._get_function_fdiff()
-        return hadamard_product(
-            dexpr,
-            ElementwiseApplyFunction(fdiff, self.expr)
-        )
+        return hadamard_product(dexpr, ElementwiseApplyFunction(fdiff, self.expr))
 
     def _eval_derivative_matrix_lines(self, x):
         from sympy import Identity
-        from sympy.codegen.array_utils import CodegenArrayContraction, CodegenArrayTensorProduct, CodegenArrayDiagonal
+        from sympy.codegen.array_utils import (
+            CodegenArrayContraction,
+            CodegenArrayTensorProduct,
+            CodegenArrayDiagonal,
+        )
         from sympy.core.expr import ExprBuilder
 
         fdiff = self._get_function_fdiff()
@@ -145,17 +147,10 @@ class ElementwiseApplyFunction(MatrixExpr):
                 subexpr = ExprBuilder(
                     CodegenArrayDiagonal,
                     [
-                        ExprBuilder(
-                            CodegenArrayTensorProduct,
-                            [
-                                ewdiff,
-                                ptr1,
-                                ptr2,
-                            ]
-                        ),
-                        (0, 2) if iscolumn else (1, 4)
+                        ExprBuilder(CodegenArrayTensorProduct, [ewdiff, ptr1, ptr2,]),
+                        (0, 2) if iscolumn else (1, 4),
                     ],
-                    validator=CodegenArrayDiagonal._validate
+                    validator=CodegenArrayDiagonal._validate,
                 )
                 i._lines = [subexpr]
                 i._first_pointer_parent = subexpr.args[0].args
@@ -174,12 +169,12 @@ class ElementwiseApplyFunction(MatrixExpr):
                     [
                         ExprBuilder(
                             CodegenArrayTensorProduct,
-                            [ptr1, newptr1, ewdiff, ptr2, newptr2]
+                            [ptr1, newptr1, ewdiff, ptr2, newptr2],
                         ),
                         (1, 2, 4),
                         (5, 7, 8),
                     ],
-                    validator=CodegenArrayContraction._validate
+                    validator=CodegenArrayContraction._validate,
                 )
                 i._first_pointer_parent = subexpr.args[0].args
                 i._first_pointer_index = 1

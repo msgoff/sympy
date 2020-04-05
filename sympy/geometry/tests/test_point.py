@@ -7,12 +7,12 @@ from sympy.testing.pytest import raises, warns
 
 
 def test_point():
-    x = Symbol('x', real=True)
-    y = Symbol('y', real=True)
-    x1 = Symbol('x1', real=True)
-    x2 = Symbol('x2', real=True)
-    y1 = Symbol('y1', real=True)
-    y2 = Symbol('y2', real=True)
+    x = Symbol("x", real=True)
+    y = Symbol("y", real=True)
+    x1 = Symbol("x1", real=True)
+    x2 = Symbol("x2", real=True)
+    y1 = Symbol("y1", real=True)
+    y2 = Symbol("y2", real=True)
     half = S.Half
     p1 = Point(x1, x2)
     p2 = Point(y1, y2)
@@ -28,18 +28,18 @@ def test_point():
     assert (p2 - p1) == Point(y1 - x1, y2 - x2)
     assert -p2 == Point(-y1, -y2)
     raises(ValueError, lambda: Point(3, I))
-    raises(ValueError, lambda: Point(2*I, I))
+    raises(ValueError, lambda: Point(2 * I, I))
     raises(ValueError, lambda: Point(3 + I, I))
 
     assert Point(34.05, sqrt(3)) == Point(Rational(681, 20), sqrt(3))
     assert Point.midpoint(p3, p4) == Point(half, half)
-    assert Point.midpoint(p1, p4) == Point(half + half*x1, half + half*x2)
+    assert Point.midpoint(p1, p4) == Point(half + half * x1, half + half * x2)
     assert Point.midpoint(p2, p2) == p2
     assert p2.midpoint(p2) == p2
 
     assert Point.distance(p3, p4) == sqrt(2)
     assert Point.distance(p1, p1) == 0
-    assert Point.distance(p3, p2) == sqrt(p2.x**2 + p2.y**2)
+    assert Point.distance(p3, p2) == sqrt(p2.x ** 2 + p2.y ** 2)
 
     # distance should be symmetric
     assert p1.distance(line) == line.distance(p1)
@@ -68,7 +68,7 @@ def test_point():
     assert p3.intersection(Point(0, 0)) == [p3]
     assert p3.intersection(p4) == []
 
-    x_pos = Symbol('x', real=True, positive=True)
+    x_pos = Symbol("x", real=True, positive=True)
     p2_1 = Point(x_pos, 0)
     p2_2 = Point(0, x_pos)
     p2_3 = Point(-x_pos, 0)
@@ -96,17 +96,16 @@ def test_point():
     raises(ValueError, lambda: Point(0, 0) + 10)
 
     # Point differences should be simplified
-    assert Point(x*(x - 1), y) - Point(x**2 - x, y + 1) == Point(0, -1)
+    assert Point(x * (x - 1), y) - Point(x ** 2 - x, y + 1) == Point(0, -1)
 
     a, b = S.Half, Rational(1, 3)
-    assert Point(a, b).evalf(2) == \
-        Point(a.n(2), b.n(2), evaluate=False)
+    assert Point(a, b).evalf(2) == Point(a.n(2), b.n(2), evaluate=False)
     raises(ValueError, lambda: Point(1, 2) + 1)
 
     # test transformations
     p = Point(1, 0)
-    assert p.rotate(pi/2) == Point(0, 1)
-    assert p.rotate(pi/2, p) == p
+    assert p.rotate(pi / 2) == Point(0, 1)
+    assert p.rotate(pi / 2, p) == p
     p = Point(1, 1)
     assert p.scale(2, 3) == Point(2, 3)
     assert p.translate(1, 2) == Point(2, 3)
@@ -120,14 +119,14 @@ def test_point():
 
 
 def test_point3D():
-    x = Symbol('x', real=True)
-    y = Symbol('y', real=True)
-    x1 = Symbol('x1', real=True)
-    x2 = Symbol('x2', real=True)
-    x3 = Symbol('x3', real=True)
-    y1 = Symbol('y1', real=True)
-    y2 = Symbol('y2', real=True)
-    y3 = Symbol('y3', real=True)
+    x = Symbol("x", real=True)
+    y = Symbol("y", real=True)
+    x1 = Symbol("x1", real=True)
+    x2 = Symbol("x2", real=True)
+    x3 = Symbol("x3", real=True)
+    y1 = Symbol("y1", real=True)
+    y2 = Symbol("y2", real=True)
+    y3 = Symbol("y3", real=True)
     half = S.Half
     p1 = Point3D(x1, x2, x3)
     p2 = Point3D(y1, y2, y3)
@@ -144,14 +143,15 @@ def test_point3D():
 
     assert Point(34.05, sqrt(3)) == Point(Rational(681, 20), sqrt(3))
     assert Point3D.midpoint(p3, p4) == Point3D(half, half, half)
-    assert Point3D.midpoint(p1, p4) == Point3D(half + half*x1, half + half*x2,
-                                         half + half*x3)
+    assert Point3D.midpoint(p1, p4) == Point3D(
+        half + half * x1, half + half * x2, half + half * x3
+    )
     assert Point3D.midpoint(p2, p2) == p2
     assert p2.midpoint(p2) == p2
 
     assert Point3D.distance(p3, p4) == sqrt(3)
     assert Point3D.distance(p1, p1) == 0
-    assert Point3D.distance(p3, p2) == sqrt(p2.x**2 + p2.y**2 + p2.z**2)
+    assert Point3D.distance(p3, p2) == sqrt(p2.x ** 2 + p2.y ** 2 + p2.z ** 2)
 
     p1_1 = Point3D(x1, x1, x1)
     p1_2 = Point3D(y2, y2, y2)
@@ -164,7 +164,6 @@ def test_point3D():
 
     assert p3.intersection(Point3D(0, 0, 0)) == [p3]
     assert p3.intersection(p4) == []
-
 
     assert p4 * 5 == Point3D(5, 5, 5)
     assert p4 / 5 == Point3D(0.2, 0.2, 0.2)
@@ -183,12 +182,12 @@ def test_point3D():
     assert p5.z == 2
 
     # Point differences should be simplified
-    assert Point3D(x*(x - 1), y, 2) - Point3D(x**2 - x, y + 1, 1) == \
-        Point3D(0, -1, 1)
+    assert Point3D(x * (x - 1), y, 2) - Point3D(x ** 2 - x, y + 1, 1) == Point3D(
+        0, -1, 1
+    )
 
     a, b, c = S.Half, Rational(1, 3), Rational(1, 4)
-    assert Point3D(a, b, c).evalf(2) == \
-        Point(a.n(2), b.n(2), c.n(2), evaluate=False)
+    assert Point3D(a, b, c).evalf(2) == Point(a.n(2), b.n(2), c.n(2), evaluate=False)
     raises(ValueError, lambda: Point3D(1, 2, 3) + 1)
 
     # test transformations
@@ -200,7 +199,7 @@ def test_point3D():
     assert p.translate(*p.args) == Point3D(2, 2, 2)
 
     # Test __new__
-    assert Point3D(0.1, 0.2, evaluate=False, on_morph='ignore').args[0].is_Float
+    assert Point3D(0.1, 0.2, evaluate=False, on_morph="ignore").args[0].is_Float
 
     # Test length property returns correctly
     assert p.length == 0
@@ -227,7 +226,7 @@ def test_point3D():
     planar3 = Point3D(1, 1, 3)
     assert Point3D.are_coplanar(p, planar2, planar3)  # line, not plane
     plane = Plane((1, 2, 1), (2, 1, 0), (3, 1, 2))
-    assert Point.are_coplanar(*[plane.projection(((-1)**i, i)) for i in range(4)])
+    assert Point.are_coplanar(*[plane.projection(((-1) ** i, i)) for i in range(4)])
 
     # all 2D points are coplanar
     assert Point.are_coplanar(Point(x, y), Point(x, x + y), Point(y, x + 2)) is True
@@ -266,8 +265,8 @@ def test_Point2D():
     p1 = Point2D(1, 5)
     p2 = Point2D(4, 2.5)
     p3 = (6, 3)
-    assert p1.distance(p2) == sqrt(61)/2
-    assert p2.distance(p3) == sqrt(17)/2
+    assert p1.distance(p2) == sqrt(61) / 2
+    assert p2.distance(p3) == sqrt(17) / 2
 
     # Test coordinates
     assert p1.x == 1
@@ -276,6 +275,7 @@ def test_Point2D():
     assert p2.y == 2.5
     assert p1.coordinates == (1, 5)
     assert p2.coordinates == (4, 2.5)
+
 
 def test_issue_9214():
     p1 = Point3D(4, -2, 6)
@@ -286,8 +286,8 @@ def test_issue_9214():
 
 
 def test_issue_11617():
-    p1 = Point3D(1,0,2)
-    p2 = Point2D(2,0)
+    p1 = Point3D(1, 0, 2)
+    p2 = Point2D(2, 0)
 
     with warns(UserWarning):
         assert p1.distance(p2) == sqrt(5)
@@ -295,13 +295,11 @@ def test_issue_11617():
 
 def test_transform():
     p = Point(1, 1)
-    assert p.transform(rotate(pi/2)) == Point(-1, 1)
+    assert p.transform(rotate(pi / 2)) == Point(-1, 1)
     assert p.transform(scale(3, 2)) == Point(3, 2)
     assert p.transform(translate(1, 2)) == Point(2, 3)
-    assert Point(1, 1).scale(2, 3, (4, 5)) == \
-        Point(-2, -7)
-    assert Point(1, 1).translate(4, 5) == \
-        Point(5, 6)
+    assert Point(1, 1).scale(2, 3, (4, 5)) == Point(-2, -7)
+    assert Point(1, 1).translate(4, 5) == Point(5, 6)
 
 
 def test_concyclic_doctest_bug():
@@ -316,20 +314,30 @@ def test_arguments():
     should also accept tuples and lists and
     automatically convert them to points."""
 
-    singles2d = ((1,2), [1,2], Point(1,2))
-    singles2d2 = ((1,3), [1,3], Point(1,3))
+    singles2d = ((1, 2), [1, 2], Point(1, 2))
+    singles2d2 = ((1, 3), [1, 3], Point(1, 3))
     doubles2d = cartes(singles2d, singles2d2)
-    p2d = Point2D(1,2)
-    singles3d = ((1,2,3), [1,2,3], Point(1,2,3))
+    p2d = Point2D(1, 2)
+    singles3d = ((1, 2, 3), [1, 2, 3], Point(1, 2, 3))
     doubles3d = subsets(singles3d, 2)
-    p3d = Point3D(1,2,3)
-    singles4d = ((1,2,3,4), [1,2,3,4], Point(1,2,3,4))
+    p3d = Point3D(1, 2, 3)
+    singles4d = ((1, 2, 3, 4), [1, 2, 3, 4], Point(1, 2, 3, 4))
     doubles4d = subsets(singles4d, 2)
-    p4d = Point(1,2,3,4)
+    p4d = Point(1, 2, 3, 4)
 
     # test 2D
-    test_single = ['distance', 'is_scalar_multiple', 'taxicab_distance', 'midpoint', 'intersection', 'dot', 'equals', '__add__', '__sub__']
-    test_double = ['is_concyclic', 'is_collinear']
+    test_single = [
+        "distance",
+        "is_scalar_multiple",
+        "taxicab_distance",
+        "midpoint",
+        "intersection",
+        "dot",
+        "equals",
+        "__add__",
+        "__sub__",
+    ]
+    test_double = ["is_concyclic", "is_collinear"]
     for p in singles2d:
         Point2D(p)
     for func in test_single:
@@ -340,7 +348,7 @@ def test_arguments():
             getattr(p2d, func)(*p)
 
     # test 3D
-    test_double = ['is_collinear']
+    test_double = ["is_collinear"]
     for p in singles3d:
         Point3D(p)
     for func in test_single:
@@ -351,7 +359,7 @@ def test_arguments():
             getattr(p3d, func)(*p)
 
     # test 4D
-    test_double = ['is_collinear']
+    test_double = ["is_collinear"]
     for p in singles4d:
         Point(p)
     for func in test_single:
@@ -362,28 +370,28 @@ def test_arguments():
             getattr(p4d, func)(*p)
 
     # test evaluate=False for ops
-    x = Symbol('x')
+    x = Symbol("x")
     a = Point(0, 1)
     assert a + (0.1, x) == Point(0.1, 1 + x, evaluate=False)
     a = Point(0, 1)
-    assert a/10.0 == Point(0, 0.1, evaluate=False)
+    assert a / 10.0 == Point(0, 0.1, evaluate=False)
     a = Point(0, 1)
-    assert a*10.0 == Point(0.0, 10.0, evaluate=False)
+    assert a * 10.0 == Point(0.0, 10.0, evaluate=False)
 
     # test evaluate=False when changing dimensions
-    u = Point(.1, .2, evaluate=False)
-    u4 = Point(u, dim=4, on_morph='ignore')
-    assert u4.args == (.1, .2, 0, 0)
+    u = Point(0.1, 0.2, evaluate=False)
+    u4 = Point(u, dim=4, on_morph="ignore")
+    assert u4.args == (0.1, 0.2, 0, 0)
     assert all(i.is_Float for i in u4.args[:2])
     # and even when *not* changing dimensions
     assert all(i.is_Float for i in Point(u).args)
 
     # never raise error if creating an origin
-    assert Point(dim=3, on_morph='error')
+    assert Point(dim=3, on_morph="error")
 
 
 def test_unit():
-    assert Point(1, 1).unit == Point(sqrt(2)/2, sqrt(2)/2)
+    assert Point(1, 1).unit == Point(sqrt(2) / 2, sqrt(2) / 2)
 
 
 def test_dot():
@@ -392,10 +400,12 @@ def test_dot():
 
 def test__normalize_dimension():
     assert Point._normalize_dimension(Point(1, 2), Point(3, 4)) == [
-        Point(1, 2), Point(3, 4)]
+        Point(1, 2),
+        Point(3, 4),
+    ]
     assert Point._normalize_dimension(
-        Point(1, 2), Point(3, 4, 0), on_morph='ignore') == [
-        Point(1, 2, 0), Point(3, 4, 0)]
+        Point(1, 2), Point(3, 4, 0), on_morph="ignore"
+    ) == [Point(1, 2, 0), Point(3, 4, 0)]
 
 
 def test_direction_cosine():
@@ -410,10 +420,22 @@ def test_direction_cosine():
     assert p1.direction_cosine(Point3D(0, sqrt(3), 0)) == [0, 1, 0]
     assert p1.direction_cosine(Point3D(0, 0, 5)) == [0, 0, 1]
 
-    assert p1.direction_cosine(Point3D(2.4, 2.4, 0)) == [sqrt(2)/2, sqrt(2)/2, 0]
-    assert p1.direction_cosine(Point3D(1, 1, 1)) == [sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3]
-    assert p1.direction_cosine(Point3D(-12, 0 -15)) == [-4*sqrt(41)/41, -5*sqrt(41)/41, 0]
+    assert p1.direction_cosine(Point3D(2.4, 2.4, 0)) == [sqrt(2) / 2, sqrt(2) / 2, 0]
+    assert p1.direction_cosine(Point3D(1, 1, 1)) == [
+        sqrt(3) / 3,
+        sqrt(3) / 3,
+        sqrt(3) / 3,
+    ]
+    assert p1.direction_cosine(Point3D(-12, 0 - 15)) == [
+        -4 * sqrt(41) / 41,
+        -5 * sqrt(41) / 41,
+        0,
+    ]
 
-    assert p2.direction_cosine(Point3D(0, 0, 0)) == [-sqrt(3) / 3, -sqrt(3) / 3, -sqrt(3) / 3]
+    assert p2.direction_cosine(Point3D(0, 0, 0)) == [
+        -sqrt(3) / 3,
+        -sqrt(3) / 3,
+        -sqrt(3) / 3,
+    ]
     assert p2.direction_cosine(Point3D(1, 1, 12)) == [0, 0, 1]
     assert p2.direction_cosine(Point3D(12, 1, 12)) == [sqrt(2) / 2, 0, sqrt(2) / 2]

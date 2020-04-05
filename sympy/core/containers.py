@@ -17,7 +17,6 @@ from sympy.core.sympify import sympify, converter
 from sympy.utilities.iterables import iterable
 
 
-
 class Tuple(Basic):
     """
     Wrapper around the builtin tuple object
@@ -48,8 +47,8 @@ class Tuple(Basic):
     """
 
     def __new__(cls, *args, **kwargs):
-        if kwargs.get('sympify', True):
-            args = ( sympify(arg) for arg in args )
+        if kwargs.get("sympify", True):
+            args = (sympify(arg) for arg in args)
         obj = Basic.__new__(cls, *args)
         return obj
 
@@ -88,8 +87,10 @@ class Tuple(Basic):
         try:
             n = as_int(other)
         except ValueError:
-            raise TypeError("Can't multiply sequence by non-integer of type '%s'" % type(other))
-        return self.func(*(self.args*n))
+            raise TypeError(
+                "Can't multiply sequence by non-integer of type '%s'" % type(other)
+            )
+        return self.func(*(self.args * n))
 
     __rmul__ = __mul__
 
@@ -184,6 +185,7 @@ def tuple_wrapper(method):
     (0, (1, 2), 3)
 
     """
+
     def wrap_tuples(*args, **kw_args):
         newargs = []
         for arg in args:
@@ -192,6 +194,7 @@ def tuple_wrapper(method):
             else:
                 newargs.append(arg)
         return method(*newargs, **kw_args)
+
     return wrap_tuples
 
 
@@ -233,7 +236,9 @@ class Dict(Basic):
         elif iterable(args) and all(len(arg) == 2 for arg in args):
             items = [Tuple(k, v) for k, v in args]
         else:
-            raise TypeError('Pass Dict args as Dict((k1, v1), ...) or Dict({k1: v1, ...})')
+            raise TypeError(
+                "Pass Dict args as Dict((k1, v1), ...) or Dict({k1: v1, ...})"
+            )
         elements = frozenset(items)
         obj = Basic.__new__(cls, elements)
         obj.elements = elements
@@ -259,31 +264,31 @@ class Dict(Basic):
         return tuple(self.elements)
 
     def items(self):
-        '''D.items() -> list of D's (key, value) pairs, as 2-tuples'''
+        """D.items() -> list of D's (key, value) pairs, as 2-tuples"""
         return self._dict.items()
 
     def keys(self):
-        '''D.keys() -> list of D's keys'''
+        """D.keys() -> list of D's keys"""
         return self._dict.keys()
 
     def values(self):
-        '''D.values() -> list of D's values'''
+        """D.values() -> list of D's values"""
         return self._dict.values()
 
     def __iter__(self):
-        '''x.__iter__() <==> iter(x)'''
+        """x.__iter__() <==> iter(x)"""
         return iter(self._dict)
 
     def __len__(self):
-        '''x.__len__() <==> len(x)'''
+        """x.__len__() <==> len(x)"""
         return self._dict.__len__()
 
     def get(self, key, default=None):
-        '''D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.'''
+        """D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return self._dict.get(sympify(key), default)
 
     def __contains__(self, key):
-        '''D.__contains__(k) -> True if D has a key k, else False'''
+        """D.__contains__(k) -> True if D has a key k, else False"""
         return sympify(key) in self._dict
 
     def __lt__(self, other):
@@ -292,11 +297,13 @@ class Dict(Basic):
     @property
     def _sorted_args(self):
         from sympy.utilities import default_sort_key
+
         return tuple(sorted(self.args, key=default_sort_key))
 
 
 # this handles dict, defaultdict, OrderedDict
 converter[dict] = lambda d: Dict(*d.items())
+
 
 class OrderedSet(MutableSet):
     def __init__(self, iterable=None):
@@ -326,8 +333,8 @@ class OrderedSet(MutableSet):
 
     def __repr__(self):
         if not self.map:
-            return '%s()' % (self.__class__.__name__,)
-        return '%s(%r)' % (self.__class__.__name__, list(self.map.keys()))
+            return "%s()" % (self.__class__.__name__,)
+        return "%s(%r)" % (self.__class__.__name__, list(self.map.keys()))
 
     def intersection(self, other):
         result = []

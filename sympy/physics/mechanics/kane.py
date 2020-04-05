@@ -3,17 +3,15 @@ from __future__ import print_function, division
 from sympy.core.backend import zeros, Matrix, diff, eye
 from sympy import solve_linear_system_LU
 from sympy.utilities import default_sort_key
-from sympy.physics.vector import (ReferenceFrame, dynamicsymbols,
-                                  partial_velocity)
+from sympy.physics.vector import ReferenceFrame, dynamicsymbols, partial_velocity
 from sympy.physics.mechanics.particle import Particle
 from sympy.physics.mechanics.rigidbody import RigidBody
-from sympy.physics.mechanics.functions import (msubs, find_dynamicsymbols,
-                                               _f_list_parser)
+from sympy.physics.mechanics.functions import msubs, find_dynamicsymbols, _f_list_parser
 from sympy.physics.mechanics.linearize import Linearizer
 from sympy.utilities.exceptions import SymPyDeprecationWarning
 from sympy.utilities.iterables import iterable
 
-__all__ = ['KanesMethod']
+__all__ = ["KanesMethod"]
 
 
 class KanesMethod(object):
@@ -114,18 +112,27 @@ class KanesMethod(object):
 
     """
 
-    def __init__(self, frame, q_ind, u_ind, kd_eqs=None, q_dependent=None,
-            configuration_constraints=None, u_dependent=None,
-            velocity_constraints=None, acceleration_constraints=None,
-            u_auxiliary=None):
+    def __init__(
+        self,
+        frame,
+        q_ind,
+        u_ind,
+        kd_eqs=None,
+        q_dependent=None,
+        configuration_constraints=None,
+        u_dependent=None,
+        velocity_constraints=None,
+        acceleration_constraints=None,
+        u_auxiliary=None,
+    ):
 
         """Please read the online documentation. """
         if not q_ind:
-            q_ind = [dynamicsymbols('dummy_q')]
-            kd_eqs = [dynamicsymbols('dummy_kd')]
+            q_ind = [dynamicsymbols("dummy_q")]
+            kd_eqs = [dynamicsymbols("dummy_kd")]
 
         if not isinstance(frame, ReferenceFrame):
-            raise TypeError('An inertial ReferenceFrame must be supplied')
+            raise TypeError("An inertial ReferenceFrame must be supplied")
         self._inertial = frame
 
         self._fr = None
@@ -134,11 +141,11 @@ class KanesMethod(object):
         self._forcelist = None
         self._bodylist = None
 
-        self._initialize_vectors(q_ind, q_dependent, u_ind, u_dependent,
-                u_auxiliary)
+        self._initialize_vectors(q_ind, q_dependent, u_ind, u_dependent, u_auxiliary)
         self._initialize_kindiffeq_matrices(kd_eqs)
-        self._initialize_constraint_matrices(configuration_constraints,
-                velocity_constraints, acceleration_constraints)
+        self._initialize_constraint_matrices(
+            configuration_constraints, velocity_constraints, acceleration_constraints
+        )
 
     def _initialize_vectors(self, q_ind, q_dep, u_ind, u_dep, u_aux):
         """Initialize the coordinate and speed vectors."""
@@ -148,9 +155,9 @@ class KanesMethod(object):
         # Initialize generalized coordinates
         q_dep = none_handler(q_dep)
         if not iterable(q_ind):
-            raise TypeError('Generalized coordinates must be an iterable.')
+            raise TypeError("Generalized coordinates must be an iterable.")
         if not iterable(q_dep):
-            raise TypeError('Dependent coordinates must be an iterable.')
+            raise TypeError("Dependent coordinates must be an iterable.")
         q_ind = Matrix(q_ind)
         self._qdep = q_dep
         self._q = Matrix([q_ind, q_dep])
@@ -159,9 +166,9 @@ class KanesMethod(object):
         # Initialize generalized speeds
         u_dep = none_handler(u_dep)
         if not iterable(u_ind):
-            raise TypeError('Generalized speeds must be an iterable.')
+            raise TypeError("Generalized speeds must be an iterable.")
         if not iterable(u_dep):
-            raise TypeError('Dependent speeds must be an iterable.')
+            raise TypeError("Dependent speeds must be an iterable.")
         u_ind = Matrix(u_ind)
         self._udep = u_dep
         self._u = Matrix([u_ind, u_dep])
@@ -180,19 +187,25 @@ class KanesMethod(object):
         # Initialize configuration constraints
         config = none_handler(config)
         if len(self._qdep) != len(config):
-            raise ValueError('There must be an equal number of dependent '
-                             'coordinates and configuration constraints.')
+            raise ValueError(
+                "There must be an equal number of dependent "
+                "coordinates and configuration constraints."
+            )
         self._f_h = none_handler(config)
 
         # Initialize velocity and acceleration constraints
         vel = none_handler(vel)
         acc = none_handler(acc)
         if len(vel) != m:
-            raise ValueError('There must be an equal number of dependent '
-                             'speeds and velocity constraints.')
+            raise ValueError(
+                "There must be an equal number of dependent "
+                "speeds and velocity constraints."
+            )
         if acc and (len(acc) != m):
-            raise ValueError('There must be an equal number of dependent '
-                             'speeds and acceleration constraints.')
+            raise ValueError(
+                "There must be an equal number of dependent "
+                "speeds and acceleration constraints."
+            )
         if vel:
             u_zero = dict((i, 0) for i in self.u)
             udot_zero = dict((i, 0) for i in self._udot)
@@ -209,8 +222,9 @@ class KanesMethod(object):
             self._k_nh = (vel - self._f_nh).jacobian(self.u)
             # If no acceleration constraints given, calculate them.
             if not acc:
-                _f_dnh = (self._k_nh.diff(dynamicsymbols._t) * self.u +
-                          self._f_nh.diff(dynamicsymbols._t))
+                _f_dnh = self._k_nh.diff(dynamicsymbols._t) * self.u + self._f_nh.diff(
+                    dynamicsymbols._t
+                )
                 if self._qdot_u_map is not None:
                     _f_dnh = msubs(_f_dnh, self._qdot_u_map)
                 self._f_dnh = _f_dnh
@@ -240,8 +254,10 @@ class KanesMethod(object):
 
         if kdeqs:
             if len(self.q) != len(kdeqs):
-                raise ValueError('There must be an equal number of kinematic '
-                                 'differential equations and coordinates.')
+                raise ValueError(
+                    "There must be an equal number of kinematic "
+                    "differential equations and coordinates."
+                )
             kdeqs = Matrix(kdeqs)
 
             u = self.u
@@ -260,7 +276,8 @@ class KanesMethod(object):
             k_kqdot = eye(len(qdot))
 
             self._qdot_u_map = solve_linear_system_LU(
-                    Matrix([k_kqdot.T, -(k_ku * u + f_k).T]).T, qdot)
+                Matrix([k_kqdot.T, -(k_ku * u + f_k).T]).T, qdot
+            )
 
             self._f_k = msubs(f_k, uaux_zero)
             self._k_ku = msubs(k_ku, uaux_zero)
@@ -274,8 +291,9 @@ class KanesMethod(object):
     def _form_fr(self, fl):
         """Form the generalized active force."""
         if fl is not None and (len(fl) == 0 or not iterable(fl)):
-            raise ValueError('Force pairs must be supplied in an '
-                'non-empty iterable or None.')
+            raise ValueError(
+                "Force pairs must be supplied in an " "non-empty iterable or None."
+            )
 
         N = self._inertial
         # pull out relevant velocities for constructing partial velocities
@@ -307,7 +325,7 @@ class KanesMethod(object):
         """Form the generalized inertia force."""
 
         if not iterable(bl):
-            raise TypeError('Bodies must be supplied in an iterable.')
+            raise TypeError("Bodies must be supplied in an iterable.")
 
         t = dynamicsymbols._t
         N = self._inertial
@@ -317,8 +335,9 @@ class KanesMethod(object):
         uauxdot = [diff(i, t) for i in self._uaux]
         uauxdot_zero = dict((i, 0) for i in uauxdot)
         # Dictionary of q' and q'' to u and u'
-        q_ddot_u_map = dict((k.diff(t), v.diff(t)) for (k, v) in
-                self._qdot_u_map.items())
+        q_ddot_u_map = dict(
+            (k.diff(t), v.diff(t)) for (k, v) in self._qdot_u_map.items()
+        )
         q_ddot_u_map.update(self._qdot_u_map)
 
         # Fill up the list of partials: format is a list with num elements
@@ -331,12 +350,17 @@ class KanesMethod(object):
             if isinstance(body, RigidBody):
                 vlist = [body.masscenter.vel(N), body.frame.ang_vel_in(N)]
             elif isinstance(body, Particle):
-                vlist = [body.point.vel(N),]
+                vlist = [
+                    body.point.vel(N),
+                ]
             else:
-                raise TypeError('The body list may only contain either '
-                                'RigidBody or Particle as list elements.')
+                raise TypeError(
+                    "The body list may only contain either "
+                    "RigidBody or Particle as list elements."
+                )
             v = [msubs(vel, self._qdot_u_map) for vel in vlist]
             return partial_velocity(v, self.u, N)
+
         partials = [get_partial_velocity(body) for body in bl]
 
         # Compute fr_star in two components:
@@ -353,10 +377,12 @@ class KanesMethod(object):
                 vel = zero_uaux(body.masscenter.vel(N))
                 omega = zero_uaux(body.frame.ang_vel_in(N))
                 acc = zero_udot_uaux(body.masscenter.acc(N))
-                inertial_force = (M.diff(t) * vel + M * acc)
-                inertial_torque = zero_uaux((I.dt(body.frame) & omega) +
-                    msubs(I & body.frame.ang_acc_in(N), udot_zero) +
-                    (omega ^ (I & omega)))
+                inertial_force = M.diff(t) * vel + M * acc
+                inertial_torque = zero_uaux(
+                    (I.dt(body.frame) & omega)
+                    + msubs(I & body.frame.ang_acc_in(N), udot_zero)
+                    + (omega ^ (I & omega))
+                )
                 for j in range(o):
                     tmp_vel = zero_uaux(partials[i][0][j])
                     tmp_ang = zero_uaux(I & partials[i][1][j])
@@ -364,14 +390,14 @@ class KanesMethod(object):
                         # translational
                         MM[j, k] += M * (tmp_vel & partials[i][0][k])
                         # rotational
-                        MM[j, k] += (tmp_ang & partials[i][1][k])
+                        MM[j, k] += tmp_ang & partials[i][1][k]
                     nonMM[j] += inertial_force & partials[i][0][j]
                     nonMM[j] += inertial_torque & partials[i][1][j]
             else:
                 M = zero_uaux(body.mass)
                 vel = zero_uaux(body.point.vel(N))
                 acc = zero_udot_uaux(body.point.acc(N))
-                inertial_force = (M.diff(t) * vel + M * acc)
+                inertial_force = M.diff(t) * vel + M * acc
                 for j in range(o):
                     temp = zero_uaux(partials[i][0][j])
                     for k in range(o):
@@ -379,8 +405,7 @@ class KanesMethod(object):
                     nonMM[j] += inertial_force & partials[i][0][j]
         # Compose fr_star out of MM and nonMM
         MM = zero_uaux(msubs(MM, q_ddot_u_map))
-        nonMM = msubs(msubs(nonMM, q_ddot_u_map),
-                udot_zero, uauxdot_zero, uaux_zero)
+        nonMM = msubs(msubs(nonMM, q_ddot_u_map), udot_zero, uauxdot_zero, uaux_zero)
         fr_star = -(MM * msubs(Matrix(self._udot), uauxdot_zero) + nonMM)
 
         # If there are dependent speeds, we need to find fr_star_tilde
@@ -407,17 +432,17 @@ class KanesMethod(object):
         efficient recalculation (i.e. about varying operating points)."""
 
         if (self._fr is None) or (self._frstar is None):
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
 
         # Get required equation components. The Kane's method class breaks
         # these into pieces. Need to reassemble
         f_c = self._f_h
         if self._f_nh and self._k_nh:
-            f_v = self._f_nh + self._k_nh*Matrix(self.u)
+            f_v = self._f_nh + self._k_nh * Matrix(self.u)
         else:
             f_v = Matrix()
         if self._f_dnh and self._k_dnh:
-            f_a = self._f_dnh + self._k_dnh*Matrix(self._udot)
+            f_a = self._f_dnh + self._k_dnh * Matrix(self._udot)
         else:
             f_a = Matrix()
         # Dicts to sub to zero, for splitting up expressions
@@ -426,8 +451,8 @@ class KanesMethod(object):
         qd_zero = dict((i, 0) for i in self._qdot)
         qd_u_zero = dict((i, 0) for i in Matrix([self._qdot, self.u]))
         # Break the kinematic differential eqs apart into f_0 and f_1
-        f_0 = msubs(self._f_k, u_zero) + self._k_kqdot*Matrix(self._qdot)
-        f_1 = msubs(self._f_k, qd_zero) + self._k_ku*Matrix(self.u)
+        f_0 = msubs(self._f_k, u_zero) + self._k_kqdot * Matrix(self._qdot)
+        f_1 = msubs(self._f_k, qd_zero) + self._k_ku * Matrix(self.u)
         # Break the dynamic differential eqs into f_2 and f_3
         f_2 = msubs(self._frstar, qd_u_zero)
         f_3 = msubs(self._frstar, ud_zero) + self._fr
@@ -437,12 +462,12 @@ class KanesMethod(object):
         q = self.q
         u = self.u
         if self._qdep:
-            q_i = q[:-len(self._qdep)]
+            q_i = q[: -len(self._qdep)]
         else:
             q_i = q
         q_d = self._qdep
         if self._udep:
-            u_i = u[:-len(self._udep)]
+            u_i = u[: -len(self._udep)]
         else:
             u_i = u
         u_d = self._udep
@@ -455,10 +480,21 @@ class KanesMethod(object):
         # Checking for dynamic symbols outside the dynamic differential
         # equations; throws error if there is.
         sym_list = set(Matrix([q, self._qdot, u, self._udot, uaux, uauxdot]))
-        if any(find_dynamicsymbols(i, sym_list) for i in [self._k_kqdot,
-                self._k_ku, self._f_k, self._k_dnh, self._f_dnh, self._k_d]):
-            raise ValueError('Cannot have dynamicsymbols outside dynamic \
-                             forcing vector.')
+        if any(
+            find_dynamicsymbols(i, sym_list)
+            for i in [
+                self._k_kqdot,
+                self._k_ku,
+                self._f_k,
+                self._k_dnh,
+                self._f_dnh,
+                self._k_d,
+            ]
+        ):
+            raise ValueError(
+                "Cannot have dynamicsymbols outside dynamic \
+                             forcing vector."
+            )
 
         # Find all other dynamic symbols, forming the forcing vector r.
         # Sort r to make it canonical.
@@ -468,10 +504,13 @@ class KanesMethod(object):
         # Check for any derivatives of variables in r that are also found in r.
         for i in r:
             if diff(i, dynamicsymbols._t) in r:
-                raise ValueError('Cannot have derivatives of specified \
-                                 quantities when linearizing forcing terms.')
-        return Linearizer(f_0, f_1, f_2, f_3, f_4, f_c, f_v, f_a, q, u, q_i,
-                q_d, u_i, u_d, r)
+                raise ValueError(
+                    "Cannot have derivatives of specified \
+                                 quantities when linearizing forcing terms."
+                )
+        return Linearizer(
+            f_0, f_1, f_2, f_3, f_4, f_c, f_v, f_a, q, u, q_i, q_d, u_i, u_d, r
+        )
 
     def linearize(self, **kwargs):
         """ Linearize the equations of motion about a symbolic operating point.
@@ -499,7 +538,7 @@ class KanesMethod(object):
         For more documentation, please see the ``Linearizer`` class."""
 
         # TODO : Remove this after 1.1 has been released.
-        _ = kwargs.pop('new_method', None)
+        _ = kwargs.pop("new_method", None)
 
         linearizer = self.to_linearizer()
         result = linearizer.linearize(**kwargs)
@@ -530,28 +569,38 @@ class KanesMethod(object):
         if (bodies is None and loads is not None) or isinstance(bodies[0], tuple):
             # This switches the order if they use the old way.
             bodies, loads = loads, bodies
-            SymPyDeprecationWarning(value='The API for kanes_equations() has changed such '
-                    'that the loads (forces and torques) are now the second argument '
-                    'and is optional with None being the default.',
-                    feature='The kanes_equation() argument order',
-                    useinstead='switched argument order to update your code, For example: '
-                    'kanes_equations(loads, bodies) > kanes_equations(bodies, loads).',
-                    issue=10945, deprecated_since_version="1.1").warn()
+            SymPyDeprecationWarning(
+                value="The API for kanes_equations() has changed such "
+                "that the loads (forces and torques) are now the second argument "
+                "and is optional with None being the default.",
+                feature="The kanes_equation() argument order",
+                useinstead="switched argument order to update your code, For example: "
+                "kanes_equations(loads, bodies) > kanes_equations(bodies, loads).",
+                issue=10945,
+                deprecated_since_version="1.1",
+            ).warn()
 
         if not self._k_kqdot:
-            raise AttributeError('Create an instance of KanesMethod with '
-                    'kinematic differential equations to use this method.')
+            raise AttributeError(
+                "Create an instance of KanesMethod with "
+                "kinematic differential equations to use this method."
+            )
         fr = self._form_fr(loads)
         frstar = self._form_frstar(bodies)
         if self._uaux:
             if not self._udep:
-                km = KanesMethod(self._inertial, self.q, self._uaux,
-                             u_auxiliary=self._uaux)
+                km = KanesMethod(
+                    self._inertial, self.q, self._uaux, u_auxiliary=self._uaux
+                )
             else:
-                km = KanesMethod(self._inertial, self.q, self._uaux,
-                        u_auxiliary=self._uaux, u_dependent=self._udep,
-                        velocity_constraints=(self._k_nh * self.u +
-                        self._f_nh))
+                km = KanesMethod(
+                    self._inertial,
+                    self.q,
+                    self._uaux,
+                    u_auxiliary=self._uaux,
+                    u_dependent=self._udep,
+                    velocity_constraints=(self._k_nh * self.u + self._f_nh),
+                )
             km._qdot_u_map = self._qdot_u_map
             self._km = km
             fraux = km._form_fr(loads)
@@ -585,35 +634,37 @@ class KanesMethod(object):
             rhs[i] = kdes[q_i.diff()]
 
         if inv_method is None:
-            rhs[len(self.q):, 0] = self.mass_matrix.LUsolve(self.forcing)
+            rhs[len(self.q) :, 0] = self.mass_matrix.LUsolve(self.forcing)
         else:
-            rhs[len(self.q):, 0] = (self.mass_matrix.inv(inv_method,
-                                                         try_block_diag=True) *
-                                    self.forcing)
+            rhs[len(self.q) :, 0] = (
+                self.mass_matrix.inv(inv_method, try_block_diag=True) * self.forcing
+            )
 
         return rhs
 
     def kindiffdict(self):
         """Returns a dictionary mapping q' to u."""
         if not self._qdot_u_map:
-            raise AttributeError('Create an instance of KanesMethod with '
-                    'kinematic differential equations to use this method.')
+            raise AttributeError(
+                "Create an instance of KanesMethod with "
+                "kinematic differential equations to use this method."
+            )
         return self._qdot_u_map
 
     @property
     def auxiliary_eqs(self):
         """A matrix containing the auxiliary equations."""
         if not self._fr or not self._frstar:
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
         if not self._uaux:
-            raise ValueError('No auxiliary speeds have been declared.')
+            raise ValueError("No auxiliary speeds have been declared.")
         return self._aux_eq
 
     @property
     def mass_matrix(self):
         """The mass matrix of the system."""
         if not self._fr or not self._frstar:
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
         return Matrix([self._k_d, self._k_dnh])
 
     @property
@@ -621,17 +672,18 @@ class KanesMethod(object):
         """The mass matrix of the system, augmented by the kinematic
         differential equations."""
         if not self._fr or not self._frstar:
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
         o = len(self.u)
         n = len(self.q)
-        return ((self._k_kqdot).row_join(zeros(n, o))).col_join((zeros(o,
-                n)).row_join(self.mass_matrix))
+        return ((self._k_kqdot).row_join(zeros(n, o))).col_join(
+            (zeros(o, n)).row_join(self.mass_matrix)
+        )
 
     @property
     def forcing(self):
         """The forcing vector of the system."""
         if not self._fr or not self._frstar:
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
         return -Matrix([self._f_d, self._f_dnh])
 
     @property
@@ -639,7 +691,7 @@ class KanesMethod(object):
         """The forcing vector of the system, augmented by the kinematic
         differential equations."""
         if not self._fr or not self._frstar:
-            raise ValueError('Need to compute Fr, Fr* first.')
+            raise ValueError("Need to compute Fr, Fr* first.")
         f1 = self._k_ku * Matrix(self.u) + self._f_k
         return -Matrix([f1, self._f_d, self._f_dnh])
 

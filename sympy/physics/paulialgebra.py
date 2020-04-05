@@ -14,7 +14,7 @@ from __future__ import print_function, division
 from sympy import Symbol, I, Mul, Pow, Add
 from sympy.physics.quantum import TensorProduct
 
-__all__ = ['evaluate_pauli_product']
+__all__ = ["evaluate_pauli_product"]
 
 
 def delta(i, j):
@@ -124,13 +124,18 @@ class Pauli(Symbol):
     def __new__(cls, i, label="sigma"):
         if not i in [1, 2, 3]:
             raise IndexError("Invalid Pauli index")
-        obj = Symbol.__new__(cls, "%s%d" %(label,i), commutative=False, hermitian=True)
+        obj = Symbol.__new__(
+            cls, "%s%d" % (label, i), commutative=False, hermitian=True
+        )
         obj.i = i
         obj.label = label
         return obj
 
     def __getnewargs__(self):
-        return (self.i,self.label,)
+        return (
+            self.i,
+            self.label,
+        )
 
     # FIXME don't work for -I*Pauli(2)*Pauli(3)
     def __mul__(self, other):
@@ -141,10 +146,12 @@ class Pauli(Symbol):
             klab = other.label
 
             if jlab == klab:
-                return delta(j, k) \
-                    + I*epsilon(j, k, 1)*Pauli(1,jlab) \
-                    + I*epsilon(j, k, 2)*Pauli(2,jlab) \
-                    + I*epsilon(j, k, 3)*Pauli(3,jlab)
+                return (
+                    delta(j, k)
+                    + I * epsilon(j, k, 1) * Pauli(1, jlab)
+                    + I * epsilon(j, k, 2) * Pauli(2, jlab)
+                    + I * epsilon(j, k, 3) * Pauli(3, jlab)
+                )
         return super(Pauli, self).__mul__(other)
 
     def _eval_power(b, e):
@@ -153,7 +160,7 @@ class Pauli(Symbol):
 
 
 def evaluate_pauli_product(arg):
-    '''Help function to evaluate Pauli matrices product
+    """Help function to evaluate Pauli matrices product
     with symbolic objects
 
     Parameters
@@ -172,7 +179,7 @@ def evaluate_pauli_product(arg):
     >>> from sympy.abc import x,y
     >>> evaluate_pauli_product(x**2*Pauli(2)*Pauli(1))
     -I*x**2*sigma3
-    '''
+    """
     start = arg
     end = arg
 
@@ -188,10 +195,10 @@ def evaluate_pauli_product(arg):
     if isinstance(arg, TensorProduct):
         return TensorProduct(*[evaluate_pauli_product(part) for part in arg.args])
 
-    elif not(isinstance(arg, Mul)):
+    elif not (isinstance(arg, Mul)):
         return arg
 
-    while ((not(start == end)) | ((start == arg) & (end == arg))):
+    while (not (start == end)) | ((start == arg) & (end == arg)):
         start = end
 
         tmp = start.as_coeff_mul()
@@ -202,21 +209,25 @@ def evaluate_pauli_product(arg):
         for el in tmp[1]:
             if isinstance(el, Pauli):
                 sigma_product *= el
-            elif not(el.is_commutative):
+            elif not (el.is_commutative):
                 if isinstance(el, Pow) and isinstance(el.args[0], Pauli):
                     if el.args[1].is_odd:
                         sigma_product *= el.args[0]
                 elif isinstance(el, TensorProduct):
-                    keeper = keeper*sigma_product*\
-                        TensorProduct(
+                    keeper = (
+                        keeper
+                        * sigma_product
+                        * TensorProduct(
                             *[evaluate_pauli_product(part) for part in el.args]
                         )
+                    )
                     sigma_product = 1
                 else:
-                    keeper = keeper*sigma_product*el
+                    keeper = keeper * sigma_product * el
                     sigma_product = 1
             else:
                 com_product *= el
-        end = (tmp[0]*keeper*sigma_product*com_product)
-        if end == arg: break
+        end = tmp[0] * keeper * sigma_product * com_product
+        if end == arg:
+            break
     return end

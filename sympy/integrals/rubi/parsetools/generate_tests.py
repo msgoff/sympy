@@ -1,4 +1,8 @@
-from sympy.integrals.rubi.parsetools.parse import generate_sympy_from_parsed, parse_full_form, rubi_printer
+from sympy.integrals.rubi.parsetools.parse import (
+    generate_sympy_from_parsed,
+    parse_full_form,
+    rubi_printer,
+)
 from sympy import sympify
 from sympy.integrals.rubi.utility_function import List, If
 import os, inspect
@@ -9,22 +13,26 @@ def rubi_sstr(a):
 
 
 def generate_test_file():
-    '''
+    """
     This function is assuming the name of file containing the fullform is test_1.m.
     It can be changes as per use.
 
     For more details, see
     `https://github.com/sympy/sympy/wiki/Rubi-parsing-guide#parsing-tests`
-    '''
-    res =[]
-    file_name = 'test_1.m'
-    with open(file_name, 'r') as myfile:
-        fullform =myfile.read().replace('\n', '')
-    fullform = fullform.replace('$VersionNumber', 'version_number')
-    fullform = fullform.replace('Defer[Int][', 'Integrate[')
-    path_header = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    """
+    res = []
+    file_name = "test_1.m"
+    with open(file_name, "r") as myfile:
+        fullform = myfile.read().replace("\n", "")
+    fullform = fullform.replace("$VersionNumber", "version_number")
+    fullform = fullform.replace("Defer[Int][", "Integrate[")
+    path_header = os.path.dirname(
+        os.path.abspath(inspect.getfile(inspect.currentframe()))
+    )
     h = open(os.path.join(path_header, "header.py.txt"), "r").read()
-    header = "import sys\nfrom sympy.external import import_module\nmatchpy = import_module({})".format('\"matchpy\"')
+    header = "import sys\nfrom sympy.external import import_module\nmatchpy = import_module({})".format(
+        '"matchpy"'
+    )
     header += "\nif not matchpy:\n    disabled = True\n"
     header += "if sys.version_info[:2] < (3, 6):\n    disabled = True\n"
     header += "\n".join(h.split("\n")[8:-9])
@@ -37,20 +45,27 @@ def generate_test_file():
     tests = []
     for i in s:
         res[:] = []
-        if i[0] == 'HoldComplete':
-            ss = sympify(generate_sympy_from_parsed(i[1]), locals = { 'version_number' : 11, 'If' : If})
+        if i[0] == "HoldComplete":
+            ss = sympify(
+                generate_sympy_from_parsed(i[1]),
+                locals={"version_number": 11, "If": If},
+            )
             ss = List(*ss.args)
             tests.append(ss)
 
-    t = ''
+    t = ""
     for a in tests:
         if len(a) == 5:
-            r = 'rubi_integrate({}, x)'.format(rubi_sstr(a[0]))
-            t += '\n    assert rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True) or rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True)'.format(r, rubi_sstr(a[1]), rubi_sstr(a[3]), r, rubi_sstr(a[1]),rubi_sstr(a[4]))
+            r = "rubi_integrate({}, x)".format(rubi_sstr(a[0]))
+            t += "\n    assert rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True) or rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True)".format(
+                r, rubi_sstr(a[1]), rubi_sstr(a[3]), r, rubi_sstr(a[1]), rubi_sstr(a[4])
+            )
         else:
-            r = 'rubi_integrate({}, x)'.format(rubi_sstr(a[0]))
-            t += '\n    assert rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True)'.format(r, rubi_sstr(a[1]), rubi_sstr(a[3]))
-    t = header+t+'\n'
-    test = open('parsed_tests.py', 'w')
+            r = "rubi_integrate({}, x)".format(rubi_sstr(a[0]))
+            t += "\n    assert rubi_test({}, {}, {}, expand=True, _diff=True, _numerical=True)".format(
+                r, rubi_sstr(a[1]), rubi_sstr(a[3])
+            )
+    t = header + t + "\n"
+    test = open("parsed_tests.py", "w")
     test.write(t)
     test.close()

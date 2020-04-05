@@ -1,6 +1,13 @@
 """Printing subsystem"""
 
-from .pretty import pager_print, pretty, pretty_print, pprint, pprint_use_unicode, pprint_try_use_unicode
+from .pretty import (
+    pager_print,
+    pretty,
+    pretty_print,
+    pprint,
+    pprint_use_unicode,
+    pprint_try_use_unicode,
+)
 
 from .latex import latex, print_latex, multiline_latex
 
@@ -48,72 +55,66 @@ from .maple import maple_code, print_maple_code
 
 __all__ = [
     # sympy.printing.pretty
-    'pager_print', 'pretty', 'pretty_print', 'pprint', 'pprint_use_unicode',
-    'pprint_try_use_unicode',
-
+    "pager_print",
+    "pretty",
+    "pretty_print",
+    "pprint",
+    "pprint_use_unicode",
+    "pprint_try_use_unicode",
     # sympy.printing.latex
-    'latex', 'print_latex', 'multiline_latex',
-
+    "latex",
+    "print_latex",
+    "multiline_latex",
     # sympy.printing.mathml
-    'mathml', 'print_mathml',
-
+    "mathml",
+    "print_mathml",
     # sympy.printing.python
-    'python', 'print_python',
-
+    "python",
+    "print_python",
     # sympy.printing.pycode
-    'pycode',
-
+    "pycode",
     # sympy.printing.ccode
-    'ccode', 'print_ccode',
-
+    "ccode",
+    "print_ccode",
     # sympy.printing.glsl
-    'glsl_code', 'print_glsl',
-
+    "glsl_code",
+    "print_glsl",
     # sympy.printing.cxxcode
-    'cxxcode',
-
+    "cxxcode",
     # sympy.printing.fcode
-    'fcode', 'print_fcode',
-
+    "fcode",
+    "print_fcode",
     # sympy.printing.rcode
-    'rcode', 'print_rcode',
-
+    "rcode",
+    "print_rcode",
     # sympy.printing.jscode
-    'jscode', 'print_jscode',
-
+    "jscode",
+    "print_jscode",
     # sympy.printing.julia
-    'julia_code',
-
+    "julia_code",
     # sympy.printing.mathematica
-    'mathematica_code',
-
+    "mathematica_code",
     # sympy.printing.octave
-    'octave_code',
-
+    "octave_code",
     # sympy.printing.rust
-    'rust_code',
-
+    "rust_code",
     # sympy.printing.gtk
-    'print_gtk',
-
+    "print_gtk",
     # sympy.printing.preview
-    'preview',
-
+    "preview",
     # sympy.printing.repr
-    'srepr',
-
+    "srepr",
     # sympy.printing.tree
-    'print_tree',
-
+    "print_tree",
     # sympy.printing.str
-    'StrPrinter', 'sstr', 'sstrrepr',
-
+    "StrPrinter",
+    "sstr",
+    "sstrrepr",
     # sympy.printing.tableform
-    'TableForm',
-
+    "TableForm",
     # sympy.printing.dot
-    'dotprint',
-
+    "dotprint",
     # sympy.printing.maple
-    'maple_code', 'print_maple_code',
+    "maple_code",
+    "print_maple_code",
 ]

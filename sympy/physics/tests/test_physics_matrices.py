@@ -9,28 +9,28 @@ def test_parallel_axis_theorem():
     # First case, 1 in all directions.
     mat1 = Matrix(((2, -1, -1), (-1, 2, -1), (-1, -1, 2)))
     assert pat_matrix(1, 1, 1, 1) == mat1
-    assert pat_matrix(2, 1, 1, 1) == 2*mat1
+    assert pat_matrix(2, 1, 1, 1) == 2 * mat1
 
     # Second case, 1 in x, 0 in all others
     mat2 = Matrix(((0, 0, 0), (0, 1, 0), (0, 0, 1)))
     assert pat_matrix(1, 1, 0, 0) == mat2
-    assert pat_matrix(2, 1, 0, 0) == 2*mat2
+    assert pat_matrix(2, 1, 0, 0) == 2 * mat2
 
     # Third case, 1 in y, 0 in all others
     mat3 = Matrix(((1, 0, 0), (0, 0, 0), (0, 0, 1)))
     assert pat_matrix(1, 0, 1, 0) == mat3
-    assert pat_matrix(2, 0, 1, 0) == 2*mat3
+    assert pat_matrix(2, 0, 1, 0) == 2 * mat3
 
     # Fourth case, 1 in z, 0 in all others
     mat4 = Matrix(((1, 0, 0), (0, 1, 0), (0, 0, 0)))
     assert pat_matrix(1, 0, 0, 1) == mat4
-    assert pat_matrix(2, 0, 0, 1) == 2*mat4
+    assert pat_matrix(2, 0, 0, 1) == 2 * mat4
 
 
 def test_Pauli():
-    #this and the following test are testing both Pauli and Dirac matrices
-    #and also that the general Matrix class works correctly in a real world
-    #situation
+    # this and the following test are testing both Pauli and Dirac matrices
+    # and also that the general Matrix class works correctly in a real world
+    # situation
     sigma1 = msigma(1)
     sigma2 = msigma(2)
     sigma3 = msigma(3)
@@ -39,16 +39,16 @@ def test_Pauli():
     assert sigma1 != sigma2
 
     # sigma*I -> I*sigma    (see #354)
-    assert sigma1*sigma2 == sigma3*I
-    assert sigma3*sigma1 == sigma2*I
-    assert sigma2*sigma3 == sigma1*I
+    assert sigma1 * sigma2 == sigma3 * I
+    assert sigma3 * sigma1 == sigma2 * I
+    assert sigma2 * sigma3 == sigma1 * I
 
-    assert sigma1*sigma1 == eye(2)
-    assert sigma2*sigma2 == eye(2)
-    assert sigma3*sigma3 == eye(2)
+    assert sigma1 * sigma1 == eye(2)
+    assert sigma2 * sigma2 == eye(2)
+    assert sigma3 * sigma3 == eye(2)
 
-    assert sigma1*2*sigma1 == 2*eye(2)
-    assert sigma1*sigma3*sigma1 == -sigma3
+    assert sigma1 * 2 * sigma1 == 2 * eye(2)
+    assert sigma1 * sigma3 * sigma1 == -sigma3
 
 
 def test_Dirac():
@@ -65,13 +65,20 @@ def test_Dirac():
     assert gamma2 * gamma2 != eye(4) * minkowski_tensor[0, 0]
     assert gamma2 * gamma2 == eye(4) * minkowski_tensor[2, 2]
 
-    assert mgamma(5, True) == \
-        mgamma(0, True)*mgamma(1, True)*mgamma(2, True)*mgamma(3, True)*I
+    assert (
+        mgamma(5, True)
+        == mgamma(0, True) * mgamma(1, True) * mgamma(2, True) * mgamma(3, True) * I
+    )
+
 
 def test_mdft():
     assert mdft(1) == Matrix([[1]])
-    assert mdft(2) == 1/sqrt(2)*Matrix([[1,1],[1,-1]])
-    assert mdft(4) == Matrix([[S.Half,  S.Half,  S.Half, S.Half],
-                              [S.Half, -I/2, Rational(-1,2),  I/2],
-                              [S.Half, Rational(-1,2),  S.Half, Rational(-1,2)],
-                              [S.Half,  I/2, Rational(-1,2), -I/2]])
+    assert mdft(2) == 1 / sqrt(2) * Matrix([[1, 1], [1, -1]])
+    assert mdft(4) == Matrix(
+        [
+            [S.Half, S.Half, S.Half, S.Half],
+            [S.Half, -I / 2, Rational(-1, 2), I / 2],
+            [S.Half, Rational(-1, 2), S.Half, Rational(-1, 2)],
+            [S.Half, I / 2, Rational(-1, 2), -I / 2],
+        ]
+    )

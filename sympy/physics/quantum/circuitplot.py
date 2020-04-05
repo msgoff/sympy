@@ -24,27 +24,28 @@ from sympy.core.assumptions import ManagedProperties
 
 
 __all__ = [
-    'CircuitPlot',
-    'circuit_plot',
-    'labeller',
-    'Mz',
-    'Mx',
-    'CreateOneQubitGate',
-    'CreateCGate',
+    "CircuitPlot",
+    "circuit_plot",
+    "labeller",
+    "Mz",
+    "Mx",
+    "CreateOneQubitGate",
+    "CreateCGate",
 ]
 
-np = import_module('numpy')
+np = import_module("numpy")
 matplotlib = import_module(
-    'matplotlib', import_kwargs={'fromlist': ['pyplot']},
-    catch=(RuntimeError,))  # This is raised in environments that have no display.
+    "matplotlib", import_kwargs={"fromlist": ["pyplot"]}, catch=(RuntimeError,)
+)  # This is raised in environments that have no display.
 
 if np and matplotlib:
     pyplot = matplotlib.pyplot
     Line2D = matplotlib.lines.Line2D
     Circle = matplotlib.patches.Circle
 
-#from matplotlib import rc
-#rc('text',usetex=True)
+# from matplotlib import rc
+# rc('text',usetex=True)
+
 
 class CircuitPlot(object):
     """A class for managing a circuit plot."""
@@ -61,7 +62,7 @@ class CircuitPlot(object):
 
     def __init__(self, c, nqubits, **kwargs):
         if not np or not matplotlib:
-            raise ImportError('numpy or matplotlib not available.')
+            raise ImportError("numpy or matplotlib not available.")
         self.circuit = c
         self.ngates = len(self.circuit.args)
         self.nqubits = nqubits
@@ -79,27 +80,24 @@ class CircuitPlot(object):
     def _create_grid(self):
         """Create the grid of wires."""
         scale = self.scale
-        wire_grid = np.arange(0.0, self.nqubits*scale, scale, dtype=float)
-        gate_grid = np.arange(0.0, self.ngates*scale, scale, dtype=float)
+        wire_grid = np.arange(0.0, self.nqubits * scale, scale, dtype=float)
+        gate_grid = np.arange(0.0, self.ngates * scale, scale, dtype=float)
         self._wire_grid = wire_grid
         self._gate_grid = gate_grid
 
     def _create_figure(self):
         """Create the main matplotlib figure."""
         self._figure = pyplot.figure(
-            figsize=(self.ngates*self.scale, self.nqubits*self.scale),
-            facecolor='w',
-            edgecolor='w'
+            figsize=(self.ngates * self.scale, self.nqubits * self.scale),
+            facecolor="w",
+            edgecolor="w",
         )
-        ax = self._figure.add_subplot(
-            1, 1, 1,
-            frameon=True
-        )
+        ax = self._figure.add_subplot(1, 1, 1, frameon=True)
         ax.set_axis_off()
-        offset = 0.5*self.scale
+        offset = 0.5 * self.scale
         ax.set_xlim(self._gate_grid[0] - offset, self._gate_grid[-1] + offset)
         ax.set_ylim(self._wire_grid[0] - offset, self._wire_grid[-1] + offset)
-        ax.set_aspect('equal')
+        ax.set_aspect("equal")
         self._axes = ax
 
     def _plot_wires(self):
@@ -109,51 +107,47 @@ class CircuitPlot(object):
         xdata = (xstart - self.scale, xstop + self.scale)
         for i in range(self.nqubits):
             ydata = (self._wire_grid[i], self._wire_grid[i])
-            line = Line2D(
-                xdata, ydata,
-                color='k',
-                lw=self.linewidth
-            )
+            line = Line2D(xdata, ydata, color="k", lw=self.linewidth)
             self._axes.add_line(line)
             if self.labels:
                 init_label_buffer = 0
-                if self.inits.get(self.labels[i]): init_label_buffer = 0.25
+                if self.inits.get(self.labels[i]):
+                    init_label_buffer = 0.25
                 self._axes.text(
-                    xdata[0]-self.label_buffer-init_label_buffer,ydata[0],
-                    render_label(self.labels[i],self.inits),
+                    xdata[0] - self.label_buffer - init_label_buffer,
+                    ydata[0],
+                    render_label(self.labels[i], self.inits),
                     size=self.fontsize,
-                    color='k',ha='center',va='center')
+                    color="k",
+                    ha="center",
+                    va="center",
+                )
         self._plot_measured_wires()
 
     def _plot_measured_wires(self):
         ismeasured = self._measurements()
         xstop = self._gate_grid[-1]
-        dy = 0.04 # amount to shift wires when doubled
+        dy = 0.04  # amount to shift wires when doubled
         # Plot doubled wires after they are measured
         for im in ismeasured:
-            xdata = (self._gate_grid[ismeasured[im]],xstop+self.scale)
-            ydata = (self._wire_grid[im]+dy,self._wire_grid[im]+dy)
-            line = Line2D(
-                xdata, ydata,
-                color='k',
-                lw=self.linewidth
-            )
+            xdata = (self._gate_grid[ismeasured[im]], xstop + self.scale)
+            ydata = (self._wire_grid[im] + dy, self._wire_grid[im] + dy)
+            line = Line2D(xdata, ydata, color="k", lw=self.linewidth)
             self._axes.add_line(line)
         # Also double any controlled lines off these wires
-        for i,g in enumerate(self._gates()):
+        for i, g in enumerate(self._gates()):
             if isinstance(g, CGate) or isinstance(g, CGateS):
                 wires = g.controls + g.targets
                 for wire in wires:
-                    if wire in ismeasured and \
-                           self._gate_grid[i] > self._gate_grid[ismeasured[wire]]:
+                    if (
+                        wire in ismeasured
+                        and self._gate_grid[i] > self._gate_grid[ismeasured[wire]]
+                    ):
                         ydata = min(wires), max(wires)
-                        xdata = self._gate_grid[i]-dy, self._gate_grid[i]-dy
-                        line = Line2D(
-                            xdata, ydata,
-                            color='k',
-                            lw=self.linewidth
-                            )
+                        xdata = self._gate_grid[i] - dy, self._gate_grid[i] - dy
+                        line = Line2D(xdata, ydata, color="k", lw=self.linewidth)
                         self._axes.add_line(line)
+
     def _gates(self):
         """Create a list of all gates in the circuit plot."""
         gates = []
@@ -175,8 +169,8 @@ class CircuitPlot(object):
         been measured, and j is the gate where the wire is measured.
         """
         ismeasured = {}
-        for i,g in enumerate(self._gates()):
-            if getattr(g,'measurement',False):
+        for i, g in enumerate(self._gates()):
+            if getattr(g, "measurement", False):
                 for target in g.targets:
                     if target in ismeasured:
                         if ismeasured[target] > i:
@@ -195,12 +189,14 @@ class CircuitPlot(object):
         x = self._gate_grid[gate_idx]
         y = self._wire_grid[wire_idx]
         self._axes.text(
-            x, y, t,
-            color='k',
-            ha='center',
-            va='center',
-            bbox=dict(ec='k', fc='w', fill=True, lw=self.linewidth),
-            size=self.fontsize
+            x,
+            y,
+            t,
+            color="k",
+            ha="center",
+            va="center",
+            bbox=dict(ec="k", fc="w", fill=True, lw=self.linewidth),
+            size=self.fontsize,
         )
 
     def two_qubit_box(self, t, gate_idx, wire_idx):
@@ -224,11 +220,7 @@ class CircuitPlot(object):
         """Draw a vertical control line."""
         xdata = (self._gate_grid[gate_idx], self._gate_grid[gate_idx])
         ydata = (self._wire_grid[min_wire], self._wire_grid[max_wire])
-        line = Line2D(
-            xdata, ydata,
-            color='k',
-            lw=self.linewidth
-        )
+        line = Line2D(xdata, ydata, color="k", lw=self.linewidth)
         self._axes.add_line(line)
 
     def control_point(self, gate_idx, wire_idx):
@@ -237,12 +229,7 @@ class CircuitPlot(object):
         y = self._wire_grid[wire_idx]
         radius = self.control_radius
         c = Circle(
-            (x, y),
-            radius*self.scale,
-            ec='k',
-            fc='k',
-            fill=True,
-            lw=self.linewidth
+            (x, y), radius * self.scale, ec="k", fc="k", fill=True, lw=self.linewidth
         )
         self._axes.add_patch(c)
 
@@ -251,20 +238,9 @@ class CircuitPlot(object):
         x = self._gate_grid[gate_idx]
         y = self._wire_grid[wire_idx]
         radius = self.not_radius
-        c = Circle(
-            (x, y),
-            radius,
-            ec='k',
-            fc='w',
-            fill=False,
-            lw=self.linewidth
-        )
+        c = Circle((x, y), radius, ec="k", fc="w", fill=False, lw=self.linewidth)
         self._axes.add_patch(c)
-        l = Line2D(
-            (x, x), (y - radius, y + radius),
-            color='k',
-            lw=self.linewidth
-        )
+        l = Line2D((x, x), (y - radius, y + radius), color="k", lw=self.linewidth)
         self._axes.add_line(l)
 
     def swap_point(self, gate_idx, wire_idx):
@@ -272,20 +248,11 @@ class CircuitPlot(object):
         x = self._gate_grid[gate_idx]
         y = self._wire_grid[wire_idx]
         d = self.swap_delta
-        l1 = Line2D(
-            (x - d, x + d),
-            (y - d, y + d),
-            color='k',
-            lw=self.linewidth
-        )
-        l2 = Line2D(
-            (x - d, x + d),
-            (y + d, y - d),
-            color='k',
-            lw=self.linewidth
-        )
+        l1 = Line2D((x - d, x + d), (y - d, y + d), color="k", lw=self.linewidth)
+        l2 = Line2D((x - d, x + d), (y + d, y - d), color="k", lw=self.linewidth)
         self._axes.add_line(l1)
         self._axes.add_line(l2)
+
 
 def circuit_plot(c, nqubits, **kwargs):
     """Draw the circuit diagram for the circuit with nqubits.
@@ -301,6 +268,7 @@ def circuit_plot(c, nqubits, **kwargs):
     """
     return CircuitPlot(c, nqubits, **kwargs)
 
+
 def render_label(label, inits={}):
     """Slightly more flexible way to render labels.
 
@@ -312,10 +280,11 @@ def render_label(label, inits={}):
     """
     init = inits.get(label)
     if init:
-        return r'$\left|%s\right\rangle=\left|%s\right\rangle$' % (label, init)
-    return r'$\left|%s\right\rangle$' % label
+        return r"$\left|%s\right\rangle=\left|%s\right\rangle$" % (label, init)
+    return r"$\left|%s\right\rangle$" % label
 
-def labeller(n, symbol='q'):
+
+def labeller(n, symbol="q"):
     """Autogenerate labels for wires of quantum circuits.
 
     Parameters
@@ -331,7 +300,8 @@ def labeller(n, symbol='q'):
     >>> labeller(3,'j')
     ['j_2', 'j_1', 'j_0']
     """
-    return ['%s_%d' % (symbol,n-i-1) for i in range(n)]
+    return ["%s_%d" % (symbol, n - i - 1) for i in range(n)]
+
 
 class Mz(OneQubitGate):
     """Mock-up of a z measurement gate.
@@ -339,9 +309,11 @@ class Mz(OneQubitGate):
     This is in circuitplot rather than gate.py because it's not a real
     gate, it just draws one.
     """
+
     measurement = True
-    gate_name='Mz'
-    gate_name_latex=u'M_z'
+    gate_name = "Mz"
+    gate_name_latex = u"M_z"
+
 
 class Mx(OneQubitGate):
     """Mock-up of an x measurement gate.
@@ -349,16 +321,23 @@ class Mx(OneQubitGate):
     This is in circuitplot rather than gate.py because it's not a real
     gate, it just draws one.
     """
+
     measurement = True
-    gate_name='Mx'
-    gate_name_latex=u'M_x'
+    gate_name = "Mx"
+    gate_name_latex = u"M_x"
+
 
 class CreateOneQubitGate(ManagedProperties):
     def __new__(mcl, name, latexname=None):
         if not latexname:
             latexname = name
-        return BasicMeta.__new__(mcl, name + "Gate", (OneQubitGate,),
-                                 {'gate_name': name, 'gate_name_latex': latexname})
+        return BasicMeta.__new__(
+            mcl,
+            name + "Gate",
+            (OneQubitGate,),
+            {"gate_name": name, "gate_name_latex": latexname},
+        )
+
 
 def CreateCGate(name, latexname=None):
     """Use a lexical closure to make a controlled gate.
@@ -366,6 +345,8 @@ def CreateCGate(name, latexname=None):
     if not latexname:
         latexname = name
     onequbitgate = CreateOneQubitGate(name, latexname)
-    def ControlledGate(ctrls,target):
-        return CGate(tuple(ctrls),onequbitgate(target))
+
+    def ControlledGate(ctrls, target):
+        return CGate(tuple(ctrls), onequbitgate(target))
+
     return ControlledGate

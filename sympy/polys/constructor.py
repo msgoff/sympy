@@ -90,13 +90,13 @@ def _construct_algebraic(coeffs, opt):
     exts = list(exts)
 
     g, span, H = primitive_element(exts, ex=True, polys=True)
-    root = sum([ s*ext for s, ext in zip(span, exts) ])
+    root = sum([s * ext for s, ext in zip(span, exts)])
 
     domain, g = QQ.algebraic_field((g, root)), g.rep.rep
 
     for i, (coeff, a, b) in enumerate(result):
         if coeff is not None:
-            coeff = a*domain.dtype.from_list(H[exts.index(coeff)], g, QQ) + b
+            coeff = a * domain.dtype.from_list(H[exts.index(coeff)], g, QQ) + b
         else:
             coeff = domain.dtype.from_list([b], g, QQ)
 
@@ -121,7 +121,7 @@ def _construct_composite(coeffs, opt):
 
     if opt.composite is None:
         if any(gen.is_number and gen.is_algebraic for gen in gens):
-            return None # generators are number-like so lets better use EX
+            return None  # generators are number-like so lets better use EX
 
         all_symbols = set([])
 
@@ -129,12 +129,12 @@ def _construct_composite(coeffs, opt):
             symbols = gen.free_symbols
 
             if all_symbols & symbols:
-                return None # there could be algebraic relations between generators
+                return None  # there could be algebraic relations between generators
             else:
                 all_symbols |= symbols
 
     n = len(gens)
-    k = len(polys)//2
+    k = len(polys) // 2
 
     numers = polys[:k]
     denoms = polys[k:]
@@ -142,7 +142,7 @@ def _construct_composite(coeffs, opt):
     if opt.field:
         fractions = True
     else:
-        fractions, zeros = False, (0,)*n
+        fractions, zeros = False, (0,) * n
 
         for denom in denoms:
             if len(denom) > 1 or zeros not in denom:
@@ -222,7 +222,7 @@ def construct_domain(obj, **args):
     """Construct a minimal domain for the list of coefficients. """
     opt = build_options(args)
 
-    if hasattr(obj, '__iter__'):
+    if hasattr(obj, "__iter__"):
         if isinstance(obj, dict):
             if not obj:
                 monoms, coeffs = [], []
@@ -252,7 +252,7 @@ def construct_domain(obj, **args):
         else:
             domain, coeffs = _construct_expression(coeffs, opt)
 
-    if hasattr(obj, '__iter__'):
+    if hasattr(obj, "__iter__"):
         if isinstance(obj, dict):
             return domain, dict(list(zip(monoms, coeffs)))
         else:

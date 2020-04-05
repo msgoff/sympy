@@ -13,8 +13,8 @@ class _cache(list):
         for item in self:
             name = item.__name__
             myfunc = item
-            while hasattr(myfunc, '__wrapped__'):
-                if hasattr(myfunc, 'cache_info'):
+            while hasattr(myfunc, "__wrapped__"):
+                if hasattr(myfunc, "cache_info"):
                     info = myfunc.cache_info()
                     break
                 else:
@@ -28,8 +28,8 @@ class _cache(list):
         """clear cache content"""
         for item in self:
             myfunc = item
-            while hasattr(myfunc, '__wrapped__'):
-                if hasattr(myfunc, 'cache_clear'):
+            while hasattr(myfunc, "__wrapped__"):
+                if hasattr(myfunc, "cache_clear"):
                     myfunc.cache_clear()
                     break
                 else:
@@ -47,18 +47,24 @@ from functools import update_wrapper
 try:
     import fastcache
     from warnings import warn
+
     # the version attribute __version__ is not present for all versions
-    if not hasattr(fastcache, '__version__'):
+    if not hasattr(fastcache, "__version__"):
         warn("fastcache version >= 0.4.0 required", UserWarning)
         raise ImportError
         # ensure minimum required version of fastcache is present
-    if V(fastcache.__version__) < '0.4.0':
-        warn("fastcache version >= 0.4.0 required, detected {}"\
-             .format(fastcache.__version__), UserWarning)
+    if V(fastcache.__version__) < "0.4.0":
+        warn(
+            "fastcache version >= 0.4.0 required, detected {}".format(
+                fastcache.__version__
+            ),
+            UserWarning,
+        )
         raise ImportError
     # Do not use fastcache if running under pypy
     import platform
-    if platform.python_implementation() == 'PyPy':
+
+    if platform.python_implementation() == "PyPy":
         raise ImportError
     lru_cache = fastcache.clru_cache
 
@@ -86,6 +92,7 @@ except ImportError:
            to force cacheit to check returned results mutability and consistency,
            set environment variable SYMPY_USE_CACHE to 'debug'
         """
+
         def func_wrapper(func):
             cfunc = lru_cache(maxsize, typed=True)(func)
 
@@ -113,6 +120,8 @@ except ImportError:
             return wrapper
 
         return func_wrapper
+
+
 else:
 
     def __cacheit(maxsize):
@@ -136,13 +145,16 @@ else:
            to force cacheit to check returned results mutability and consistency,
            set environment variable SYMPY_USE_CACHE to 'debug'
         """
+
         def func_wrapper(func):
 
-            cfunc = fastcache.clru_cache(maxsize, typed=True, unhashable='ignore')(func)
+            cfunc = fastcache.clru_cache(maxsize, typed=True, unhashable="ignore")(func)
             CACHE.append(cfunc)
             return cfunc
 
         return func_wrapper
+
+
 ########################################
 
 
@@ -152,6 +164,7 @@ def __cacheit_nocache(func):
 
 def __cacheit_debug(maxsize):
     """cacheit + code to check cache consistency"""
+
     def func_wrapper(func):
         from .decorators import wraps
 
@@ -178,37 +191,41 @@ def __cacheit_debug(maxsize):
             if r1 != r2:
                 raise RuntimeError("Returned values are not the same")
             return r1
+
         return wrapper
+
     return func_wrapper
 
 
 def _getenv(key, default=None):
     from os import getenv
+
     return getenv(key, default)
 
+
 # SYMPY_USE_CACHE=yes/no/debug
-USE_CACHE = _getenv('SYMPY_USE_CACHE', 'yes').lower()
+USE_CACHE = _getenv("SYMPY_USE_CACHE", "yes").lower()
 # SYMPY_CACHE_SIZE=some_integer/None
 # special cases :
 #  SYMPY_CACHE_SIZE=0    -> No caching
 #  SYMPY_CACHE_SIZE=None -> Unbounded caching
-scs = _getenv('SYMPY_CACHE_SIZE', '1000')
-if scs.lower() == 'none':
+scs = _getenv("SYMPY_CACHE_SIZE", "1000")
+if scs.lower() == "none":
     SYMPY_CACHE_SIZE = None
 else:
     try:
         SYMPY_CACHE_SIZE = int(scs)
     except ValueError:
         raise RuntimeError(
-            'SYMPY_CACHE_SIZE must be a valid integer or None. ' + \
-            'Got: %s' % SYMPY_CACHE_SIZE)
+            "SYMPY_CACHE_SIZE must be a valid integer or None. "
+            + "Got: %s" % SYMPY_CACHE_SIZE
+        )
 
-if USE_CACHE == 'no':
+if USE_CACHE == "no":
     cacheit = __cacheit_nocache
-elif USE_CACHE == 'yes':
+elif USE_CACHE == "yes":
     cacheit = __cacheit(SYMPY_CACHE_SIZE)
-elif USE_CACHE == 'debug':
-    cacheit = __cacheit_debug(SYMPY_CACHE_SIZE)   # a lot slower
+elif USE_CACHE == "debug":
+    cacheit = __cacheit_debug(SYMPY_CACHE_SIZE)  # a lot slower
 else:
-    raise RuntimeError(
-        'unrecognized value for SYMPY_USE_CACHE: %s' % USE_CACHE)
+    raise RuntimeError("unrecognized value for SYMPY_USE_CACHE: %s" % USE_CACHE)

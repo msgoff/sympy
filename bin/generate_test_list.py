@@ -54,6 +54,7 @@ def get_paths(level=15):
     p = ["sympy" + x + "test_*.py" for x in wildcards]
     return p
 
+
 def generate_test_list():
     g = []
     for x in get_paths():
@@ -63,7 +64,8 @@ def generate_test_list():
     g.sort()
     return g
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     g = generate_test_list()
     print("tests = [")
     for x in g:

@@ -109,8 +109,7 @@ from __future__ import print_function, division
 from sympy.core.assumptions import StdFactKB
 from sympy.core import Expr, Tuple, sympify, S
 from sympy.core.symbol import _filter_assumptions, Symbol
-from sympy.core.compatibility import (is_sequence, NotIterable,
-                                      Iterable)
+from sympy.core.compatibility import is_sequence, NotIterable, Iterable
 from sympy.core.logic import fuzzy_bool
 from sympy.core.sympify import _sympify
 from sympy.functions.special.tensor_functions import KroneckerDelta
@@ -138,6 +137,7 @@ class Indexed(Expr):
     True
 
     """
+
     is_commutative = True
     is_Indexed = True
     is_symbol = True
@@ -152,14 +152,20 @@ class Indexed(Expr):
             raise IndexException("Indexed needs at least one index.")
         if isinstance(base, (str, Symbol)):
             base = IndexedBase(base)
-        elif not hasattr(base, '__getitem__') and not isinstance(base, IndexedBase):
-            raise TypeError(filldedent("""
+        elif not hasattr(base, "__getitem__") and not isinstance(base, IndexedBase):
+            raise TypeError(
+                filldedent(
+                    """
                 The base can only be replaced with a string, Symbol,
                 IndexedBase or an object with a method for getting
                 items (i.e. an object with a `__getitem__` method).
-                """))
+                """
+                )
+            )
         args = list(map(sympify, args))
-        if isinstance(base, (NDimArray, Iterable, Tuple, MatrixBase)) and all([i.is_number for i in args]):
+        if isinstance(base, (NDimArray, Iterable, Tuple, MatrixBase)) and all(
+            [i.is_number for i in args]
+        ):
             if len(args) == 1:
                 return base[args[0]]
             else:
@@ -174,7 +180,9 @@ class Indexed(Expr):
         return obj
 
     def _hashable_content(self):
-        return super(Indexed, self)._hashable_content() + tuple(sorted(self.assumptions0.items()))
+        return super(Indexed, self)._hashable_content() + tuple(
+            sorted(self.assumptions0.items())
+        )
 
     @property
     def name(self):
@@ -190,8 +198,7 @@ class Indexed(Expr):
 
         if isinstance(wrt, Indexed) and wrt.base == self.base:
             if len(self.indices) != len(wrt.indices):
-                msg = "Different # of indices: d({!s})/d({!s})".format(self,
-                                                                       wrt)
+                msg = "Different # of indices: d({!s})/d({!s})".format(self, wrt)
                 raise IndexException(msg)
             result = S.One
             for index1, index2 in zip(self.indices, wrt.indices):
@@ -199,6 +206,7 @@ class Indexed(Expr):
             return result
         elif isinstance(self.base, NDimArray):
             from sympy.tensor.array import derive_by_array
+
             return Indexed(derive_by_array(self.base, wrt), *self.args[1:])
         else:
             if Tuple(self.indices).has(wrt):
@@ -289,17 +297,27 @@ class Indexed(Expr):
             return self.base.shape
         sizes = []
         for i in self.indices:
-            upper = getattr(i, 'upper', None)
-            lower = getattr(i, 'lower', None)
+            upper = getattr(i, "upper", None)
+            lower = getattr(i, "lower", None)
             if None in (upper, lower):
-                raise IndexException(filldedent("""
-                    Range is not defined for all indices in: %s""" % self))
+                raise IndexException(
+                    filldedent(
+                        """
+                    Range is not defined for all indices in: %s"""
+                        % self
+                    )
+                )
             try:
                 size = upper - lower + 1
             except TypeError:
-                raise IndexException(filldedent("""
+                raise IndexException(
+                    filldedent(
+                        """
                     Shape cannot be inferred from Idx with
-                    undefined range: %s""" % self))
+                    undefined range: %s"""
+                        % self
+                    )
+                )
             sizes.append(size)
         return Tuple(*sizes)
 
@@ -326,8 +344,8 @@ class Indexed(Expr):
         ranges = []
         for i in self.indices:
             sentinel = object()
-            upper = getattr(i, 'upper', sentinel)
-            lower = getattr(i, 'lower', sentinel)
+            upper = getattr(i, "upper", sentinel)
+            lower = getattr(i, "lower", sentinel)
             if sentinel not in (upper, lower):
                 ranges.append(Tuple(lower, upper))
             else:
@@ -341,8 +359,7 @@ class Indexed(Expr):
     @property
     def free_symbols(self):
         base_free_symbols = self.base.free_symbols
-        indices_free_symbols = {
-            fs for i in self.indices for fs in i.free_symbols}
+        indices_free_symbols = {fs for i in self.indices for fs in i.free_symbols}
         if base_free_symbols:
             return {self} | base_free_symbols | indices_free_symbols
         else:
@@ -419,6 +436,7 @@ class IndexedBase(Expr, NotIterable):
     >>> C_inherit == C_explicit
     True
     """
+
     is_commutative = True
     is_symbol = True
     is_Atom = True
@@ -427,8 +445,8 @@ class IndexedBase(Expr, NotIterable):
     def _set_assumptions(obj, assumptions):
         """Set assumptions on obj, making sure to apply consistent values."""
         tmp_asm_copy = assumptions.copy()
-        is_commutative = fuzzy_bool(assumptions.get('commutative', True))
-        assumptions['commutative'] = is_commutative
+        is_commutative = fuzzy_bool(assumptions.get("commutative", True))
+        assumptions["commutative"] = is_commutative
         obj._assumptions = StdFactKB(assumptions)
         obj._assumptions._generator = tmp_asm_copy  # Issue #8873
 
@@ -452,8 +470,8 @@ class IndexedBase(Expr, NotIterable):
         elif shape is not None:
             shape = Tuple(shape)
 
-        offset = kw_args.pop('offset', S.Zero)
-        strides = kw_args.pop('strides', None)
+        offset = kw_args.pop("offset", S.Zero)
+        strides = kw_args.pop("strides", None)
 
         if shape is not None:
             obj = Expr.__new__(cls, label, shape)
@@ -472,7 +490,9 @@ class IndexedBase(Expr, NotIterable):
         return self._name
 
     def _hashable_content(self):
-        return super(IndexedBase, self)._hashable_content() + tuple(sorted(self.assumptions0.items()))
+        return super(IndexedBase, self)._hashable_content() + tuple(
+            sorted(self.assumptions0.items())
+        )
 
     @property
     def assumptions0(self):
@@ -655,11 +675,19 @@ class Idx(Expr):
 
         elif is_sequence(range):
             if len(range) != 2:
-                raise ValueError(filldedent("""
-                    Idx range tuple must have length 2, but got %s""" % len(range)))
+                raise ValueError(
+                    filldedent(
+                        """
+                    Idx range tuple must have length 2, but got %s"""
+                        % len(range)
+                    )
+                )
             for bound in range:
-                if (bound.is_integer is False and bound is not S.Infinity
-                        and bound is not S.NegativeInfinity):
+                if (
+                    bound.is_integer is False
+                    and bound is not S.Infinity
+                    and bound is not S.NegativeInfinity
+                ):
                     raise TypeError("Idx object requires integer bounds.")
             args = label, Tuple(*range)
         elif isinstance(range, Expr):
@@ -667,11 +695,15 @@ class Idx(Expr):
                 raise TypeError("Idx object requires an integer dimension.")
             args = label, Tuple(0, range - 1)
         elif range:
-            raise TypeError(filldedent("""
+            raise TypeError(
+                filldedent(
+                    """
                 The range must be an ordered iterable or
-                integer SymPy expression."""))
+                integer SymPy expression."""
+                )
+            )
         else:
-            args = label,
+            args = (label,)
 
         obj = Expr.__new__(cls, *args, **kw_args)
         obj._assumptions["finite"] = True

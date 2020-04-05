@@ -43,6 +43,7 @@ class AssumptionsContext(set):
             return "%s()" % self.__class__.__name__
         return "%s(%s)" % (self.__class__.__name__, printer._print_set(self))
 
+
 global_assumptions = AssumptionsContext()
 
 
@@ -60,6 +61,7 @@ class AppliedPredicate(Boolean):
     <class 'sympy.assumptions.assume.AppliedPredicate'>
 
     """
+
     __slots__ = ()
 
     def __new__(cls, predicate, arg):
@@ -95,8 +97,12 @@ class AppliedPredicate(Boolean):
 
     @cacheit
     def sort_key(self, order=None):
-        return (self.class_key(), (2, (self.func.name, self.arg.sort_key())),
-                S.One.sort_key(), S.One)
+        return (
+            self.class_key(),
+            (2, (self.func.name, self.arg.sort_key())),
+            S.One.sort_key(),
+            S.One,
+        )
 
     def __eq__(self, other):
         if type(other) is AppliedPredicate:
@@ -112,7 +118,8 @@ class AppliedPredicate(Boolean):
     @property
     def binary_symbols(self):
         from sympy.core.relational import Eq, Ne
-        if self.func.name in ['is_true', 'is_false']:
+
+        if self.func.name in ["is_true", "is_false"]:
             i = self.arg
             if i.is_Boolean or i.is_Symbol or isinstance(i, (Eq, Ne)):
                 return i.binary_symbols
@@ -202,7 +209,7 @@ class Predicate(Boolean):
                 else:
                     # only check consistency if both resolutors have concluded
                     if _res != res:
-                        raise ValueError('incompatible resolutors')
+                        raise ValueError("incompatible resolutors")
                 break
         return res
 

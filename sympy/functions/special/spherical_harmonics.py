@@ -13,6 +13,7 @@ from sympy.functions.elementary.trigonometric import sin, cos, cot
 
 _x = Dummy("x")
 
+
 class Ynm(Function):
     r"""
     Spherical harmonics defined as
@@ -142,22 +143,25 @@ class Ynm(Function):
         # Handle negative index m and arguments theta, phi
         if m.could_extract_minus_sign():
             m = -m
-            return S.NegativeOne**m * exp(-2*I*m*phi) * Ynm(n, m, theta, phi)
+            return S.NegativeOne ** m * exp(-2 * I * m * phi) * Ynm(n, m, theta, phi)
         if theta.could_extract_minus_sign():
             theta = -theta
             return Ynm(n, m, theta, phi)
         if phi.could_extract_minus_sign():
             phi = -phi
-            return exp(-2*I*m*phi) * Ynm(n, m, theta, phi)
+            return exp(-2 * I * m * phi) * Ynm(n, m, theta, phi)
 
         # TODO Add more simplififcation here
 
     def _eval_expand_func(self, **hints):
         n, m, theta, phi = self.args
-        rv = (sqrt((2*n + 1)/(4*pi) * factorial(n - m)/factorial(n + m)) *
-                exp(I*m*phi) * assoc_legendre(n, m, cos(theta)))
+        rv = (
+            sqrt((2 * n + 1) / (4 * pi) * factorial(n - m) / factorial(n + m))
+            * exp(I * m * phi)
+            * assoc_legendre(n, m, cos(theta))
+        )
         # We can do this because of the range of theta
-        return rv.subs(sqrt(-cos(theta)**2 + 1), sin(theta))
+        return rv.subs(sqrt(-cos(theta) ** 2 + 1), sin(theta))
 
     def fdiff(self, argindex=4):
         if argindex == 1:
@@ -169,8 +173,9 @@ class Ynm(Function):
         elif argindex == 3:
             # Diff wrt theta
             n, m, theta, phi = self.args
-            return (m * cot(theta) * Ynm(n, m, theta, phi) +
-                    sqrt((n - m)*(n + m + 1)) * exp(-I*phi) * Ynm(n, m + 1, theta, phi))
+            return m * cot(theta) * Ynm(n, m, theta, phi) + sqrt(
+                (n - m) * (n + m + 1)
+            ) * exp(-I * phi) * Ynm(n, m + 1, theta, phi)
         elif argindex == 4:
             # Diff wrt phi
             n, m, theta, phi = self.args
@@ -189,25 +194,32 @@ class Ynm(Function):
     def _eval_rewrite_as_cos(self, n, m, theta, phi, **kwargs):
         # This method can be expensive due to extensive use of simplification!
         from sympy.simplify import simplify, trigsimp
+
         # TODO: Make sure n \in N
         # TODO: Assert |m| <= n ortherwise we should return 0
         term = simplify(self.expand(func=True))
         # We can do this because of the range of theta
-        term = term.xreplace({Abs(sin(theta)):sin(theta)})
+        term = term.xreplace({Abs(sin(theta)): sin(theta)})
         return simplify(trigsimp(term))
 
     def _eval_conjugate(self):
         # TODO: Make sure theta \in R and phi \in R
         n, m, theta, phi = self.args
-        return S.NegativeOne**m * self.func(n, -m, theta, phi)
+        return S.NegativeOne ** m * self.func(n, -m, theta, phi)
 
     def as_real_imag(self, deep=True, **hints):
         # TODO: Handle deep and hints
         n, m, theta, phi = self.args
-        re = (sqrt((2*n + 1)/(4*pi) * factorial(n - m)/factorial(n + m)) *
-              cos(m*phi) * assoc_legendre(n, m, cos(theta)))
-        im = (sqrt((2*n + 1)/(4*pi) * factorial(n - m)/factorial(n + m)) *
-              sin(m*phi) * assoc_legendre(n, m, cos(theta)))
+        re = (
+            sqrt((2 * n + 1) / (4 * pi) * factorial(n - m) / factorial(n + m))
+            * cos(m * phi)
+            * assoc_legendre(n, m, cos(theta))
+        )
+        im = (
+            sqrt((2 * n + 1) / (4 * pi) * factorial(n - m) / factorial(n + m))
+            * sin(m * phi)
+            * assoc_legendre(n, m, cos(theta))
+        )
         return (re, im)
 
     def _eval_evalf(self, prec):
@@ -216,6 +228,7 @@ class Ynm(Function):
         #       the dedicated function directly is cleaner.
         from mpmath import mp, workprec
         from sympy import Expr
+
         n = self.args[0]._to_mpmath(prec)
         m = self.args[1]._to_mpmath(prec)
         theta = self.args[2]._to_mpmath(prec)
@@ -226,10 +239,13 @@ class Ynm(Function):
 
     def _sage_(self):
         import sage.all as sage
-        return sage.spherical_harmonic(self.args[0]._sage_(),
-                                       self.args[1]._sage_(),
-                                       self.args[2]._sage_(),
-                                       self.args[3]._sage_())
+
+        return sage.spherical_harmonic(
+            self.args[0]._sage_(),
+            self.args[1]._sage_(),
+            self.args[2]._sage_(),
+            self.args[3]._sage_(),
+        )
 
 
 def Ynm_c(n, m, theta, phi):
@@ -253,6 +269,7 @@ def Ynm_c(n, m, theta, phi):
 
     """
     from sympy import conjugate
+
     return conjugate(Ynm(n, m, theta, phi))
 
 
@@ -304,5 +321,5 @@ class Znm(Function):
         elif m.is_zero:
             return Ynm(n, m, th, ph)
         elif m.is_negative:
-            zz = (Ynm(n, m, th, ph) - Ynm_c(n, m, th, ph)) / (sqrt(2)*I)
+            zz = (Ynm(n, m, th, ph) - Ynm_c(n, m, th, ph)) / (sqrt(2) * I)
             return zz

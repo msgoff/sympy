@@ -1,12 +1,14 @@
 from sympy.core import Basic, Integer
 import operator
 
+
 class OmegaPower(Basic):
     """
     Represents ordinal exponential and multiplication terms one of the
     building blocks of the Ordinal class.
     In OmegaPower(a, b) a represents exponent and b represents multiplicity.
     """
+
     def __new__(cls, a, b):
         if isinstance(b, int):
             b = Integer(b)
@@ -51,6 +53,7 @@ class OmegaPower(Basic):
                 return NotImplemented
         return self._compare_term(other, operator.lt)
 
+
 class Ordinal(Basic):
     """
     Represents ordinals in Cantor normal form.
@@ -75,10 +78,11 @@ class Ordinal(Basic):
 
     .. [1] https://en.wikipedia.org/wiki/Ordinal_arithmetic
     """
+
     def __new__(cls, *terms):
         obj = super(Ordinal, cls).__new__(cls, *terms)
         powers = [i.exp for i in obj.args]
-        if not all(powers[i] >= powers[i+1] for i in range(len(powers) - 1)):
+        if not all(powers[i] >= powers[i + 1] for i in range(len(powers) - 1)):
             raise ValueError("powers must be in decreasing order")
         return obj
 
@@ -145,7 +149,7 @@ class Ordinal(Basic):
         return len(self.terms) < len(other.terms)
 
     def __le__(self, other):
-        return (self == other or self < other)
+        return self == other or self < other
 
     def __gt__(self, other):
         return not self <= other
@@ -157,7 +161,7 @@ class Ordinal(Basic):
         net_str = ""
         plus_count = 0
         if self == ord0:
-            return 'ord0'
+            return "ord0"
         for i in self.terms:
             if plus_count:
                 net_str += " + "
@@ -165,17 +169,17 @@ class Ordinal(Basic):
             if i.exp == ord0:
                 net_str += str(i.mult)
             elif i.exp == 1:
-                net_str += 'w'
+                net_str += "w"
             elif len(i.exp.terms) > 1 or i.exp.is_limit_ordinal:
-                net_str += 'w**(%s)'%i.exp
+                net_str += "w**(%s)" % i.exp
             else:
-                net_str += 'w**%s'%i.exp
+                net_str += "w**%s" % i.exp
 
             if not i.mult == 1 and not i.exp == ord0:
-                net_str += '*%s'%i.mult
+                net_str += "*%s" % i.mult
 
             plus_count += 1
-        return(net_str)
+        return net_str
 
     __repr__ = __str__
 
@@ -199,7 +203,7 @@ class Ordinal(Basic):
             sum_term = OmegaPower(b_exp, a_terms[r].mult + other.leading_term.mult)
             terms = a_terms[:r] + [sum_term] + b_terms[1:]
         else:
-            terms = a_terms[:r+1] + b_terms
+            terms = a_terms[: r + 1] + b_terms
         return Ordinal(*terms)
 
     def __radd__(self, other):
@@ -229,7 +233,7 @@ class Ordinal(Basic):
             for arg in other.terms[:-1]:
                 sum.append(OmegaPower(a_exp + arg.exp, arg.mult))
             b_mult = other.trailing_term.mult
-            sum.append(OmegaPower(a_exp, a_mult*b_mult))
+            sum.append(OmegaPower(a_exp, a_mult * b_mult))
             sum += list(self.terms[1:])
         return Ordinal(*sum)
 
@@ -246,12 +250,15 @@ class Ordinal(Basic):
             return NotImplemented
         return Ordinal(OmegaPower(other, 1))
 
+
 class OrdinalZero(Ordinal):
     """The ordinal zero.
 
     OrdinalZero can be imported as ``ord0``.
     """
+
     pass
+
 
 class OrdinalOmega(Ordinal):
     """The ordinal omega which forms the base of all ordinals in cantor normal form.
@@ -265,12 +272,14 @@ class OrdinalOmega(Ordinal):
     >>> omega + omega
     w*2
     """
+
     def __new__(cls):
         return Ordinal.__new__(cls)
 
     @property
     def terms(self):
         return (OmegaPower(1, 1),)
+
 
 ord0 = OrdinalZero()
 omega = OrdinalOmega()

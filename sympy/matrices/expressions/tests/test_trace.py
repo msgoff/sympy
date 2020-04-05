@@ -3,16 +3,25 @@ from sympy.concrete import Sum
 from sympy.functions import adjoint, conjugate, transpose
 from sympy.matrices import eye, Matrix, ShapeError, ImmutableMatrix
 from sympy.matrices.expressions import (
-    Adjoint, Identity, FunctionMatrix, MatrixExpr, MatrixSymbol, Trace,
-    ZeroMatrix, trace, MatPow, MatAdd, MatMul
+    Adjoint,
+    Identity,
+    FunctionMatrix,
+    MatrixExpr,
+    MatrixSymbol,
+    Trace,
+    ZeroMatrix,
+    trace,
+    MatPow,
+    MatAdd,
+    MatMul,
 )
 from sympy.matrices.expressions.matexpr import OneMatrix
 from sympy.testing.pytest import raises
 
-n = symbols('n', integer=True)
-A = MatrixSymbol('A', n, n)
-B = MatrixSymbol('B', n, n)
-C = MatrixSymbol('C', 3, 4)
+n = symbols("n", integer=True)
+A = MatrixSymbol("A", n, n)
+B = MatrixSymbol("B", n, n)
+C = MatrixSymbol("C", 3, 4)
 
 
 def test_Trace():
@@ -34,10 +43,10 @@ def test_Trace():
     assert trace(OneMatrix(1, 1)) == 1
     assert trace(OneMatrix(2, 2)) == 2
     assert trace(OneMatrix(n, n)) == n
-    assert trace(2*A*B) == 2*Trace(A*B)
+    assert trace(2 * A * B) == 2 * Trace(A * B)
     assert trace(A.T) == trace(A)
 
-    i, j = symbols('i j')
+    i, j = symbols("i j")
     F = FunctionMatrix(3, 3, Lambda((i, j), i + j))
     assert trace(F) == (0 + 0) + (1 + 1) + (2 + 2)
 
@@ -49,6 +58,7 @@ def test_Trace():
 
     assert Trace(A).is_commutative is True
 
+
 def test_Trace_A_plus_B():
     assert trace(A + B) == Trace(A) + Trace(B)
     assert Trace(A + B).arg == MatAdd(A, B)
@@ -57,11 +67,11 @@ def test_Trace_A_plus_B():
 
 def test_Trace_MatAdd_doit():
     # See issue #9028
-    X = ImmutableMatrix([[1, 2, 3]]*3)
-    Y = MatrixSymbol('Y', 3, 3)
-    q = MatAdd(X, 2*X, Y, -3*Y)
+    X = ImmutableMatrix([[1, 2, 3]] * 3)
+    Y = MatrixSymbol("Y", 3, 3)
+    q = MatAdd(X, 2 * X, Y, -3 * Y)
     assert Trace(q).arg == q
-    assert Trace(q).doit() == 18 - 2*Trace(Y)
+    assert Trace(q).doit() == 18 - 2 * Trace(Y)
 
 
 def test_Trace_MatPow_doit():
@@ -75,22 +85,22 @@ def test_Trace_MatPow_doit():
 def test_Trace_MutableMatrix_plus():
     # See issue #9043
     X = Matrix([[1, 2], [3, 4]])
-    assert Trace(X) + Trace(X) == 2*Trace(X)
+    assert Trace(X) + Trace(X) == 2 * Trace(X)
 
 
 def test_Trace_doit_deep_False():
     X = Matrix([[1, 2], [3, 4]])
     q = MatPow(X, 2)
     assert Trace(q).doit(deep=False).arg == q
-    q = MatAdd(X, 2*X)
+    q = MatAdd(X, 2 * X)
     assert Trace(q).doit(deep=False).arg == q
-    q = MatMul(X, 2*X)
+    q = MatMul(X, 2 * X)
     assert Trace(q).doit(deep=False).arg == q
 
 
 def test_trace_constant_factor():
     # Issue 9052: gave 2*Trace(MatMul(A)) instead of 2*Trace(A)
-    assert trace(2*A) == 2*Trace(A)
+    assert trace(2 * A) == 2 * Trace(A)
     X = ImmutableMatrix([[1, 2], [3, 4]])
     assert trace(MatMul(2, X)) == 10
 

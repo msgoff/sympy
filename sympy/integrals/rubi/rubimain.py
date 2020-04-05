@@ -6,17 +6,20 @@ from sympy.functions import exp as sym_exp
 import inspect
 import re
 from sympy import powsimp
+
 matchpy = import_module("matchpy")
 
 if matchpy:
     from matchpy import ManyToOneReplacer, ManyToOneMatcher
     from sympy.integrals.rubi.utility_function import (
-        rubi_exp, rubi_unevaluated_expr, process_trig
+        rubi_exp,
+        rubi_unevaluated_expr,
+        process_trig,
     )
 
     from sympy.utilities.matchpy_connector import op_iter, op_len
 
-    @doctest_depends_on(modules=('matchpy',))
+    @doctest_depends_on(modules=("matchpy",))
     def get_rubi_object():
         """
         Returns rubi ManyToOneReplacer by adding all rules from different modules.
@@ -26,12 +29,16 @@ if matchpy:
         Currently, there are parsing issues with special_function,
         derivative and miscellaneous_integration. Hence they are commented.
         """
-        from sympy.integrals.rubi.rules.integrand_simplification import integrand_simplification
+        from sympy.integrals.rubi.rules.integrand_simplification import (
+            integrand_simplification,
+        )
         from sympy.integrals.rubi.rules.linear_products import linear_products
         from sympy.integrals.rubi.rules.quadratic_products import quadratic_products
         from sympy.integrals.rubi.rules.binomial_products import binomial_products
         from sympy.integrals.rubi.rules.trinomial_products import trinomial_products
-        from sympy.integrals.rubi.rules.miscellaneous_algebraic import miscellaneous_algebraic
+        from sympy.integrals.rubi.rules.miscellaneous_algebraic import (
+            miscellaneous_algebraic,
+        )
         from sympy.integrals.rubi.rules.exponential import exponential
         from sympy.integrals.rubi.rules.logarithms import logarithms
         from sympy.integrals.rubi.rules.sine import sine
@@ -42,9 +49,12 @@ if matchpy:
         from sympy.integrals.rubi.rules.hyperbolic import hyperbolic
         from sympy.integrals.rubi.rules.inverse_hyperbolic import inverse_hyperbolic
         from sympy.integrals.rubi.rules.special_functions import special_functions
-        #from sympy.integrals.rubi.rules.derivative import derivative
-        #from sympy.integrals.rubi.rules.piecewise_linear import piecewise_linear
-        from sympy.integrals.rubi.rules.miscellaneous_integration import miscellaneous_integration
+
+        # from sympy.integrals.rubi.rules.derivative import derivative
+        # from sympy.integrals.rubi.rules.piecewise_linear import piecewise_linear
+        from sympy.integrals.rubi.rules.miscellaneous_integration import (
+            miscellaneous_integration,
+        )
 
         rules = []
 
@@ -64,11 +74,12 @@ if matchpy:
         rules += inverse_trig()
         rules += hyperbolic()
         rules += inverse_hyperbolic()
-        #rubi = piecewise_linear(rubi)
+        # rubi = piecewise_linear(rubi)
         rules += miscellaneous_integration()
 
         rubi = ManyToOneReplacer(*rules)
         return rubi, rules
+
     _E = rubi_unevaluated_expr(E)
 
 
@@ -101,30 +112,34 @@ class LoadRubiReplacer(object):
 
     def to_pickle(self, filename):
         import pickle
+
         rubi = self.load()
         with open(filename, "wb") as fout:
             pickle.dump(rubi, fout)
 
     def to_dill(self, filename):
         import dill
+
         rubi = self.load()
         with open(filename, "wb") as fout:
             dill.dump(rubi, fout)
 
     def from_pickle(self, filename):
         import pickle
+
         with open(filename, "rb") as fin:
             self._rubi = pickle.load(fin)
         return self._rubi
 
     def from_dill(self, filename):
         import dill
+
         with open(filename, "rb") as fin:
             self._rubi = dill.load(fin)
         return self._rubi
 
 
-@doctest_depends_on(modules=('matchpy',))
+@doctest_depends_on(modules=("matchpy",))
 def process_final_integral(expr):
     """
     Rubi's `rubi_exp` need to be replaced back to SymPy's general `exp`.
@@ -147,7 +162,7 @@ def process_final_integral(expr):
     return expr
 
 
-@doctest_depends_on(modules=('matchpy',))
+@doctest_depends_on(modules=("matchpy",))
 def rubi_powsimp(expr):
     """
     This function is needed to preprocess an expression as done in matchpy
@@ -170,11 +185,11 @@ def rubi_powsimp(expr):
                 lst_pow.append(i)
             else:
                 lst_non_pow.append(i)
-        return powsimp(Mul(*lst_pow))*Mul(*lst_non_pow)
+        return powsimp(Mul(*lst_pow)) * Mul(*lst_non_pow)
     return expr
 
 
-@doctest_depends_on(modules=('matchpy',))
+@doctest_depends_on(modules=("matchpy",))
 def rubi_integrate(expr, var, showsteps=False):
     """
     Rule based algorithm for integration. Integrates the expression by applying
@@ -194,7 +209,7 @@ def rubi_integrate(expr, var, showsteps=False):
     expr = process_trig(expr)
     expr = rubi_powsimp(expr)
     if isinstance(expr, (int, Integer)) or isinstance(expr, (float, Float)):
-        return S(expr)*var
+        return S(expr) * var
     if isinstance(expr, Add):
         results = 0
         for ex in expr.args:
@@ -205,22 +220,21 @@ def rubi_integrate(expr, var, showsteps=False):
     return process_final_integral(results)
 
 
-@doctest_depends_on(modules=('matchpy',))
+@doctest_depends_on(modules=("matchpy",))
 def util_rubi_integrate(expr, showsteps=False, max_loop=10):
     rubi = LoadRubiReplacer().load()
     expr = process_trig(expr)
     expr = expr.replace(sym_exp, rubi_exp)
     for i in range(max_loop):
         results = expr.replace(
-            lambda x: isinstance(x, Integral),
-            lambda x: rubi.replace(x, max_count=10)
+            lambda x: isinstance(x, Integral), lambda x: rubi.replace(x, max_count=10)
         )
         if expr == results:
             return results
     return results
 
 
-@doctest_depends_on(modules=('matchpy',))
+@doctest_depends_on(modules=("matchpy",))
 def get_matching_rule_definition(expr, var):
     """
     Prints the list or rules which match to `expr`.
@@ -241,6 +255,6 @@ def get_matching_rule_definition(expr, var):
         print("\n".join(code))
         print("Pattern matching: ")
         pattno = int(re.match(r"^\s*rule(\d+)", code[0]).group(1))
-        print(matcher.patterns[pattno-1])
+        print(matcher.patterns[pattno - 1])
         print(e)
         print()

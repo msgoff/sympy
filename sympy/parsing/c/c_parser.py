@@ -2,7 +2,7 @@ from __future__ import unicode_literals, print_function
 from sympy.external import import_module
 import os
 
-cin = import_module('clang.cindex', import_kwargs = {'fromlist': ['cindex']})
+cin = import_module("clang.cindex", import_kwargs={"fromlist": ["cindex"]})
 
 """
 This module contains all the necessary Classes and Function used to Parse C and
@@ -43,9 +43,19 @@ Refrences
 """
 
 if cin:
-    from sympy.codegen.ast import (Variable, IntBaseType, FloatBaseType, String,
-        Integer, Float, FunctionPrototype, FunctionDefinition, FunctionCall,
-        none, Return)
+    from sympy.codegen.ast import (
+        Variable,
+        IntBaseType,
+        FloatBaseType,
+        String,
+        Integer,
+        Float,
+        FunctionPrototype,
+        FunctionDefinition,
+        FunctionCall,
+        none,
+        Return,
+    )
     import sys
     import tempfile
 
@@ -59,19 +69,23 @@ if cin:
         def diagnostics(self, out):
             """Diagostics function for the Clang AST"""
             for diag in self.tu.diagnostics:
-                print('%s %s (line %s, col %s) %s' % (
+                print(
+                    "%s %s (line %s, col %s) %s"
+                    % (
                         {
-                            4: 'FATAL',
-                            3: 'ERROR',
-                            2: 'WARNING',
-                            1: 'NOTE',
-                            0: 'IGNORED',
+                            4: "FATAL",
+                            3: "ERROR",
+                            2: "WARNING",
+                            1: "NOTE",
+                            0: "IGNORED",
                         }[diag.severity],
                         diag.location.file,
                         diag.location.line,
                         diag.location.column,
-                        diag.spelling
-                    ), file=out)
+                        diag.spelling,
+                    ),
+                    file=out,
+                )
 
     class CCodeConverter(BaseParser):
         """The Code Convereter for Clang AST
@@ -114,12 +128,12 @@ if cin:
             self.tu = self.index.parse(
                 filename,
                 args=flags,
-                options=cin.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+                options=cin.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD,
             )
             for child in self.tu.cursor.get_children():
                 if child.kind == cin.CursorKind.VAR_DECL:
                     self._py_nodes.append(self.transform(child))
-                elif (child.kind == cin.CursorKind.FUNCTION_DECL):
+                elif child.kind == cin.CursorKind.FUNCTION_DECL:
                     self._py_nodes.append(self.transform(child))
                 else:
                     pass
@@ -150,19 +164,19 @@ if cin:
                 A list of sympy AST nodes
 
             """
-            file = tempfile.NamedTemporaryFile(mode = 'w+', suffix = '.h')
+            file = tempfile.NamedTemporaryFile(mode="w+", suffix=".h")
             file.write(source)
             file.seek(0)
             self.tu = self.index.parse(
                 file.name,
                 args=flags,
-                options=cin.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+                options=cin.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD,
             )
             file.close()
             for child in self.tu.cursor.get_children():
                 if child.kind == cin.CursorKind.VAR_DECL:
                     self._py_nodes.append(self.transform(child))
-                elif (child.kind == cin.CursorKind.FUNCTION_DECL):
+                elif child.kind == cin.CursorKind.FUNCTION_DECL:
                     self._py_nodes.append(self.transform(child))
                 else:
                     pass
@@ -182,15 +196,12 @@ if cin:
 
             """
             try:
-                handler = getattr(self, 'transform_%s' % node.kind.name.lower())
+                handler = getattr(self, "transform_%s" % node.kind.name.lower())
             except AttributeError:
                 print(
-                    "Ignoring node of type %s (%s)" % (
-                        node.kind,
-                        ' '.join(
-                            t.spelling for t in node.get_tokens())
-                        ),
-                    file=sys.stderr
+                    "Ignoring node of type %s (%s)"
+                    % (node.kind, " ".join(t.spelling for t in node.get_tokens())),
+                    file=sys.stderr,
                 )
                 handler = None
             if handler:
@@ -225,7 +236,7 @@ if cin:
             try:
                 children = node.get_children()
                 child = next(children)
-                #ignoring namespace and type details for the variable
+                # ignoring namespace and type details for the variable
                 while child.kind == cin.CursorKind.NAMESPACE_REF:
                     child = next(children)
 
@@ -234,47 +245,37 @@ if cin:
 
                 val = self.transform(child)
                 # List in case of variable assignment, FunctionCall node in case of a funcion call
-                if (child.kind == cin.CursorKind.INTEGER_LITERAL
-                    or child.kind == cin.CursorKind.UNEXPOSED_EXPR):
-                    if (node.type.kind == cin.TypeKind.INT):
-                        type = IntBaseType(String('integer'))
+                if (
+                    child.kind == cin.CursorKind.INTEGER_LITERAL
+                    or child.kind == cin.CursorKind.UNEXPOSED_EXPR
+                ):
+                    if node.type.kind == cin.TypeKind.INT:
+                        type = IntBaseType(String("integer"))
                         value = Integer(val)
-                    elif (node.type.kind == cin.TypeKind.FLOAT):
-                        type = FloatBaseType(String('real'))
+                    elif node.type.kind == cin.TypeKind.FLOAT:
+                        type = FloatBaseType(String("real"))
                         value = Float(val)
                     else:
                         raise NotImplementedError()
-                    return Variable(
-                        node.spelling
-                    ).as_Declaration(
-                        type = type,
-                        value = value
+                    return Variable(node.spelling).as_Declaration(
+                        type=type, value=value
                     )
-                elif (child.kind == cin.CursorKind.CALL_EXPR):
-                    return Variable(
-                        node.spelling
-                    ).as_Declaration(
-                        value = val
-                    )
+                elif child.kind == cin.CursorKind.CALL_EXPR:
+                    return Variable(node.spelling).as_Declaration(value=val)
                 else:
                     raise NotImplementedError()
 
             except StopIteration:
 
-                if (node.type.kind == cin.TypeKind.INT):
-                    type = IntBaseType(String('integer'))
+                if node.type.kind == cin.TypeKind.INT:
+                    type = IntBaseType(String("integer"))
                     value = Integer(0)
-                elif (node.type.kind == cin.TypeKind.FLOAT):
-                    type = FloatBaseType(String('real'))
+                elif node.type.kind == cin.TypeKind.FLOAT:
+                    type = FloatBaseType(String("real"))
                     value = Float(0.0)
                 else:
                     raise NotImplementedError()
-                return Variable(
-                    node.spelling
-                ).as_Declaration(
-                    type = type,
-                    value = value
-                )
+                return Variable(node.spelling).as_Declaration(type=type, value=value)
 
         def transform_function_decl(self, node):
             """Transformation Function For Function Declaration
@@ -293,12 +294,12 @@ if cin:
             """
             token = node.get_tokens()
             c_ret_type = next(token).spelling
-            if (c_ret_type == 'void'):
+            if c_ret_type == "void":
                 ret_type = none
-            elif(c_ret_type == 'int'):
-                ret_type = IntBaseType(String('integer'))
-            elif (c_ret_type == 'float'):
-                ret_type = FloatBaseType(String('real'))
+            elif c_ret_type == "int":
+                ret_type = IntBaseType(String("integer"))
+            elif c_ret_type == "float":
+                ret_type = FloatBaseType(String("real"))
             else:
                 raise NotImplementedError("Variable not yet supported")
             body = []
@@ -316,14 +317,13 @@ if cin:
                 while child.kind == cin.CursorKind.TYPE_REF:
                     child = next(children)
 
-
                 # Subsequent nodes will be the parameters for the function.
                 try:
                     while True:
                         decl = self.transform(child)
-                        if (child.kind == cin.CursorKind.PARM_DECL):
+                        if child.kind == cin.CursorKind.PARM_DECL:
                             param.append(decl)
-                        elif (child.kind == cin.CursorKind.COMPOUND_STMT):
+                        elif child.kind == cin.CursorKind.COMPOUND_STMT:
                             for val in decl:
                                 body.append(val)
                         else:
@@ -336,16 +336,14 @@ if cin:
 
             if body == []:
                 function = FunctionPrototype(
-                    return_type = ret_type,
-                    name = node.spelling,
-                    parameters = param
+                    return_type=ret_type, name=node.spelling, parameters=param
                 )
             else:
                 function = FunctionDefinition(
-                    return_type = ret_type,
-                    name = node.spelling,
-                    parameters = param,
-                    body = body
+                    return_type=ret_type,
+                    name=node.spelling,
+                    parameters=param,
+                    body=body,
                 )
             return function
 
@@ -367,42 +365,34 @@ if cin:
             ValueError if multiple children encountered in the parameter node
 
             """
-            if (node.type.kind == cin.TypeKind.INT):
-                type = IntBaseType(String('integer'))
+            if node.type.kind == cin.TypeKind.INT:
+                type = IntBaseType(String("integer"))
                 value = Integer(0)
-            elif (node.type.kind == cin.TypeKind.FLOAT):
-                type = FloatBaseType(String('real'))
+            elif node.type.kind == cin.TypeKind.FLOAT:
+                type = FloatBaseType(String("real"))
                 value = Float(0.0)
             try:
                 children = node.get_children()
                 child = next(children)
 
                 # Any namespace nodes can be ignored
-                while child.kind in [cin.CursorKind.NAMESPACE_REF,
-                                     cin.CursorKind.TYPE_REF,
-                                     cin.CursorKind.TEMPLATE_REF]:
+                while child.kind in [
+                    cin.CursorKind.NAMESPACE_REF,
+                    cin.CursorKind.TYPE_REF,
+                    cin.CursorKind.TEMPLATE_REF,
+                ]:
                     child = next(children)
 
                 # If there is a child, it is the default value of the parameter.
                 lit = self.transform(child)
-                if (node.type.kind == cin.TypeKind.INT):
+                if node.type.kind == cin.TypeKind.INT:
                     val = Integer(lit)
-                elif (node.type.kind == cin.TypeKind.FLOAT):
+                elif node.type.kind == cin.TypeKind.FLOAT:
                     val = Float(lit)
 
-                param = Variable(
-                    node.spelling
-                ).as_Declaration(
-                    type = type,
-                    value = val
-                )
+                param = Variable(node.spelling).as_Declaration(type=type, value=val)
             except StopIteration:
-                param = Variable(
-                    node.spelling
-                ).as_Declaration(
-                        type = type,
-                        value = value
-                )
+                param = Variable(node.spelling).as_Declaration(type=type, value=value)
 
             try:
                 value = self.transform(next(children))
@@ -464,32 +454,31 @@ if cin:
                 value = node.literal
             return float(value)
 
-
         def transform_string_literal(self, node):
-            #TODO: No string type in AST
-            #type =
-            #try:
+            # TODO: No string type in AST
+            # type =
+            # try:
             #    value = next(node.get_tokens()).spelling
-            #except (StopIteration, ValueError):
-                # No tokens
+            # except (StopIteration, ValueError):
+            # No tokens
             #    value = node.literal
-            #val = [type, value]
-            #return val
+            # val = [type, value]
+            # return val
             pass
 
         def transform_character_literal(self, node):
-            #TODO: No string Type in AST
-            #type =
-            #try:
+            # TODO: No string Type in AST
+            # type =
+            # try:
             #    value = next(node.get_tokens()).spelling
-            #except (StopIteration, ValueError):
-                # No tokens
+            # except (StopIteration, ValueError):
+            # No tokens
             #    value = node.literal
-            #val = [type, value]
-            #return val
+            # val = [type, value]
+            # return val
             pass
 
-        def transform_unexposed_decl(self,node):
+        def transform_unexposed_decl(self, node):
             """Transformation function for unexposed declarations"""
             pass
 
@@ -560,9 +549,9 @@ if cin:
             try:
                 for child in children:
                     arg = self.transform(child)
-                    if (child.kind == cin.CursorKind.INTEGER_LITERAL):
+                    if child.kind == cin.CursorKind.INTEGER_LITERAL:
                         param.append(Integer(arg))
-                    elif (child.kind == cin.CursorKind.FLOATING_LITERAL):
+                    elif child.kind == cin.CursorKind.FLOATING_LITERAL:
                         param.append(Float(arg))
                     else:
                         param.append(arg)
@@ -631,8 +620,11 @@ if cin:
                 pass
 
             return statement
+
+
 else:
-    class CCodeConverter():  # type: ignore
+
+    class CCodeConverter:  # type: ignore
         def __init__(self, *args, **kwargs):
             raise ImportError("Module not Installed")
 
@@ -650,9 +642,9 @@ def parse_c(source):
         List of Python expression strings
 
     """
-    converter = CCodeConverter('output')
+    converter = CCodeConverter("output")
     if os.path.exists(source):
-        src = converter.parse(source, flags = [])
+        src = converter.parse(source, flags=[])
     else:
-        src = converter.parse_str(source, flags = [])
+        src = converter.parse_str(source, flags=[])
     return src

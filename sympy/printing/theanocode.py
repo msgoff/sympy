@@ -9,7 +9,7 @@ import sympy
 from functools import partial
 
 
-theano = import_module('theano')
+theano = import_module("theano")
 
 if theano:
     ts = theano.scalar
@@ -17,53 +17,53 @@ if theano:
     from theano.sandbox import linalg as tlinalg
 
     mapping = {
-            sympy.Add: tt.add,
-            sympy.Mul: tt.mul,
-            sympy.Abs: tt.abs_,
-            sympy.sign: tt.sgn,
-            sympy.ceiling: tt.ceil,
-            sympy.floor: tt.floor,
-            sympy.log: tt.log,
-            sympy.exp: tt.exp,
-            sympy.sqrt: tt.sqrt,
-            sympy.cos: tt.cos,
-            sympy.acos: tt.arccos,
-            sympy.sin: tt.sin,
-            sympy.asin: tt.arcsin,
-            sympy.tan: tt.tan,
-            sympy.atan: tt.arctan,
-            sympy.atan2: tt.arctan2,
-            sympy.cosh: tt.cosh,
-            sympy.acosh: tt.arccosh,
-            sympy.sinh: tt.sinh,
-            sympy.asinh: tt.arcsinh,
-            sympy.tanh: tt.tanh,
-            sympy.atanh: tt.arctanh,
-            sympy.re: tt.real,
-            sympy.im: tt.imag,
-            sympy.arg: tt.angle,
-            sympy.erf: tt.erf,
-            sympy.gamma: tt.gamma,
-            sympy.loggamma: tt.gammaln,
-            sympy.Pow: tt.pow,
-            sympy.Eq: tt.eq,
-            sympy.StrictGreaterThan: tt.gt,
-            sympy.StrictLessThan: tt.lt,
-            sympy.LessThan: tt.le,
-            sympy.GreaterThan: tt.ge,
-            sympy.And: tt.and_,
-            sympy.Or: tt.or_,
-            sympy.Max: tt.maximum,  # Sympy accept >2 inputs, Theano only 2
-            sympy.Min: tt.minimum,  # Sympy accept >2 inputs, Theano only 2
-            sympy.conjugate: tt.conj,
-            sympy.core.numbers.ImaginaryUnit: lambda:tt.complex(0,1),
-            # Matrices
-            sympy.MatAdd: tt.Elemwise(ts.add),
-            sympy.HadamardProduct: tt.Elemwise(ts.mul),
-            sympy.Trace: tlinalg.trace,
-            sympy.Determinant : tlinalg.det,
-            sympy.Inverse: tlinalg.matrix_inverse,
-            sympy.Transpose: tt.DimShuffle((False, False), [1, 0]),
+        sympy.Add: tt.add,
+        sympy.Mul: tt.mul,
+        sympy.Abs: tt.abs_,
+        sympy.sign: tt.sgn,
+        sympy.ceiling: tt.ceil,
+        sympy.floor: tt.floor,
+        sympy.log: tt.log,
+        sympy.exp: tt.exp,
+        sympy.sqrt: tt.sqrt,
+        sympy.cos: tt.cos,
+        sympy.acos: tt.arccos,
+        sympy.sin: tt.sin,
+        sympy.asin: tt.arcsin,
+        sympy.tan: tt.tan,
+        sympy.atan: tt.arctan,
+        sympy.atan2: tt.arctan2,
+        sympy.cosh: tt.cosh,
+        sympy.acosh: tt.arccosh,
+        sympy.sinh: tt.sinh,
+        sympy.asinh: tt.arcsinh,
+        sympy.tanh: tt.tanh,
+        sympy.atanh: tt.arctanh,
+        sympy.re: tt.real,
+        sympy.im: tt.imag,
+        sympy.arg: tt.angle,
+        sympy.erf: tt.erf,
+        sympy.gamma: tt.gamma,
+        sympy.loggamma: tt.gammaln,
+        sympy.Pow: tt.pow,
+        sympy.Eq: tt.eq,
+        sympy.StrictGreaterThan: tt.gt,
+        sympy.StrictLessThan: tt.lt,
+        sympy.LessThan: tt.le,
+        sympy.GreaterThan: tt.ge,
+        sympy.And: tt.and_,
+        sympy.Or: tt.or_,
+        sympy.Max: tt.maximum,  # Sympy accept >2 inputs, Theano only 2
+        sympy.Min: tt.minimum,  # Sympy accept >2 inputs, Theano only 2
+        sympy.conjugate: tt.conj,
+        sympy.core.numbers.ImaginaryUnit: lambda: tt.complex(0, 1),
+        # Matrices
+        sympy.MatAdd: tt.Elemwise(ts.add),
+        sympy.HadamardProduct: tt.Elemwise(ts.mul),
+        sympy.Trace: tlinalg.trace,
+        sympy.Determinant: tlinalg.det,
+        sympy.Inverse: tlinalg.matrix_inverse,
+        sympy.Transpose: tt.DimShuffle((False, False), [1, 0]),
     }
 
 
@@ -94,10 +94,11 @@ class TheanoPrinter(Printer):
         created only once. Symbols are differentiated only by name and type. The
         format of the cache's contents should be considered opaque to the user.
     """
+
     printmethod = "_theano"
 
     def __init__(self, *args, **kwargs):
-        self.cache = kwargs.pop('cache', dict())
+        self.cache = kwargs.pop("cache", dict())
         super(TheanoPrinter, self).__init__(*args, **kwargs)
 
     def _get_key(self, s, name=None, dtype=None, broadcastable=None):
@@ -128,7 +129,7 @@ class TheanoPrinter(Printer):
         if name is None:
             name = s.name
         if dtype is None:
-            dtype = 'floatX'
+            dtype = "floatX"
         if broadcastable is None:
             broadcastable = ()
 
@@ -142,14 +143,14 @@ class TheanoPrinter(Printer):
         return value
 
     def _print_Symbol(self, s, **kwargs):
-        dtype = kwargs.get('dtypes', {}).get(s)
-        bc = kwargs.get('broadcastables', {}).get(s)
+        dtype = kwargs.get("dtypes", {}).get(s)
+        bc = kwargs.get("broadcastables", {}).get(s)
         return self._get_or_create(s, dtype=dtype, broadcastable=bc)
 
     def _print_AppliedUndef(self, s, **kwargs):
-        name = str(type(s)) + '_' + str(s.args[0])
-        dtype = kwargs.get('dtypes', {}).get(s)
-        bc = kwargs.get('broadcastables', {}).get(s)
+        name = str(type(s)) + "_" + str(s.args[0])
+        dtype = kwargs.get("dtypes", {}).get(s)
+        bc = kwargs.get("broadcastables", {}).get(s)
         return self._get_or_create(s, name=name, dtype=dtype, broadcastable=bc)
 
     def _print_Basic(self, expr, **kwargs):
@@ -162,18 +163,18 @@ class TheanoPrinter(Printer):
         return float(n.evalf())
 
     def _print_MatrixSymbol(self, X, **kwargs):
-        dtype = kwargs.get('dtypes', {}).get(X)
+        dtype = kwargs.get("dtypes", {}).get(X)
         return self._get_or_create(X, dtype=dtype, broadcastable=(None, None))
 
     def _print_DenseMatrix(self, X, **kwargs):
-        if not hasattr(tt, 'stacklists'):
+        if not hasattr(tt, "stacklists"):
             raise NotImplementedError(
-               "Matrix translation not yet supported in this version of Theano")
+                "Matrix translation not yet supported in this version of Theano"
+            )
 
-        return tt.stacklists([
-            [self._print(arg, **kwargs) for arg in L]
-            for L in X.tolist()
-        ])
+        return tt.stacklists(
+            [[self._print(arg, **kwargs) for arg in L] for L in X.tolist()]
+        )
 
     _print_ImmutableMatrix = _print_ImmutableDenseMatrix = _print_DenseMatrix
 
@@ -191,8 +192,10 @@ class TheanoPrinter(Printer):
             for i in range(children[1]):
                 result = tt.dot(result, children[0])
         else:
-            raise NotImplementedError('''Only non-negative integer
-           powers of matrices can be handled by Theano at the moment''')
+            raise NotImplementedError(
+                """Only non-negative integer
+           powers of matrices can be handled by Theano at the moment"""
+            )
         return result
 
     def _print_MatrixSlice(self, expr, **kwargs):
@@ -203,22 +206,26 @@ class TheanoPrinter(Printer):
 
     def _print_BlockMatrix(self, expr, **kwargs):
         nrows, ncols = expr.blocks.shape
-        blocks = [[self._print(expr.blocks[r, c], **kwargs)
-                        for c in range(ncols)]
-                        for r in range(nrows)]
+        blocks = [
+            [self._print(expr.blocks[r, c], **kwargs) for c in range(ncols)]
+            for r in range(nrows)
+        ]
         return tt.join(0, *[tt.join(1, *row) for row in blocks])
 
-
     def _print_slice(self, expr, **kwargs):
-        return slice(*[self._print(i, **kwargs)
-                        if isinstance(i, sympy.Basic) else i
-                        for i in (expr.start, expr.stop, expr.step)])
+        return slice(
+            *[
+                self._print(i, **kwargs) if isinstance(i, sympy.Basic) else i
+                for i in (expr.start, expr.stop, expr.step)
+            ]
+        )
 
     def _print_Pi(self, expr, **kwargs):
         return 3.141592653589793
 
     def _print_Piecewise(self, expr, **kwargs):
         import numpy as np
+
         e, cond = expr.args[0].args  # First condition and corresponding value
 
         # Print conditional expression and value for first condition
@@ -235,8 +242,7 @@ class TheanoPrinter(Printer):
         return tt.switch(p_cond, p_e, p_remaining)
 
     def _print_Rational(self, expr, **kwargs):
-        return tt.true_div(self._print(expr.p, **kwargs),
-                           self._print(expr.q, **kwargs))
+        return tt.true_div(self._print(expr.p, **kwargs), self._print(expr.q, **kwargs))
 
     def _print_Integer(self, expr, **kwargs):
         return expr.p
@@ -378,10 +384,7 @@ def dim_handling(inputs, dim=None, dims=None, broadcastables=None):
 
     if dims is not None:
         maxdim = max(dims.values())
-        return {
-            s: (False,) * d + (True,) * (maxdim - d)
-            for s, d in dims.items()
-        }
+        return {s: (False,) * d + (True,) * (maxdim - d) for s, d in dims.items()}
 
     if broadcastables is not None:
         return broadcastables
@@ -481,24 +484,28 @@ def theano_function(inputs, outputs, scalar=False, **kwargs):
         raise ImportError("theano is required for theano_function")
 
     # Pop off non-theano keyword args
-    cache = kwargs.pop('cache', {})
-    dtypes = kwargs.pop('dtypes', {})
+    cache = kwargs.pop("cache", {})
+    dtypes = kwargs.pop("dtypes", {})
 
     broadcastables = dim_handling(
         inputs,
-        dim=kwargs.pop('dim', None),
-        dims=kwargs.pop('dims', None),
-        broadcastables=kwargs.pop('broadcastables', None),
+        dim=kwargs.pop("dim", None),
+        dims=kwargs.pop("dims", None),
+        broadcastables=kwargs.pop("broadcastables", None),
     )
 
     # Print inputs/outputs
-    code = partial(theano_code, cache=cache, dtypes=dtypes,
-                   broadcastables=broadcastables)
+    code = partial(
+        theano_code, cache=cache, dtypes=dtypes, broadcastables=broadcastables
+    )
     tinputs = list(map(code, inputs))
     toutputs = list(map(code, outputs))
 
-    #fix constant expressions as variables
-    toutputs = [output if isinstance(output, theano.Variable) else tt.as_tensor_variable(output) for output in toutputs]
+    # fix constant expressions as variables
+    toutputs = [
+        output if isinstance(output, theano.Variable) else tt.as_tensor_variable(output)
+        for output in toutputs
+    ]
 
     if len(toutputs) == 1:
         toutputs = toutputs[0]

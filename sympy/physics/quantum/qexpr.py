@@ -7,19 +7,20 @@ from sympy.core.compatibility import is_sequence
 
 from sympy.physics.quantum.dagger import Dagger
 from sympy.physics.quantum.matrixutils import (
-    numpy_ndarray, scipy_sparse_matrix,
-    to_sympy, to_numpy, to_scipy_sparse
+    numpy_ndarray,
+    scipy_sparse_matrix,
+    to_sympy,
+    to_numpy,
+    to_scipy_sparse,
 )
 
-__all__ = [
-    'QuantumError',
-    'QExpr'
-]
+__all__ = ["QuantumError", "QExpr"]
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Error handling
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 
 class QuantumError(Exception):
     pass
@@ -57,7 +58,7 @@ def __qsympify_sequence_helper(seq):
        Helper function for _qsympify_sequence
        This function does the actual work.
     """
-    #base case. If not a list, do Sympification
+    # base case. If not a list, do Sympification
     if not is_sequence(seq):
         if isinstance(seq, Matrix):
             return seq
@@ -71,15 +72,16 @@ def __qsympify_sequence_helper(seq):
     if isinstance(seq, QExpr):
         return seq
 
-    #if list, recurse on each item in the list
+    # if list, recurse on each item in the list
     result = [__qsympify_sequence_helper(item) for item in seq]
 
     return Tuple(*result)
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Basic Quantum Expression from which all objects descend
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 
 class QExpr(Expr):
     """A base class for all quantum object like operators and states."""
@@ -89,12 +91,12 @@ class QExpr(Expr):
     # derive from args.
 
     # The Hilbert space a quantum Object belongs to.
-    __slots__ = ('hilbert_space')
+    __slots__ = "hilbert_space"
 
     is_commutative = False
 
     # The separator used in printing the label.
-    _label_separator = u''
+    _label_separator = u""
 
     @property
     def free_symbols(self):
@@ -152,9 +154,9 @@ class QExpr(Expr):
         obj.hilbert_space = hilbert_space
         return obj
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Properties
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     @property
     def label(self):
@@ -184,9 +186,9 @@ class QExpr(Expr):
         """
         raise NotImplementedError("No default arguments for this class!")
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # _eval_* methods
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _eval_adjoint(self):
         obj = Expr._eval_adjoint(self)
@@ -209,11 +211,12 @@ class QExpr(Expr):
         """Compute the Hilbert space instance from the args.
         """
         from sympy.physics.quantum.hilbert import HilbertSpace
+
         return HilbertSpace()
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Printing
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     # Utilities for printing: these operate on raw sympy objects
 
@@ -233,14 +236,14 @@ class QExpr(Expr):
     # Utilities for printing: these operate prettyForm objects
 
     def _print_subscript_pretty(self, a, b):
-        top = prettyForm(*b.left(' '*a.width()))
-        bot = prettyForm(*a.right(' '*b.width()))
+        top = prettyForm(*b.left(" " * a.width()))
+        bot = prettyForm(*a.right(" " * b.width()))
         return prettyForm(binding=prettyForm.POW, *bot.below(top))
 
     def _print_superscript_pretty(self, a, b):
-        return a**b
+        return a ** b
 
-    def _print_parens_pretty(self, pform, left='(', right=')'):
+    def _print_parens_pretty(self, pform, left="(", right=")"):
         return prettyForm(*pform.parens(left=left, right=right))
 
     # Printing of labels (i.e. args)
@@ -252,14 +255,10 @@ class QExpr(Expr):
         the elements. This method should not be overridden, instead, override
         _print_contents to change printing behavior.
         """
-        return self._print_sequence(
-            self.label, self._label_separator, printer, *args
-        )
+        return self._print_sequence(self.label, self._label_separator, printer, *args)
 
     def _print_label_repr(self, printer, *args):
-        return self._print_sequence(
-            self.label, ',', printer, *args
-        )
+        return self._print_sequence(self.label, ",", printer, *args)
 
     def _print_label_pretty(self, printer, *args):
         return self._print_sequence_pretty(
@@ -267,9 +266,7 @@ class QExpr(Expr):
         )
 
     def _print_label_latex(self, printer, *args):
-        return self._print_sequence(
-            self.label, self._label_separator, printer, *args
-        )
+        return self._print_sequence(self.label, self._label_separator, printer, *args)
 
     # Printing of contents (default to label)
 
@@ -306,7 +303,7 @@ class QExpr(Expr):
     def _sympyrepr(self, printer, *args):
         classname = self.__class__.__name__
         label = self._print_label_repr(printer, *args)
-        return '%s(%s)' % (classname, label)
+        return "%s(%s)" % (classname, label)
 
     def _pretty(self, printer, *args):
         pform = self._print_contents_pretty(printer, *args)
@@ -315,19 +312,19 @@ class QExpr(Expr):
     def _latex(self, printer, *args):
         return self._print_contents_latex(printer, *args)
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Methods from Basic and Expr
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def doit(self, **kw_args):
         return self
 
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # Represent
-    #-------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def _represent_default_basis(self, **options):
-        raise NotImplementedError('This object does not have a default basis')
+        raise NotImplementedError("This object does not have a default basis")
 
     def _represent(self, **options):
         """Represent this object in a given basis.
@@ -363,24 +360,23 @@ class QExpr(Expr):
             the representation, such as the number of basis functions to
             be used.
         """
-        basis = options.pop('basis', None)
+        basis = options.pop("basis", None)
         if basis is None:
             result = self._represent_default_basis(**options)
         else:
-            result = dispatch_method(self, '_represent', basis, **options)
+            result = dispatch_method(self, "_represent", basis, **options)
 
         # If we get a matrix representation, convert it to the right format.
-        format = options.get('format', 'sympy')
+        format = options.get("format", "sympy")
         result = self._format_represent(result, format)
         return result
 
     def _format_represent(self, result, format):
-        if format == 'sympy' and not isinstance(result, Matrix):
+        if format == "sympy" and not isinstance(result, Matrix):
             return to_sympy(result)
-        elif format == 'numpy' and not isinstance(result, numpy_ndarray):
+        elif format == "numpy" and not isinstance(result, numpy_ndarray):
             return to_numpy(result)
-        elif format == 'scipy.sparse' and \
-                not isinstance(result, scipy_sparse_matrix):
+        elif format == "scipy.sparse" and not isinstance(result, scipy_sparse_matrix):
             return to_scipy_sparse(result)
 
         return result
@@ -407,7 +403,7 @@ def split_qexpr_parts(e):
 
 def dispatch_method(self, basename, arg, **options):
     """Dispatch a method to the proper handlers."""
-    method_name = '%s_%s' % (basename, arg.__class__.__name__)
+    method_name = "%s_%s" % (basename, arg.__class__.__name__)
     if hasattr(self, method_name):
         f = getattr(self, method_name)
         # This can raise and we will allow it to propagate.
@@ -415,6 +411,5 @@ def dispatch_method(self, basename, arg, **options):
         if result is not None:
             return result
     raise NotImplementedError(
-        "%s.%s can't handle: %r" %
-        (self.__class__.__name__, basename, arg)
+        "%s.%s can't handle: %r" % (self.__class__.__name__, basename, arg)
     )

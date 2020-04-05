@@ -1,6 +1,7 @@
 from .cartan_type import CartanType
 from sympy.core.backend import Basic
 
+
 class RootSystem(Basic):
     """Represent the root system of a simple Lie algebra
 
@@ -65,11 +66,10 @@ class RootSystem(Basic):
         """
         n = self.cartan_type.rank()
         roots = {}
-        for i in range(1, n+1):
+        for i in range(1, n + 1):
             root = self.cartan_type.simple_root(i)
             roots[i] = root
         return roots
-
 
     def all_roots(self):
         """Generate all the roots of a given root system
@@ -109,7 +109,7 @@ class RootSystem(Basic):
 
         """
         n = self.cartan_type.rank()
-        rs = " + ".join("alpha["+str(i) +"]" for i in range(1, n+1))
+        rs = " + ".join("alpha[" + str(i) + "]" for i in range(1, n + 1))
         return rs
 
     def add_simple_roots(self, root1, root2):
@@ -168,7 +168,6 @@ class RootSystem(Basic):
             return newroot
         else:
             return "The sum of these two roots is not a root"
-
 
     def cartan_matrix(self):
         """Cartan matrix of Lie algebra associated with this root system

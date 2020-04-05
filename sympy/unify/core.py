@@ -20,27 +20,34 @@ from __future__ import print_function, division
 
 from sympy.utilities.iterables import kbins
 
+
 class Compound(object):
     """ A little class to represent an interior node in the tree
 
     This is analogous to SymPy.Basic for non-Atoms
     """
+
     def __init__(self, op, args):
         self.op = op
         self.args = args
 
     def __eq__(self, other):
-        return (type(self) == type(other) and self.op == other.op and
-                self.args == other.args)
+        return (
+            type(self) == type(other)
+            and self.op == other.op
+            and self.args == other.args
+        )
 
     def __hash__(self):
         return hash((type(self), self.op, self.args))
 
     def __str__(self):
-        return "%s[%s]" % (str(self.op), ', '.join(map(str, self.args)))
+        return "%s[%s]" % (str(self.op), ", ".join(map(str, self.args)))
+
 
 class Variable(object):
     """ A Wild token """
+
     def __init__(self, arg):
         self.arg = arg
 
@@ -53,26 +60,31 @@ class Variable(object):
     def __str__(self):
         return "Variable(%s)" % str(self.arg)
 
+
 class CondVariable(object):
     """ A wild token that matches conditionally
 
     arg   - a wild token
     valid - an additional constraining function on a match
     """
+
     def __init__(self, arg, valid):
         self.arg = arg
         self.valid = valid
 
     def __eq__(self, other):
-        return (type(self) == type(other) and
-                self.arg == other.arg and
-                self.valid == other.valid)
+        return (
+            type(self) == type(other)
+            and self.arg == other.arg
+            and self.valid == other.valid
+        )
 
     def __hash__(self):
         return hash((type(self), self.arg, self.valid))
 
     def __str__(self):
         return "CondVariable(%s)" % str(self.arg)
+
 
 def unify(x, y, s=None, **fns):
     """ Unify two expressions
@@ -108,15 +120,15 @@ def unify(x, y, s=None, **fns):
         for match in unify_var(y, x, s, **fns):
             yield match
     elif isinstance(x, Compound) and isinstance(y, Compound):
-        is_commutative = fns.get('is_commutative', lambda x: False)
-        is_associative = fns.get('is_associative', lambda x: False)
+        is_commutative = fns.get("is_commutative", lambda x: False)
+        is_associative = fns.get("is_associative", lambda x: False)
         for sop in unify(x.op, y.op, s, **fns):
             if is_associative(x) and is_associative(y):
                 a, b = (x, y) if len(x.args) < len(y.args) else (y, x)
                 if is_commutative(x) and is_commutative(y):
-                    combs = allcombinations(a.args, b.args, 'commutative')
+                    combs = allcombinations(a.args, b.args, "commutative")
                 else:
-                    combs = allcombinations(a.args, b.args, 'associative')
+                    combs = allcombinations(a.args, b.args, "associative")
                 for aaargs, bbargs in combs:
                     aa = [unpack(Compound(a.op, arg)) for arg in aaargs]
                     bb = [unpack(Compound(b.op, arg)) for arg in bbargs]
@@ -134,6 +146,7 @@ def unify(x, y, s=None, **fns):
                 for match in unify(x[1:], y[1:], shead, **fns):
                     yield match
 
+
 def unify_var(var, x, s, **fns):
     if var in s:
         for match in unify(s[var], x, s, **fns):
@@ -145,6 +158,7 @@ def unify_var(var, x, s, **fns):
     elif isinstance(var, Variable):
         yield assoc(s, var, x)
 
+
 def occur_check(var, x):
     """ var occurs in subtree owned by x? """
     if var == x:
@@ -152,8 +166,10 @@ def occur_check(var, x):
     elif isinstance(x, Compound):
         return occur_check(var, x.args)
     elif is_args(x):
-        if any(occur_check(var, xi) for xi in x): return True
+        if any(occur_check(var, xi) for xi in x):
+            return True
     return False
+
 
 def assoc(d, key, val):
     """ Return copy of d with key associated to val """
@@ -161,15 +177,18 @@ def assoc(d, key, val):
     d[key] = val
     return d
 
+
 def is_args(x):
     """ Is x a traditional iterable? """
     return type(x) in (tuple, list, set)
+
 
 def unpack(x):
     if isinstance(x, Compound) and len(x.args) == 1:
         return x.args[0]
     else:
         return x
+
 
 def allcombinations(A, B, ordered):
     """
@@ -214,6 +233,7 @@ def allcombinations(A, B, ordered):
         else:
             yield partition(A, part), tuple((b,) for b in B)
 
+
 def partition(it, part):
     """ Partition a tuple/list into pieces defined by indices
 
@@ -225,6 +245,7 @@ def partition(it, part):
     ((10, 20, 30), (40,))
     """
     return type(it)([index(it, ind) for ind in part])
+
 
 def index(it, ind):
     """ Fancy indexing into an indexable iterable (tuple, list)

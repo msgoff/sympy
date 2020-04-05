@@ -2,9 +2,7 @@ from sympy.physics.units.systems.si import dimsys_SI
 
 from sympy import S, Symbol, sqrt
 from sympy.physics.units.dimensions import Dimension
-from sympy.physics.units.definitions.dimension_definitions import (
-    length, time
-)
+from sympy.physics.units.definitions.dimension_definitions import length, time
 from sympy.physics.units import foot
 from sympy.testing.pytest import raises
 
@@ -40,12 +38,12 @@ def test_str():
 
 def test_Dimension_properties():
     assert dimsys_SI.is_dimensionless(length) is False
-    assert dimsys_SI.is_dimensionless(length/length) is True
+    assert dimsys_SI.is_dimensionless(length / length) is True
     assert dimsys_SI.is_dimensionless(Dimension("undefined")) is False
 
     assert length.has_integer_powers(dimsys_SI) is True
-    assert (length**(-1)).has_integer_powers(dimsys_SI) is True
-    assert (length**1.5).has_integer_powers(dimsys_SI) is False
+    assert (length ** (-1)).has_integer_powers(dimsys_SI) is True
+    assert (length ** 1.5).has_integer_powers(dimsys_SI) is False
 
 
 def test_Dimension_add_sub():
@@ -60,7 +58,7 @@ def test_Dimension_add_sub():
 
     # issue 14547 - only raise error for dimensional args; allow
     # others to pass
-    x = Symbol('x')
+    x = Symbol("x")
     e = length + x
     assert e == x + length and e.is_Add and set(e.args) == {length, x}
     e = length + 1
@@ -68,15 +66,15 @@ def test_Dimension_add_sub():
 
 
 def test_Dimension_mul_div_exp():
-    assert 2*length == length*2 == length/2 == length
-    assert 2/length == 1/length
-    x = Symbol('x')
-    m = x*length
-    assert m == length*x and m.is_Mul and set(m.args) == {x, length}
-    d = x/length
-    assert d == x*length**-1 and d.is_Mul and set(d.args) == {x, 1/length}
-    d = length/x
-    assert d == length*x**-1 and d.is_Mul and set(d.args) == {1/x, length}
+    assert 2 * length == length * 2 == length / 2 == length
+    assert 2 / length == 1 / length
+    x = Symbol("x")
+    m = x * length
+    assert m == length * x and m.is_Mul and set(m.args) == {x, length}
+    d = x / length
+    assert d == x * length ** -1 and d.is_Mul and set(d.args) == {x, 1 / length}
+    d = length / x
+    assert d == length * x ** -1 and d.is_Mul and set(d.args) == {1 / x, length}
 
     velo = length / time
 
@@ -84,16 +82,25 @@ def test_Dimension_mul_div_exp():
 
     assert dimsys_SI.get_dimensional_dependencies(length * length) == {"length": 2}
     assert dimsys_SI.get_dimensional_dependencies(length ** 2) == {"length": 2}
-    assert dimsys_SI.get_dimensional_dependencies(length * time) == { "length": 1, "time": 1}
-    assert dimsys_SI.get_dimensional_dependencies(velo) == { "length": 1, "time": -1}
-    assert dimsys_SI.get_dimensional_dependencies(velo ** 2) == {"length": 2, "time": -2}
+    assert dimsys_SI.get_dimensional_dependencies(length * time) == {
+        "length": 1,
+        "time": 1,
+    }
+    assert dimsys_SI.get_dimensional_dependencies(velo) == {"length": 1, "time": -1}
+    assert dimsys_SI.get_dimensional_dependencies(velo ** 2) == {
+        "length": 2,
+        "time": -2,
+    }
 
     assert dimsys_SI.get_dimensional_dependencies(length / length) == {}
     assert dimsys_SI.get_dimensional_dependencies(velo / length * time) == {}
     assert dimsys_SI.get_dimensional_dependencies(length ** -1) == {"length": -1}
-    assert dimsys_SI.get_dimensional_dependencies(velo ** -1.5) == {"length": -1.5, "time": 1.5}
+    assert dimsys_SI.get_dimensional_dependencies(velo ** -1.5) == {
+        "length": -1.5,
+        "time": 1.5,
+    }
 
-    length_a = length**"a"
+    length_a = length ** "a"
     assert dimsys_SI.get_dimensional_dependencies(length_a) == {"length": Symbol("a")}
 
     assert length != 1

@@ -75,11 +75,13 @@ class Curve(GeometrySet):
     def __new__(cls, function, limits):
         fun = sympify(function)
         if not is_sequence(fun) or len(fun) != 2:
-            raise ValueError("Function argument should be (x(t), y(t)) "
-                "but got %s" % str(function))
+            raise ValueError(
+                "Function argument should be (x(t), y(t)) " "but got %s" % str(function)
+            )
         if not is_sequence(limits) or len(limits) != 3:
-            raise ValueError("Limit argument should be (t, tmin, tmax) "
-                "but got %s" % str(limits))
+            raise ValueError(
+                "Limit argument should be (t, tmin, tmax) " "but got %s" % str(limits)
+            )
 
         return GeometryEntity.__new__(cls, Tuple(*fun), Tuple(*limits))
 
@@ -90,7 +92,7 @@ class Curve(GeometrySet):
         if old == self.parameter:
             return Point(*[f.subs(old, new) for f in self.functions])
 
-    def arbitrary_point(self, parameter='t'):
+    def arbitrary_point(self, parameter="t"):
         """
         A parameterized point on the curve.
 
@@ -140,10 +142,11 @@ class Curve(GeometrySet):
 
         tnew = _symbol(parameter, self.parameter, real=True)
         t = self.parameter
-        if (tnew.name != t.name and
-                tnew.name in (f.name for f in self.free_symbols)):
-            raise ValueError('Symbol %s already appears in object '
-                'and cannot be used as a parameter.' % tnew.name)
+        if tnew.name != t.name and tnew.name in (f.name for f in self.free_symbols):
+            raise ValueError(
+                "Symbol %s already appears in object "
+                "and cannot be used as a parameter." % tnew.name
+            )
         return Point(*[w.subs(t, tnew) for w in self.functions])
 
     @property
@@ -264,10 +267,12 @@ class Curve(GeometrySet):
         >>> Curve((t, t), (t, 0, 1)).length
         sqrt(2)
         """
-        integrand = sqrt(sum(diff(func, self.limits[0])**2 for func in self.functions))
+        integrand = sqrt(
+            sum(diff(func, self.limits[0]) ** 2 for func in self.functions)
+        )
         return integrate(integrand, self.limits)
 
-    def plot_interval(self, parameter='t'):
+    def plot_interval(self, parameter="t"):
         """The plot interval for the default geometric plot of the curve.
 
         Parameters
@@ -317,10 +322,11 @@ class Curve(GeometrySet):
         Curve((-x, x), (x, 0, 1))
         """
         from sympy.matrices import Matrix, rot_axis3
+
         if pt:
             pt = -Point(pt, dim=2)
         else:
-            pt = Point(0,0)
+            pt = Point(0, 0)
         rv = self.translate(*pt.args)
         f = list(rv.functions)
         f.append(0)
@@ -348,7 +354,7 @@ class Curve(GeometrySet):
             pt = Point(pt, dim=2)
             return self.translate(*(-pt).args).scale(x, y).translate(*pt.args)
         fx, fy = self.functions
-        return self.func((fx*x, fy*y), self.limits)
+        return self.func((fx * x, fy * y), self.limits)
 
     def translate(self, x=0, y=0):
         """Translate the Curve by (x, y).

@@ -1,17 +1,55 @@
 from __future__ import print_function, division
 
 from sympy import sqrt, log, exp, FallingFactorial
-from .rv import (probability, expectation, density, where, given, pspace, cdf,
-                 characteristic_function, sample, sample_iter, random_symbols, independent, dependent,
-                 sampling_density, moment_generating_function, quantile)
+from .rv import (
+    probability,
+    expectation,
+    density,
+    where,
+    given,
+    pspace,
+    cdf,
+    characteristic_function,
+    sample,
+    sample_iter,
+    random_symbols,
+    independent,
+    dependent,
+    sampling_density,
+    moment_generating_function,
+    quantile,
+)
 
-__all__ = ['P', 'E', 'H', 'density', 'where', 'given', 'sample', 'cdf',
-        'characteristic_function', 'pspace', 'sample_iter', 'variance', 'std',
-        'skewness', 'kurtosis', 'covariance', 'dependent', 'entropy',
-        'independent', 'random_symbols', 'correlation', 'factorial_moment',
-        'moment', 'cmoment', 'sampling_density', 'moment_generating_function',
-        'smoment', 'quantile']
-
+__all__ = [
+    "P",
+    "E",
+    "H",
+    "density",
+    "where",
+    "given",
+    "sample",
+    "cdf",
+    "characteristic_function",
+    "pspace",
+    "sample_iter",
+    "variance",
+    "std",
+    "skewness",
+    "kurtosis",
+    "covariance",
+    "dependent",
+    "entropy",
+    "independent",
+    "random_symbols",
+    "correlation",
+    "factorial_moment",
+    "moment",
+    "cmoment",
+    "sampling_density",
+    "moment_generating_function",
+    "smoment",
+    "quantile",
+]
 
 
 def moment(X, n, c=0, condition=None, **kwargs):
@@ -31,7 +69,7 @@ def moment(X, n, c=0, condition=None, **kwargs):
     >>> moment(X, 1) == E(X)
     True
     """
-    return expectation((X - c)**n, condition, **kwargs)
+    return expectation((X - c) ** n, condition, **kwargs)
 
 
 def variance(X, condition=None, **kwargs):
@@ -78,7 +116,10 @@ def standard_deviation(X, condition=None, **kwargs):
     sqrt(p*(1 - p))
     """
     return sqrt(variance(X, condition, **kwargs))
+
+
 std = standard_deviation
+
 
 def entropy(expr, condition=None, **kwargs):
     """
@@ -117,10 +158,11 @@ def entropy(expr, condition=None, **kwargs):
     .. [3] http://www.math.uconn.edu/~kconrad/blurbs/analysis/entropypost.pdf
     """
     pdf = density(expr, condition, **kwargs)
-    base = kwargs.get('b', exp(1))
-    if hasattr(pdf, 'dict'):
-            return sum([-prob*log(prob, base) for prob in pdf.dict.values()])
+    base = kwargs.get("b", exp(1))
+    if hasattr(pdf, "dict"):
+        return sum([-prob * log(prob, base) for prob in pdf.dict.values()])
     return expectation(-log(pdf(expr), base))
+
 
 def covariance(X, Y, condition=None, **kwargs):
     """
@@ -148,9 +190,11 @@ def covariance(X, Y, condition=None, **kwargs):
     1/lambda
     """
     return expectation(
-        (X - expectation(X, condition, **kwargs)) *
-        (Y - expectation(Y, condition, **kwargs)),
-        condition, **kwargs)
+        (X - expectation(X, condition, **kwargs))
+        * (Y - expectation(Y, condition, **kwargs)),
+        condition,
+        **kwargs
+    )
 
 
 def correlation(X, Y, condition=None, **kwargs):
@@ -180,8 +224,9 @@ def correlation(X, Y, condition=None, **kwargs):
     >>> correlation(X, Y + rate*X)
     1/sqrt(1 + lambda**(-2))
     """
-    return covariance(X, Y, condition, **kwargs)/(std(X, condition, **kwargs)
-     * std(Y, condition, **kwargs))
+    return covariance(X, Y, condition, **kwargs) / (
+        std(X, condition, **kwargs) * std(Y, condition, **kwargs)
+    )
 
 
 def cmoment(X, n, condition=None, **kwargs):
@@ -225,7 +270,8 @@ def smoment(X, n, condition=None, **kwargs):
     True
     """
     sigma = std(X, condition, **kwargs)
-    return (1/sigma)**n*cmoment(X, n, condition, **kwargs)
+    return (1 / sigma) ** n * cmoment(X, n, condition, **kwargs)
+
 
 def skewness(X, condition=None, **kwargs):
     """
@@ -259,6 +305,7 @@ def skewness(X, condition=None, **kwargs):
     2
     """
     return smoment(X, 3, condition=condition, **kwargs)
+
 
 def kurtosis(X, condition=None, **kwargs):
     """

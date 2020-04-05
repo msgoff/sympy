@@ -7,7 +7,9 @@ graphing functions using matplotlib.
 
 from sympy.core.sympify import sympify, SympifyError
 from sympy.external import import_module
-np = import_module('numpy')
+
+np = import_module("numpy")
+
 
 def sample2d(f, x_args):
     """
@@ -28,7 +30,7 @@ def sample2d(f, x_args):
         raise ValueError("x_args must be a tuple of the form (var, min, max, n)")
 
     x_l = float(x_max - x_min)
-    x_d = x_l/float(x_n)
+    x_d = x_l / float(x_n)
     X = np.arange(float(x_min), float(x_max) + x_d, x_d)
 
     Y = np.empty(len(X))
@@ -59,14 +61,16 @@ def sample3d(f, x_args, y_args):
         x, x_min, x_max, x_n = x_args
         y, y_min, y_max, y_n = y_args
     except (TypeError, IndexError):
-        raise ValueError("x_args and y_args must be tuples of the form (var, min, max, intervals)")
+        raise ValueError(
+            "x_args and y_args must be tuples of the form (var, min, max, intervals)"
+        )
 
     x_l = float(x_max - x_min)
-    x_d = x_l/float(x_n)
+    x_d = x_l / float(x_n)
     x_a = np.arange(float(x_min), float(x_max) + x_d, x_d)
 
     y_l = float(y_max - y_min)
-    y_d = y_l/float(y_n)
+    y_d = y_l / float(y_n)
     y_a = np.arange(float(y_min), float(y_max) + y_d, y_d)
 
     def meshgrid(x, y):

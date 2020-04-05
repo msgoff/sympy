@@ -18,6 +18,7 @@ class Trace(Expr):
     >>> Trace(A)
     Trace(A)
     """
+
     is_Trace = True
     is_commutative = True
 
@@ -38,6 +39,7 @@ class Trace(Expr):
     def _eval_derivative(self, v):
         from sympy import Sum
         from .matexpr import MatrixElement
+
         if isinstance(v, MatrixElement):
             return self.rewrite(Sum).diff(v)
         expr = self.doit()
@@ -47,8 +49,12 @@ class Trace(Expr):
         return expr._eval_derivative(v)
 
     def _eval_derivative_matrix_lines(self, x):
-        from sympy.codegen.array_utils import CodegenArrayContraction, CodegenArrayTensorProduct
+        from sympy.codegen.array_utils import (
+            CodegenArrayContraction,
+            CodegenArrayTensorProduct,
+        )
         from sympy.core.expr import ExprBuilder
+
         r = self.args[0]._eval_derivative_matrix_lines(x)
         for lr in r:
             if lr.higher == 1:
@@ -56,15 +62,11 @@ class Trace(Expr):
                     CodegenArrayContraction,
                     [
                         ExprBuilder(
-                            CodegenArrayTensorProduct,
-                            [
-                                lr._lines[0],
-                                lr._lines[1],
-                            ]
+                            CodegenArrayTensorProduct, [lr._lines[0], lr._lines[1],]
                         ),
                         (1, 3),
                     ],
-                    validator=CodegenArrayContraction._validate
+                    validator=CodegenArrayContraction._validate,
                 )
             else:
                 # This is not a matrix line:
@@ -73,14 +75,11 @@ class Trace(Expr):
                     [
                         ExprBuilder(
                             CodegenArrayTensorProduct,
-                            [
-                                lr._lines[0],
-                                lr._lines[1],
-                                lr.higher,
-                            ]
+                            [lr._lines[0], lr._lines[1], lr.higher,],
                         ),
-                        (1, 3), (0, 2)
-                    ]
+                        (1, 3),
+                        (0, 2),
+                    ],
                 )
             lr._lines = [S.One, S.One]
             lr._first_pointer_parent = lr._lines
@@ -94,7 +93,7 @@ class Trace(Expr):
         return self.args[0]
 
     def doit(self, **kwargs):
-        if kwargs.get('deep', True):
+        if kwargs.get("deep", True):
             arg = self.arg.doit(**kwargs)
             try:
                 return arg._eval_trace()
@@ -109,8 +108,9 @@ class Trace(Expr):
 
     def _eval_rewrite_as_Sum(self, expr, **kwargs):
         from sympy import Sum, Dummy
-        i = Dummy('i')
-        return Sum(self.arg[i, i], (i, 0, self.arg.rows-1)).doit()
+
+        i = Dummy("i")
+        return Sum(self.arg[i, i], (i, 0, self.arg.rows - 1)).doit()
 
 
 def trace(expr):

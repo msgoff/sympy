@@ -70,14 +70,16 @@ known_functions = {
     # "": "is_sign_positive",
     # "": "is_sign_negative",
     # "": "mul_add",
-    "Pow": [(lambda base, exp: exp == -S.One, "recip", 2),           # 1.0/x
-            (lambda base, exp: exp == S.Half, "sqrt", 2),            # x ** 0.5
-            (lambda base, exp: exp == -S.Half, "sqrt().recip", 2),   # 1/(x ** 0.5)
-            (lambda base, exp: exp == Rational(1, 3), "cbrt", 2),    # x ** (1/3)
-            (lambda base, exp: base == S.One*2, "exp2", 3),          # 2 ** x
-            (lambda base, exp: exp.is_integer, "powi", 1),           # x ** y, for i32
-            (lambda base, exp: not exp.is_integer, "powf", 1)],      # x ** y, for f64
-    "exp": [(lambda exp: True, "exp", 2)],   # e ** x
+    "Pow": [
+        (lambda base, exp: exp == -S.One, "recip", 2),  # 1.0/x
+        (lambda base, exp: exp == S.Half, "sqrt", 2),  # x ** 0.5
+        (lambda base, exp: exp == -S.Half, "sqrt().recip", 2),  # 1/(x ** 0.5)
+        (lambda base, exp: exp == Rational(1, 3), "cbrt", 2),  # x ** (1/3)
+        (lambda base, exp: base == S.One * 2, "exp2", 3),  # 2 ** x
+        (lambda base, exp: exp.is_integer, "powi", 1),  # x ** y, for i32
+        (lambda base, exp: not exp.is_integer, "powf", 1),
+    ],  # x ** y, for f64
+    "exp": [(lambda exp: True, "exp", 2)],  # e ** x
     "log": "ln",
     # "": "log",          # number.log(base)
     # "": "log2",
@@ -161,88 +163,91 @@ known_functions = {
 # These are the core reserved words in the Rust language. Taken from:
 # http://doc.rust-lang.org/grammar.html#keywords
 
-reserved_words = ['abstract',
-                  'alignof',
-                  'as',
-                  'become',
-                  'box',
-                  'break',
-                  'const',
-                  'continue',
-                  'crate',
-                  'do',
-                  'else',
-                  'enum',
-                  'extern',
-                  'false',
-                  'final',
-                  'fn',
-                  'for',
-                  'if',
-                  'impl',
-                  'in',
-                  'let',
-                  'loop',
-                  'macro',
-                  'match',
-                  'mod',
-                  'move',
-                  'mut',
-                  'offsetof',
-                  'override',
-                  'priv',
-                  'proc',
-                  'pub',
-                  'pure',
-                  'ref',
-                  'return',
-                  'Self',
-                  'self',
-                  'sizeof',
-                  'static',
-                  'struct',
-                  'super',
-                  'trait',
-                  'true',
-                  'type',
-                  'typeof',
-                  'unsafe',
-                  'unsized',
-                  'use',
-                  'virtual',
-                  'where',
-                  'while',
-                  'yield']
+reserved_words = [
+    "abstract",
+    "alignof",
+    "as",
+    "become",
+    "box",
+    "break",
+    "const",
+    "continue",
+    "crate",
+    "do",
+    "else",
+    "enum",
+    "extern",
+    "false",
+    "final",
+    "fn",
+    "for",
+    "if",
+    "impl",
+    "in",
+    "let",
+    "loop",
+    "macro",
+    "match",
+    "mod",
+    "move",
+    "mut",
+    "offsetof",
+    "override",
+    "priv",
+    "proc",
+    "pub",
+    "pure",
+    "ref",
+    "return",
+    "Self",
+    "self",
+    "sizeof",
+    "static",
+    "struct",
+    "super",
+    "trait",
+    "true",
+    "type",
+    "typeof",
+    "unsafe",
+    "unsized",
+    "use",
+    "virtual",
+    "where",
+    "while",
+    "yield",
+]
 
 
 class RustCodePrinter(CodePrinter):
     """A printer to convert python expressions to strings of Rust code"""
+
     printmethod = "_rust_code"
     language = "Rust"
 
     _default_settings = {
-        'order': None,
-        'full_prec': 'auto',
-        'precision': 17,
-        'user_functions': {},
-        'human': True,
-        'contract': True,
-        'dereference': set(),
-        'error_on_reserved': False,
-        'reserved_word_suffix': '_',
-        'inline': False,
+        "order": None,
+        "full_prec": "auto",
+        "precision": 17,
+        "user_functions": {},
+        "human": True,
+        "contract": True,
+        "dereference": set(),
+        "error_on_reserved": False,
+        "reserved_word_suffix": "_",
+        "inline": False,
     }  # type: Dict[str, Any]
 
     def __init__(self, settings={}):
         CodePrinter.__init__(self, settings)
         self.known_functions = dict(known_functions)
-        userfuncs = settings.get('user_functions', {})
+        userfuncs = settings.get("user_functions", {})
         self.known_functions.update(userfuncs)
-        self._dereference = set(settings.get('dereference', []))
+        self._dereference = set(settings.get("dereference", []))
         self.reserved_words = set(reserved_words)
 
     def _rate_index_position(self, p):
-        return p*5
+        return p * 5
 
     def _get_statement(self, codestring):
         return "%s;" % codestring
@@ -266,10 +271,14 @@ class RustCodePrinter(CodePrinter):
         loopstart = "for %(var)s in %(start)s..%(end)s {"
         for i in indices:
             # Rust arrays start at 0 and end at dimension-1
-            open_lines.append(loopstart % {
-                'var': self._print(i),
-                'start': self._print(i.lower),
-                'end': self._print(i.upper + 1)})
+            open_lines.append(
+                loopstart
+                % {
+                    "var": self._print(i),
+                    "start": self._print(i.lower),
+                    "end": self._print(i.upper + 1),
+                }
+            )
             close_lines.append("}")
         return open_lines, close_lines
 
@@ -278,7 +287,7 @@ class RustCodePrinter(CodePrinter):
             # for something like `sin(x + y + z)`,
             # make sure we can get '(x + y + z).sin()'
             # instead of 'x + y + z.sin()'
-            return '(' + self._print(expr) + ')'
+            return "(" + self._print(expr) + ")"
         elif expr.is_number:
             return self._print(expr, _type=True)
         else:
@@ -309,27 +318,29 @@ class RustCodePrinter(CodePrinter):
             if func is not None:
                 if style == 1:
                     ret = "%(var)s.%(method)s(%(args)s)" % {
-                        'var': self._print_caller_var(expr.args[0]),
-                        'method': func,
-                        'args': self.stringify(expr.args[1:], ", ") if len(expr.args) > 1 else ''
+                        "var": self._print_caller_var(expr.args[0]),
+                        "method": func,
+                        "args": self.stringify(expr.args[1:], ", ")
+                        if len(expr.args) > 1
+                        else "",
                     }
                 elif style == 2:
                     ret = "%(var)s.%(method)s()" % {
-                        'var': self._print_caller_var(expr.args[0]),
-                        'method': func,
+                        "var": self._print_caller_var(expr.args[0]),
+                        "method": func,
                     }
                 elif style == 3:
                     ret = "%(var)s.%(method)s()" % {
-                        'var': self._print_caller_var(expr.args[1]),
-                        'method': func,
+                        "var": self._print_caller_var(expr.args[1]),
+                        "method": func,
                     }
                 else:
                     ret = "%(func)s(%(args)s)" % {
-                        'func': func,
-                        'args': self.stringify(expr.args, ", "),
+                        "func": func,
+                        "args": self.stringify(expr.args, ", "),
                     }
                 return ret
-        elif hasattr(expr, '_imp_') and isinstance(expr._imp_, Lambda):
+        elif hasattr(expr, "_imp_") and isinstance(expr._imp_, Lambda):
             # inlined function
             return self._print(expr._imp_(*expr.args))
         else:
@@ -344,20 +355,20 @@ class RustCodePrinter(CodePrinter):
     def _print_Float(self, expr, _type=False):
         ret = super(RustCodePrinter, self)._print_Float(expr)
         if _type:
-            return ret + '_f64'
+            return ret + "_f64"
         else:
             return ret
 
     def _print_Integer(self, expr, _type=False):
         ret = super(RustCodePrinter, self)._print_Integer(expr)
         if _type:
-            return ret + '_i32'
+            return ret + "_i32"
         else:
             return ret
 
     def _print_Rational(self, expr):
         p, q = int(expr.p), int(expr.q)
-        return '%d_f64/%d.0' % (p, q)
+        return "%d_f64/%d.0" % (p, q)
 
     def _print_Relational(self, expr):
         lhs_code = self._print(expr.lhs)
@@ -371,7 +382,7 @@ class RustCodePrinter(CodePrinter):
         elem = S.Zero
         offset = S.One
         for i in reversed(range(expr.rank)):
-            elem += expr.indices[i]*offset
+            elem += expr.indices[i] * offset
             offset *= dims[i]
         return "%s[%s]" % (self._print(expr.base.label), self._print(elem))
 
@@ -385,13 +396,13 @@ class RustCodePrinter(CodePrinter):
         return "E"
 
     def _print_Pi(self, expr, _type=False):
-        return 'PI'
+        return "PI"
 
     def _print_Infinity(self, expr, _type=False):
-        return 'INFINITY'
+        return "INFINITY"
 
     def _print_NegativeInfinity(self, expr, _type=False):
-        return 'NEG_INFINITY'
+        return "NEG_INFINITY"
 
     def _print_BooleanTrue(self, expr, _type=False):
         return "true"
@@ -409,11 +420,13 @@ class RustCodePrinter(CodePrinter):
         if expr.args[-1].cond != True:
             # We need the last conditional to be a True, otherwise the resulting
             # function may not return a result.
-            raise ValueError("All Piecewise expressions must contain an "
-                             "(expr, True) statement to be used as a default "
-                             "condition. Without one, the generated "
-                             "expression may not evaluate to anything under "
-                             "some condition.")
+            raise ValueError(
+                "All Piecewise expressions must contain an "
+                "(expr, True) statement to be used as a default "
+                "condition. Without one, the generated "
+                "expression may not evaluate to anything under "
+                "some condition."
+            )
         lines = []
 
         for i, (e, c) in enumerate(expr.args):
@@ -427,13 +440,14 @@ class RustCodePrinter(CodePrinter):
             lines.append(code0)
             lines.append("}")
 
-        if self._settings['inline']:
+        if self._settings["inline"]:
             return " ".join(lines)
         else:
             return "\n".join(lines)
 
     def _print_ITE(self, expr):
         from sympy.functions import Piecewise
+
         _piecewise = Piecewise((expr.args[1], expr.args[0]), (expr.args[2], True))
         return self._print(_piecewise)
 
@@ -441,11 +455,12 @@ class RustCodePrinter(CodePrinter):
         if A.cols == 1:
             return "[%s]" % ", ".join(self._print(a) for a in A)
         else:
-            raise ValueError("Full Matrix Support in Rust need Crates (https://crates.io/keywords/matrix).")
+            raise ValueError(
+                "Full Matrix Support in Rust need Crates (https://crates.io/keywords/matrix)."
+            )
 
     def _print_MatrixElement(self, expr):
-        return "%s[%s]" % (expr.parent,
-                           expr.j + expr.i*expr.parent.shape[1])
+        return "%s[%s]" % (expr.parent, expr.j + expr.i * expr.parent.shape[1])
 
     # FIXME: Str/CodePrinter could define each of these to call the _print
     # method from higher up the class hierarchy (see _print_NumberSymbol).
@@ -461,16 +476,18 @@ class RustCodePrinter(CodePrinter):
         name = super(RustCodePrinter, self)._print_Symbol(expr)
 
         if expr in self._dereference:
-            return '(*%s)' % name
+            return "(*%s)" % name
         else:
             return name
 
     def _print_Assignment(self, expr):
         from sympy.tensor.indexed import IndexedBase
+
         lhs = expr.lhs
         rhs = expr.rhs
-        if self._settings["contract"] and (lhs.has(IndexedBase) or
-                rhs.has(IndexedBase)):
+        if self._settings["contract"] and (
+            lhs.has(IndexedBase) or rhs.has(IndexedBase)
+        ):
             # Here we check if there is looping to be done, and if so
             # print the required loops.
             return self._doprint_loops(rhs, lhs)
@@ -484,26 +501,25 @@ class RustCodePrinter(CodePrinter):
 
         if isinstance(code, str):
             code_lines = self.indent_code(code.splitlines(True))
-            return ''.join(code_lines)
+            return "".join(code_lines)
 
         tab = "    "
-        inc_token = ('{', '(', '{\n', '(\n')
-        dec_token = ('}', ')')
+        inc_token = ("{", "(", "{\n", "(\n")
+        dec_token = ("}", ")")
 
-        code = [ line.lstrip(' \t') for line in code ]
+        code = [line.lstrip(" \t") for line in code]
 
-        increase = [ int(any(map(line.endswith, inc_token))) for line in code ]
-        decrease = [ int(any(map(line.startswith, dec_token)))
-                     for line in code ]
+        increase = [int(any(map(line.endswith, inc_token))) for line in code]
+        decrease = [int(any(map(line.startswith, dec_token))) for line in code]
 
         pretty = []
         level = 0
         for n, line in enumerate(code):
-            if line == '' or line == '\n':
+            if line == "" or line == "\n":
                 pretty.append(line)
                 continue
             level -= decrease[n]
-            pretty.append("%s%s" % (tab*level, line))
+            pretty.append("%s%s" % (tab * level, line))
             level += increase[n]
         return pretty
 
