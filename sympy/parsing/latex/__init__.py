@@ -33,4 +33,6 @@ def parse_latex(s):
     )
 
     if _latex is not None:
-        return _latex.parse_latex(s)
+        resp = _latex.parse_latex(s)
+        print(resp)
+        return resp

@@ -93,7 +93,7 @@ GTE: '\\geq';
 
 BANG: '!';
 
-SYMBOL: '\\' [a-zA-Z]+;
+SYMBOL: '\\' ([a-zA-Z]+ | [ :;]);
 
 math: relation;
 

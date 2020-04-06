@@ -61,7 +61,6 @@ if ErrorListener:
                 err = fmt % ("I don't understand this", self.src, marker)
             raise LaTeXParsingError(err)
 
-
 def parse_latex(sympy):
     antlr4 = import_module("antlr4", warn_not_installed=True)
 
@@ -82,14 +81,13 @@ def parse_latex(sympy):
 
     tokens = antlr4.CommonTokenStream(lex)
     parser = LaTeXParser(tokens)
-
     # remove default console error listener
     parser.removeErrorListeners()
     parser.addErrorListener(matherror)
 
     relation = parser.math().relation()
     expr = convert_relation(relation)
-
+    print(expr)
     return expr
 
 
