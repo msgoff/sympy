@@ -93,7 +93,7 @@ GTE: '\\geq';
 
 BANG: '!';
 
-SYMBOL: '\\' ([a-zA-Z]+ | [ :;]);
+SYMBOL: '\\' ([a-zA-Z]+ | [ :;])|  [a-zA-Z]+'\\'[,:;];
 
 math: relation;
 
@@ -201,9 +201,11 @@ func:
     | (LETTER | SYMBOL) subexpr? // e.g. f(x)
     L_PAREN args R_PAREN
 
-    | FUNC_INT
+    | FUNC_INT UNDERSCORE?
     (subexpr supexpr | supexpr subexpr)?
     (additive? DIFFERENTIAL | frac | additive)
+
+
 
     | FUNC_SQRT
     (L_BRACKET root=expr R_BRACKET)?
